@@ -60,7 +60,6 @@
 <script setup lang="ts">
 import cloneDeep from 'lodash/cloneDeep'
 
-import rms from '@/api/rms'
 import { TREND_NOT_IMPLEMENTED_PREVIEW_VISUALIZATION } from '@/config'
 
 import { notEmpty } from '@/utils'
@@ -76,7 +75,8 @@ import IconButton from '@/components/selection/IconButton.vue'
 
 import Field from '@/utils/domain/gaussianRandomField'
 import { ref, computed, onBeforeMount, watch } from 'vue'
-import { useStore } from '../../../store'
+import { useConstantsOptionsVariogramsStore } from '@/stores/constants/options'
+import { useGaussianRandomFieldStore } from '@/stores/gaussian-random-fields'
 import { provideInvalidation } from '@/utils/invalidation'
 
 interface Invalid {
@@ -88,7 +88,8 @@ interface Invalid {
 
 type Props = { value: Field }
 const props = defineProps<Props>()
-const store = useStore()
+
+const fieldStore = useGaussianRandomFieldStore()
 const { invalidate } = provideInvalidation()
 
 const waitingForSimulation = ref(false)
@@ -103,7 +104,7 @@ const invalid = ref<Invalid>({
 })
 
 const availableVariograms = computed(
-  () => store.state.constants.options.variograms.available,
+  () => useConstantsOptionsVariogramsStore().available,
 )
 
 const isGeneralExponential = computed(
@@ -113,15 +114,10 @@ const isGeneralExponential = computed(
 const variogram = computed(() => props.value.variogram)
 const variogramType = computed({
   get: () => variogram.value.type,
-  set: (value: string) =>
-    store.dispatch('gaussianRandomFields/variogramType', {
-      field: props.value,
-      value,
-    }),
+  set: (value: string) => (props.value.variogram.type = value),
 })
 
 const trend = computed(() => props.value.trend)
-const fieldName = computed(() => props.value.name)
 const isValid = computed(() =>
   Object.values(invalid.value).every((invalid) => !invalid),
 )
@@ -145,20 +141,8 @@ onBeforeMount(() => {
 })
 
 async function simulation(renew = false): Promise<void> {
-  if (renew) {
-    await store.dispatch('gaussianRandomFields/newSeed', {
-      field: props.value,
-    })
-  }
-  await store.dispatch('gaussianRandomFields/updateSimulationData', {
-    field: props.value,
-    data: await rms.simulateGaussianField({
-      name: props.value.name,
-      variogram: variogram.value,
-      trend: trend.value,
-      settings: store.getters.simulationSettings({ field: props.value }),
-    }),
-  })
+  if (renew) fieldStore.newSeed(props.value)
+  fieldStore.updateSimulation(props.value)
 }
 
 async function updateSimulation(renew = false): Promise<void> {
@@ -173,29 +157,21 @@ async function updateSimulation(renew = false): Promise<void> {
 }
 
 async function openVisualizationSettings(): Promise<void> {
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-ignore
-  // eslint-disable-next-line security/detect-non-literal-fs-filename
+  // TODO: Fix typing here
   const { save, settings } = await visualisationSettingsDialog.value?.open(
     cloneDeep(props.value.settings),
   )
   if (save) {
-    await store.dispatch('gaussianRandomFields/changeSettings', {
-      field: props.value,
-      settings,
-    })
+    props.value.settings = settings
     await updateSimulation()
   }
 }
 
-function updateInvalid(type: string, value: boolean): void {
+function updateInvalid(type: keyof Invalid, value: boolean): void {
   invalid.value[type] = value
 }
 
 watch(isValid, async (value: boolean) => {
-  await store.dispatch('gaussianRandomFields/changeValidity', {
-    field: props.value,
-    value,
-  })
+  props.value.valid = value
 })
 </script>

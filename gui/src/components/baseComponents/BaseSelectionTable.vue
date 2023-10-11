@@ -8,7 +8,7 @@
     :no-data-text="noDataText"
     :expanded="props.expanded"
   >
-    <template #item="{ item }: { item: T }">
+    <template #item="{ item }">
       <tr
         :class="isCurrent(item) ? 'font-weight-bold' : ''"
         :style="isCurrent(item) ? currentStyle : ''"

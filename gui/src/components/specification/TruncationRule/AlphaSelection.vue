@@ -27,8 +27,8 @@ import type {
 } from '@/utils/domain/polygon/base'
 import type { ID } from '@/utils/domain/types'
 import type { ListItem } from '@/utils/typing'
-import { useStore } from '../../../store'
 import { computed } from 'vue'
+import { useGaussianRandomFieldStore } from '@/stores/gaussian-random-fields'
 
 type Props = {
   value: GaussianRandomField | null
@@ -40,20 +40,16 @@ const props = withDefaults(defineProps<Props>(), {
   channel: 0,
   group: '',
 })
-const store = useStore()
 // why is `value: GaussianRandomField`, but the emit `input: ID`?
 const emit = defineEmits<{
   (event: 'input', value: ID | null): void
 }>()
 
-const _fields = computed<GaussianRandomField[]>(() =>
-  store.getters.fields.sort((a: GaussianRandomField, b: GaussianRandomField) =>
-    a.name.localeCompare(b.name),
-  ),
-)
+const fieldStore = useGaussianRandomFieldStore()
 
-// TODO: Not used?
-const id = computed<ID | ''>(() => props.value?.id ?? '')
+const _fields = computed<GaussianRandomField[]>(() =>
+  fieldStore.selected.sort((a, b) => a.name.localeCompare(b.name)),
+)
 
 const fields = computed<ListItem<string>[]>(() =>
   _fields.value.map((field) => {

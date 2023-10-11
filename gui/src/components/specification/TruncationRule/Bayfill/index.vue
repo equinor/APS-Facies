@@ -3,9 +3,9 @@
 </template>
 
 <script setup lang="ts">
-import TruncationRuleSpecification from '../main.vue'
+import TruncationRuleSpecification from '@/components/specification/TruncationRule/main.vue'
 import PolygonTable from './PolygonTable.vue'
-import { Bayfill } from '@/utils/domain'
+import type { Bayfill } from '@/utils/domain'
 
 defineProps<{ value: Bayfill }>()
 </script>

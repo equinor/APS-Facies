@@ -31,14 +31,12 @@ import { getId } from '@/utils'
 import { computed } from 'vue'
 import vuetify from '@/plugins/vuetify'
 import type { InstantiatedTruncationRule } from '@/utils/domain'
-import { useStore } from '../../store'
 
 type Props = {
   value: T
   rule: RULE
 }
 const props = defineProps<Props>()
-const store = useStore()
 
 const disabled = computed(() => {
   return (
@@ -53,20 +51,16 @@ const disabled = computed(() => {
 const appendIcon = computed(() => {
   return disabled.value || props.rule.isPolygonFractionsNormalized(props.value)
     ? ''
-    : vuetify.icons.values.refresh
+    : vuetify.icons.aliases.refresh
 })
 
-async function updateFactor(polygon: T, value: number): Promise<void> {
-  await store.dispatch(
-    'truncationRules/changeProportionFactors',
-    { rule: props.rule, polygon, value },
-    { root: true },
-  )
+function updateFactor(polygon: T, value: number): void {
+  polygon.fraction = value
 }
 
 async function normalizeFractions(): Promise<void> {
-  const polygons: T[] = props.rule.polygons.filter(
-    (polygon: T): boolean =>
+  const polygons = props.rule.polygons.filter(
+    (polygon): boolean =>
       getId(polygon.facies) === getId(props.value.facies),
   )
   const sum = polygons.reduce(
@@ -74,7 +68,7 @@ async function normalizeFractions(): Promise<void> {
     0,
   )
   await Promise.all(
-    polygons.map((polygon) => updateFactor(polygon, polygon.fraction / sum)),
+    (polygons as T[]).map((polygon) => updateFactor(polygon, polygon.fraction / sum)),
   )
 }
 </script>

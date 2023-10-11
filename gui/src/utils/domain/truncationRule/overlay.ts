@@ -81,6 +81,9 @@ export default abstract class OverlayTruncationRule<
   public get useOverlay(): boolean {
     return this._useOverlay
   }
+  public set useOverlay(value: boolean) {
+    this._useOverlay = value
+  }
 
   public get overlayPolygons(): OverlayPolygon[] {
     if (!this.useOverlay) return []

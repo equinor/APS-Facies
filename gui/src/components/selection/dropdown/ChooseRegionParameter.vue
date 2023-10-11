@@ -21,16 +21,13 @@
 import ChooseParameter from '@/components/selection/dropdown/ChooseParameter.vue'
 import WarningDialog from '@/components/dialogs/JobSettings/WarningDialog.vue'
 
-import { useStore } from '../../../store'
 import { computed } from 'vue'
+import { useRegionStore } from '@/stores/regions'
 
-const store = useStore()
+const regionStore = useRegionStore()
 
 const useRegions = computed({
-  get: () => store.state.regions.use,
-  set: (value: boolean) => store.dispatch('regions/use', { use: value }),
+  get: () => regionStore.use,
+  set: (value: boolean) => regionStore.setUse(value),
 })
-
-// not in use?
-const ertMode = computed(() => store.state.fmu.runFmuWorkflows.value)
 </script>

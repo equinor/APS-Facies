@@ -42,7 +42,7 @@ export type TruncationRuleConfiguration<T extends Polygon = Polygon> =
   }
 
 export interface TruncationRuleSpecification<
-  P extends PolygonSpecification = PolygonSpecification,
+  P extends PolygonSpecification
 > {
   polygons: P[]
 }
@@ -157,6 +157,12 @@ export default abstract class TruncationRule<
     return Object.values(this._polygons).sort((a, b): number =>
       a.atLevel === b.atLevel ? a.order - b.order : b.atLevel - a.atLevel,
     )
+  }
+  public addPolygon(polygon: T) {
+    this._polygons[polygon.id] = polygon
+  }
+  public removePolygon(polygon: T) {
+    delete this._polygons[polygon.id]
   }
 
   public isUsedInDifferentAlpha(

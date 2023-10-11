@@ -13,17 +13,30 @@
 </template>
 
 <script setup lang="ts">
-import { resetState, useStore } from '@/store'
 import { getJobs } from '@/components/debugging/utils'
 import { onMounted, computed, ref } from 'vue'
+import type { RootStoreSerialization } from '@/stores'
+import { useRootStore } from '@/stores'
 
-const store = useStore()
+const rootStore = useRootStore()
 
-// TODO: "JSON" is probably not the correct type, probably meant "object".
-const jobMapping = ref<Record<string, JSON>>({})
-const selectedJob = ref<string | null>(null)
+type Jobs = Record<string, RootStoreSerialization>
 
+const jobMapping = ref<Jobs>({})
 const loading = ref(false)
+
+const _selectedJob = ref<string | null>(null)
+const selectedJob = computed({
+  get: () => _selectedJob.value,
+  set: (job: keyof Jobs | null) => {
+    _selectedJob.value = job
+    if (!job) {
+      rootStore.$reset()
+    } else {
+      rootStore.populate(jobMapping.value[job])
+    }
+  },
+})
 
 const jobs = computed(() => {
   return Object.keys(jobMapping.value)
@@ -36,7 +49,7 @@ onMounted(() => {
       jobMapping.value = receivedJobs.reduce((jobDict, job) => {
         jobDict[job.instance_name] = JSON.parse(job.jobinputjson)
         return jobDict
-      }, {} as Record<string, JSON>)
+      }, {} as Jobs)
     })
     .finally(() => {
       loading.value = false

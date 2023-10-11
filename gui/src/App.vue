@@ -17,14 +17,14 @@ import TheToolBar from '@/components/TheToolBar.vue'
 import TheInformationBar from '@/components/TheInformationBar.vue'
 import MainPage from '@/pages/MainPage.vue'
 import { onBeforeMount } from 'vue'
-import { useStore } from './store'
+import { useRootStore } from './stores'
 
-const store = useStore()
+const rootStore = useRootStore()
 
-onBeforeMount(() => {
-  if (!store.getters.loaded && !store.getters.loading) {
+onBeforeMount(async () => {
+  if (!rootStore.loaded && !rootStore.loading) {
     // Fetch various parameters
-    store.dispatch('fetch')
+    await rootStore.fetch()
   }
 })
 </script>

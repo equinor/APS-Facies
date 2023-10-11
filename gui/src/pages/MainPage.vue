@@ -30,19 +30,19 @@ import Settings from '@/components/ElementSettings.vue'
 import Preview from '@/components/ElementPreview.vue'
 import ScrollableArea from '@/components/baseComponents/ScrollableArea.vue'
 
-import { GaussianRandomField } from '@/utils/domain'
-import { useStore } from '../store'
+import type { GaussianRandomField } from '@/utils/domain'
 import { computed } from 'vue'
+import { useRootStore } from '@/stores'
+import { useGaussianRandomFieldStore } from '@/stores/gaussian-random-fields'
 
-const store = useStore()
-// TODO: Typing of getters.canSpecifyModelSettings is wrong
+const rootStore = useRootStore()
+const fieldStore = useGaussianRandomFieldStore()
+
 const canSpecifyModelSettings = computed<boolean>(
-  () => store.getters.canSpecifyModelSettings,
+  () => rootStore.canSpecifyModelSettings,
 )
-const loading = computed<boolean>(() => store.state._loading.value)
-const loadingMessage = computed<string>(() => store.state._loading.message)
-const fields = computed<GaussianRandomField[]>(() =>
-  Object.values(store.getters.fields),
-)
+const loading = computed<boolean>(() => rootStore.loading)
+const loadingMessage = computed<string>(() => rootStore.loadingMessage)
+const fields = computed<GaussianRandomField[]>(() => fieldStore.selected)
 const hasSimulations = computed<boolean>(() => fields.value.length > 0)
 </script>

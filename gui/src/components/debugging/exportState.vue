@@ -12,11 +12,9 @@ import IconButton from '@/components/selection/IconButton.vue'
 
 import { dumpState } from '@/utils/helpers/processing/export'
 import { ref, computed } from 'vue'
-import { useStore } from '../../store'
 
 type Option = 'may' | 'success' | 'failure'
 
-const store = useStore()
 const status = ref<Option>('may')
 
 const clipboardIcon = computed(() => {
@@ -28,7 +26,7 @@ const clipboardIcon = computed(() => {
 })
 
 async function save(): Promise<void> {
-  const state = JSON.stringify(dumpState(store))
+  const state = JSON.stringify(dumpState())
   try {
     await navigator.clipboard.writeText(state)
     status.value = 'success'

@@ -38,32 +38,25 @@ import CubicSpecification from '@/components/specification/TruncationRule/Cubic/
 import TruncationHeader from '@/components/specification/TruncationRule/header.vue'
 import OverlayFacies from '@/components/specification/TruncationRule/Overlay/index.vue'
 
-import { isUUID } from '@/utils/helpers'
 import { Bayfill } from '@/utils/domain'
-import Polygon from '@/utils/domain/polygon/base'
 import { Optional } from '@/utils/typing'
-import { TruncationRuleTemplate } from '@/store/modules/truncationRules/typing'
-import { useStore } from '../../../store'
-import { RootGetters } from '../../../store/typing'
+import type { TruncationRuleType } from '@/utils/domain/truncationRule/base'
 import { computed } from 'vue'
-import { type Component } from 'vue'
+import type { Component } from 'vue'
+import { useTruncationRuleStore } from '@/stores/truncation-rules'
+import { useTruncationRulePresetStore } from '@/stores/truncation-rules/presets'
+import OverlayTruncationRule from '@/utils/domain/truncationRule/overlay'
+import { APSError } from '@/utils/domain/errors'
+import { useFaciesStore } from '@/stores/facies'
 
-const store = useStore()
+const ruleStore = useTruncationRuleStore()
+const rulePresetStore = useTruncationRulePresetStore()
+const faciesStore = useFaciesStore()
 
-const rule = computed(() => (store.getters as RootGetters).truncationRule)
+const rule = computed(() => ruleStore.current)
 
-const truncationRuleType = computed<Optional<TruncationRuleTemplate>>(() => {
-  const available = store.state.truncationRules.templates.types.available
-  const type = store.state.truncationRules.preset.type
-  if (type && isUUID(type)) {
-    return available[type]
-  } else {
-    return (
-      Object.values(available).find(
-        (item) => item.type === rule?.value?.type,
-      ) ?? null
-    )
-  }
+const truncationRuleType = computed<Optional<TruncationRuleType>>(() => {
+  return rulePresetStore.type
 })
 
 const truncationRuleComponent = computed<Optional<Component>>(() => {
@@ -72,34 +65,34 @@ const truncationRuleComponent = computed<Optional<Component>>(() => {
     'Non-Cubic': NonCubicSpecification,
     Bayfill: BayfillSpecification,
   }
+  // TODO: Remove `as` coercion
   return truncationRuleType.value && rule.value
-    ? mapping[truncationRuleType.value.name]
+    ? mapping[truncationRuleType.value.name as keyof typeof mapping]
     : null
 })
 
 const useOverlay = computed({
-  get: () => rule.value?.useOverlay ?? false,
-  set: (value: boolean) =>
-    store.dispatch('truncationRules/toggleOverlay', {
-      rule: rule.value,
-      value: value,
-    }),
+  get: () => {
+    return rule.value instanceof OverlayTruncationRule && rule.value.useOverlay
+  },
+  set: (value: boolean) => {
+    if (!(rule.value instanceof OverlayTruncationRule)) {
+      throw new APSError('useOverlay changes require OverlayTruncationRule')
+    }
+    ruleStore.toggleOverlay(rule.value, value)
+  },
 })
 
 const notBayfill = computed(() => !(rule.value instanceof Bayfill))
 
 const hasEnoughFacies = computed(() => {
   if (!rule.value) return true
-  const numFacies = Object.values(
-    (store.getters as RootGetters)['facies/selected'],
-  ).length
-  const numFaciesInBackground = [
-    ...new Set(
-      (rule.value.backgroundPolygons as Polygon[])
-        .map((polygon) => polygon.facies)
-        .filter((name) => !!name),
-    ),
-  ].length
+  const numFacies = faciesStore.selected.length
+  const numFaciesInBackground = new Set(
+    rule.value.backgroundPolygons
+      .map((polygon) => polygon.facies)
+      .filter((facies) => !!facies),
+  ).size
   return numFacies > numFaciesInBackground
 })
 

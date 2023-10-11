@@ -136,17 +136,15 @@
 import SettingsPanel from '@/components/dialogs/JobSettings/SettingsPanel.vue'
 import NumericField from '@/components/selection/NumericField.vue'
 import WarningDialog from '@/components/dialogs/JobSettings/WarningDialog.vue'
-import { useStore } from '../../../store'
 import { computed, ref, watch } from 'vue'
+import { useFmuMaxDepthStore } from '@/stores/fmu/maxDepth'
 import {
   FIELD_FORMATS,
   type FieldFormats,
   TREND_EXTRAPOLATION_METHODS,
 } from '@/stores/fmu/options'
-
-interface Invalid {
-  fmuGridDepth: boolean
-}
+import { useGridModelStore } from '@/stores/grid-models'
+import { useGaussianRandomFieldStore } from '@/stores/gaussian-random-fields'
 
 type FieldUsage = 'generate' | 'automatic_detect'
 
@@ -183,21 +181,22 @@ const emit = defineEmits<{
   (event: 'update:error', error: boolean): void
 }>()
 
-const store = useStore()
-const minimumErtLayers = computed(() => store.state.fmu.maxDepth.minimum)
-const availableGridModels = computed(() =>
-  Object.values(store.state.gridModels.available),
-)
-const invalid = ref<Invalid>({
-  fmuGridDepth: false,
-})
+const fmuMaxDepthStore = useFmuMaxDepthStore()
+const gridModelStore = useGridModelStore()
+const fieldStore = useGaussianRandomFieldStore()
+
+const minimumErtLayers = computed(() => fmuMaxDepthStore.maxDepth.minimum)
+const availableGridModels = computed(() => gridModelStore.available)
+
+type Invalid = { fmuGridDepth: boolean }
+const invalid = ref<Invalid>({ fmuGridDepth: false })
 
 const hasErrors = computed(() => {
   return Object.values(invalid.value).some((invalid) => invalid)
 })
 watch(hasErrors, (value: boolean) => emit('update:error', value))
 
-const _fmuGrid = computed({
+const _fmuGrid = computed<string>({
   get: () => props.fmuGrid,
   set: (value: string | { value: string }) => {
     const newValue = typeof value === 'string' ? value : value.value
@@ -277,14 +276,12 @@ function update(type: keyof Invalid, value: boolean): void {
   invalid.value[type] = value
 }
 
-const hasGrid = computed(() => {
-  return !!store.getters.gridModel
-})
+const hasGrid = computed(() => !!gridModelStore.current)
 
 const hasRmsParamTrend = computed(() => {
-  const affectedFields = Object.values(
-    store.state.gaussianRandomFields.available,
-  ).filter((field) => field.trend.type === 'RMS_PARAM')
+  const affectedFields = fieldStore.available.filter(
+    (field) => field.trend.type === 'RMS_PARAM',
+  )
   return affectedFields.length > 0
 })
 
@@ -295,7 +292,7 @@ const fmuGridExists = computed(() => {
 })
 
 const fmuGrids = computed(() => {
-  const selectedGrid = store.getters['gridModels/current']
+  const selectedGrid = gridModelStore.current
   if (!selectedGrid) return []
 
   const dimension = selectedGrid.dimension

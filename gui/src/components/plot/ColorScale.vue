@@ -9,7 +9,7 @@ import type { ColorMapping, ColorScale } from './utils'
 import { colorMapping as mapColors } from './utils'
 import { PlotData } from 'plotly.js'
 import { computed } from 'vue'
-import { useStore } from '../../store'
+import { useOptionStore } from '@/stores/options'
 
 type Props = {
   colorScale?: ColorScale
@@ -18,10 +18,10 @@ type Props = {
 const props = withDefaults(defineProps<Props>(), {
   range: () => ({ min: 0, max: 1 }),
 })
-const store = useStore()
+const optionStore = useOptionStore()
 
 const _colorScale = computed<ColorScale>(
-  () => props.colorScale || store.state.options.colorScale.value,
+  () => props.colorScale || optionStore.options.colorScale,
 )
 const colorMapping = computed<ColorMapping>(() => mapColors(_colorScale.value))
 const dataDefinition = computed<Partial<PlotData>[]>(() => [

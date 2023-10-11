@@ -1,15 +1,17 @@
 <template>
-  <v-select :items="faciesOptions" v-model="selected" :clearable="clearable" variant="underlined" />
+  <v-select
+    :items="faciesOptions"
+    v-model="selected"
+    :clearable="clearable"
+    variant="underlined"
+  />
 </template>
 
 <script setup lang="ts">
-import { getId } from '@/utils/helpers'
-
-import { ID } from '@/utils/domain/types'
-import Facies from '@/utils/domain/facies/local'
-import { ListItem } from '@/utils/typing'
-import { useStore } from '../../../store'
+import type Facies from '@/utils/domain/facies/local'
+import type { ListItem } from '@/utils/typing'
 import { computed } from 'vue'
+import { useFaciesStore } from '@/stores/facies'
 
 type Props = {
   modelValue: Facies | null
@@ -23,17 +25,16 @@ const props = withDefaults(defineProps<Props>(), {
 const emit = defineEmits<{
   (event: 'update:model-value', value: Facies | null): void
 }>()
-const store = useStore()
 
-const selectedFacies = computed<Facies[]>(
-  () => store.getters['facies/selected'],
-)
-const selected = computed<ID | ID[]>(() =>
-  Array.isArray(props.modelValue) ? props.modelValue.map(getId) : getId(props.modelValue),
-)
+const faciesStore = useFaciesStore()
 
-const faciesOptions = computed<ListItem<string>[]>(() => {
-  return selectedFacies.value.map((facies) => ({
+const selected = computed({
+  get: () => props.modelValue,
+  set: (facies: Facies | null) => emit('update:model-value', facies),
+})
+
+const faciesOptions = computed<ListItem<Facies>[]>(() => {
+  return faciesStore.selected.map((facies) => ({
     title: facies.alias,
     value: facies,
     props: {

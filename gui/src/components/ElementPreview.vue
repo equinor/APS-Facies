@@ -2,7 +2,7 @@
   <v-container fluid>
     <v-row align="center" justify="center">
       <section-title>Preview</section-title>
-      <preview-header :value="rule" />
+      <preview-header v-if="rule" :value="rule" />
     </v-row>
     <v-row>
       <v-expansion-panels v-model="expanded" variant="accordion" multiple>
@@ -70,24 +70,30 @@ import FaciesRealization from '@/components/plot/FaciesRealization.vue'
 import GaussianPlots from '@/components/plot/GaussianPlot/multiple.vue'
 import PreviewHeader from '@/components/visualization/preview/header.vue'
 import CrossPlots from '@/components/plot/CrossPlot/multiple.vue'
-import { GaussianRandomField } from '@/utils/domain'
-import { useStore } from '../store'
+import type { GaussianRandomField } from '@/utils/domain'
 import { computed, watch } from 'vue'
+import { usePanelStore } from '@/stores/panels'
+import { useGaussianRandomFieldStore } from '@/stores/gaussian-random-fields'
+import { useTruncationRuleStore } from '@/stores/truncation-rules'
 
-const store = useStore()
+const fieldStore = useGaussianRandomFieldStore()
+const ruleStore = useTruncationRuleStore()
 
-const expanded = computed<number[]>({
-  get: () => store.getters['panels/preview'],
-  set: (indices: number[]) =>
-    store.dispatch('panels/change', { type: 'preview', indices }),
+const panelStore = usePanelStore()
+
+const expanded = computed({
+  get: () => panelStore.getOpen('preview'),
+  set: (panelNames: string[]) => {
+    panelStore.setOpen('preview', panelNames)
+  },
 })
 
 const fields = computed<GaussianRandomField[]>(() => {
-  return Object.values(store.getters.fields)
+  return fieldStore.selected as GaussianRandomField[]
 })
 
 const rule = computed(() => {
-  return store.getters.truncationRule
+  return ruleStore.current
 })
 
 const hasTruncationRule = computed<boolean>(() => {
@@ -95,7 +101,7 @@ const hasTruncationRule = computed<boolean>(() => {
 })
 
 const hasRealization = computed<boolean>(() => {
-  return !!(rule.value && rule.value.realization)
+  return !!(rule.value && rule.value?.realization)
 })
 
 const hasEnoughFieldsForCrossPlot = computed<boolean>(() => {
@@ -124,10 +130,7 @@ watch(
   fields,
   async (value: GaussianRandomField[]) => {
     if (value.length < 2) {
-      await store.dispatch('panels/close', {
-        type: 'preview',
-        panel: 'crossPlots',
-      })
+      panelStore.close('preview', 'crossPlots')
     }
   },
   { deep: true },
@@ -135,23 +138,14 @@ watch(
 
 watch(
   rule,
-  async (value) => {
-    const type = 'preview'
+  (value) => {
     if (value) {
-      await store.dispatch('panels/open', {
-        type,
-        panel: 'truncationRuleMap',
-      })
-
-      await store.dispatch(`panels/${value.realization ? 'open' : 'close'}`, {
-        type,
-        panel: 'truncationRuleRealization',
-      })
+      panelStore.open('preview', 'truncationRuleMap')
+      const realized = !!value.realization
+      panelStore.set('preview', 'truncationRuleRealization', realized)
     } else {
-      await store.dispatch('panels/close', {
-        type,
-        panel: ['truncationRuleMap', 'truncationRuleRealization'],
-      })
+      panelStore.close('preview', 'truncationRuleMap')
+      panelStore.close('preview', 'truncationRuleRealization')
     }
   },
   { deep: true },

@@ -1,3 +1,3 @@
 import './rms'
-import './swatches'
+import 'vue-swatches/dist/vue-swatches.css'
 import './vuetify'

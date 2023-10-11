@@ -5,7 +5,7 @@
     :label="label"
     :error-messages="errors"
     variant="underlined"
-    @blur="$v.value.$touch()"
+    @blur="v.value.$touch()"
     @update:model-value="(e) => $emit('update:model-value', e as T)"
   />
 </template>
@@ -19,11 +19,7 @@ import { useInvalidation } from '@/utils/invalidation'
 type Props = {
   modelValue: T
   items: T[]
-  constraints: {
-    required: boolean
-    legalChoice: boolean
-    [_: string]: any
-  }
+  constraints: { required: boolean }
   label?: string
 }
 const props = withDefaults(defineProps<Props>(), { label: '' })

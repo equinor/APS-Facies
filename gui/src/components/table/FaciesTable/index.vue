@@ -1,30 +1,30 @@
 <template>
   <base-selection-table
+    :items="(facies as GlobalFacies[])"
+    v-model:current="currentId"
+    v-model:expanded="expanded"
     v-model="selected"
     :headers="headers"
     :loading="loading"
     :loading-text="'Loading Facies from RMS'"
-    :current.sync="current"
     :no-data-text="noDataText"
-    :items="facies"
-    :expanded="expanded"
     :select-disabled="!canSelect"
     :select-error="selectFaciesError"
   >
     <template #item="{ item: facies }">
       <td class="dense">
-        <informational-icons :value="facies" :current="current" />
+        <informational-icons :value="facies" :current="currentId" />
       </td>
       <td class="text-left">
+        <span v-if="isFaciesFromRms(facies)">
+          {{ facies.name }}
+        </span>
         <editable-cell
-          v-if="!isFaciesFromRms(facies)"
+          v-else
           :value="facies"
           field="name"
           @submit="changeName"
         />
-        <span v-else>
-          {{ facies.name }}
-        </span>
       </td>
       <td v-if="!hideAlias" class="text-left">
         <editable-cell :value="facies" field="alias" @submit="changeAlias" />
@@ -43,54 +43,59 @@
         />
       </td>
       <td
-        :style="{ backgroundColor: facies.color }"
+        :style="{ backgroundColor: facies.color, cursor: 'pointer' }"
         @click.stop="() => changeColorSelection(facies)"
       />
     </template>
-    <template #expanded-item="{ item, headers }">
-      <td :colspan="headers.length">
-        <v-swatches
-          :value="item.color"
-          :swatches="availableColors"
-          inline
-          swatches-size="30"
-          @input="(color) => changeColor(item, color)"
-        />
-      </td>
+    <template #expanded-item="{ item, columns }">
+      <tr>
+        <td :colspan="columns.length">
+          <color-picker
+            :model-value="item.color"
+            :colors="availableColors"
+            @update:model-value="(color) => item.color = color"
+          />
+        </td>
+      </tr>
     </template>
   </base-selection-table>
 </template>
 
 <script setup lang="ts">
-import VSwatches from 'vue-swatches'
 import EditableCell from '@/components/table/EditableCell.vue'
 import BaseSelectionTable from '@/components/baseComponents/BaseSelectionTable.vue'
+import ColorPicker from '@/components/ColorPicker.vue'
 import InformationalIcons from '@/components/table/FaciesTable/InformationalIcons.vue'
 
-import { Facies, GlobalFacies } from '@/utils/domain'
+import { GlobalFacies } from '@/utils/domain'
 
 import { hasCurrentParents } from '@/utils'
 import { ref, computed } from 'vue'
-import { useStore } from '../../../store'
+import { useRegionStore } from '@/stores/regions'
+import { useRootStore } from '@/stores'
+import { useFaciesGlobalStore } from '@/stores/facies/global'
+import { useFaciesStore } from '@/stores/facies'
+import { useConstantsFaciesColorsStore } from '@/stores/constants/facies-colors'
+import type { ID } from '@/utils/domain/types'
 
 const props = withDefaults(defineProps<{ hideAlias: boolean }>(), {
   hideAlias: false,
 })
-const store = useStore()
 
-const expanded = ref<Facies[]>([])
+const expanded = ref<GlobalFacies[]>([])
 
-// TODO: Typing is wrong.
-const canSelect = computed<boolean>(() => store.getters.canSpecifyModelSettings)
-// TODO: Typing is wrong.
-const loading = computed<boolean>(() => store.state.facies.global._loading)
+const regionStore = useRegionStore()
+const rootStore = useRootStore()
+const faciesStore = useFaciesStore()
+const faciesGlobalStore = useFaciesGlobalStore()
+const colorStore = useConstantsFaciesColorsStore()
 
-// TODO: The typing of store.state.facies.global.current is probably wrong,
-// or this usage is wrong. Gonna have to fix that.
-const current = computed({
-  get: () => store.state.facies.global.current as GlobalFacies,
-  set: ({ id }: GlobalFacies) =>
-    store.dispatch('facies/global/current', { id }),
+const canSelect = computed<boolean>(() => rootStore.canSpecifyModelSettings)
+const loading = computed<boolean>(() => faciesGlobalStore.loading)
+
+const currentId = computed({
+  get: () => faciesGlobalStore.currentId,
+  set: (id: ID | null) => faciesGlobalStore.setCurrentId(id),
 })
 
 const noDataText = computed(() =>
@@ -99,8 +104,10 @@ const noDataText = computed(() =>
     : 'There are no facies for the selected well logs. You may still add new facies.',
 )
 
-const facies = computed(() => store.getters.faciesTable)
-const parent = computed(() => store.getters.parent)
+const facies = computed(() =>
+  faciesGlobalStore.available.sort((a, b) => a.code - b.code),
+)
+const parent = computed(() => rootStore.parent)
 
 const headers = computed(() => [
   {
@@ -135,43 +142,26 @@ const headers = computed(() => [
 ])
 
 const selected = computed({
-  get: () =>
-    Object.values(store.state.facies.global.available).filter(
-      (globalFacies) =>
-        Object.values(store.state.facies.available)
-          .filter((localFacies) =>
-            hasCurrentParents(localFacies, store.getters),
-          )
-          .findIndex(
-            (localFacies) => localFacies.facies.id === globalFacies.id,
-          ) >= 0,
-    ),
-  set: (value: GlobalFacies[]) =>
-    store.dispatch('facies/select', {
-      items: value,
-      parent: parent.value,
-    }),
+  get: () => {
+    return faciesGlobalStore.available.filter((globalFacies) =>
+      faciesStore.available.some(
+        (localFacies) =>
+          hasCurrentParents(localFacies) &&
+          localFacies.facies.id === globalFacies.id,
+      ),
+    ) as GlobalFacies[]
+  },
+  set: (value: GlobalFacies[]) => faciesStore.select(value, parent.value),
 })
-
-const availableColors = computed(
-  () => store.getters['constants/faciesColors/available'],
-)
 
 const selectFaciesError = computed(() => {
-  const item =
-    store.state.regions.use && !parent.value.region ? 'Region' : 'Zone'
-  return !canSelect.value
-    ? `A ${item} must be selected, before including a facies in the model`
-    : ''
+  if (canSelect.value) return ''
+  const item = regionStore.use && !parent.value.region ? 'Region' : 'Zone'
+  return `A ${item} must be selected, before including a facies in the model`
 })
 
-// TODO: unused?
-const blockedWellLogParameter = computed(
-  () => store.getters.blockedWellLogParameter,
-)
-
 function isFaciesFromRms(facies: GlobalFacies): boolean {
-  return store.getters['facies/isFromRMS'](facies)
+  return faciesStore.isFromRMS(facies)
 }
 
 function faciesCodeRestrictions(
@@ -199,32 +189,23 @@ function faciesCodeRestrictions(
   ]
 }
 
-async function changeColor(facies: GlobalFacies, color: string): Promise<void> {
-  if (facies.color !== color) {
-    // Only dispatch when the color *actually* changes
-    await store.dispatch('facies/global/changeColor', {
-      id: facies.id,
-      color,
-    })
-  }
-}
+const availableColors = computed(
+  () => colorStore.current?.colors ?? [],
+)
 
 async function changeName(facies: GlobalFacies): Promise<void> {
-  await store.dispatch('facies/global/changeName', {
-    id: facies.id,
-    name: facies.name || `F${facies.code}`,
-  })
+  faciesGlobalStore.changeName(facies.id, facies.name || `F${facies.code}`)
 }
 
 async function changeAlias(facies: GlobalFacies): Promise<void> {
-  await store.dispatch('facies/global/changeAlias', facies)
+  faciesGlobalStore.changeAlias(facies.id, facies.alias)
 }
 
 async function changeCode(facies: GlobalFacies): Promise<void> {
-  await store.dispatch('facies/global/changeCode', facies)
+  faciesGlobalStore.changeCode(facies.id, facies.code)
 }
 
-function changeColorSelection(facies: Facies): void {
+function changeColorSelection(facies: GlobalFacies): void {
   const previous = expanded.value.pop()
   if (previous && previous.id === facies.id) {
     expanded.value = []

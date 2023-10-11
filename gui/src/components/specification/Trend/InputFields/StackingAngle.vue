@@ -1,12 +1,12 @@
 <template>
   <storable-numeric-field
     :value="value"
+    trend
     property-type="angle"
     sub-property-type="stacking"
     value-type="stacking"
     label="Stacking angle"
     unit="°"
-    trend
     @update:error="(e: boolean) => emit('update:error', e)"
   />
 </template>

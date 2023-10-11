@@ -9,8 +9,8 @@ const app = createApp(App)
 import vuetify from './plugins/vuetify'
 app.use(vuetify)
 
-import { key, store } from './store'
-app.use(store, key)
+import { createPinia } from 'pinia'
+app.use(createPinia())
 
 import { vTooltip, Tooltip } from 'floating-vue'
 import 'floating-vue/dist/style.css'

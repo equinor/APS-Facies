@@ -66,12 +66,17 @@ export default class Zone extends SelectableItem {
   }: ZoneConfiguration) {
     super(rest)
     this.thickness = thickness
-    this._regions = regions ? identify(regions) : {}
+    this._regions = identify(
+      regions?.map((r) => new Region({ ...r, zone: this })) ?? [],
+    )
     this.conformity = conformity
   }
 
   public get regions(): Region[] {
     return Object.values(this._regions)
+  }
+  public set regions(regions: Region[]) {
+    this._regions = identify(regions)
   }
 
   public get selected(): SelectedType {

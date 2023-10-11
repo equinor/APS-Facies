@@ -26,29 +26,37 @@ import NumericField from '@/components/selection/NumericField.vue'
 
 import { hasOwnProperty } from '@/utils/helpers'
 import { computed } from 'vue'
-import { useStore } from '../../store'
+import { useGaussianRandomFieldStore } from '@/stores/gaussian-random-fields'
 
-function getValue(
-  field: Trend | Variogram,
-  property: string,
-  subProperty: string | undefined,
+function getValue<T extends Trend | Variogram>(
+  field: T,
+  property: keyof T,
+  subProperty: (keyof T[keyof T] & string) | undefined,
 ): any {
-  return hasOwnProperty(field[property], subProperty)
+  return !!subProperty && hasOwnProperty(field[property], subProperty)
     ? field[property][subProperty]
     : field[property]
 }
 
-type Props = {
+type TrendProps<T extends Trend = Trend> = {
+  trend: true
+  propertyType: keyof T
+  subPropertyType?: keyof T[keyof T]
+}
+type VariogramProps<T extends Variogram = Variogram> = {
+  trend: false
+  propertyType: keyof T
+  subPropertyType?: keyof T[keyof T]
+}
+
+type Props = (TrendProps | VariogramProps) & {
   value: GaussianRandomField
-  propertyType: string
-  subPropertyType?: string
   label?: string
   valueType?: string
   unit?: string
   strictlyGreater?: boolean
   allowNegative?: boolean
   useModulus?: boolean
-  trend?: boolean
   arrowStep?: number
   ranges?: Optional<MinMax>
   enforceRanges?: boolean
@@ -66,27 +74,35 @@ const props = withDefaults(defineProps<Props>(), {
   ranges: null,
   enforceRanges: false,
 })
-const store = useStore()
 const emit = defineEmits<{
   (event: 'update:error', error: boolean): void
 }>()
 
+const fieldStore = useGaussianRandomFieldStore()
+
+const variogramOrTrend = computed(() => (props.trend ? 'trend' : 'variogram'))
 const field = computed(() => props.value[variogramOrTrend.value])
 
+// #257: Move all this logic outside this form input component.
+// This belongs in gui/src/components/specification/GaussianRandomField/index.vue
 const propertyValue = computed({
-  get: () => getValue(field.value, props.propertyType, props.subPropertyType),
+  get: () =>
+    getValue(
+      field.value,
+      props.propertyType as keyof typeof field.value,
+      props.subPropertyType,
+    ),
   set: (value: any) =>
-    store.dispatch(`gaussianRandomFields/${props.propertyType}`, {
-      field: props.value,
-      variogramOrTrend: variogramOrTrend.value,
-      type: props.subPropertyType,
+    fieldStore.setProperty(
+      props.value,
+      variogramOrTrend.value,
+      props.propertyType as keyof typeof field.value,
+      props.subPropertyType,
       value,
-    }),
+    ),
 })
 
 const fmuUpdatable = computed(() =>
   hasOwnProperty(propertyValue.value, 'updatable'),
 )
-
-const variogramOrTrend = computed(() => (props.trend ? 'trend' : 'variogram'))
 </script>

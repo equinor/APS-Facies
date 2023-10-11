@@ -1,10 +1,11 @@
-import { Parent } from '@/utils/domain/bases/zoneRegionDependent'
+import type { Parent } from '@/utils/domain/bases/zoneRegionDependent'
 import Discrete, {
-  DiscreteConfiguration,
-  DiscreteSerialization,
+  type DiscreteConfiguration,
+  type DiscreteSerialization,
 } from '@/utils/domain/bases/discrete'
-import { Color } from '@/utils/domain/facies/helpers/colors'
-import { Optional } from '@/utils/typing'
+import type { Color } from '@/utils/domain/facies/helpers/colors'
+import type { Optional } from '@/utils/typing'
+import type { CODE } from '@/utils/domain/types'
 
 interface Observations {
   zones: number[]
@@ -27,6 +28,9 @@ export default class GlobalFacies extends Discrete {
   public observed: Optional<Observations>
   public color: Color
   public alias: string
+  // make fields writable
+  public declare name: string
+  public declare code: CODE
 
   public constructor({
     observed = null,

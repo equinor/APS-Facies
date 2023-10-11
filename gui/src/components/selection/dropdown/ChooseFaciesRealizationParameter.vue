@@ -12,15 +12,14 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import { useStore } from '../../../store'
+import { useParameterRealizationStore } from '@/stores/parameters/realization'
 
-const store = useStore()
+const parameterRealizationStore = useParameterRealizationStore()
 
 const faciesRealizationParameter = computed({
-  get: () => store.state.parameters.realization.selected,
-  set: (value: string | null) =>
-    store.dispatch('parameters/realization/select', value),
+  get: () => parameterRealizationStore.selected,
+  set: (value: string | null) => (parameterRealizationStore.selected = value),
 })
 
-const available = computed(() => store.state.parameters.realization.available)
+const available = computed(() => parameterRealizationStore.available)
 </script>

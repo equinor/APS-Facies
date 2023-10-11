@@ -108,7 +108,7 @@ export default {
   simulateRealization: <P extends PolygonSpecification,>(
     fields: GaussianRandomFieldSpecification[],
     truncationRule: TruncationRuleDescription<P>,
-  ): Promise<number[][]> =>
+  ): Promise<{ faciesMap: number[][]; fields: GaussianRandomField[] }> =>
     api.call('simulate_realization', fields, truncationRule),
   averageProbabilityCubes: (
     gridName: string,

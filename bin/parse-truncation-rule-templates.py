@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 import json
-from pathlib import Path
 import re
-from copy import deepcopy
 import sys
+from copy import deepcopy
+from pathlib import Path
 from typing import List
 
 
@@ -12,7 +12,13 @@ def find_polygon_references(polygons, item):
     references = []
     for polygon in polygons:
         if polygon['facies'] == item[0]:
-            references.append(polygon['name'])
+            if "name" in polygon:
+                references.append(polygon['name'])
+            elif "order" in polygon:
+                references.append(polygon['order'])
+            else:
+                raise KeyError(f"No name or order in polygon {polygon}")
+
     if len(references) == 0:
         return -1
     elif len(references) == 1:
@@ -134,14 +140,14 @@ class Parser:
                 field_name = item['field']['name']
                 item['field']['index'] = indices['field'][field_name]
             if 'overlay' in rule:
-                for item in rule['overlay']['items']:
+                for item in rule['overlay']:
                     for polygon in item['polygons']:
                         field_name = polygon['field']['name']
                         polygon['field']['index'] = indices['field'][field_name]
 
                         facies_name = polygon['facies']['name']
                         polygon['facies']['index'] = indices['facies'][facies_name]
-                    for facies in item['over']:
+                    for facies in item['background']:
                         facies['index'] = indices['facies'][facies['name']]
         return rules
 
@@ -199,7 +205,7 @@ class Parser:
                         'name': polygon[0],
                         'index': index,
                     },
-                    'proportions': 1 / len(rule),
+                    'proportion': 1 / len(rule),
                 }
                 for index, polygon in enumerate(rule)
             ]
@@ -262,13 +268,12 @@ class Parser:
         def settings(content, polygons):
             cubic_specification = get_array(content, 'rule')
 
-            settings = [
-                {
-                    'direction': cubic_specification[0]
-                }
-            ]
+            settings = {
+                'direction': cubic_specification[0],
+                'polygons': []
+            }
             for polygon in cubic_specification[1:]:
-                settings.append({
+                settings['polygons'].append({
                     'polygon': find_polygon_references(polygons, polygon),
                     'fraction': polygon[1],
                     'level': tuple(polygon[2:])
@@ -301,9 +306,11 @@ class Parser:
                     updatable = False
                 settings.append({
                     'polygon': find_polygon_references(polygons, item),
-                    'angle': item[1],
+                    'angle': {
+                        'value': item[1],
+                        'updatable': updatable,
+                    },
                     'fraction': item[2],
-                    'updatable': updatable,
                 })
             counter = {}
             for setting in settings:
@@ -320,7 +327,7 @@ class Parser:
             items = get_array(content, 'settings')
             return [{
                 # Polygons are 1 indexed
-                'name': i + 1,
+                'order': i + 1,
                 'facies': item[0],
                 'proportion': 1 / len(items)
             } for i, item in enumerate(items)]
@@ -339,16 +346,13 @@ class Parser:
         @staticmethod
         def settings(content):
             settings = get_array(content, 'settings')
-            overlay = {
-                'use': True,
-                'items': []
-            }
+            overlay = []
             for item in settings:
-                overlay['items'].append({
+                overlay.append({
                     'polygons': [
                         make_overlay_polygon(elem) for elem in item[0]
                     ],
-                    'over': [
+                    'background': [
                         {
                             'name': name
                         } for name in item[1]
@@ -374,7 +378,7 @@ def _indices(items):
 def _get_all_fields_indices(rule):
     fields = {item['field']['name'] for item in rule['fields']}
     if 'overlay' in rule:
-        for item in rule['overlay']['items']:
+        for item in rule['overlay']:
             for polygon in item['polygons']:
                 fields.add(polygon['field']['name'])
     return _indices(fields)
@@ -395,10 +399,10 @@ def _get_all_facies_indices(rule):
         }
     facies = {polygon['facies'] for polygon in rule['polygons']}
     if 'overlay' in rule:
-        for item in rule['overlay']['items']:
+        for item in rule['overlay']:
             for polygon in item['polygons']:
                 facies.add(polygon['facies']['name'])
-            for over_facies in item['over']:
+            for over_facies in item['background']:
                 facies.add(over_facies['name'])
     return _indices(facies)
 

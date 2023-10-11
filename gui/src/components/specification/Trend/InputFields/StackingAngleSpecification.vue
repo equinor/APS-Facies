@@ -15,13 +15,13 @@
 </template>
 
 <script setup lang="ts">
-import { GaussianRandomField } from '@/utils/domain'
-import { StackingDirectionType } from '@/utils/domain/gaussianRandomField/trend'
+import type { GaussianRandomField } from '@/utils/domain'
+import type { StackingDirectionType } from '@/utils/domain/gaussianRandomField/trend'
 
 import StackingAngle from './StackingAngle.vue'
 import ItemSelection from '@/components/selection/dropdown/ItemSelection.vue'
 import { ref, computed, watch } from 'vue'
-import { useStore } from '../../../../store'
+import { useConstantsOptionsStackingStore } from '@/stores/constants/options'
 
 interface Invalid {
   angle: boolean
@@ -29,7 +29,6 @@ interface Invalid {
 }
 
 const props = defineProps<{ value: GaussianRandomField }>()
-const store = useStore()
 const emit = defineEmits<{
   (event: 'update:error', error: boolean): void
 }>()
@@ -40,17 +39,13 @@ const invalid = ref<Invalid>({
 })
 
 const availableStackingDirection = computed(
-  () => store.state.constants.options.stacking.available,
+  () => useConstantsOptionsStackingStore().available,
 )
 
-const trend = computed(() => props.value.trend)
 const stackingDirection = computed({
-  get: () => trend.value.stackingDirection,
+  get: () => props.value.trend.stackingDirection,
   set: (value: StackingDirectionType) =>
-    store.dispatch('gaussianRandomFields/stackingDirection', {
-      field: props.value,
-      value,
-    }),
+    (props.value.trend.stackingDirection = value),
 })
 
 watch(

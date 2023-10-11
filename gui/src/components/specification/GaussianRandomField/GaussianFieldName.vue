@@ -3,27 +3,27 @@
     v-model="fieldName"
     :error-messages="errors"
     @click.stop
-    @input="$v.fieldName.$touch()"
-    @blur="$v.fieldName.$touch()"
+    @input="v.fieldName.$touch()"
+    @blur="v.fieldName.$touch()"
     variant="underlined"
   />
 </template>
 <script setup lang="ts">
-import { GaussianRandomField } from '@/utils/domain'
-import { Optional } from '@/utils/typing'
+import type { GaussianRandomField } from '@/utils/domain'
+import type { Optional } from '@/utils/typing'
 import { ref, computed, watch, onMounted } from 'vue'
-import { useStore } from '../../../store'
 import useVuelidate from '@vuelidate/core'
+import { useGaussianRandomFieldStore } from '@/stores/gaussian-random-fields'
 import { required } from '@vuelidate/validators'
 import { useInvalidation } from '@/utils/invalidation'
 
 type Props = { value: GaussianRandomField }
 const props = defineProps<Props>()
-const store = useStore()
+const fieldStore = useGaussianRandomFieldStore()
 
 const fieldName = ref<Optional<string>>(null)
 
-const fields = computed<GaussianRandomField[]>(() => store.getters.fields)
+const fields = computed<GaussianRandomField[]>(() => fieldStore.selected)
 const name = computed(() => props.value.name)
 
 const validators = {
@@ -52,10 +52,7 @@ const errors = computed(() => {
 
 watch(fieldName, (value: Optional<string>) => {
   if (value && v.value.fieldName && !v.value.fieldName.$invalid) {
-    store.dispatch('gaussianRandomFields/changeName', {
-      field: props.value,
-      name: value,
-    })
+    props.value.name = value
   }
 })
 

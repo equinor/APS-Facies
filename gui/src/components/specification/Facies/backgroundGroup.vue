@@ -30,7 +30,9 @@ import type OverlayTruncationRule from '@/utils/domain/truncationRule/overlay'
 
 import type { ListItem } from '@/utils/typing'
 import { computed } from 'vue'
-import { useStore } from '../../../store'
+import { useFaciesGroupStore } from '@/stores/facies/groups'
+import { useFaciesStore } from '@/stores/facies'
+import { useTruncationRuleStore } from '@/stores/truncation-rules'
 
 function isFaciesSelected(
   group: FaciesGroup | undefined,
@@ -44,16 +46,18 @@ type Props = {
   rule: RULE
 }
 const props = defineProps<Props>()
-const store = useStore()
+const faciesStore = useFaciesStore()
+const faciesGroupStore = useFaciesGroupStore()
+const truncationRuleStore = useTruncationRuleStore()
 
 const group = computed(
-  () => store.state.facies.groups.available[props.value.group],
+  () => faciesGroupStore.identifiedAvailable[props.value.group],
 )
 
 const selected = computed(() => group.value?.facies ?? [])
 
 const facies = computed<ListItem<Facies>[]>(() =>
-  (Object.values(store.state.facies.available) as Facies[])
+  (faciesStore.available as Facies[])
     .filter((facies) => facies.isChildOf(props.rule.parent))
     .map((facies) => {
       return {
@@ -65,31 +69,18 @@ const facies = computed<ListItem<Facies>[]>(() =>
               group.value,
               facies,
             ) /* I.e. the user should be allowed to DESELECT an already selected facies */ &&
-            !store.getters['facies/availableForBackgroundFacies'](
-              props.rule,
-              facies,
-            ),
+            !faciesStore.availableForBackgroundFacies(props.rule, facies),
         }
       }
     }),
 )
 
-async function update(facies: Facies[]): Promise<void> {
+function update(facies: Facies[]): void {
   if (!group.value) {
-    const group = await store.dispatch('facies/groups/add', {
-      facies,
-      parent: props.rule.parent,
-    })
-    await store.dispatch('truncationRules/addPolygon', {
-      rule: props.rule,
-      group,
-      overlay: true,
-    })
+    const group = faciesGroupStore.add(facies, props.rule.parent)
+    truncationRuleStore.addPolygon(props.rule, { group, overlay: true })
   } else {
-    await store.dispatch('facies/groups/update', {
-      group: group.value,
-      facies,
-    })
+    faciesGroupStore.update(group.value, facies)
   }
 }
 </script>

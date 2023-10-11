@@ -14,13 +14,15 @@
 <script setup lang="ts">
 import BaseDropdown from '@/components/selection/dropdown/BaseDropdown.vue'
 
-import { ListItem } from '@/utils/typing'
 import { computed } from 'vue'
-import { useStore } from '../../../store'
+import { useParameterRegionStore } from '@/stores/parameters/region'
+import { useParameterBlockedWellStore } from '@/stores/parameters/blocked-well'
+import { useParameterBlockedWellLogStore } from '@/stores/parameters/blocked-well-log'
 
+type ParameterType = 'region' | 'blockedWell' | 'blockedWellLog'
 type Props = {
   label: string
-  parameterType: string
+  parameterType: ParameterType
   hideIfDisabled?: boolean
   disabled?: boolean
   regular?: boolean
@@ -36,14 +38,20 @@ const props = withDefaults(defineProps<Props>(), {
   warnMessage: '',
   warnEvenWhenEmpty: false,
 })
-const store = useStore()
-const available = computed<ListItem<string>[]>(() =>
-  store.state.parameters[props.parameterType].available.map(
-    (item: string): ListItem<string> => ({
-      title: item,
-      value: item,
-    }),
-  ),
+
+const store = computed(() => {
+  switch (props.parameterType) {
+    case 'region':
+      return useParameterRegionStore()
+    case 'blockedWell':
+      return useParameterBlockedWellStore()
+    case 'blockedWellLog':
+      return useParameterBlockedWellLogStore()
+  }
+})
+
+const available = computed(() =>
+  store.value.available.map((item) => ({ title: item, value: item })),
 )
 
 const isDisabled = computed(
@@ -53,8 +61,7 @@ const isDisabled = computed(
 )
 const isShown = computed(() => !(props.hideIfDisabled && isDisabled.value))
 const selected = computed({
-  get: () => store.state.parameters[props.parameterType].selected,
-  set: (value: string) =>
-    store.dispatch(`parameters/${props.parameterType}/select`, value),
+  get: () => store.value.selected!,
+  set: (value: string) => store.value.select(value),
 })
 </script>

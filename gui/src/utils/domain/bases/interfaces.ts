@@ -30,7 +30,7 @@ export interface ParentReference {
   readonly region: ID | null
 }
 
-interface Coordinate2D {
+export interface Coordinate2D {
   x: Optional<number>
   y: Optional<number>
 }

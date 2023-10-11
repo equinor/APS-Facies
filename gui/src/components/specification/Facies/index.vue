@@ -1,9 +1,8 @@
 <template>
   <facies-specification-base
-    :model-value="value.facies"
+    v-model="facies"
     :disable="disable"
     :clearable="clearable"
-    @update:model-value="(facies) => updateFacies(facies)"
   />
 </template>
 
@@ -19,7 +18,8 @@ import type Polygon from '@/utils/domain/polygon/base'
 import type { InstantiatedTruncationRule } from '@/utils/domain'
 
 import FaciesSpecificationBase from './base.vue'
-import { useStore } from '../../../store'
+import { computed } from 'vue'
+import { useTruncationRuleStore } from '@/stores/truncation-rules'
 
 type Props = {
   value: T
@@ -31,14 +31,15 @@ const props = withDefaults(defineProps<Props>(), {
   clearable: false,
   disable: false,
 })
-const store = useStore()
 
-async function updateFacies(faciesId: ID | undefined): Promise<void> {
-  const facies = store.getters['facies/byId'](faciesId)
-  await store.dispatch('truncationRules/updateFacies', {
-    rule: props.rule,
-    polygon: props.value,
-    facies,
-  })
+const ruleStore = useTruncationRuleStore()
+
+const facies = computed({
+  get: () => props.value.facies,
+  set: (value: Facies | null) => (value ? updateFacies(value) : undefined),
+})
+
+function updateFacies(facies: Facies): void {
+  ruleStore.updateFacies(props.rule, props.value, facies)
 }
 </script>

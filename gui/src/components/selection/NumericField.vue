@@ -35,7 +35,7 @@
     <v-col v-if="isFmuUpdatable" v-bind="binding">
       <v-checkbox
         v-model="updatable"
-        v-tooltip.bottom="`Toggle whether this should be updatable in FMU`"
+        v-tooltip.bottom="'Toggle whether this should be updatable in FMU'"
         :class="__class"
         :disabled="disabled"
         persistent-hint
@@ -45,13 +45,13 @@
 </template>
 
 <script setup lang="ts" generic="T extends number = number">
-import { BigNumber } from 'mathjs'
+import type { BigNumber } from 'mathjs'
 import { isNumber } from 'lodash'
 
 import math from '@/plugins/mathjs'
 
-import { MinMax } from '@/api/types'
-import { Optional } from '@/utils/typing'
+import type { MinMax } from '@/api/types'
+import type { Optional } from '@/utils/typing'
 import { notEmpty, isEmpty } from '@/utils'
 import { hasOwnProperty } from '@/utils/helpers'
 
@@ -59,9 +59,17 @@ import type { FmuUpdatable } from '@/utils/domain/bases/fmuUpdatable'
 import FmuUpdatableValue from '@/utils/domain/bases/fmuUpdatable'
 import { computed, ref, watch, onMounted } from 'vue'
 import type { ValidationRule } from '@vuelidate/core'
-import { useStore } from '../../store'
 import useVuelidate from '@vuelidate/core'
 import { VTextField } from 'vuetify/lib/components/index.mjs'
+import {
+  useConstantsRangesAzimuthStore,
+  useConstantsRangesDepositionalAzimuthStore,
+  useConstantsRangesDipStore,
+  useConstantsRangesMigrationStore,
+  useConstantsRangesPowerStore,
+  useConstantsRangesStackingStore,
+} from '@/stores/constants/ranges'
+import { useFmuOptionStore } from '@/stores/fmu/options'
 import { between, numeric, requiredUnless } from '@vuelidate/validators'
 import { useInvalidation } from '@/utils/invalidation'
 
@@ -124,9 +132,31 @@ const emit = defineEmits<{
   (event: 'update:error', error: boolean): void
   (event: 'click:append', value: MouseEvent): void
 }>()
-const store = useStore()
-const inputElement = ref<InstanceType<typeof VTextField> | null>(null)
+
 const fieldValue = ref<InternalValue>(null)
+
+const constants = computed<MinMax>(() => {
+  if (notEmpty(props.ranges)) return props.ranges
+
+  switch (props.valueType) {
+    case 'azimuth':
+      return useConstantsRangesAzimuthStore().minMax
+    case 'dip':
+      return useConstantsRangesDipStore().minMax
+    case 'power':
+      return useConstantsRangesPowerStore().minMax
+    case 'depositionalAzimuth':
+      return useConstantsRangesDepositionalAzimuthStore().minMax
+    case 'stacking':
+      return useConstantsRangesStackingStore().minMax
+    case 'migration':
+      return useConstantsRangesMigrationStore().minMax
+    default:
+      return { max: Infinity, min: props.allowNegative ? -Infinity : 0 }
+  }
+})
+const max = computed(() => constants.value.max)
+const min = computed(() => constants.value.min)
 
 const validators = computed(() => {
   const fieldValue: Record<string, ValidationRule> = {
@@ -162,25 +192,10 @@ const updatable = computed({
   set: (value: boolean) => emitChange(value),
 })
 
-const constants = computed<MinMax>(() =>
-  notEmpty(props.ranges)
-    ? props.ranges
-    : props.valueType !== '' &&
-      hasOwnProperty(store.state.constants.ranges, props.valueType)
-    ? store.state.constants.ranges[props.valueType]
-    : { max: Infinity, min: props.allowNegative ? -Infinity : 0 },
-)
-
 const _unit = computed(() => {
   if (!props.unit) return ''
   if (props.discrete) {
-    if (!props.unit) return ''
-    const irregular = {}
-    return props.modelValue === 1
-      ? props.unit
-      : hasOwnProperty(irregular, props.unit)
-      ? irregular[props.unit]
-      : `${props.unit}s`
+    return props.modelValue === 1 ? props.unit : `${props.unit}s`
   } else {
     return props.unit
   }
@@ -188,13 +203,11 @@ const _unit = computed(() => {
 
 const __class = computed(() => (props.dense ? ['dense'] : []))
 
-const max = computed(() => constants.value.max)
-const min = computed(() => constants.value.min)
-
+const fmuOptionStore = useFmuOptionStore()
 const isFmuUpdatable = computed(
   () =>
     props.fmuUpdatable &&
-    store.getters.fmuUpdatable &&
+    fmuOptionStore.fmuUpdatable &&
     (props.modelValue instanceof FmuUpdatableValue ||
       (props.modelValue !== null &&
         hasOwnProperty(props.modelValue, 'updatable'))),

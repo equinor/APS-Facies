@@ -46,73 +46,65 @@ import SectionTitle from '@/components/baseComponents/headings/SectionTitle.vue'
 import { isEmpty } from '@/utils'
 
 import { Facies } from '@/utils/domain'
-import { useStore } from '../store'
 import { computed, watch } from 'vue'
+import { usePanelStore } from '@/stores/panels'
+import { useRegionStore } from '@/stores/regions'
+import { useOptionStore } from '@/stores/options'
+import { useZoneStore } from '@/stores/zones'
+import { useFaciesStore } from '@/stores/facies'
 
-type Option = 'number' | 'name'
+const optionStore = useOptionStore()
+const zoneStore = useZoneStore()
+const regionStore = useRegionStore()
+const faciesStore = useFaciesStore()
+const panelStore = usePanelStore()
 
-const store = useStore()
-const options = computed(() => {
-  const showNameOrNumber = store.state.options.showNameOrNumber
-  return {
-    zone: showNameOrNumber.zone.value as Option,
-    region: showNameOrNumber.region.value as Option,
-  }
-})
-
-const expanded = computed<number[]>({
-  get: () => store.getters['panels/settings'],
-  set: (indices: number[]) =>
-    store.dispatch('panels/change', { type: 'settings', indices }),
+const expanded = computed({
+  get: () => panelStore.getOpen('settings'),
+  set: (panelNames: string[]) => panelStore.setOpen('settings', panelNames),
 })
 
 const title = computed<string>(() =>
-  `Settings for ${zoneName.value}`.concat(
-    useRegions.value ? ` / ${regionName.value}` : '',
-  ),
+  `Settings for ${zoneName.value}` + useRegions.value
+    ? ` / ${regionName.value}`
+    : '',
 )
 
-const useRegions = computed<boolean>(() => store.state.regions.use)
+const useRegions = computed<boolean>(() => regionStore.use)
 
+const options = computed(() => optionStore.options.showNameOrNumber)
 // TODO: Combine common logic in zone/regionName
 const zoneName = computed<string>(() => {
-  const current = store.getters.zone
-  return isEmpty(current)
+  const zone = zoneStore.current
+  return isEmpty(zone)
     ? ''
     : options.value.zone === 'name'
-    ? current.name
-    : `Zone ${current.code}`
+    ? zone.name
+    : `Zone ${zone.code}`
 })
 
 const regionName = computed<string>(() => {
-  const current = store.getters.region
-  return isEmpty(current)
+  const region = regionStore.current
+  return isEmpty(region)
     ? ''
     : options.value.region === 'name'
-    ? current.name
-    : `Region ${current.code}`
+    ? region.name
+    : `Region ${region.code}`
 })
 
-const _facies = computed<Facies[]>(() => store.getters['facies/selected'])
-
+const _facies = computed<Facies[]>(() => faciesStore.selected)
 const hasFacies = computed<boolean>(() => _facies.value.length > 0)
-
-const hasEnoughFacies = computed<boolean>(
-  () => _facies.value.length >= 2,
-) /* TODO: Use a constant */
+const minFacies = 2
+const hasEnoughFacies = computed<boolean>(() => _facies.value.length >= minFacies)
 
 watch(
   _facies,
   async () => {
-    await store.dispatch(`panels/${hasEnoughFacies.value ? 'open' : 'close'}`, {
-      type: 'settings',
-      panel: 'truncationRule',
-    })
+    panelStore.set('settings', 'truncationRule', hasEnoughFacies.value)
+
     if (!hasFacies.value) {
-      await store.dispatch('panels/close', {
-        type: 'settings',
-        panel: ['truncationRule', 'faciesProbability'],
-      })
+      panelStore.close('settings', 'truncationRule')
+      panelStore.close('settings', 'faciesProbability')
     }
   },
   { deep: true },

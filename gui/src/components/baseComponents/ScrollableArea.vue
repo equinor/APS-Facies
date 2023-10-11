@@ -1,9 +1,5 @@
 <template>
-  <v-responsive
-    class="overflow-y-auto"
-    :max-height="height"
-    @resize="updateHeight"
-  >
+  <v-responsive class="overflow-y-auto" :height="height" @resize="updateHeight">
     <slot ref="component" />
   </v-responsive>
 </template>
@@ -15,7 +11,8 @@ type Props = {
   offset?: number
 }
 const props = withDefaults(defineProps<Props>(), {
-  offset: 64, // 64 is the height of the toolbar
+  // 64 is the height of the toolbar, so not sure why 96 is the magic value.
+  offset: 96,
 })
 
 const height = ref(0)

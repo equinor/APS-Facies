@@ -24,16 +24,16 @@
 </template>
 
 <script setup lang="ts">
-import { GaussianRandomField } from '@/utils/domain'
-import { ID } from '@/utils/domain/types'
+import type { GaussianRandomField } from '@/utils/domain'
+import type { ID } from '@/utils/domain/types'
 
 import CrossPlot from './index.vue'
-import { useStore } from '../../../store'
+import { useGaussianRandomFieldStore } from '@/stores/gaussian-random-fields'
 import { ref, computed, watch, onBeforeMount } from 'vue'
 import type { ListItem } from '@/utils/typing'
 
 const props = defineProps<{ value: GaussianRandomField[] }>()
-const store = useStore()
+const fieldStore = useGaussianRandomFieldStore()
 
 const selected = ref<ID[]>([])
 const available = computed<ListItem<ID>[]>(() =>
@@ -46,7 +46,7 @@ const available = computed<ListItem<ID>[]>(() =>
 const combinations = computed<GaussianRandomField[][]>(() => {
   const pairs: GaussianRandomField[][] = []
   const available = selected.value.map(
-    (id) => store.state.gaussianRandomFields.available[id],
+    (id) => fieldStore.identifiedAvailable[id],
   )
   if (!available) return pairs
   for (let i = 0; i < available.length; i++) {
@@ -57,17 +57,13 @@ const combinations = computed<GaussianRandomField[][]>(() => {
   return pairs
 })
 
-watch(
-  selected,
-  (value: ID[]) => {
-    store.dispatch('gaussianRandomFields/updateSimulations', { fields: value })
-  },
-  { deep: true },
-)
+watch(selected, (value: ID[]) => fieldStore.updateSimulations(value), {
+  deep: true,
+})
 
 watch(
   available,
-  (value: Item[]) => {
+  (value: ListItem<ID>[]) => {
     if (
       selected.value.some(
         (selectedItem) =>
@@ -81,7 +77,7 @@ watch(
             (selectedItem) => selectedItem === availableItem.value,
           ),
         )
-        .map((el) => el.value)
+        .map((el) => el.value) as ID[]
     }
   },
   { deep: true },

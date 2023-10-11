@@ -12,7 +12,7 @@
     </v-expansion-panel-title>
     <v-expansion-panel-text>
       <cross-section />
-      <v-expansion-panels v-model="panel" variant="accordion" multiple>
+      <v-expansion-panels v-model="panels" variant="accordion" multiple>
         <v-expansion-panel v-for="field in fields" :key="field.id" elevation="0">
           <v-expansion-panel-title>
             <v-row class="fill-height" align="center" justify="start">
@@ -42,31 +42,32 @@ import IconButton from '@/components/selection/IconButton.vue'
 import CrossSection from '@/components/specification/GaussianRandomField/CrossSection.vue'
 import SectionTitle from '@/components/baseComponents/headings/SectionTitle.vue'
 
-import { GaussianRandomField as Field } from '@/utils/domain'
-import { ID } from '@/utils/domain/types'
-import { isNumber } from 'lodash'
-import { useStore } from '../../../store'
+import type { GaussianRandomField as Field } from '@/utils/domain'
 import { computed, ref } from 'vue'
-import { Optional } from '../../../utils/typing'
+import { usePanelStore } from '@/stores/panels'
+import { useGaussianRandomFieldStore } from '@/stores/gaussian-random-fields'
 
-const store = useStore()
-const panel = computed({
-  get: () => store.state.panels.settings.gaussianRandomFields,
-  set: (value: boolean | Optional<number>) =>
-    store.dispatch('panels/set', {
-      type: 'settings',
-      panel: 'gaussianRandomFields',
-      toggled: isNumber(value) ? value : true,
-    }),
+const panelStore = usePanelStore()
+const fieldStore = useGaussianRandomFieldStore()
+
+const panels = computed<number[]>({
+  get: () => panelStore.panels.settings.individualGaussianRandomFields,
+  set: (value: number[]) => {
+    panelStore.set(
+      'settings',
+      'individualGaussianRandomFields',
+      value,
+    )
+    fieldStore.updateSimulations(fieldStore.selected)
+  },
 })
 
 const deleteDialogRefs = ref<InstanceType<typeof ConfirmationDialog>[]>([])
 
-const fields = computed<Field[]>(() => store.getters.fields)
-const ids = computed<ID[]>(() => Object.keys(fields.value))
+const fields = computed<Field[]>(() => fieldStore.selected)
 
-async function addField(): Promise<void> {
-  await store.dispatch('gaussianRandomFields/addEmptyField')
+function addField(): void {
+  fieldStore.addEmptyField()
 }
 
 async function deleteField(field: Field) {
@@ -77,9 +78,6 @@ async function deleteField(field: Field) {
     'Are you sure?',
     `This will delete the Gaussian random field '${field.name}'`,
   )
-
-  if (confirmed) {
-    store.dispatch('gaussianRandomFields/deleteField', { field })
-  }
+  if (confirmed) fieldStore.deleteField(field)
 }
 </script>

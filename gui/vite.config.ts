@@ -7,7 +7,12 @@ const resolve = (dir: string) => join(__dirname, dir)
 const { CODESPACE_NAME } = process.env
 
 export default defineConfig({
-  plugins: [vue(), vuetify({ autoImport: true })],
+  plugins: [
+    vue(),
+    vuetify({
+      autoImport: true,
+    }),
+  ],
   resolve: {
     alias: {
       '@': resolve('src'),

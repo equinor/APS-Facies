@@ -88,9 +88,10 @@ import OptionalFileSelection from '@/components/selection/OptionalFileSelection.
 import IconButton from '@/components/selection/IconButton.vue'
 
 import { APSError } from '@/utils/domain/errors'
-import { Paths } from '@/api/types'
+import type { Paths } from '@/api/types'
 import { ref, onMounted, computed, watch } from 'vue'
-import { useStore } from '../../store'
+import { useFmuOptionStore } from '@/stores/fmu/options'
+import { useModelFileExporterStore } from '@/stores/model-file-exporter'
 
 interface State {
   path: string
@@ -109,13 +110,13 @@ interface Invalid {
   probabilityDistribution: boolean
 }
 
-const store = useStore()
+const modelFileExporterStore = useModelFileExporterStore()
+const fmuOptionStore = useFmuOptionStore()
 
 const dialog = ref(false)
 const resolve = ref<((value: { paths: Paths | null }) => void) | null>(null)
 const reject = ref<((reason: string) => void) | null>(null)
 const fetched = ref(false)
-const disabled = ref(false)
 const projectPath = ref('')
 const pathsState = ref<PathsState>({
   model: '',
@@ -129,7 +130,7 @@ const invalid = ref<Invalid>({
   probabilityDistribution: false,
 })
 
-function setInvalid(name: string, error: boolean): void {
+function setInvalid(name: keyof Invalid, error: boolean): void {
   invalid.value[name] = error
 }
 
@@ -141,7 +142,7 @@ onMounted(async () => {
 
 const _hasFmuUpdatableValues = ref(false)
 
-const model = computed(() => store.getters['modelFileExporter/model'])
+const model = computed(() => modelFileExporterStore.model)
 async function checkFmuUpdatableValues() {
   _hasFmuUpdatableValues.value = !model.value
     ? false
@@ -155,7 +156,11 @@ watch(model, async (value: string | null) => {
   if (value) await checkFmuUpdatableValues()
 })
 
-const fmuMode = computed(() => store.getters.fmuUpdatable)
+const fmuMode = computed(
+  () =>
+    fmuOptionStore.options.runFmuWorkflows ||
+    fmuOptionStore.options.onlyUpdateFromFmu,
+)
 const hasErrors = computed(() => {
   if (!_hasFmuUpdatableValues.value) return invalid.value.model
 
@@ -172,8 +177,9 @@ const disabledMessage = computed<string | undefined>(() => {
 
 async function defaultPaths(): Promise<PathsState> {
   const { model, fmuConfig, probabilityDistribution } = DEFAULT_MODEL_FILE_NAMES
-  const useNonStandardFmu = store.state.fmu.useNonStandardFmu.value
-  const defaultRelativeExportPaths = await rms.apsFmuConfig(useNonStandardFmu)
+  const defaultRelativeExportPaths = await rms.apsFmuConfig(
+    fmuOptionStore.options.useNonStandardFmu,
+  )
   const modelPath = defaultRelativeExportPaths[0]
   const ertParamPath = defaultRelativeExportPaths[1]
   const fmuParamPath = defaultRelativeExportPaths[2]

@@ -15,9 +15,10 @@ import OverlayTruncationRule, {
 } from '@/utils/domain/truncationRule/overlay'
 import { sample } from 'lodash'
 
-type CubicTruncationRuleArgs = OverlayTruncationRuleArgs<CubicPolygon> & {
-  direction: Direction | Orientation | OrientationString
-}
+export type CubicTruncationRuleArgs =
+  OverlayTruncationRuleArgs<CubicPolygon> & {
+    direction: Direction | Orientation | OrientationString
+  }
 
 export interface CubicSpecification
   extends OverlaySpecification<CubicPolygonSpecification> {

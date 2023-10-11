@@ -11,15 +11,13 @@
 </template>
 
 <script setup lang="ts">
-import { GaussianRandomField } from '@/utils/domain'
+import type { GaussianRandomField } from '@/utils/domain'
 import FmuUpdatableValue from '@/utils/domain/bases/fmuUpdatable'
 
 import NumericField from '@/components/selection/NumericField.vue'
 import { computed } from 'vue'
-import { useStore } from '../../../../store'
 
 const props = defineProps<{ value: GaussianRandomField }>()
-const store = useStore()
 const emit = defineEmits<{
   (event: 'update:error', error: boolean): void
 }>()
@@ -33,13 +31,9 @@ const relativeSize = computed({
     })
   },
   set: ({ value, updatable }: FmuUpdatableValue) =>
-    store.dispatch('gaussianRandomFields/relativeSize', {
-      field: props.value,
-      variogramOrTrend: 'trend',
-      value: new FmuUpdatableValue({
-        value: value / 100,
-        updatable: updatable,
-      }),
-    }),
+    (props.value.trend.relativeSize = new FmuUpdatableValue({
+      value: value / 100,
+      updatable: updatable,
+    })),
 })
 </script>

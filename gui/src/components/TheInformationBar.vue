@@ -15,18 +15,20 @@
 <script setup lang="ts">
 import { isDevelopmentBuild } from '@/config'
 import { delay } from 'lodash'
-import BaseMessage, { MessageType } from '@/utils/domain/messages/base'
+import { MessageType } from '@/utils/domain/messages/base'
 import { Optional } from '@/utils/typing'
-import { computed } from 'vue'
-import { ref } from 'vue'
-import { useStore } from '../store'
-import { watch } from 'vue'
+import { computed, ref, watch } from 'vue'
+import { useMessageStore } from '@/stores/messages'
 
-const store = useStore()
+const messageStore = useMessageStore()
 const shown = ref(false)
 
-const _message = computed<{ value: string | Error | null; kind: MessageType }>(
-  () => store.state.message.value ?? { value: null, kind: 'info' },
+type Message = {
+  value: string | Error | null
+  readonly kind: MessageType
+}
+const _message = computed<Message>(
+  () => messageStore.message ?? { value: null, kind: 'info' },
 )
 
 const message = computed<Optional<string>>(() => {
@@ -46,15 +48,18 @@ const message = computed<Optional<string>>(() => {
 const type = computed<MessageType>(() => _message.value.kind)
 
 // TODO: Not sure what is wrong with the typing here.
-watch(_message, (message: BaseMessage) => {
-  if (message.value) {
-    shown.value = true
-    const { use, wait } = store.state.message.autoDismiss
-    if (use) {
-      delay(() => (shown.value = false), wait)
+watch(
+  _message,
+  (message: { value: string | Error | null; kind: MessageType }) => {
+    if (message.value) {
+      shown.value = true
+      const { use, wait } = messageStore.autoDismiss
+      if (use) {
+        delay(() => (shown.value = false), wait)
+      }
     }
-  }
-})
+  },
+)
 </script>
 
 <style lang="scss" scoped>

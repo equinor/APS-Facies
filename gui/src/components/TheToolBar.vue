@@ -53,7 +53,6 @@
 </template>
 
 <script setup lang="ts">
-import { Store } from '@/store/typing'
 import { displayError, displaySuccess } from '@/utils/helpers/storeInteraction'
 import ExportDialog from '@/components/dialogs/ExportDialog.vue'
 import ChangelogDialog from '@/components/dialogs/ChangelogDialog.vue'
@@ -62,12 +61,14 @@ import IconButton from '@/components/selection/IconButton.vue'
 import ExportState from '@/components/debugging/exportState.vue'
 import LoadJob from '@/components/debugging/LoadJob.vue'
 import RunJob from '@/components/debugging/RunJob.vue'
-import { Optional } from '@/utils/typing'
+import type { Optional } from '@/utils/typing'
 import rms from '@/api/rms'
-import { resetState, useStore } from '@/store'
 import { isDevelopmentBuild } from '@/utils/helpers/simple'
 import { ref } from 'vue'
 import { XMLParser } from 'fast-xml-parser'
+import { useModelFileExporterStore } from '@/stores/model-file-exporter'
+import { useRootStore } from '@/stores'
+import { useModelFileLoaderStore } from '@/stores/model-file-loader'
 
 const betaBuild: boolean = import.meta.env.VUE_APP_BUILD_MODE !== 'stable'
 const versionNumber: Optional<string> =
@@ -80,26 +81,19 @@ const versionInformation: string =
     ? `${versionNumber}.${buildNumber}-${commitHash} (beta)`
     : 'live'
 const isDevelop = isDevelopmentBuild()
+const rootStore = useRootStore()
 
 async function loadModelFile(
-  store: Store,
   fileName: string,
   fileContent: string | null = null,
 ): Promise<void> {
   let json: string | null = null
 
-  store.commit(
-    'LOADING',
-    {
-      loading: true,
-      message: `Checking the model file, "${fileName}", for consistency`,
-    },
-    { root: true },
-  )
+  rootStore.startLoading(`Checking the model file, "${fileName}", for consistency`)
   if (!fileContent) fileContent = await rms.loadFile(fileName)
 
   if (!fileContent) {
-    await displayError('The file is empty, or it does not exist')
+    displayError('The file is empty, or it does not exist')
   } else {
     try {
       // TODO: Check whether this new XML parser actually outputs similar json.
@@ -108,7 +102,7 @@ async function loadModelFile(
       const jsObject = xmlParser.parse(fileContent)
       json = JSON.stringify(jsObject)
     } catch (err: any) {
-      await displayError(
+      displayError(
         'The file you tried to open is not valid XML and cannot be used\n' +
           'Fix the following error before opening again:\n\n' +
           err.message,
@@ -117,16 +111,14 @@ async function loadModelFile(
     if (json) {
       const { valid, error } = await rms.isApsModelValid(btoa(fileContent))
       if (valid) {
-        resetState()
-        store.commit(
-          'LOADING',
-          { loading: true, message: 'Resetting the state...' },
-          { root: true },
-        )
-        await store.dispatch('fetch')
-        await store.dispatch('modelFileLoader/populateGUI', { json, fileName })
+        rootStore.$reset()
+        rootStore.loadingMessage = 'Resetting the state...'
+        await rootStore.fetch()
+        await useModelFileLoaderStore()
+          .populateGUI(json, fileName)
+
       } else {
-        await displayError(
+        displayError(
           'The file you tried to open is not a valid APS model file and cannot be used\n' +
             'Fix the following error before opening again:\n\n' +
             error,
@@ -135,10 +127,8 @@ async function loadModelFile(
     }
   }
 
-  store.commit('LOADING', { loading: false }, { root: true })
+  rootStore.finishLoading()
 }
-
-const store = useStore()
 
 const refreshing = ref(false)
 const lastMSelectedModelFile = ref('')
@@ -161,11 +151,11 @@ async function importModelFile(): Promise<void> {
       const { files } = event.target as HTMLInputElement
       if (files) {
         const file = files[0]
-        file.text().then((content) => loadModelFile(store, file.name, content))
+        file.text().then((content) => loadModelFile(file.name, content))
       }
+      input.remove()
     }
     input.click()
-    document.removeChild(input)
   } else {
     const fileName = await rms.chooseFile(
       'load',
@@ -174,22 +164,23 @@ async function importModelFile(): Promise<void> {
     )
     if (fileName) {
       lastMSelectedModelFile.value = fileName
-      await loadModelFile(store, fileName)
+      await loadModelFile(fileName)
     }
   }
 }
 
 async function refresh(): Promise<void> {
   refreshing.value = true
-  await store.dispatch('refresh', 'Fetching data from RMS')
+  await rootStore.refresh('Fetching data from RMS')
   refreshing.value = false
 }
 
 async function exportModelFile(): Promise<void> {
-  const exportedXMLString = await store
-    .dispatch('modelFileExporter/createModelFileFromStore', {})
+  const modelFileExporterStore = useModelFileExporterStore()
+  const exportedXMLString = await modelFileExporterStore
+    .createModelFileFromStore()
     .catch(async (error) => {
-      await displayError(error.message)
+      displayError(error.message)
     })
   if (exportedXMLString) {
     const result = await rms.isApsModelValid(btoa(exportedXMLString))
@@ -202,14 +193,17 @@ async function exportModelFile(): Promise<void> {
         )
         resultPromise.then(async (success: boolean): Promise<void> => {
           if (success) {
-            await displaySuccess(
+            displaySuccess(
               `The model file was saved to ${response.paths?.model ?? '-'}`,
             )
           }
         })
+          .catch(err => {
+            displayError(err)
+          })
       }
     } else {
-      await displayError(
+      displayError(
         'The model you have defined is not valid and cannot be exported\n' +
           'Fix the following error before exporting again:\n\n' +
           result.error,

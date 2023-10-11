@@ -22,32 +22,32 @@
 import FaciesTable from '@/components/table/FaciesTable/index.vue'
 import IconButton from '@/components/selection/IconButton.vue'
 
-import { useStore } from '../../store'
 import { computed } from 'vue'
+import { useFaciesStore } from '@/stores/facies'
+import { useFaciesGlobalStore } from '@/stores/facies/global'
 
 withDefaults(defineProps<{ hideAlias?: boolean }>(), { hideAlias: false })
 
-const store = useStore()
+const faciesStore = useFaciesStore()
+const faciesGlobalStore = useFaciesGlobalStore()
 
-const current = computed(() => store.getters.facies)
+const current = computed(() => faciesGlobalStore.current)
 const canRemove = computed(() =>
-  !!current.value ? !store.getters['facies/isFromRMS'](current) : false,
+  !!current.value ? !faciesStore.isFromRMS(current.value) : false,
 )
+
 const removeError = computed(() => {
-  if (!current.value) {
-    return 'A facies must be selected'
-  }
-  if (!canRemove.value) {
-    return `The selected facies, ${current.value.name}, is from RMS, and cannot be deleted from this GUI`
-  }
+  if (!current.value) return 'A facies must be selected'
+  if (!canRemove.value)
+    return `The selected facies (${current.value.name}) is from RMS, and cannot be deleted from this GUI`
   return ''
 })
 
-async function add(): Promise<void> {
-  await store.dispatch('facies/global/new', {})
+async function add() {
+  await faciesGlobalStore.create({})
 }
 
-async function remove(): Promise<void> {
-  await store.dispatch('facies/global/removeSelectedFacies')
+function remove() {
+  faciesGlobalStore.removeSelectedFacies()
 }
 </script>

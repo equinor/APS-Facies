@@ -14,14 +14,12 @@ import { dumpState } from '@/utils/helpers/processing/export'
 
 import WaitButton from '@/components/baseComponents/WaitButton.vue'
 import { ref } from 'vue'
-import { useStore } from '../../store'
 
-const store = useStore()
 const executing = ref(false)
 
 async function execute(): Promise<void> {
   executing.value = true
-  const state = JSON.stringify(dumpState(store))
+  const state = JSON.stringify(dumpState())
   await rms.runAPSWorkflow(btoa(state)).finally(() => {
     executing.value = false
   })

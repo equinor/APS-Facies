@@ -37,11 +37,11 @@
 </template>
 
 <script setup lang="ts">
-import { GaussianRandomField } from '@/utils/domain'
-import { OriginType } from '@/utils/domain/gaussianRandomField/trend'
+import type { GaussianRandomField } from '@/utils/domain'
+import type { OriginType } from '@/utils/domain/gaussianRandomField/trend'
 import OriginCoordinate from './Coordinate.vue'
 import { ref, computed, watch } from 'vue'
-import { useStore } from '../../../../store'
+import { useConstantsOptionsOriginStore } from '@/stores/constants/options'
 
 const OriginX = OriginCoordinate
 const OriginY = OriginCoordinate
@@ -56,7 +56,6 @@ interface Invalid {
 }
 
 const props = defineProps<{ value: GaussianRandomField }>()
-const store = useStore()
 const emit = defineEmits<{
   (event: 'update:error', error: boolean): void
 }>()
@@ -68,17 +67,14 @@ const invalid = ref<Invalid>({
 })
 
 const availableOriginTypes = computed(
-  () => store.state.constants.options.origin.available,
+  () => useConstantsOptionsOriginStore().available,
 )
-const trend = computed(() => props.value.trend)
-const isEllipticCone = computed(() => trend.value.type === 'ELLIPTIC_CONE')
+const isEllipticCone = computed(
+  () => props.value.trend.type === 'ELLIPTIC_CONE',
+)
 const originType = computed({
-  get: () => trend.value.origin.type,
-  set: (value: OriginType) =>
-    store.dispatch('gaussianRandomFields/originType', {
-      field: props.value,
-      value,
-    }),
+  get: () => props.value.trend.origin.type,
+  set: (value: OriginType) => (props.value.trend.origin.type = value),
 })
 
 watch(invalid, ({ x, y, z }: Invalid) =>

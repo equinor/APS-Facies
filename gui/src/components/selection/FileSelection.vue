@@ -9,14 +9,11 @@
         :label="label"
         :append-outer-icon="icon"
         :error-messages="errors"
-        @keydown.enter.prevent="
-          () => {
-            /* Intentionally ignore 'newline'*/
-          }
-        "
+        @keydown.enter.prevent="() => null /** Ignore newline */"
         @click:append-outer="choosePath"
         @input="touch()"
         @blur="touch()"
+        variant="underlined"
       />
     </v-col>
   </v-row>

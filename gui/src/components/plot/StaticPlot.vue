@@ -1,14 +1,13 @@
 <template>
-  <div>TODO: Re-add plotly chart somehow.</div>
-  <!-- <vue-plot
+  <plotly-plot
     :data="__content"
     :layout="__layout"
     :options="__options"
     auto-resize
-    @click.native="(e: MouseEvent) => $emit('click', e)"
+    @click="(e) => $emit('click', e)"
     @resize="resize"
     ref="plot"
-  /> -->
+  />
 </template>
 
 <script setup lang="ts">
@@ -18,12 +17,11 @@ import { getDisabledOpacity } from '@/utils/helpers/simple'
 // import VuePlot from "@statnett/vue-plotly";
 
 import { notEmpty } from '@/utils'
-
 import { DEFAULT_SIZE } from '@/config'
-
 import { Optional } from '@/utils/typing'
 import { Config, Layout, LayoutAxis, PlotData, Shape } from 'plotly.js'
 import { ref, computed, onBeforeUnmount, onMounted, onBeforeMount } from 'vue'
+import PlotlyPlot from './PlotlyPlot.vue'
 
 type Size = {
   width: number
@@ -57,7 +55,7 @@ const props = withDefaults(defineProps<Props>(), {
 })
 
 const size = ref<Size>({ height: 0, width: 0 })
-const plot = ref<HTMLElement | null>(null)
+const plot = ref<InstanceType<typeof PlotlyPlot> | null>(null)
 
 const __content = computed<Partial<PlotData>[]>(() => {
   if (!props.svg) {
@@ -80,8 +78,7 @@ const __content = computed<Partial<PlotData>[]>(() => {
 const __layout = computed<Partial<Layout>>(() => {
   const scaleRatio =
     notEmpty(__content.value) && __content.value.length > 0
-      ? // @ts-ignore
-        this.__content.length / this.__content[0].length
+      ? __content.value.length / (__content.value[0].x?.length ?? 1)
       : 1
 
   const _axis: Partial<LayoutAxis> = {
@@ -135,7 +132,9 @@ const __options = computed<Partial<Config>>(() => ({
 }))
 
 function resize(): void {
-  const parent = plot.value?.getElementsByClassName('svg-container')?.[0] ?? {
+  const parent = plot.value?.$el.getElementsByClassName(
+    'svg-container',
+  )?.[0] ?? {
     clientWidth: props.width,
     clientHeight: props.height,
   }

@@ -1,5 +1,21 @@
 import BaseMessage, { MessageType } from '@/utils/domain/messages/base'
 
+export function getMessage(
+  message: string,
+  type: MessageType,
+): ErrorMessage | Message | WarningMessage | SuccessMessage {
+  switch (type) {
+    case 'error':
+      return new ErrorMessage(message)
+    case 'info':
+      return new Message(message)
+    case 'warning':
+      return new WarningMessage(message)
+    case 'success':
+      return new SuccessMessage(message)
+  }
+}
+
 export class ErrorMessage extends BaseMessage {
   public constructor(message: string) {
     super(message)

@@ -23,10 +23,10 @@ import type { PlotData } from 'plotly.js-dist-min'
 import type { GlobalFacies, Polygon } from '@/utils/domain'
 
 import StaticPlot from '@/components/plot/StaticPlot.vue'
-import { useStore } from '../../store'
 import { computed } from 'vue'
 import type { TruncationRule } from '@/utils/domain/truncationRule'
 import type { PolygonSerialization, PolygonSpecification } from '@/utils/domain/polygon/base'
+import { useFaciesGlobalStore } from '@/stores/facies/global'
 
 function filterOnCode(data: number[][] | null, code: number): (1 | null)[][] {
   if (!data) return []
@@ -42,11 +42,9 @@ const props = withDefaults(defineProps<Props>(), {
   expand: false,
   disabled: false,
 })
-const store = useStore()
+const faciesGlobalStore = useFaciesGlobalStore()
 
-const faciesTable = computed<GlobalFacies[]>(
-  () => store.getters['facies/global/selected'],
-)
+const faciesTable = computed<GlobalFacies[]>(() => faciesGlobalStore.selected)
 
 const _disabled = computed(
   () => props.disabled || !props.value.isRepresentative,

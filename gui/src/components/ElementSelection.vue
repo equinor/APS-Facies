@@ -5,14 +5,14 @@
         <choose-grid-model />
       </v-col>
       <v-col>
-        <choose-facies-realization-parameter v-if="currentGridModel" />
+        <choose-facies-realization-parameter v-if="gridModelSelected" />
       </v-col>
     </v-row>
     <v-row>
       <v-col>
         <v-expansion-panels
-          v-if="currentGridModel"
-          v-model="panels"
+          v-if="gridModelSelected"
+          v-model="expanded"
           variant="accordion"
           multiple
         >
@@ -20,8 +20,8 @@
             <v-expansion-panel-title>
               <section-title>Zones and Regions</section-title>
             </v-expansion-panel-title>
-            <v-expansion-panel-text>
-              <zone-region v-if="currentGridModel" />
+            <v-expansion-panel-text class="pa-0">
+              <zone-region v-if="gridModelSelected" />
               <span v-else>
                 Selection of zones and regions is not available until Grid Model
                 is selected
@@ -33,7 +33,7 @@
               <section-title>Facies</section-title>
             </v-expansion-panel-title>
             <v-expansion-panel-text class="fill-height">
-              <v-row v-if="currentGridModel" no-gutters>
+              <v-row v-if="gridModelSelected" no-gutters>
                 <v-row v-if="hasWellParameters" no-gutters>
                   <v-col class="pt-2" cols="6">
                     <choose-blocked-well-parameter />
@@ -50,7 +50,7 @@
                 <v-row v-else no-gutters>
                   <v-col cols="12">
                     <p class="text-center">
-                      {{ gridName }} has no blocked well parameters
+                      {{ currentGridModelName }} has no blocked well parameters
                     </p>
                   </v-col>
                   <v-col cols="12">
@@ -79,40 +79,31 @@ import ChooseBlockedWellLogParameter from '@/components/selection/dropdown/Choos
 import ChooseFaciesRealizationParameter from '@/components/selection/dropdown/ChooseFaciesRealizationParameter.vue'
 import SectionTitle from '@/components/baseComponents/headings/SectionTitle.vue'
 
-import { ID } from '@/utils/domain/types'
-import { Optional } from '@/utils/typing'
-import { ref, computed } from 'vue'
-import { useStore } from '../store'
+import { computed } from 'vue'
+import { usePanelStore } from '@/stores/panels'
+import { useParameterBlockedWellStore } from '@/stores/parameters/blocked-well'
+import { useGridModelStore } from '@/stores/grid-models'
 
-const store = useStore()
+const parameterBlockedWellStore = useParameterBlockedWellStore()
+const gridModelStore = useGridModelStore()
 
-// TODO: These were not in use...
-const disabled = ref(false)
-const readonly = ref(false)
-
-const panels = computed<number[]>({
-  get: () => {
-    return store.getters['panels/selection']
+const panelStore = usePanelStore()
+const expanded = computed({
+  get: () => panelStore.getOpen('selection'),
+  set: (panelNames: string[]) => {
+    panelStore.setOpen('selection', panelNames)
   },
-  set: (indices: number[]) =>
-    store.dispatch('panels/change', { type: 'selection', indices }),
 })
 
-const hasWellParameters = computed<boolean>(() => {
-  return store.state.parameters.blockedWell.available.length > 0
-})
-
-const hasBlockedWellParameter = computed<boolean>(() => {
-  return !!store.getters.blockedWellParameter
-})
-
-const currentGridModel = computed<Optional<ID>>(() => {
-  return store.state.gridModels.current
-})
-
-const gridName = computed<string>(() => {
-  return store.getters.gridModel
-})
+const hasWellParameters = computed<boolean>(
+  () => parameterBlockedWellStore.available.length > 0,
+)
+const hasBlockedWellParameter = computed<boolean>(
+  () => !!parameterBlockedWellStore.selected,
+)
+const currentGridModel = computed(() => gridModelStore.current)
+const gridModelSelected = computed(() => !!currentGridModel.value)
+const currentGridModelName = computed(() => currentGridModel.value?.name)
 </script>
 
 <style lang="scss" scoped>

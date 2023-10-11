@@ -39,11 +39,9 @@ import FaciesSpecification from '@/components/specification/Facies/index.vue'
 import BaseTable from '@/components/baseComponents/BaseTable.vue'
 
 import { Bayfill, BayfillPolygon, Facies } from '@/utils/domain'
-import { useStore } from '../../../../store'
 import { computed } from 'vue'
 
 const props = defineProps<{ value: Bayfill }>()
-const store = useStore()
 
 const polygons = computed(() => props.value?.backgroundPolygons ?? [])
 const headers = [
@@ -60,14 +58,12 @@ function isFaciesUsed(polygon: BayfillPolygon): (facies: Facies) => boolean {
     otherPolygons.filter((polygon) => facies === polygon.facies).length > 0
 }
 
-async function updateFactor(
+function updateFactor(
   item: BayfillPolygon,
   value: number,
-): Promise<void> {
-  await store.dispatch('truncationRules/changeSlantFactors', {
-    rule: props.value,
-    polygon: item,
-    value,
-  })
+): void {
+  // TODO: [sindre] How do FmuUpdatable values work?
+  // TODO: [seb] Make usages decide if they should use fmuUpdatable
+  item.slantFactor = value
 }
 </script>

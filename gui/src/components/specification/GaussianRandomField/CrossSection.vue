@@ -19,21 +19,20 @@ import CrossSection, {
   CrossSectionType,
 } from '@/utils/domain/gaussianRandomField/crossSection'
 
-import { useStore } from '../../../store'
 import { computed } from 'vue'
+import { useGaussianRandomFieldCrossSectionStore } from '@/stores/gaussian-random-fields/cross-sections'
 
-const store = useStore()
+const crossSectionStore = useGaussianRandomFieldCrossSectionStore()
 
 const crossSection = computed<Optional<CrossSection>>(
-  () => store.getters['gaussianRandomFields/crossSections/current'],
+  () => crossSectionStore.current,
 )
 
 const type = computed({
   get: () => crossSection.value?.type ?? 'IJ',
-  set: (value: CrossSectionType) =>
-    store.dispatch('gaussianRandomFields/crossSections/changeType', {
-      id: crossSection.value?.id,
-      type: value,
-    }),
+  set: (value: CrossSectionType) => {
+    if (!crossSection.value) return
+    crossSectionStore.changeType(crossSection.value.id, value)
+  },
 })
 </script>

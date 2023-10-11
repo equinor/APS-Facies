@@ -57,9 +57,10 @@ function update(): void {
   if (errorMessages.value.length > 0) return
 
   const value = _fieldValue.value
-  emit('submit', {
-    ...props.value,
-    [props.field]: props.numeric ? Number(value) : value,
-  })
+  if (props.numeric) {
+    emit('submit', parseFloat(value) as OnSubmit)
+  } else {
+    emit('submit', value as OnSubmit)
+  }
 }
 </script>

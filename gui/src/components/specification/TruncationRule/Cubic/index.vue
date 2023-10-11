@@ -3,9 +3,9 @@
 </template>
 
 <script setup lang="ts">
-import TruncationRuleSpecification from '../main.vue'
+import TruncationRuleSpecification from '@/components/specification/TruncationRule/main.vue'
 import PolygonTable from './table/index.vue'
-import { Cubic } from '@/utils/domain'
+import type { Cubic } from '@/utils/domain'
 
 defineProps<{ value: Cubic }>()
 </script>

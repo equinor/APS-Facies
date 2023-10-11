@@ -255,10 +255,10 @@ truncation-rule-vislualization-dir: relink-matplotlibrc
 
 clean-generated-truncation-rules:
 	rm -rf $(TRUNCATION_RULE_VISUALIZATIONS)
-	rm -f  $(WEB_DIR)/src/store/templates/truncationRules.json
+	rm -f  $(WEB_DIR)/src/stores/truncation-rules/templates/truncationRules.json
 
 generate-truncation-rules: generate-truncation-rule-images
-	$(RUN) python3 $(CODE_DIR)/bin/parse-truncation-rule-templates.py $(WEB_DIR)/src/store/templates/truncationRules.json
+	$(RUN) python3 $(CODE_DIR)/bin/parse-truncation-rule-templates.py $(WEB_DIR)/src/stores/truncation-rules/templates/truncationRules.json
 
 generate-truncation-rule-images: clean-generated-truncation-rules truncation-rule-vislualization-dir
 	cd $(TRUNCATION_RULE_VISUALIZATIONS) && \

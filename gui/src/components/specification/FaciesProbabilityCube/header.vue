@@ -36,25 +36,19 @@
 <script setup lang="ts">
 import WaitBtn from '@/components/baseComponents/WaitButton.vue'
 
-import { RootState } from '@/store/typing'
 import { ProbabilityCube } from '@/utils/domain/facies/local'
 
-import { hasCurrentParents, notEmpty } from '@/utils'
+import { notEmpty } from '@/utils'
 import { isCloseToUnity } from '@/utils/helpers/simple'
-import { ref } from 'vue'
-import { computed } from 'vue'
-import { useStore } from '../../../store'
+import { ref, computed } from 'vue'
+import { useFaciesStore } from '@/stores/facies'
+import { useRootStore } from '@/stores'
 
-const store = useStore()
 const calculatingAverages = ref(false)
 
-const selectedFacies = computed(() => {
-  const state: RootState = store.state
-  const getters = store.getters
-  return Object.values(state.facies.available).filter((facies) =>
-    hasCurrentParents(facies, getters),
-  )
-})
+const faciesStore = useFaciesStore()
+const rootStore = useRootStore()
+const selectedFacies = computed(() => faciesStore.selected)
 
 const probabilityCubeParameters = computed<ProbabilityCube[]>(
   () =>
@@ -64,8 +58,12 @@ const probabilityCubeParameters = computed<ProbabilityCube[]>(
 )
 
 const useProbabilityCubes = computed({
-  get: () => !store.getters['facies/constantProbability'](),
-  set: (value: boolean) => store.dispatch('facies/toggleConstantProbability'),
+  get: () => !faciesStore.constantProbability(rootStore.parent),
+  set: (value: boolean) => {
+    if (value !== !faciesStore.constantProbability(rootStore.parent)) {
+      faciesStore.toggleConstantProbability()
+    }
+  },
 })
 
 const disabled = computed(() => selectedFacies.value.length === 0)
@@ -78,13 +76,13 @@ const canCalculateAverages = computed(
 )
 
 const shouldNormalize = computed(
-  () => !disabled.value && !isCloseToUnity(store.getters['facies/cumulative']),
+  () => !disabled.value && !isCloseToUnity(faciesStore.cumulative),
 )
 
 async function average() {
   calculatingAverages.value = true
   try {
-    await store.dispatch('facies/averageProbabilityCubes', {
+    await faciesStore.averageProbabilityCubes({
       probabilityCubes: probabilityCubeParameters.value,
     })
   } finally {
@@ -93,11 +91,14 @@ async function average() {
 }
 
 async function normalize() {
-  const normalize = selectedFacies.value.every(
+  const allEmpty = selectedFacies.value.every(
     (facies) => facies.previewProbability === null,
   )
-    ? 'normalizeEmpty'
-    : 'normalize'
-  await store.dispatch(`facies/${normalize}`)
+
+  if (allEmpty) {
+    faciesStore.normalizeEmpty()
+  } else {
+    await faciesStore.normalize()
+  }
 }
 </script>

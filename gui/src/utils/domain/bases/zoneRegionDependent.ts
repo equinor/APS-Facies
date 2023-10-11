@@ -16,15 +16,15 @@ export interface Parent {
 }
 
 interface ParentConfiguration extends BaseItemConfiguration {
-  zone?: null
-  region?: null
+  zone?: never
+  region?: never
   parent: Parent
 }
 
 interface ZoneRegionConfiguration extends BaseItemConfiguration {
   zone: Zone
-  region?: Optional<Region>
-  parent?: { zone: null; region: null }
+  region: Optional<Region>
+  parent?: never
 }
 
 export type DependentConfiguration =
@@ -73,11 +73,11 @@ export default abstract class ZoneRegionDependent
     id,
     zone,
     region = null,
-    parent = { zone: null, region: null },
+    parent,
   }: DependentConfiguration) {
     super({ id })
     zone = zone || parent.zone
-    region = region || parent.region
+    region = region ?? parent?.region ?? null
     if (!zone) throw new Error("Missing 'zone', or 'parent.zone'")
     this.parent = {
       zone,

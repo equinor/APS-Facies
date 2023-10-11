@@ -92,9 +92,8 @@
 </template>
 
 <script setup lang="ts">
-import { GaussianRandomField } from '@/utils/domain'
+import type { GaussianRandomField } from '@/utils/domain'
 import type { TrendType } from '@/utils/domain/gaussianRandomField/trend'
-import { ListItem } from '@/utils/typing'
 
 import { notEmpty } from '@/utils'
 
@@ -110,9 +109,10 @@ import {
 } from '@/components/specification/Trend/InputFields'
 
 import { TREND_NOT_IMPLEMENTED_PREVIEW_VISUALIZATION } from '@/config'
-import type { TrendMap } from '@/store/modules/parameters/rmsTrendMapZones'
+import { useParameterRmsTrendStore } from '@/stores/parameters/rms-trend'
+import { type TrendMap, useParameterRmsTrendMapZoneStore } from '@/stores/parameters/rms-trend-map-zones'
 import { ref, computed, watch } from 'vue'
-import { useStore } from '../../../store'
+import { useConstantsOptionsTrendsStore } from '@/stores/constants/options'
 
 interface Invalid {
   relativeStdDev: boolean
@@ -137,7 +137,6 @@ const invalid = ref<Invalid>({
 })
 
 const props = defineProps<{ value: GaussianRandomField }>()
-const store = useStore()
 const emit = defineEmits<{
   (event: 'update:error', error: boolean): void
 }>()
@@ -149,10 +148,10 @@ function notOneOf(types: TrendType[]): boolean {
 }
 
 const availableRmsTrendParameters = computed<string[]>(
-  () => store.state.parameters.rmsTrend.available,
+  () => useParameterRmsTrendStore().available,
 )
 const rmsTrendMapZones = computed<TrendMap[]>(
-  () => store.state.parameters.rmsTrendMapZones.available,
+  () => useParameterRmsTrendMapZoneStore().available,
 )
 const availableRmsTrendZones = computed(() =>
   rmsTrendMapZones.value
@@ -164,17 +163,15 @@ const trendMapZoneLookup = computed<Record<string, string[]>>(() => {
   return rmsTrendMapZones.value.reduce((mapping, trendMap) => {
     mapping[trendMap.name] = trendMap.representations
     return mapping
-  }, {})
+  }, {} as Record<string, string[]>)
 })
 
 const availableRmsTrendMaps = computed(() =>
   trendMapZone.value ? trendMapZoneLookup.value[trendMapZone.value] : [],
 )
 
-const availableTrends = computed<ListItem<string>[]>(() =>
-  store.state.constants.options.trends.available.map((name) => ({
-    title: name,
-  })),
+const availableTrends = computed<string[]>(
+  () => useConstantsOptionsTrendsStore().available,
 )
 
 const hasLinearProperties = computed(
@@ -198,47 +195,23 @@ const isRmsTrendMap = computed(() => trend.value.type === 'RMS_TRENDMAP')
 
 const trendType = computed({
   get: () => props.value.trend.type,
-  set: (value: TrendType) =>
-    store.dispatch('gaussianRandomFields/trendType', {
-      field: props.value,
-      value,
-    }),
+  set: (value: TrendType) => (props.value.trend.type = value),
 })
-
 const trendParameter = computed({
   get: () => props.value.trend.parameter,
-  set: (value: string | null) =>
-    store.dispatch('gaussianRandomFields/trendParameter', {
-      field: props.value,
-      value,
-    }),
+  set: (value: string | null) => (props.value.trend.parameter = value),
 })
-
 const trendMapName = computed({
   get: () => props.value.trend.trendMapName,
-  set: (value: string | null) =>
-    store.dispatch('gaussianRandomFields/trendMapName', {
-      field: props.value,
-      value,
-    }),
+  set: (value: string | null) => (props.value.trend.trendMapName = value),
 })
-
 const trendMapZone = computed({
   get: () => props.value.trend.trendMapZone,
-  set: (value: string | null) =>
-    store.dispatch('gaussianRandomFields/trendMapZone', {
-      field: props.value,
-      value,
-    }),
+  set: (value: string | null) => (props.value.trend.trendMapZone = value),
 })
-
 const useTrend = computed({
   get: () => props.value.trend.use,
-  set: (value: boolean) =>
-    store.dispatch('gaussianRandomFields/useTrend', {
-      field: props.value,
-      value,
-    }),
+  set: (value: boolean) => (props.value.trend.use = value),
 })
 
 const hasDefinedRmsTrendZone = computed(() => trendMapZone.value != null)

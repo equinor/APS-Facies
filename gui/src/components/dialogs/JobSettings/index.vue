@@ -86,7 +86,7 @@
                   <v-select
                     v-model="faciesColorLibrary"
                     label="The color library for Facies"
-                    :items="store.getters['constants/faciesColors/libraries']"
+                    :items="stores.constants.faciesColors.libraries"
                     variant="underlined"
                   >
                     <template #item="{ item, props }">
@@ -134,11 +134,8 @@
             </v-col>
           </v-row>
         </settings-panel>
-        <br />
-        <grid-information
-          :grid-size="gridSize"
-          :simulation-settings="simulationSettings"
-        />
+        <br>
+        <grid-information />
       </v-card-text>
       <v-card-actions>
         {{ version && `Version: ${version}` }}
@@ -165,28 +162,53 @@ import RunSettings from '@/components/dialogs/JobSettings/RunSettings.vue'
 import GridInformation from '@/components/dialogs/JobSettings/GridInformation.vue'
 import TransformtypeSettings from '@/components/dialogs/JobSettings/TransformtypeSettings.vue'
 
-import ColorLibrary from '@/utils/domain/colorLibrary'
-import { Optional } from '@/utils/typing'
-import { Store } from '@/store/typing'
-import {
-  Coordinate3D,
-  SimulationSettings,
-} from '@/utils/domain/bases/interfaces'
-import { ref,computed, watch } from 'vue'
-import { useStore } from '../../../store'
+import type ColorLibrary from '@/utils/domain/colorLibrary'
+import type { Optional } from '@/utils/typing'
+import { ref, computed, watch } from 'vue'
+import type { NameOrNumber } from '@/stores/options'
+import { useOptionStore } from '@/stores/options'
 import type {
   FieldFormats,
+  TrendExtrapolationMethod
 } from '@/stores/fmu/options'
+import {
+  useFmuOptionStore,
+} from '@/stores/fmu/options'
+import { useFmuMaxDepthStore } from '@/stores/fmu/maxDepth'
+import { useParameterDebugLevelStore } from '@/stores/parameters/debug-level'
+import { type TransformType, useParameterTransformTypeStore } from '@/stores/parameters/transform-type'
+import {
+  useParametersMaxFractionOfValuesOutsideToleranceStore,
+  useParametersToleranceOfProbabilityNormalisationStore,
+} from '@/stores/parameters/tolerance'
+import { useConstantsFaciesColorsStore } from '@/stores/constants/facies-colors'
+import type { AllowedColorScales } from '@/config'
 import { COLOR_SCALES } from '@/config'
+import { useGaussianRandomFieldStore } from '@/stores/gaussian-random-fields'
+import { useGridModelStore } from '@/stores/grid-models'
+import { VSelect } from 'vuetify/components'
 
-const store = useStore()
-
-interface Invalid {
-  fmu: boolean
+const stores = {
+  gridModel: useGridModelStore(),
+  options: useOptionStore(),
+  gaussianRandomField: useGaussianRandomFieldStore(),
+  fmu: {
+    options: useFmuOptionStore(),
+    maxDepth: useFmuMaxDepthStore(),
+  },
+  parameter: {
+    transformType: useParameterTransformTypeStore(),
+    debugLevel: useParameterDebugLevelStore(),
+    maxFractionOfValuesOutsideTolerance: useParametersMaxFractionOfValuesOutsideToleranceStore(),
+    toleranceOfProbabilityNormalisation: useParametersToleranceOfProbabilityNormalisationStore(),
+  },
+  constants: {
+    faciesColors: useConstantsFaciesColorsStore()
+  }
 }
-const invalid = ref<Invalid>({
-  fmu: false,
-})
+
+type Invalid = { fmu: boolean }
+const invalid = ref<Invalid>({ fmu: false })
 
 const dialog = ref(false)
 const showZoneNameNumber = ref('')
@@ -214,14 +236,12 @@ const useNonStandardFmu = ref(false)
 const onlyUpdateResidualFields = ref(false)
 const exportErtBoxGrid = ref(true)
 
-const simulationSettings = computed<SimulationSettings>(() =>
-  store.getters.simulationSettings(),
-)
-const gridSize = computed<Coordinate3D>(() => simulationSettings.value.gridSize)
 const version = computed<string>(
   () => import.meta.env.VUE_APP_APS_VERSION || '',
 )
-const currentGridModel = computed<string>(() => store.getters.gridModel)
+const currentGridModel = computed(() => stores.gridModel.current)
+
+const currentGridModelName = computed(() => currentGridModel.value?.name)
 
 const hasErrors = computed(() =>
   Object.values(invalid.value).some((invalid) => invalid),
@@ -233,103 +253,92 @@ function cancel(): void {
 
 watch(dialog, (value: boolean) => {
   if (!value) return
-  const options = (store as Store).state.options
-  const parameters = store.state.parameters
-  const fmu = store.state.fmu
+  const options = stores.options.options
+  const fmu = stores.fmu.options.options
+  const fmuMaxDepth = stores.fmu.maxDepth.maxDepth
 
-  maxLayersInFmu.value = fmu.maxDepth.value
-  runFmuWorkflows.value = fmu.runFmuWorkflows.value
-  onlyUpdateFromFmu.value = fmu.onlyUpdateFromFmu.value
-  fmuGrid.value = fmu.simulationGrid.current
-  createFmuGrid.value = fmu.create.value
-  fieldFileFormat.value = fmu.fieldFileFormat.value
-  customTrendExtrapolationMethod.value =
-    fmu.customTrendExtrapolationMethod.value
-  onlyUpdateResidualFields.value = fmu.onlyUpdateResidualFields.value
-  useNonStandardFmu.value = fmu.useNonStandardFmu.value
-  exportErtBoxGrid.value = fmu.exportErtBoxGrid.value
+  maxLayersInFmu.value = fmuMaxDepth.value
+  runFmuWorkflows.value = fmu.runFmuWorkflows
+  onlyUpdateFromFmu.value = fmu.onlyUpdateFromFmu
+  fmuGrid.value = fmu.simulationGrid
+  createFmuGrid.value = fmu.create
+  fieldFileFormat.value = fmu.fieldFileFormat
+  customTrendExtrapolationMethod.value = fmu.customTrendExtrapolationMethod
+  onlyUpdateResidualFields.value = fmu.onlyUpdateResidualFields
+  useNonStandardFmu.value = fmu.useNonStandardFmu
+  exportErtBoxGrid.value = fmu.exportErtBoxGrid
 
-  debugLevel.value = parameters.debugLevel.selected
-  transformType.value = parameters.transformType.selected
+  debugLevel.value = stores.parameter.debugLevel.level
+  transformType.value = stores.parameter.transformType.level
   maxAllowedFractionOfValuesOutsideTolerance.value =
-    parameters.maxAllowedFractionOfValuesOutsideTolerance.selected
+    stores.parameter.maxFractionOfValuesOutsideTolerance.tolerance
   toleranceOfProbabilityNormalisation.value =
-    parameters.toleranceOfProbabilityNormalisation.selected
-  showZoneNameNumber.value = options.showNameOrNumber.zone.value
-  showRegionNameNumber.value = options.showNameOrNumber.region.value
-  automaticAlphaFieldSelection.value =
-    options.automaticAlphaFieldSelection.value
+    stores.parameter.toleranceOfProbabilityNormalisation.tolerance
+  showZoneNameNumber.value = options.showNameOrNumber.zone
+  showRegionNameNumber.value = options.showNameOrNumber.region
+  automaticAlphaFieldSelection.value = options.automaticAlphaFieldSelection
   automaticObservedFaciesSelection.value =
-    options.automaticObservedFaciesSelection.value
-  automaticFaciesFill.value = options.automaticFaciesFill.value
-  filterZeroProbability.value = options.filterZeroProbability.value
-  importFields.value = options.importFields.value
-  exportFmuConfigFiles.value = options.exportFmuConfigFiles.value
-  colorScale.value = options.colorScale.value
-  faciesColorLibrary.value = store.getters['constants/faciesColors/current']
+    options.automaticObservedFaciesSelection
+  automaticFaciesFill.value = options.automaticFaciesFill
+  filterZeroProbability.value = options.filterZeroProbability
+  importFields.value = options.importFields
+  exportFmuConfigFiles.value = options.exportFmuConfigFiles
+  colorScale.value = options.colorScale
+  faciesColorLibrary.value = stores.constants.faciesColors.current
 })
 
 async function ok(): Promise<void> {
-  const dispatch = store.dispatch
-  await Promise.all([
-    dispatch('parameters/debugLevel/select', debugLevel.value),
-    dispatch('parameters/transformType/select', transformType.value),
-    dispatch(
-      'parameters/maxAllowedFractionOfValuesOutsideTolerance/select',
-      maxAllowedFractionOfValuesOutsideTolerance.value,
-    ),
-    dispatch(
-      'parameters/toleranceOfProbabilityNormalisation/select',
-      toleranceOfProbabilityNormalisation.value,
-    ),
-    dispatch('fmu/maxDepth/set', maxLayersInFmu.value),
-    dispatch('fmu/runFmuWorkflows/set', runFmuWorkflows.value),
-    dispatch('fmu/onlyUpdateFromFmu/set', onlyUpdateFromFmu.value),
-    dispatch('fmu/simulationGrid/set', fmuGrid.value),
-    dispatch('fmu/create/set', createFmuGrid.value),
-    dispatch('fmu/fieldFileFormat/set', fieldFileFormat.value),
-    dispatch(
-      'fmu/customTrendExtrapolationMethod/set',
-      customTrendExtrapolationMethod.value,
-    ),
-    dispatch(
-      'fmu/onlyUpdateResidualFields/set',
-      onlyUpdateResidualFields.value,
-    ),
-    dispatch('fmu/useNonStandardFmu/set', useNonStandardFmu.value),
-    dispatch('fmu/exportErtBoxGrid/set', exportErtBoxGrid.value),
+  stores.parameter.debugLevel.select(debugLevel.value)
+  stores.parameter.transformType.select(transformType.value as TransformType)
+  stores.parameter.maxFractionOfValuesOutsideTolerance.setTolerance(
+    maxAllowedFractionOfValuesOutsideTolerance.value,
+  )
+  stores.parameter.toleranceOfProbabilityNormalisation.setTolerance(
+    toleranceOfProbabilityNormalisation.value,
+  )
+  stores.fmu.maxDepth.set(maxLayersInFmu.value)
+  stores.fmu.options.populate({
+    runFmuWorkflows: runFmuWorkflows.value,
+    onlyUpdateFromFmu: onlyUpdateFromFmu.value,
+    simulationGrid: fmuGrid.value,
+    create: createFmuGrid.value,
+    fieldFileFormat: fieldFileFormat.value as FieldFormats,
+    useNonStandardFmu: useNonStandardFmu.value,
+    exportErtBoxGrid: exportErtBoxGrid.value,
+    customTrendExtrapolationMethod:
+      customTrendExtrapolationMethod.value as TrendExtrapolationMethod,
+    onlyUpdateResidualFields: onlyUpdateResidualFields.value,
+  })
 
-    dispatch('options/showNameOrNumber/zone/set', showZoneNameNumber.value),
-    dispatch('options/showNameOrNumber/region/set', showRegionNameNumber.value),
-    dispatch(
-      'options/automaticAlphaFieldSelection/set',
-      automaticAlphaFieldSelection.value,
-    ),
-    dispatch(
-      'options/automaticObservedFaciesSelection/set',
-      automaticObservedFaciesSelection.value,
-    ),
-    dispatch('options/automaticFaciesFill/set', automaticFaciesFill.value),
-    dispatch('options/filterZeroProbability/set', filterZeroProbability.value),
-    dispatch('options/importFields/set', importFields.value),
-    dispatch('options/exportFmuConfigFiles/set', exportFmuConfigFiles.value),
-    dispatch('options/colorScale/set', colorScale.value),
+  stores.options.populate({
+    showNameOrNumber: {
+      zone: showZoneNameNumber.value as NameOrNumber,
+      region: showRegionNameNumber.value as NameOrNumber,
+    },
+    automaticAlphaFieldSelection: automaticAlphaFieldSelection.value,
+    automaticObservedFaciesSelection: automaticObservedFaciesSelection.value,
+    automaticFaciesFill: automaticFaciesFill.value,
+    filterZeroProbability: filterZeroProbability.value,
+    importFields: importFields.value,
+    exportFmuConfigFiles: exportFmuConfigFiles.value,
+    colorScale: colorScale.value as AllowedColorScales,
+  })
 
-    dispatch('constants/faciesColors/set', faciesColorLibrary.value),
-  ])
+  stores.constants.faciesColors.set(faciesColorLibrary.value as ColorLibrary)
+
   // Create ERTBOX grid if createFmuGrid.value is true
-  if (createFmuGrid.value) {
+  if (runFmuWorkflows.value && createFmuGrid.value) {
+    if (!currentGridModelName.value) throw new Error('No grid model name selected')
     await rms.createErtBoxGrid(
-      currentGridModel.value,
+      currentGridModelName.value as string,
       fmuGrid.value,
       maxLayersInFmu.value,
       debugLevel.value,
     )
     createFmuGrid.value = false
-    await Promise.all([
-      dispatch('fmu/create/set', createFmuGrid.value),
-      dispatch('gridModels/refresh'),
-    ])
+    stores.fmu.options.options.create = createFmuGrid.value
+
+    await useGridModelStore().refresh()
   }
 
   // Create the .aps_config file if useNonStandardFmu.value is true and it does not exist already

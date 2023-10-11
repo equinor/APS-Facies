@@ -60,18 +60,18 @@ import type { InstantiatedOverlayTruncationRule } from '@/utils/domain'
 import BaseTable from '@/components/baseComponents/BaseTable.vue'
 import type OverlayPolygon from '@/utils/domain/polygon/overlay'
 import type { ID } from '@/utils/domain/types'
-import { Store } from '@/store/typing'
 import type { HeaderItems } from '@/utils/typing'
 import { hasFaciesSpecifiedForMultiplePolygons } from '@/utils/queries'
 import { computed } from 'vue'
-import { useStore } from '../../../../../store'
+import { useGaussianRandomFieldStore } from '@/stores/gaussian-random-fields'
+import type { MaybeFmuUpdatable } from '@/utils/domain/bases/fmuUpdatable'
 
 type Props = {
   value: T[]
   rule: RULE
 }
 const props = defineProps<Props>()
-const store = useStore()
+const fieldStore = useGaussianRandomFieldStore()
 
 const polygons = computed(() => props.value)
 
@@ -111,29 +111,22 @@ const headers = computed<HeaderItems>(() => [
   },
 ])
 
-async function updateField(
+function updateField(
   polygon: OverlayPolygon,
   fieldId: ID,
-): Promise<void> {
-  const field = (store as Store).state.gaussianRandomFields.available[
-    `${fieldId}`
-  ]
-  await store.dispatch('truncationRules/updateOverlayField', {
-    rule: props.rule,
-    polygon,
-    field,
-  })
+): void {
+  const field = fieldStore.byId(fieldId)
+  polygon.field = field ?? null
 }
 
-async function updateCenter(
+function updateCenter(
   polygon: OverlayPolygon,
-  val: number,
-): Promise<void> {
-  await store.dispatch('truncationRules/updateOverlayCenter', {
-    rule: props.rule,
-    polygon,
-    value: val,
-  })
+  value: MaybeFmuUpdatable | null,
+): void {
+    if (value === null) {
+      throw new Error('Cannot set center to be empty')
+    }
+    polygon.center = value
 }
 </script>
 

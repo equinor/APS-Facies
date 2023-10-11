@@ -328,26 +328,23 @@ class UpdateFieldNamesInZones(UpdateModel):
 
         field_model.trend.model.trend_parameter_name = name
 
+
     def before(self):
         self._change_names(
             name_getter=lambda zone_model, field_model, field_index: self._get_fmu_field_name(zone_model, field_model),
         )
         self._change_name_of_trend_params(
-            name_getter=lambda zone_model, field_model, field_index: self._get_fmu_trend_param_name(
-                zone_model, field_model
-            ),
+            name_getter=lambda zone_model, field_model, field_index: self._get_fmu_trend_param_name(zone_model, field_model),
         )
 
     def after(self):
         self._change_names(
-            name_getter=lambda zone_model, field_model, field_index: self._get_original_field_name(
-                zone_model, field_index
-            ),
+            name_getter=lambda zone_model, field_model, field_index: self._get_original_field_name(zone_model,
+                                                                                                   field_index),
         )
         self._change_name_of_trend_params(
-            name_getter=lambda zone_model, field_model, field_index: self._get_original_trend_param_name(
-                zone_model, field_index
-            ),
+            name_getter=lambda zone_model, field_model, field_index: self._get_original_trend_param_name(zone_model,
+                                                                                                   field_index),
         )
 
     def _change_names(self, name_getter: Callable[[APSZoneModel, GaussianField, int], str]) -> None:
@@ -360,6 +357,7 @@ class UpdateFieldNamesInZones(UpdateModel):
                 self._change_field_name(field, name)
             rule = zone_model.truncation_rule
             rule.names_of_gaussian_fields = [mapping[name] for name in rule.names_of_gaussian_fields]
+
 
     def _change_name_of_trend_params(self, name_getter: Callable[[APSZoneModel, GaussianField, int], str]) -> None:
         aps_model: APSModel = self.aps_model
@@ -379,7 +377,10 @@ class UpdateSimBoxThicknessInZones(SimBoxDependentUpdate):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-        self._original = {zone_model.zone_number: zone_model.sim_box_thickness for zone_model in self.zone_models}
+        self._original = {
+            zone_model.zone_number: zone_model.sim_box_thickness
+            for zone_model in self.zone_models
+        }
 
     def before(self):
         for zone_model in self.zone_models:
@@ -398,7 +399,7 @@ class UpdateRelativeSizeForEllipticConeTrend(TrendUpdate):
         original_relative_size = self.get_original_value(zone_model, field_model)
         if zone_model.grid_layout in [Conform.Proportional, Conform.TopConform]:
             fmu_relative_size = original_relative_size / (
-                1 + (nz_fmu_box - nz_geo_grid) * (1 - original_relative_size) / nz_geo_grid
+                    1 + (nz_fmu_box - nz_geo_grid) * (1 - original_relative_size) / nz_geo_grid
             )
         elif zone_model.grid_layout in [Conform.BaseConform]:
             if original_relative_size >= 1 - nz_geo_grid / nz_fmu_box:
@@ -406,7 +407,7 @@ class UpdateRelativeSizeForEllipticConeTrend(TrendUpdate):
             else:
                 fmu_relative_size = 0.001
         else:
-            raise NotImplementedError("{} is not supported".format(zone_model.grid_layout))
+            raise NotImplementedError('{} is not supported'.format(zone_model.grid_layout))
         field_model.trend.model.relative_size_of_ellipse = fmu_relative_size
 
     def restore_trend(self, zone_model: APSZoneModel, field_model: GaussianField) -> None:
@@ -422,7 +423,10 @@ class UpdateRelativeSizeForEllipticConeTrend(TrendUpdate):
         return relative_sizes
 
     def has_appropriate_trend(self, field: GaussianField) -> bool:
-        return field.trend.use_trend and isinstance(field.trend.model, Trend3D_elliptic_cone)
+        return (
+                field.trend.use_trend
+                and isinstance(field.trend.model, Trend3D_elliptic_cone)
+        )
 
 
 class UpdateRelativePositionOfTrends(TrendUpdate):
@@ -444,12 +448,12 @@ class UpdateRelativePositionOfTrends(TrendUpdate):
             elif zone_model.grid_layout in [Conform.BaseConform]:
                 trend.origin.z = 1 - (nz_zone * (1 - z_original) / nz_fmu)
             else:
-                raise NotImplementedError("{} is not supported".format(zone_model.grid_layout))
+                raise NotImplementedError('{} is not supported'.format(zone_model.grid_layout))
 
     @property
     def update_message(self) -> str:
         if self.debug_level >= Debug.VERY_VERBOSE:
-            return "--- Updating the location of relative trends for ERTBOX simulation"
+            return '--- Updating the location of relative trends for ERTBOX simulation'
         return None
 
     def restore_trend(self, zone_model: APSZoneModel, field_model: GaussianField) -> None:
@@ -470,34 +474,34 @@ class UpdateRelativePositionOfTrends(TrendUpdate):
 
 class UpdateTrends(FmuModelChanges):
     def __init__(self, **kwargs):
-        super(FmuModelChanges, self).__init__(
-            [
-                UpdateRelativeSizeForEllipticConeTrend(**kwargs),
-                UpdateRelativePositionOfTrends(**kwargs),
-            ]
-        )
+        super(FmuModelChanges, self).__init__([
+            UpdateRelativeSizeForEllipticConeTrend(**kwargs),
+            UpdateRelativePositionOfTrends(**kwargs),
+        ])
+
 
 
 @contextmanager
 def fmu_aware_model_file(*, fmu_mode: bool, **kwargs) -> ContextManager[str]:
     """Updates the name of the grid, if necessary"""
-    model_file = kwargs["model_file"]
-    ertbox_grid_model_name = kwargs["fmu_simulation_grid_name"]
-    debug_level = kwargs["debug_level"]
+    model_file = kwargs['model_file']
+    ertbox_grid_model_name = kwargs['fmu_simulation_grid_name']
+    debug_level = kwargs['debug_level']
     # Instantiate the APS model anew, as it may have been modified by `global_variables`
-    aps_model = kwargs["aps_model"] = APSModel(model_file)
+    aps_model = kwargs['aps_model'] = APSModel(model_file)
 
-    changes = FmuModelChanges(
-        [
-            UpdateTrends(**kwargs),
-            UpdateSimBoxThicknessInZones(**kwargs),
-            UpdateFieldNamesInZones(**kwargs),
-            UpdateGridModelName(**kwargs),
-        ]
-    )
+    changes = FmuModelChanges([
+        UpdateTrends(**kwargs),
+        UpdateSimBoxThicknessInZones(**kwargs),
+        UpdateFieldNamesInZones(**kwargs),
+        UpdateGridModelName(**kwargs),
+    ])
     if fmu_mode:
         print(" ")
-        print("FMU mode. Prepare for simulation of GRF's " f"in {ertbox_grid_model_name}")
+        print(
+            "FMU mode. Prepare for simulation of GRF's "
+            f"in {ertbox_grid_model_name}"
+        )
         changes.before()
         if debug_level >= Debug.VERY_VERBOSE:
             filename = "debug_model_with_updated_param.xml"
@@ -515,6 +519,7 @@ def fmu_aware_model_file(*, fmu_mode: bool, **kwargs) -> ContextManager[str]:
             filename = "debug_model_with_original_param.xml"
             print(f"--- Write model file for debug purpose: {filename} ")
             aps_model.dump(filename)
+
 
 
 def find_zone_range(defined: np.ndarray) -> Tuple[int, int]:

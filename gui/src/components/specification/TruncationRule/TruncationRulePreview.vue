@@ -39,6 +39,8 @@ import {
   type TruncationRuleType,
   truncationRuleTypeNames,
 } from '@/utils/domain/truncationRule/base'
+import type { StyleValue } from 'vue'
+
 type Props = {
   value: string
   type: TruncationRuleType
@@ -57,5 +59,21 @@ const imageUrl = computed(
 
 const isDevelop = computed(() => isDevelopmentBuild())
 
-const style = computed(() => ({ opacity: getDisabledOpacity(props.disabled) }))
+const style = computed<StyleValue>(() => ({
+  opacity: getDisabledOpacity(props.disabled),
+  cursor: props.disabled ? 'not-allowed' : undefined,
+}))
 </script>
+
+<style lang="scss">
+.tr-preview {
+  display: flex;
+  justify-content: space-between;
+  cursor: pointer;
+  margin-bottom: 0.5rem;
+}
+
+.tr-preview :only-child {
+  margin: 0 auto;
+}
+</style>

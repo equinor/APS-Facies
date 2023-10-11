@@ -5,7 +5,7 @@
         :channel="item.channel"
         :value="item.selected"
         :rule="value"
-        @input="(val: string | GaussianRandomField) => update(item, val)"
+        @input="(val: ID | null) => update(item, val)"
       />
     </v-col>
   </v-row>
@@ -31,7 +31,8 @@ import type { GaussianRandomField } from '@/utils/domain'
 
 import AlphaSelection from './AlphaSelection.vue'
 import { computed } from 'vue'
-import { useStore } from '../../../store'
+import { useTruncationRuleStore } from '@/stores/truncation-rules'
+import { useGaussianRandomFieldStore } from '@/stores/gaussian-random-fields'
 
 interface AlphaField {
   channel: number
@@ -52,7 +53,8 @@ type Props = {
   minFields: number
 }
 const props = withDefaults(defineProps<Props>(), { minFields: 2 })
-const store = useStore()
+const fieldStore = useGaussianRandomFieldStore()
+const ruleStore = useTruncationRuleStore()
 
 const alphas = computed<AlphaField[]>(() =>
   props.value
@@ -66,16 +68,10 @@ const alphas = computed<AlphaField[]>(() =>
 )
 
 async function update(
-  { channel }: { channel: number },
-  fieldId: ID | GaussianRandomField,
+  { channel }: AlphaField,
+  fieldId: ID | null,
 ): Promise<void> {
-  const field = fieldId
-    ? (store as Store).state.gaussianRandomFields.available[fieldId]
-    : null
-  await store.dispatch('truncationRules/updateBackgroundField', {
-    index: channel - 1,
-    rule: props.value,
-    field,
-  })
+  const field = fieldId ? fieldStore.identifiedAvailable[fieldId] : null
+  ruleStore.updateBackgroundField(props.value, channel - 1, field)
 }
 </script>

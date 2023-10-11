@@ -47,10 +47,10 @@ import NonCubicPolygon from '@/utils/domain/polygon/nonCubic'
 import { HeaderItems } from '@/utils/typing'
 import { hasFaciesSpecifiedForMultiplePolygons } from '@/utils/queries'
 import { computed } from 'vue'
-import { useStore } from '../../../../store'
+import { useTruncationRuleStore } from '@/stores/truncation-rules'
 
 const props = defineProps<{ value: NonCubic }>()
-const store = useStore()
+const ruleStore = useTruncationRuleStore()
 
 // TODO: Include 'help' messages
 const polygons = computed(() => props.value?.backgroundPolygons ?? [])
@@ -86,11 +86,8 @@ async function updateAngle(
   item: NonCubicPolygon,
   value: number,
 ): Promise<void> {
-  await store.dispatch('truncationRules/changeAngles', {
-    rule: props.value,
-    polygon: item,
-    value,
-  })
+  // TODO: [sindre] FmuUpdatable again
+  item.angle = value
 }
 
 function isLast(polygon: NonCubicPolygon): boolean {

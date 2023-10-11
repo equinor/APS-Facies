@@ -7,23 +7,20 @@ import { Zone } from '@/utils/domain'
 import { ZoneConformOption } from '@/utils/domain/zone'
 import { ListItem } from '@/utils/typing'
 import { computed } from 'vue'
-import { useStore } from '../../../store'
+import { useZoneStore } from '@/stores/zones'
 
 type Props = {
   value: Zone
   dark?: boolean
 }
 const props = withDefaults(defineProps<Props>(), { dark: false })
-const store = useStore()
+
+const zoneStore = useZoneStore()
 
 const conformity = computed({
   get: () => props.value.conformity,
   set: (value: ZoneConformOption) =>
-    store.dispatch(
-      'zones/conformity',
-      { zone: props.value, value },
-      { root: true },
-    ),
+    zoneStore.setConformity(props.value, value),
 })
 
 const options: ListItem<string>[] = [

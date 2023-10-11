@@ -6,7 +6,7 @@
     :loading-text="loadingText"
     :items="items"
     :no-data-text="_noDataText"
-    v-model:current="current"
+    v-model:current="currentId"
   >
     <template #item="{ item, isCurrent }: { item: T, isCurrent: boolean }">
       <td v-if="showName" class="text-start">
@@ -39,19 +39,23 @@
   </base-selection-table>
 </template>
 
-<script setup lang="ts" generic="T extends SelectableItem">
+<script
+  setup
+  lang="ts"
+  generic="ItemType extends 'zone' | 'region', T extends ItemType extends 'zone' ? Zone : Region"
+>
 import BaseSelectionTable from '@/components/baseComponents/BaseSelectionTable.vue'
 import IconButton from '@/components/selection/IconButton.vue'
 import ConformSelection from '@/components/selection/dropdown/ConformSelection.vue'
 
-import SelectableItem from '@/utils/domain/bases/selectableItem'
-
-import { getId } from '@/utils'
-
-import { useStore } from '../../store'
 import { computed } from 'vue'
-import { HeaderItem } from '../../utils/typing'
-import { ID } from '../../utils/domain/types'
+import { HeaderItem } from '@/utils/typing'
+import { ID } from '@/utils/domain/types'
+import { useZoneStore } from '@/stores/zones'
+import { useRegionStore } from '@/stores/regions'
+import { Region, Zone } from '@/utils/domain'
+import { useCopyPasteStore } from '@/stores/copy-paste'
+import { useFmuOptionStore } from '@/stores/fmu/options'
 
 type Props = {
   headerName: string
@@ -67,11 +71,24 @@ const props = withDefaults(defineProps<Props>(), {
   showName: false,
   showCode: false,
 })
-const store = useStore()
+const zoneStore = useZoneStore()
+const regionStore = useRegionStore()
 
-const loading = computed<boolean>(
-  () => store.state[`${props.itemType}s`]._loading,
+type GenericStore = {
+  loading: boolean
+  currentId: ID | null
+  setCurrentId: (id: ID) => void
+  select: (values: T[]) => void
+}
+
+const store = computed(
+  () =>
+    (props.itemType === 'zone'
+      ? zoneStore
+      : regionStore) as unknown as GenericStore,
 )
+
+const loading = computed<boolean>(() => store.value.loading)
 const _noDataText = computed(() =>
   loading.value ? `Loading ${props.itemType}s` : props.noDataText,
 )
@@ -86,15 +103,19 @@ const headers = computed<HeaderItem[]>(() => [
   { text: 'Copy/Paste' },
 ])
 
-const items = computed<T[]>(() =>
-  store.getters[`${props.itemType}s`].sort((a: T, b: T) => a.code - b.code),
-)
+const items = computed<T[]>(() => {
+  switch (props.itemType) {
+    case 'zone':
+      return zoneStore.available as T[]
+    case 'region':
+      return (zoneStore.current?.regions as T[]) ?? []
+  }
+})
 
-// TODO: state.itemTypes.current is a string, which isn't T
-const current = computed<ID | undefined>({
-  get: () => store.state[`${props.itemType}s`].current,
+const currentId = computed({
+  get: () => store.value.currentId ?? undefined,
   set: (value: ID | undefined) =>
-    store.dispatch(`${props.itemType}s/current`, value),
+    value ? store.value.setCurrentId(value) : null,
 })
 
 const selected = computed<T[]>({
@@ -103,48 +124,33 @@ const selected = computed<T[]>({
     const filteredValues = items.value.filter((item) =>
       values.map(({ id }) => id).includes(item.id),
     )
-    store.dispatch(`${props.itemType}s/select`, filteredValues)
+
+    store.value.select(filteredValues)
   },
 })
 
-// TODO: Typing doesn't like this.
-const source = computed<T>(() => store.state.copyPaste.source)
+const copyPasteStore = useCopyPasteStore()
+const fmuOptionStore = useFmuOptionStore()
+
+const source = computed(() => copyPasteStore.source)
 const showConformity = computed(
-  () => store.getters.fmuMode && props.itemType === 'zone',
+  () => fmuOptionStore.fmuMode && props.itemType === 'zone',
 )
-
-function getItem(item: T): T | undefined {
-  return items.value.find(({ id }) => id === item.id)
-}
-
-// TODO: not used?
-function getColor(item: T): 'accent' | undefined {
-  return getId(source.value) === item.id ? 'accent' : undefined
-}
 
 function canPaste(item: T): boolean {
   return source.value?.id !== item.id
 }
 
 function isPasting(item: T): boolean {
-  return !!store.getters['copyPaste/isPasting'](getItem(item))
+  return !!copyPasteStore.isPasting(item)
 }
 
-async function copy(item: T): Promise<void> {
-  await store.dispatch('copyPaste/copy', getItem(item))
+function copy(item: T): void {
+  copyPasteStore.copy(item)
 }
 
-async function paste(item: T): Promise<void> {
-  await store.dispatch('copyPaste/paste', getItem(item))
-}
-
-// TODO: not used?
-function updateSelection(item: T, value: boolean): void {
-  if (value) {
-    selected.value = [...selected.value, item]
-  } else {
-    selected.value = selected.value.filter((el) => el.id !== item.id)
-  }
+function paste(item: T): void {
+  copyPasteStore.paste(item)
 }
 </script>
 

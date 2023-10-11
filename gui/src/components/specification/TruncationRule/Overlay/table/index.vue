@@ -1,7 +1,7 @@
 <template>
   <base-table
     :headers="headers"
-    :items="groups"
+    :items="idGroups"
     :no-data-text="noDataText"
     item-key="id"
     @input.stop
@@ -17,9 +17,7 @@
             :value="item.polygons"
             :rule="value as OverlayTruncationRule<T, S, P>"
           />
-          <span v-else>
-            {{ 'Select one, or more background facies' }}
-          </span>
+          <span v-else>Select one, or more background facies </span>
         </td>
       </tr>
     </template>
@@ -43,7 +41,6 @@ import type {
   PolygonSpecification,
 } from '@/utils/domain/polygon/base'
 import type { ID } from '@/utils/domain/types'
-import { Store } from '@/store/typing'
 import type { Facies, InstantiatedOverlayTruncationRule, OverlayPolygon } from '@/utils/domain'
 import type OverlayTruncationRule from '@/utils/domain/truncationRule/overlay'
 
@@ -52,48 +49,53 @@ import PolygonTable from './table.vue'
 
 import { hasOwnProperty } from '@/utils/helpers'
 import { computed } from 'vue'
-import { useStore } from '../../../../../store'
+import { useFaciesStore } from '@/stores/facies'
 
 function hasAvailableBackgroundFacies(
-  store: Store,
   rule: RULE,
 ): boolean {
-  return Object.values(store.state.facies.available).some((facies) =>
-    store.getters['facies/availableForBackgroundFacies'](rule, facies),
+  const faciesStore = useFaciesStore()
+  return faciesStore.available.some((facies) =>
+    faciesStore.availableForBackgroundFacies(rule, facies as Facies),
   )
 }
 
-function allBackgroundPolygonsHasSomeFacies(rule: RULE): boolean {
+function allBackgroundPolygonsHasSomeFacies(
+  rule: RULE,
+): boolean {
   return rule.overlayPolygons.every(({ group }) =>
     group ? group.facies.length > 0 : true,
   )
 }
 
 const props = defineProps<{ value: OverlayTruncationRule<T, S, P> }>()
-const store = useStore()
 
 const groups = computed(() => {
-  let overlay: { group: ID; polygons: Facies[] }[] = []
+  let overlay: { group: ID; polygons: OverlayPolygon[] }[] = []
   if (props.value) {
-    const groups = {}
+    const groupRecord: Record<ID, OverlayPolygon[]> = {}
     const polygons = props.value.overlayPolygons
     polygons.forEach((polygon): void => {
-      if (!hasOwnProperty(groups, polygon.group.id))
-        groups[polygon.group.id] = []
-      groups[polygon.group.id].push(polygon)
+      if (!hasOwnProperty(groupRecord, polygon.group.id))
+        groupRecord[polygon.group.id] = []
+      groupRecord[polygon.group.id].push(polygon)
     })
-    overlay = Object.keys(groups).map((groupId) => {
-      return { group: groupId, polygons: groups[groupId] }
+    overlay = Object.keys(groupRecord).map((groupId) => {
+      return { group: groupId, polygons: groupRecord[groupId] }
     })
   }
   if (
-    hasAvailableBackgroundFacies(store, props.value) &&
+    hasAvailableBackgroundFacies(props.value) &&
     allBackgroundPolygonsHasSomeFacies(props.value)
   ) {
     overlay.push({ group: '', polygons: [] })
   }
   return overlay
 })
+
+const idGroups = computed(() =>
+  groups.value.map(({ group, polygons }) => ({ id: group, polygons })),
+)
 
 const headers: HeaderItems = [
   {

@@ -12,7 +12,7 @@
 <script setup lang="ts">
 import ChooseParameter from '@/components/selection/dropdown/ChooseParameter.vue'
 import { computed } from 'vue'
-import { useStore } from '../../../store'
+import { useFaciesGlobalStore } from '@/stores/facies/global'
 
 type Props = {
   parameterType: string
@@ -21,7 +21,6 @@ type Props = {
 }
 defineProps<Props>()
 
-const store = useStore()
-
-const hasFacies = computed(() => store.getters.faciesTable.length > 0)
+const faciesGlobalStore = useFaciesGlobalStore()
+const hasFacies = computed(() => faciesGlobalStore.available.length > 0)
 </script>

@@ -30,7 +30,7 @@ import { OverlayPolygon } from '@/utils/domain'
 
 import BasePolygonOrder from '@/components/specification/PolygonOrder.vue'
 import { computed } from 'vue'
-import { useStore } from '../../../store'
+import { useTruncationRuleStore } from '@/stores/truncation-rules'
 
 type Props = {
   value: T
@@ -42,17 +42,17 @@ const props = withDefaults(defineProps<Props>(), {
   overlay: false,
   minPolygons: 0,
 })
-const store = useStore()
+const ruleStore = useTruncationRuleStore()
 
 const polygons = computed(() =>
   props.rule.polygons.filter((polygon) => polygon.overlay === props.overlay),
 )
-const orders = computed(() => polygons.value.map(({ order }) => order))
 
-const hasMultiplePolygons = computed(() => polygons.value.length > 1)
+const orders = computed(() => polygons.value.map(({ order }) => order))
 const max = computed(() => Math.max(...orders.value))
 const min = computed(() => Math.min(...orders.value))
 
+const hasMultiplePolygons = computed(() => polygons.value.length > 1)
 const canIncrease = computed(
   () => hasMultiplePolygons.value && props.value.order < max.value,
 )
@@ -69,27 +69,20 @@ const canRemove = computed(
     ).length > props.minPolygons,
 )
 
-async function addPolygon(): Promise<void> {
-  await store.dispatch('truncationRules/addPolygon', {
-    rule: props.rule,
+function addPolygon(): void {
+  ruleStore.addPolygon(props.rule, {
     order: props.value.order + 1,
     overlay: props.value.overlay,
-    group: props.value instanceof OverlayPolygon ? props.value.group : null,
+    group:
+      props.value instanceof OverlayPolygon ? props.value.group : undefined,
   })
 }
 
-async function deletePolygon(): Promise<void> {
-  await store.dispatch('truncationRules/removePolygon', {
-    rule: props.rule,
-    polygon: props.value,
-  })
+function deletePolygon(): void {
+  ruleStore.removePolygon(props.rule, props.value)
 }
 
-async function changeOrder(direction: number): Promise<void> {
-  await store.dispatch('truncationRules/changeOrder', {
-    rule: props.rule,
-    polygon: props.value,
-    direction,
-  })
+function changeOrder(direction: number): void {
+  ruleStore.changeOrder(props.rule, props.value, direction)
 }
 </script>

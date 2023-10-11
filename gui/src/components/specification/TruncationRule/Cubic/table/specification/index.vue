@@ -58,32 +58,30 @@ import WaitButton from '@/components/baseComponents/WaitButton.vue'
 
 import { Cubic, CubicPolygon } from '@/utils/domain'
 import { ref, computed } from 'vue'
-import { useStore } from '../../../../../../store'
+import { useTruncationRuleStore } from '@/stores/truncation-rules'
 
 const props = defineProps<{ value: Cubic }>()
-const store = useStore()
+const ruleStore = useTruncationRuleStore()
 
 const splitInto = ref(2)
 const selected = ref<CubicPolygon[]>([])
 
 function split() {
   const polygon =
-    selected.value.length > 0 ? selected.value.pop() : props.value.root
+    selected.value.length > 0
+      ? (selected.value.pop() as CubicPolygon)
+      : props.value.root
   if (!polygon) {
     throw new Error('The truncation rule has no root')
   }
-  store.dispatch('truncationRules/split', {
-    rule: props.value,
-    polygon,
-    value: splitInto.value,
-  })
+  ruleStore.split(props.value, polygon, splitInto.value)
 }
 
 function merge() {
-  store.dispatch('truncationRules/merge', {
-    rule: props.value,
-    polygons: selected.value.splice(0, selected.value.length),
-  })
+  ruleStore.merge(
+    props.value,
+    selected.value.splice(0, selected.value.length) as CubicPolygon[],
+  )
 }
 
 const canSplit = computed(

@@ -14,12 +14,13 @@ import RegionSelection from './RegionSelection.vue'
 import ZoneSelection from './ZoneSelection.vue'
 
 import { notEmpty } from '@/utils'
-import { useStore } from '../../store'
 import { computed } from 'vue'
+import { useRegionStore } from '@/stores/regions'
+import { useParameterRegionStore } from '@/stores/parameters/region'
 
-const store = useStore()
-
+const regionStore = useRegionStore()
+const regionParameterStore = useParameterRegionStore()
 const canShowRegions = computed(
-  () => store.state.regions.use && notEmpty(store.getters.regionParameter),
+  () => regionStore.use && notEmpty(regionParameterStore.selected),
 )
 </script>

@@ -33,20 +33,20 @@ import type {
 import type TruncationRule from '@/utils/domain/truncationRule/base'
 
 import { TREND_NOT_IMPLEMENTED_PREVIEW_VISUALIZATION } from '@/config'
-import { usesAllFacies } from '@/store/utils/helpers'
 
 import { displayError } from '@/utils/helpers/storeInteraction'
 import { ref, computed } from 'vue'
-import { useStore } from '../../../store'
+import { usesAllFacies } from '@/stores/truncation-rules/utils'
+import { useFaciesStore } from '@/stores/facies'
+import { useTruncationRuleStore } from '@/stores/truncation-rules'
 
 const props = defineProps<{ value: RULE }>()
-const store = useStore()
+const faciesStore = useFaciesStore()
+const ruleStore = useTruncationRuleStore()
 
 const waitingForSimulation = ref(false)
 
-const _allFaciesUsed = computed(() =>
-  usesAllFacies({ rootGetters: store.getters }, props.value),
-)
+const _allFaciesUsed = computed(() => usesAllFacies(props.value))
 
 const _canSimulateAllTrends = computed(
   () =>
@@ -73,12 +73,12 @@ const _explanation = computed(() => {
 })
 
 async function refresh(): Promise<void> {
-  await store.dispatch('facies/normalize')
+  await faciesStore.normalize()
   waitingForSimulation.value = true
   try {
-    await store.dispatch('truncationRules/updateRealization', props.value)
+    await ruleStore.updateRealization(props.value)
   } catch (e) {
-    await displayError(String(e))
+    displayError(String(e))
   } finally {
     waitingForSimulation.value = false
   }

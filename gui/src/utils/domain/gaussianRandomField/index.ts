@@ -137,6 +137,7 @@ export default class GaussianRandomField extends Simulation implements Named {
     )
   }
 
+  /** @deprecated Moved into gaussianRandomFieldStore */
   public specification({
     rootGetters,
   }: {

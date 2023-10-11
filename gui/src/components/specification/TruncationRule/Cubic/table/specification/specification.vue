@@ -143,15 +143,15 @@ function relativeClickPosition(e: MouseEvent): { x: number; y: number } {
   const { top, bottom, left, right } = element
     .getElementsByClassName('svg-container')[0]
     .getBoundingClientRect()
-  const getMax = (direction: string): number =>
+  const getMax = (direction: 'X' | 'Y'): number =>
     Math.max(
       ...boundingBoxes.value.map(
-        ({ boundingBox }) => boundingBox[`max${direction.toUpperCase()}`],
+        ({ boundingBox }) => boundingBox[`max${direction}`],
       ),
     )
   return {
-    x: Math.min((e.clientX - left) / (right - left), getMax('x')),
-    y: Math.min((e.clientY - top) / (bottom - top), getMax('y')),
+    x: Math.min((e.clientX - left) / (right - left), getMax('X')),
+    y: Math.min((e.clientY - top) / (bottom - top), getMax('Y')),
   }
 }
 
