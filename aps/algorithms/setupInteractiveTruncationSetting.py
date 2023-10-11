@@ -383,6 +383,7 @@ def mapCommand(rules):
     finished = False
     while not finished:
         name = input(
+            'Set format (F) (default PNG)\n'
             'Plot all settings (A)\n'
             'Plot specific setting, give name\n'
             'Quit (Q) : '
@@ -400,9 +401,15 @@ def mapCommand(rules):
             if rules.write_overview:
                 rules.createOverviewPlotCubic('Cubic_overview')
                 rules.createOverviewPlotNonCubic('NonCubic_overview')
+        elif name in ['F', 'f']:
+            format = input("Change output format: ").lower()
+            if format not in ["svg", "png"]:
+                print("Unknown format. using PNG instead")
+                format = "png"
+            rules.setFormat(format)
 
         else:
-            rules.makeTruncationMapPlot(name, writePngFile=False)
+            rules.makeTruncationMapPlot(name, write_file=False)
 
 
 def removeCommand(rules):
@@ -436,6 +443,7 @@ def run():
         write_to_directories=write_to_directories,
     )
 
+    # r\n$(EXAMPLES_FOLDER)/truncation_settings.dat\nm\na\nq\nq\n
     finished = False
     while not finished:
         command = input(
