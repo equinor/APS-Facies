@@ -5,49 +5,40 @@
     unit="%"
     fmu-updatable
     enforce-ranges
-    :ranges="{min: 0, max: 100}"
-    @update:error="e => propagateError(e)"
+    :ranges="{ min: 0, max: 100 }"
+    @update:error="(e: boolean) => emit('update:error', e)"
   />
 </template>
 
-<script lang="ts">
-import { Component, Prop, Vue } from 'vue-property-decorator'
-
+<script setup lang="ts">
 import { GaussianRandomField } from '@/utils/domain'
 import FmuUpdatableValue from '@/utils/domain/bases/fmuUpdatable'
 
 import NumericField from '@/components/selection/NumericField.vue'
+import { computed } from 'vue'
+import { useStore } from '../../../../store'
 
-@Component({
-  components: {
-    NumericField,
-  },
-})
-export default class RelativeSizeOfEllipse extends Vue {
-  @Prop({ required: true })
-  readonly value!: GaussianRandomField
+const props = defineProps<{ value: GaussianRandomField }>()
+const emit = defineEmits<{
+  (event: 'update:error', error: boolean): void
+}>()
 
-  get relativeSize (): FmuUpdatableValue {
-    const { value, updatable } = this.value.trend.relativeSize
+const relativeSize = computed({
+  get: () => {
+    const { value, updatable } = props.value.trend.relativeSize
     return new FmuUpdatableValue({
       value: value * 100,
-      updatable
+      updatable,
     })
-  }
-
-  set relativeSize ({ value, updatable }) {
-    this.$store.dispatch('gaussianRandomFields/relativeSize', {
-      field: this.value,
+  },
+  set: ({ value, updatable }: FmuUpdatableValue) =>
+    store.dispatch('gaussianRandomFields/relativeSize', {
+      field: props.value,
       variogramOrTrend: 'trend',
       value: new FmuUpdatableValue({
         value: value / 100,
-        updatable,
-      })
-    })
-  }
-
-  propagateError (value: boolean): void {
-    this.$emit('update:error', value)
-  }
-}
+        updatable: updatable,
+      }),
+    }),
+})
 </script>

@@ -1,8 +1,9 @@
-import { Region, RegionConfiguration, RegionSerialization } from '@/utils/domain/zone'
+import {
+  Region,
+  type RegionConfiguration,
+  type RegionSerialization,
+} from '@/utils/domain/zone'
 
 export default Region
 
-export {
-  RegionConfiguration,
-  RegionSerialization,
-}
+export { type RegionConfiguration, type RegionSerialization }

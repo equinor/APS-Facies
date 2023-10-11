@@ -3,48 +3,47 @@
     :items="faciesOptions"
     :value="selected"
     :clearable="clearable"
-    @input.capture="facies => $emit('input', facies)"
+    @input.capture="(facies: Value) => $emit('input', facies)"
   />
 </template>
 
-<script lang="ts">
-import { Component, Prop, Vue } from 'vue-property-decorator'
+<script setup lang="ts">
 import { getId } from '@/utils/helpers'
 
-import { Store } from '@/store/typing'
 import { ID } from '@/utils/domain/types'
 import Facies from '@/utils/domain/facies/local'
 import { ListItem } from '@/utils/typing'
+import { useStore } from '../../../store'
+import { computed } from 'vue'
 
-@Component
-export default class FaciesSpecificationBase extends Vue {
-  @Prop({ required: true })
-  readonly value: Facies | ID | Facies[] | ID[]
+type Value = Facies | ID | Facies[] | ID[]
 
-  @Prop({ default: false })
-  readonly disable: ((facies: Facies) => boolean) | boolean
-
-  @Prop({ default: false, type: Boolean })
-  readonly clearable!: boolean
-
-  get selectedFacies (): Facies[] {
-    return (this.$store as Store).getters['facies/selected']
-  }
-
-  get selected (): ID | ID[] {
-    if (Array.isArray(this.value)) return (this.value as ID[]).map(getId)
-    return getId(this.value)
-  }
-
-  get faciesOptions (): ListItem<string>[] {
-    return this.selectedFacies
-      .map(facies => {
-        return {
-          text: facies.alias,
-          value: facies.id,
-          disabled: this.disable instanceof Function ? this.disable(facies) : this.disable,
-        }
-      })
-  }
+type Props = {
+  value: Value
+  disable: boolean | ((facies: Facies) => boolean)
+  clearable: boolean
 }
+const props = withDefaults(defineProps<Props>(), {
+  disable: false,
+  clearable: false,
+})
+const store = useStore()
+
+const selectedFacies = computed<Facies[]>(
+  () => store.getters['facies/selected'],
+)
+const selected = computed<ID | ID[]>(() =>
+  Array.isArray(props.value) ? props.value.map(getId) : getId(props.value),
+)
+
+const faciesOptions = computed<ListItem<string>[]>(() => {
+  return selectedFacies.value.map((facies) => ({
+    title: facies.alias,
+    value: facies,
+    props: {
+      disabled:
+        props.disable instanceof Function ? props.disable(facies) : props.disable,
+    }
+  }) as ListItem<Facies>)
+})
 </script>

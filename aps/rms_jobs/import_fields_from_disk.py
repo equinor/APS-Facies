@@ -1,7 +1,7 @@
 #!/bin/env python
 # -*- coding: utf-8 -*-
-# This module is used in FMU workflows to import gaussian field values from disk into APS. 
-# Here we can assume that the project.current_realisation = 0 always since FMU ONLY run with one 
+# This module is used in FMU workflows to import gaussian field values from disk into APS.
+# Here we can assume that the project.current_realisation = 0 always since FMU ONLY run with one
 # realization in the RMS project and should have shared grid and shared parameters only.
 # There are two different modes of handling the GRF fields having trends.
 # The first is to let ERT update the GRF (having trend +residual).

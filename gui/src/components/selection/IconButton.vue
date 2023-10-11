@@ -4,13 +4,13 @@
     :color="color"
     :dark="dark"
     :large="large"
-    :left="left"
+    :start="left"
+    :end="right"
     :light="light"
-    :right="right"
     :small="small"
     icon
-    text
-    @click.stop="e => $emit('click', e)"
+    variant="text"
+    @click.stop="(e: MouseEvent) => emit('click', e)"
   >
     <v-icon
       :color="color"
@@ -23,65 +23,56 @@
       :size="size"
       :small="small"
       :x-large="xLarge"
-      v-text="fullIconName"
-    />
+      >{{ fullIconName }}</v-icon
+    >
   </v-btn>
 </template>
 
-<script lang="ts">
-import { Component, Prop, Vue } from 'vue-property-decorator'
+<script setup lang="ts">
 import { Color } from '@/utils/domain/facies/helpers/colors'
+import { computed } from 'vue'
 
-@Component
-export default class IconButton extends Vue {
-  @Prop({ required: true })
-  readonly icon!: string
-
-  @Prop({ default: false, type: Boolean })
-  readonly waiting!: boolean
-
-  @Prop({ default: false, type: Boolean })
-  readonly disabled!: boolean
-
-  @Prop({ default: false, type: Boolean })
-  readonly loadingSpinner!: boolean
-
-  @Prop({ default: 'black' })
-  readonly color!: Color | undefined
-
-  @Prop({ default: false, type: Boolean })
-  readonly dark!: boolean
-
-  @Prop({ default: false, type: Boolean })
-  readonly large!: boolean
-
-  @Prop({ default: false, type: Boolean })
-  readonly left!: boolean
-
-  @Prop({ default: false, type: Boolean })
-  readonly light!: boolean
-
-  @Prop({ default: false, type: Boolean })
-  readonly medium!: boolean
-
-  @Prop({ default: false, type: Boolean })
-  readonly right!: boolean
-
-  @Prop({ default: undefined })
-  readonly size!: number | string | undefined
-
-  @Prop({ default: false, type: Boolean })
-  readonly small!: boolean
-
-  @Prop({ default: false, type: Boolean })
-  readonly xLarge!: boolean
-
-  get fullIconName (): string {
-    if (this.loadingSpinner && this.waiting) {
-      return '$vuetify.icons.values.refreshSpinner'
-    } else {
-      return `$vuetify.icons.values.${this.icon}${this.waiting ? 'Spinner' : ''}`
-    }
-  }
+type Props = {
+  icon: string
+  waiting?: boolean
+  disabled?: boolean
+  loadingSpinner?: boolean
+  color?: Color
+  dark?: boolean
+  large?: boolean
+  left?: boolean
+  light?: boolean
+  medium?: boolean
+  right?: boolean
+  size?: number | string
+  small?: boolean
+  xLarge?: boolean
 }
+const props = withDefaults(defineProps<Props>(), {
+  waiting: false,
+  disabled: false,
+  loadingSpinner: false,
+  color: undefined,
+  dark: false,
+  large: false,
+  left: false,
+  light: false,
+  medium: false,
+  right: false,
+  size: undefined,
+  small: false,
+  xLarge: false,
+})
+
+const emit = defineEmits<{
+  (event: 'click', value: MouseEvent): void
+}>()
+
+const fullIconName = computed(() => {
+  if (props.loadingSpinner && props.waiting) {
+    return '$refreshSpinner'
+  } else {
+    return `$${props.icon}${props.waiting ? 'Spinner' : ''}`
+  }
+})
 </script>

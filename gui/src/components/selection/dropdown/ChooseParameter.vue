@@ -11,58 +11,50 @@
   />
 </template>
 
-<script lang="ts">
-import { Component, Prop, Vue } from 'vue-property-decorator'
-
+<script setup lang="ts">
 import BaseDropdown from '@/components/selection/dropdown/BaseDropdown.vue'
-import ConfirmationDialog from '@/components/specification/GaussianRandomField/ConfirmationDialog.vue'
 
-import { Store } from '@/store/typing'
 import { ListItem } from '@/utils/typing'
+import { computed } from 'vue'
+import { useStore } from '../../../store'
 
-@Component({
-  components: {
-    BaseDropdown,
-    ConfirmationDialog,
-  },
-})
-export default class ChooseParameter extends Vue {
-  @Prop({ required: true })
-  readonly label!: string
-
-  @Prop({ required: true })
-  readonly parameterType!: string
-
-  @Prop({ default: true })
-  readonly hideIfDisabled!: boolean
-
-  @Prop({ default: false })
-  readonly disabled!: boolean
-
-  @Prop({ default: false, type: Boolean })
-  readonly regular!: boolean
-
-  @Prop({ default: false, type: Boolean })
-  readonly warn!: boolean
-
-  @Prop({ default: '' })
-  readonly warnMessage!: string
-
-  @Prop({ default: false, type: Boolean })
-  readonly warnEvenWhenEmpty: boolean
-
-  get available (): ListItem<string>[] {
-    return this.$store.state.parameters[this.parameterType].available
-      .map((item: string): ListItem<string> => ({
-        text: item,
-        value: item,
-      }))
-  }
-
-  get isDisabled (): boolean { return (!this.regular && this.available ? this.available.length <= 1 : false) || this.disabled }
-  get isShown (): boolean { return !(this.hideIfDisabled && this.isDisabled) }
-
-  get selected (): string { return (this.$store as Store).state.parameters[this.parameterType].selected }
-  set selected (value: string) { this.$store.dispatch(`parameters/${this.parameterType}/select`, value) }
+type Props = {
+  label: string
+  parameterType: string
+  hideIfDisabled?: boolean
+  disabled?: boolean
+  regular?: boolean
+  warn?: boolean
+  warnMessage?: string
+  warnEvenWhenEmpty?: boolean
 }
+const props = withDefaults(defineProps<Props>(), {
+  hideIfDisabled: true,
+  disabled: false,
+  regular: false,
+  warn: false,
+  warnMessage: '',
+  warnEvenWhenEmpty: false,
+})
+const store = useStore()
+const available = computed<ListItem<string>[]>(() =>
+  store.state.parameters[props.parameterType].available.map(
+    (item: string): ListItem<string> => ({
+      title: item,
+      value: item,
+    }),
+  ),
+)
+
+const isDisabled = computed(
+  () =>
+    (!props.regular && available.value ? available.value.length <= 1 : false) ||
+    props.disabled,
+)
+const isShown = computed(() => !(props.hideIfDisabled && isDisabled.value))
+const selected = computed({
+  get: () => store.state.parameters[props.parameterType].selected,
+  set: (value: string) =>
+    store.dispatch(`parameters/${props.parameterType}/select`, value),
+})
 </script>

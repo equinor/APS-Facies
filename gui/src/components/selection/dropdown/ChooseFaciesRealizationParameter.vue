@@ -1,7 +1,7 @@
 <template>
   <v-combobox
-    :value="faciesRealizationParameter"
-    :search-input.sync="faciesRealizationParameter"
+    v-model="faciesRealizationParameter"
+    v-model:search-input="faciesRealizationParameter"
     :items="available"
     :append-icon="''"
     :append-outer-icon="'$vuetify.icons.values.search'"
@@ -9,14 +9,17 @@
   />
 </template>
 
-<script lang="ts">
-import { Component, Vue } from 'vue-property-decorator'
+<script setup lang="ts">
+import { computed } from 'vue'
+import { useStore } from '../../../store'
 
-@Component
-export default class ChooseFaciesRealizationParameter extends Vue {
-  get faciesRealizationParameter (): string { return this.$store.state.parameters.realization.selected }
-  set faciesRealizationParameter (value) { this.$store.dispatch('parameters/realization/select', value) }
+const store = useStore()
 
-  get available (): string[] { return this.$store.state.parameters.realization.available }
-}
+const faciesRealizationParameter = computed({
+  get: () => store.state.parameters.realization.selected,
+  set: (value: string | null) =>
+    store.dispatch('parameters/realization/select', value),
+})
+
+const available = computed(() => store.state.parameters.realization.available)
 </script>

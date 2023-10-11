@@ -28,6 +28,8 @@
 !gui/.postcssrc.js
 !gui/babel.config.js
 !gui/vue.config.js
+!gui/vite.config.ts
+!gui/index.html
 !gui/public/CHANGELOG.md
 !gui/public/favicon.ico
 !gui/public/index.html

@@ -1,13 +1,11 @@
 <template>
-  <v-row
-    class="fill-height"
-    align="center"
-    justify="space-around"
-  >
+  <v-row class="fill-height" align="center" justify="space-around">
     <v-col>
       <v-checkbox
         v-model="useProbabilityCubes"
-        v-tooltip.bottom="'Toggles whether constant probabilities, or probability cubes should be used'"
+        v-tooltip.bottom="
+          'Toggles whether constant probabilities, or probability cubes should be used'
+        "
         :disabled="disabled"
         label="Use cubes"
       />
@@ -35,61 +33,71 @@
   </v-row>
 </template>
 
-<script lang="ts">
-import { Component, Vue } from 'vue-property-decorator'
-
+<script setup lang="ts">
 import WaitBtn from '@/components/baseComponents/WaitButton.vue'
 
 import { RootState } from '@/store/typing'
 import { ProbabilityCube } from '@/utils/domain/facies/local'
 
 import { hasCurrentParents, notEmpty } from '@/utils'
-import { Facies } from '@/utils/domain'
 import { isCloseToUnity } from '@/utils/helpers/simple'
+import { ref } from 'vue'
+import { computed } from 'vue'
+import { useStore } from '../../../store'
 
-@Component({
-  components: {
-    WaitBtn,
-  },
+const store = useStore()
+const calculatingAverages = ref(false)
+
+const selectedFacies = computed(() => {
+  const state: RootState = store.state
+  const getters = store.getters
+  return Object.values(state.facies.available).filter((facies) =>
+    hasCurrentParents(facies, getters),
+  )
 })
-export default class FaciesProbabilityCubeHeader extends Vue {
-  calculatingAverages = false
 
-  get probabilityCubeParameters (): ProbabilityCube[] {
-    return (this.selectedFacies.map(facies => facies.probabilityCube)
-      .filter(param => notEmpty(param)) as ProbabilityCube[])
+const probabilityCubeParameters = computed<ProbabilityCube[]>(
+  () =>
+    selectedFacies.value
+      .map((facies) => facies.probabilityCube)
+      .filter((param) => notEmpty(param)) as ProbabilityCube[],
+)
+
+const useProbabilityCubes = computed({
+  get: () => !store.getters['facies/constantProbability'](),
+  set: (value: boolean) => store.dispatch('facies/toggleConstantProbability'),
+})
+
+const disabled = computed(() => selectedFacies.value.length === 0)
+
+const canCalculateAverages = computed(
+  () =>
+    !disabled.value &&
+    !calculatingAverages.value &&
+    probabilityCubeParameters.value.length !== 0,
+)
+
+const shouldNormalize = computed(
+  () => !disabled.value && !isCloseToUnity(store.getters['facies/cumulative']),
+)
+
+async function average() {
+  calculatingAverages.value = true
+  try {
+    await store.dispatch('facies/averageProbabilityCubes', {
+      probabilityCubes: probabilityCubeParameters.value,
+    })
+  } finally {
+    calculatingAverages.value = false
   }
+}
 
-  get selectedFacies (): Facies[] {
-    const state: RootState = this.$store.state
-    const getters = this.$store.getters
-    return Object.values(state.facies.available).filter(facies => hasCurrentParents(facies, getters))
-  }
-
-  get useProbabilityCubes (): boolean { return !this.$store.getters['facies/constantProbability']() }
-  set useProbabilityCubes (value) { this.$store.dispatch('facies/toggleConstantProbability') }
-
-  get canCalculateAverages (): boolean { return !this.disabled && !this.calculatingAverages && this.probabilityCubeParameters.length !== 0 }
-
-  get disabled (): boolean { return this.selectedFacies.length === 0 }
-
-  get shouldNormalize (): boolean { return !this.disabled && !isCloseToUnity(this.$store.getters['facies/cumulative']) }
-
-  async average (): Promise<void> {
-    this.calculatingAverages = true
-    try {
-      await this.$store.dispatch('facies/averageProbabilityCubes', { probabilityCubes: this.probabilityCubeParameters })
-    } finally {
-      this.calculatingAverages = false
-    }
-  }
-
-  async normalize (): Promise<void> {
-    const normalize = this.selectedFacies
-      .every(facies => facies.previewProbability === null)
-      ? 'normalizeEmpty'
-      : 'normalize'
-    await this.$store.dispatch(`facies/${normalize}`)
-  }
+async function normalize() {
+  const normalize = selectedFacies.value.every(
+    (facies) => facies.previewProbability === null,
+  )
+    ? 'normalizeEmpty'
+    : 'normalize'
+  await store.dispatch(`facies/${normalize}`)
 }
 </script>

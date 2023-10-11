@@ -1,6 +1,3 @@
-import Vue from 'vue'
-import VTooltip from 'v-tooltip'
-
 import { merge } from 'lodash'
 
 import './style.scss'
@@ -17,7 +14,8 @@ const defaultOptions = {
   // Default HTML template of the tooltip element
   // It must include `tooltip-arrow` & `tooltip-inner` CSS classes (can be configured, see below)
   // Change if the classes conflict with other libraries (for example bootstrap)
-  defaultTemplate: '<div class="tooltip" role="tooltip"><div class="tooltip-arrow"></div><div class="tooltip-inner"></div></div>',
+  defaultTemplate:
+    '<div class="tooltip" role="tooltip"><div class="tooltip-arrow"></div><div class="tooltip-inner"></div></div>',
   // Selector used to get the arrow element in the tooltip template
   defaultArrowSelector: '.tooltip-arrow, .tooltip__arrow',
   // Selector used to get the inner content element in the tooltip template
@@ -68,9 +66,6 @@ const defaultOptions = {
   },
 }
 
-const options = merge(
-  defaultOptions,
-  {},
-)
+const options = merge(defaultOptions, {})
 
-Vue.use(VTooltip, options)
+export { options }

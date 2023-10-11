@@ -10,17 +10,22 @@ const zone = selectedZone({ code: 0, name: 'Upper', thickness: 12 })
 
 const facies = createFacies(5)
 
-const polygons = identify([
-  { name: 'Floodplain', slantFactor: 0.5 },
-  { name: 'Subbay', slantFactor: 0.5 },
-  { name: 'Wave influenced Bayfill', slantFactor: null },
-  { name: 'Bayhead Delta', slantFactor: 0.5 },
-  { name: 'Lagoon', slantFactor: null },
-].map((config, index) => new BayfillPolygon({
-  ...config,
-  facies: new Facies({ facies: facies[`${index}`], zone }),
-  order: index,
-})))
+const polygons = identify(
+  [
+    { name: 'Floodplain', slantFactor: 0.5 },
+    { name: 'Subbay', slantFactor: 0.5 },
+    { name: 'Wave influenced Bayfill', slantFactor: null },
+    { name: 'Bayhead Delta', slantFactor: 0.5 },
+    { name: 'Lagoon', slantFactor: null },
+  ].map(
+    (config, index) =>
+      new BayfillPolygon({
+        ...config,
+        facies: new Facies({ facies: facies[index], zone }),
+        order: index,
+      }),
+  ),
+)
 
 const backgroundFields = generateFields(3, zone)
 
@@ -33,7 +38,7 @@ describe('When setting up required dependencies of a (Bayfill) truncation rule',
 
   it('Should have 5 global facies', () => {
     expect(facies.length).toBe(5)
-    facies.forEach(facies => {
+    facies.forEach((facies) => {
       expect(facies instanceof GlobalFacies).toBeTruthy()
     })
   })
@@ -43,11 +48,15 @@ describe('When setting up required dependencies of a (Bayfill) truncation rule',
   })
 
   it('Should have distinct (local) facies associated with the polygons', () => {
-    Object.values(polygons).forEach(polygon => {
+    Object.values(polygons).forEach((polygon) => {
       expect(polygon.facies instanceof Facies).toBeTruthy()
     })
 
-    const uniqueFacies = new Set(Object.values(polygons).map(({ facies }) => (facies as Facies).id || facies))
+    const uniqueFacies = new Set(
+      Object.values(polygons).map(
+        ({ facies }) => (facies as Facies).id || facies,
+      ),
+    )
     expect(uniqueFacies.size).toBe(5)
   })
 })
@@ -90,7 +99,6 @@ describe('While creating a Bayfill truncation rule', () => {
           polygon: 'Bayhead Delta',
         },
       ],
-    },
-    )
+    })
   })
 })

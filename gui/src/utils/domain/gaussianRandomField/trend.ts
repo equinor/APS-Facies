@@ -1,6 +1,15 @@
-import FmuUpdatableValue, { FmuUpdatableSerialization } from '@/utils/domain/bases/fmuUpdatable'
+import FmuUpdatableValue, {
+  FmuUpdatableSerialization,
+} from '@/utils/domain/bases/fmuUpdatable'
 
-export type TrendType = 'NONE' | 'LINEAR' | 'ELLIPTIC' | 'ELLIPTIC_CONE' | 'HYPERBOLIC' | 'RMS_PARAM' | 'RMS_TRENDMAP'
+export type TrendType =
+  | 'NONE'
+  | 'LINEAR'
+  | 'ELLIPTIC'
+  | 'ELLIPTIC_CONE'
+  | 'HYPERBOLIC'
+  | 'RMS_PARAM'
+  | 'RMS_TRENDMAP'
 export type StackingDirectionType = 'PROGRADING' | 'RETROGRADING'
 export type OriginType = 'RELATIVE' | 'ABSOLUTE'
 
@@ -72,7 +81,7 @@ export interface TrendSerialization {
   relativeStdDev: FmuUpdatableSerialization
 }
 
-export function unpackTrend (trend: TrendSerialization): TrendConfiguration {
+export function unpackTrend(trend: TrendSerialization): TrendConfiguration {
   return {
     use: trend.use,
     type: trend.type,
@@ -115,7 +124,7 @@ export default class Trend {
   public relativeSize: FmuUpdatableValue
   public relativeStdDev: FmuUpdatableValue
 
-  public constructor ({
+  public constructor({
     use = false,
     type = 'LINEAR',
     azimuth = 0,
@@ -147,7 +156,10 @@ export default class Trend {
     this.angle = {
       azimuth: new FmuUpdatableValue(azimuth, !!azimuthUpdatable),
       stacking: new FmuUpdatableValue(stackAngle, !!stackAngleUpdatable),
-      migration: new FmuUpdatableValue(migrationAngle, !!migrationAngleUpdatable),
+      migration: new FmuUpdatableValue(
+        migrationAngle,
+        !!migrationAngleUpdatable,
+      ),
     }
     this.stackingDirection = stackingDirection
     this.parameter = parameter
@@ -162,33 +174,36 @@ export default class Trend {
       z: new FmuUpdatableValue(originZ, !!originZUpdatable),
       type: originType,
     }
-    this.relativeSize = new FmuUpdatableValue(relativeSize, !!relativeSizeUpdatable)
-    this.relativeStdDev = new FmuUpdatableValue(relativeStdDev, !!relativeStdDevUpdatable)
-  }
-
-  public get isFmuUpdatable (): boolean {
-    return (
-      this.relativeStdDev.updatable
-      || (this.type !== 'RMS_PARAM' && this.type !== 'RMS_TRENDMAP' && (
-        this.angle.azimuth.updatable
-        || this.angle.stacking.updatable
-        || (this.type !== 'LINEAR' && (
-          this.curvature.updatable
-          || this.origin.x.updatable
-          || this.origin.y.updatable
-          || (['ELLIPTIC', 'HYPERBOLIC'].includes(this.type) && (
-            this.origin.z.updatable
-          ))
-          || (['ELLIPTIC_CONE', 'HYPERBOLIC'].includes(this.type) && (
-            this.angle.migration.updatable
-            || this.relativeSize.updatable
-          ))
-        ))
-      ))
+    this.relativeSize = new FmuUpdatableValue(
+      relativeSize,
+      !!relativeSizeUpdatable,
+    )
+    this.relativeStdDev = new FmuUpdatableValue(
+      relativeStdDev,
+      !!relativeStdDevUpdatable,
     )
   }
 
-  public toJSON (): TrendSerialization {
+  public get isFmuUpdatable(): boolean {
+    return (
+      this.relativeStdDev.updatable ||
+      (this.type !== 'RMS_PARAM' &&
+        this.type !== 'RMS_TRENDMAP' &&
+        (this.angle.azimuth.updatable ||
+          this.angle.stacking.updatable ||
+          (this.type !== 'LINEAR' &&
+            (this.curvature.updatable ||
+              this.origin.x.updatable ||
+              this.origin.y.updatable ||
+              (['ELLIPTIC', 'HYPERBOLIC'].includes(this.type) &&
+                this.origin.z.updatable) ||
+              (['ELLIPTIC_CONE', 'HYPERBOLIC'].includes(this.type) &&
+                (this.angle.migration.updatable ||
+                  this.relativeSize.updatable))))))
+    )
+  }
+
+  public toJSON(): TrendSerialization {
     return {
       use: this.use,
       type: this.type,

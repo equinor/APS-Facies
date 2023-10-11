@@ -10,13 +10,11 @@
     :ranges="ranges"
     :arrow-step="arrowStep"
     :use-modulus="useModulus"
-    @update:error="e => propagateError(e)"
+    @update:error="(e: boolean) => emit('update:error', e)"
   />
 </template>
 
-<script lang="ts">
-import { Component, Prop, Vue } from 'vue-property-decorator'
-
+<script setup lang="ts">
 import { MinMax } from '@/api/types'
 import { Optional } from '@/utils/typing'
 import { GaussianRandomField } from '@/utils/domain'
@@ -26,74 +24,66 @@ import Variogram from '@/utils/domain/gaussianRandomField/variogram'
 import NumericField from '@/components/selection/NumericField.vue'
 
 import { hasOwnProperty } from '@/utils/helpers'
+import { computed } from 'vue'
+import { useStore } from '../../store'
 
-function getValue (field: Variogram | Trend, property: string, subProperty: string): any {
-  return hasOwnProperty(field[`${property}`], subProperty)
-    ? field[`${property}`][`${subProperty}`]
-    : field[`${property}`]
+function getValue(
+  field: Trend | Variogram,
+  property: string,
+  subProperty: string | undefined,
+): any {
+  return hasOwnProperty(field[property], subProperty)
+    ? field[property][subProperty]
+    : field[property]
 }
 
-@Component({
-  components: {
-    NumericField,
-  },
+type Props = {
+  value: GaussianRandomField
+  propertyType: string
+  subPropertyType?: string
+  label?: string
+  valueType?: string
+  unit?: string
+  strictlyGreater?: boolean
+  allowNegative?: boolean
+  useModulus?: boolean
+  trend?: boolean
+  arrowStep?: number
+  ranges?: Optional<MinMax>
+}
+const props = withDefaults(defineProps<Props>(), {
+  subPropertyType: undefined,
+  label: '',
+  valueType: '',
+  unit: '',
+  strictlyGreater: false,
+  allowNegative: false,
+  useModulus: false,
+  trend: false,
+  arrowStep: 1,
+  ranges: null,
 })
-export default class StorableNumericField extends Vue {
-  @Prop({ required: true })
-  readonly value!: GaussianRandomField
+const store = useStore()
+const emit = defineEmits<{
+  (event: 'update:error', error: boolean): void
+}>()
 
-  @Prop({ required: true })
-  readonly propertyType!: string
+const field = computed(() => props.value[variogramOrTrend.value])
 
-  @Prop({ default: '' })
-  readonly subPropertyType!: string
+const propertyValue = computed({
+  get: () => getValue(field.value, props.propertyType, props.subPropertyType),
+  set: (value: any) =>
+    store.dispatch(`gaussianRandomFields/${props.propertyType}`, {
+      field: props.value,
+      variogramOrTrend: variogramOrTrend.value,
+      type: props.subPropertyType,
+      value,
+    }),
+})
 
-  @Prop({ default: '' })
-  readonly label!: string
+const fmuUpdatable = computed(() =>
+  hasOwnProperty(propertyValue.value, 'updatable'),
+)
 
-  @Prop({ default: '' })
-  readonly valueType!: string
-
-  @Prop({ default: '' })
-  readonly unit!: string
-
-  @Prop({ default: false, type: Boolean })
-  readonly strictlyGreater!: boolean
-
-  @Prop({ default: false, type: Boolean })
-  readonly allowNegative!: boolean
-
-  @Prop({ default: false, type: Boolean })
-  readonly useModulus!: boolean
-
-  @Prop({ default: false, type: Boolean })
-  readonly trend!: boolean
-
-  @Prop({ default: 1 })
-  readonly arrowStep!: number
-
-  @Prop()
-  readonly ranges!: Optional<MinMax>
-
-  get field (): Trend | Variogram { return this.value[this.variogramOrTrend] }
-
-  get propertyValue (): any { return this.getValue() }
-  set propertyValue (value) { this.dispatchChange(value) }
-
-  get fmuUpdatable (): boolean { return hasOwnProperty(this.propertyValue, 'updatable') }
-
-  get variogramOrTrend (): 'trend' | 'variogram' { return this.trend ? 'trend' : 'variogram' }
-
-  dispatchChange (value: number): void {
-    this.$store.dispatch(`gaussianRandomFields/${this.propertyType}`, { field: this.value, variogramOrTrend: this.variogramOrTrend, type: this.subPropertyType, value })
-  }
-
-  getValue (): any {
-    return getValue(this.field, this.propertyType, this.subPropertyType)
-  }
-
-  propagateError (value: boolean): void {
-    this.$emit('update:error', value)
-  }
-}
+const variogramOrTrend = computed(() => (props.trend ? 'trend' : 'variogram'))
 </script>

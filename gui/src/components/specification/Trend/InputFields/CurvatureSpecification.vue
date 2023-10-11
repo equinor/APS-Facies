@@ -7,34 +7,21 @@
     strictly-greater
     :ranges="{ min: minCurvature, max: Number.POSITIVE_INFINITY }"
     trend
-    @update:error="e => propagateError(e)"
+    @update:error="(e: boolean) => emit('update:error', e)"
   />
 </template>
 
-<script lang="ts">
-import { Component, Prop, Vue } from 'vue-property-decorator'
-
+<script setup lang="ts">
 import { GaussianRandomField } from '@/utils/domain'
 import StorableNumericField from '@/components/specification/StorableNumericField.vue'
+import { computed } from 'vue'
 
-@Component({
-  components: {
-    StorableNumericField,
-  },
-})
-export default class CurvatureSpecification extends Vue {
-  @Prop({ required: true })
-  readonly value: GaussianRandomField
+const props = defineProps<{ value: GaussianRandomField }>()
+const emit = defineEmits<{
+  (event: 'update:error', error: boolean): void
+}>()
 
-  get minCurvature (): number {
-    const field = this.value
-    return field && field.trend && field.trend.type === 'HYPERBOLIC'
-      ? 1
-      : 0
-  }
-
-  propagateError (value: boolean): void {
-    this.$emit('update:error', value)
-  }
-}
+const minCurvature = computed(() =>
+  props.value?.trend.type === 'HYPERBOLIC' ? 1 : 0,
+)
 </script>

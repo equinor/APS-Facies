@@ -1,17 +1,11 @@
 <template>
-  <v-row
-    align="center"
-    justify="center"
-    no-gutters
-  >
-    <v-col
-      cols="6"
-    >
+  <v-row align="center" justify="center" no-gutters>
+    <v-col cols="6">
       <v-col class="pa-0">
         <v-icon
           :disabled="!canDecrease"
           small
-          @click="() => $emit('input', -1)"
+          @click="() => emit('input', -1)"
           v-text="'$vuetify.icons.values.up'"
         />
       </v-col>
@@ -19,45 +13,45 @@
         <v-icon
           :disabled="!canIncrease"
           small
-          @click="() => $emit('input', +1)"
+          @click="() => emit('input', +1)"
           v-text="'$vuetify.icons.values.down'"
         />
       </v-col>
     </v-col>
-    <v-col
-      cols="6"
-    >
+    <v-col cols="6">
       <v-icon
         :disabled="!canRemove"
         small
-        @click="() => $emit('delete')"
+        @click="() => emit('delete')"
         v-text="'$vuetify.icons.values.remove'"
       />
       <v-icon
         :disabled="!canAdd"
         small
-        @click="() => $emit('add')"
+        @click="() => emit('add')"
         v-text="'$vuetify.icons.values.add'"
       />
     </v-col>
   </v-row>
 </template>
 
-<script lang="ts">
-import { Component, Prop, Vue } from 'vue-property-decorator'
-
-@Component
-export default class BasePolygonOrder extends Vue {
-  @Prop({ default: true, type: Boolean })
-  readonly canIncrease: boolean
-
-  @Prop({ default: true, type: Boolean })
-  readonly canDecrease: boolean
-
-  @Prop({ default: true, type: Boolean })
-  readonly canRemove: boolean
-
-  @Prop({ default: true, type: Boolean })
-  readonly canAdd: boolean
+<script setup lang="ts">
+type Props = {
+  canIncrease?: boolean
+  canDecrease?: boolean
+  canRemove?: boolean
+  canAdd?: boolean
 }
+withDefaults(defineProps<Props>(), {
+  canIncrease: false,
+  canDecrease: false,
+  canRemove: false,
+  canAdd: false,
+})
+
+const emit = defineEmits<{
+  (event: 'input', value: 1 | -1): void
+  (event: 'add'): void
+  (event: 'delete'): void
+}>()
 </script>

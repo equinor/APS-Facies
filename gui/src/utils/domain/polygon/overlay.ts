@@ -2,7 +2,11 @@ import APSError from '@/utils/domain/errors/base'
 import GaussianRandomField from '@/utils/domain/gaussianRandomField'
 import FaciesGroup from '@/utils/domain/facies/group'
 import { ID } from '@/utils/domain/types'
-import Polygon, { PolygonArgs, PolygonSerialization, PolygonSpecification } from './base'
+import Polygon, {
+  PolygonArgs,
+  PolygonSerialization,
+  PolygonSpecification,
+} from './base'
 
 export type CENTER = number
 
@@ -29,7 +33,12 @@ export default class OverlayPolygon extends Polygon {
   public field: GaussianRandomField | null
   public readonly group: FaciesGroup
 
-  public constructor ({ group, center = 0, field = null, ...rest }: OverlayPolygonArgs) {
+  public constructor({
+    group,
+    center = 0,
+    field = null,
+    ...rest
+  }: OverlayPolygonArgs) {
     super(rest)
     if (!group) throw new APSError('No group was given')
     this.group = group
@@ -37,9 +46,11 @@ export default class OverlayPolygon extends Polygon {
     this.field = field
   }
 
-  public get overlay (): boolean { return true }
+  public get overlay(): boolean {
+    return true
+  }
 
-  public get specification (): OverlayPolygonSpecification {
+  public get specification(): OverlayPolygonSpecification {
     return {
       ...super.specification,
       center: this.center,
@@ -48,7 +59,7 @@ export default class OverlayPolygon extends Polygon {
     }
   }
 
-  public toJSON (): OverlayPolygonSerialization {
+  public toJSON(): OverlayPolygonSerialization {
     return {
       ...super.toJSON(),
       group: this.group.id,

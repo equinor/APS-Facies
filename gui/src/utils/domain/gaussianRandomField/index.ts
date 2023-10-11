@@ -1,5 +1,5 @@
 import CrossSection, {
-  CrossSectionSerialization
+  type CrossSectionSerialization,
 } from '@/utils/domain/gaussianRandomField/crossSection'
 import cloneDeep from 'lodash/cloneDeep'
 
@@ -7,12 +7,16 @@ import { newSeed } from '@/utils/helpers'
 import { Named } from '@/utils/domain/bases/interfaces'
 import { Parent } from '@/utils/domain/bases/zoneRegionDependent'
 import Simulation, {
-  SimulationConfiguration,
-  SimulationSerialization,
+  type SimulationConfiguration,
+  type SimulationSerialization,
 } from '@/utils/domain/bases/simulation'
 
-import Trend, { TrendSerialization } from '@/utils/domain/gaussianRandomField/trend'
-import Variogram, { VariogramSerialization } from '@/utils/domain/gaussianRandomField/variogram'
+import Trend, {
+  type TrendSerialization,
+} from '@/utils/domain/gaussianRandomField/trend'
+import Variogram, {
+  type VariogramSerialization,
+} from '@/utils/domain/gaussianRandomField/variogram'
 
 interface Settings {
   crossSection: CrossSection
@@ -40,7 +44,7 @@ interface SettingsSerialization {
   seed: number
 }
 
-function defaultSettings (parent: Parent): Settings {
+function defaultSettings(parent: Parent): Settings {
   return {
     crossSection: new CrossSection({
       type: 'IJ',
@@ -49,7 +53,9 @@ function defaultSettings (parent: Parent): Settings {
     gridModel: {
       use: false,
       size: {
-        x: 100, y: 100, z: 1,
+        x: 100,
+        y: 100,
+        z: 1,
       },
     },
     seed: newSeed(),
@@ -74,7 +80,8 @@ export interface GaussianRandomFieldSpecification {
   variogram: Variogram
 }
 
-export interface GaussianRandomFieldSerialization extends SimulationSerialization {
+export interface GaussianRandomFieldSerialization
+  extends SimulationSerialization {
   name: string
   settings: SettingsSerialization
   trend: TrendSerialization
@@ -90,7 +97,15 @@ export default class GaussianRandomField extends Simulation implements Named {
 
   public valid: boolean
 
-  public constructor ({ name, variogram = null, trend = null, settings = null, crossSection = null, seed = null, ...rest }: GaussianRandomFieldConfiguration) {
+  public constructor({
+    name,
+    variogram = null,
+    trend = null,
+    settings = null,
+    crossSection = null,
+    seed = null,
+    ...rest
+  }: GaussianRandomFieldConfiguration) {
     super(rest)
     this.name = name
     this.variogram = variogram || new Variogram({})
@@ -108,26 +123,37 @@ export default class GaussianRandomField extends Simulation implements Named {
     this.valid = true
   }
 
-  public get simulation (): number[][] | null { return super.simulation }
-  public set simulation (data) { super.simulation = data }
-
-  public get isFmuUpdatable (): boolean {
-    return this.variogram.isFmuUpdatable || (this.trend.use && this.trend.isFmuUpdatable)
+  public get simulation(): number[][] | null {
+    return super.simulation
+  }
+  public set simulation(data) {
+    super.simulation = data
   }
 
-  public specification ({ rootGetters }: { rootGetters?: { simulationSettings: () => Record<string, unknown> } } = {}): GaussianRandomFieldSpecification {
+  public get isFmuUpdatable(): boolean {
+    return (
+      this.variogram.isFmuUpdatable ||
+      (this.trend.use && this.trend.isFmuUpdatable)
+    )
+  }
+
+  public specification({
+    rootGetters,
+  }: {
+    rootGetters?: { simulationSettings: () => Record<string, unknown> }
+  } = {}): GaussianRandomFieldSpecification {
     return {
       name: this.name,
       variogram: this.variogram,
       trend: this.trend,
       settings: {
-        ...rootGetters ? cloneDeep(rootGetters.simulationSettings()) : {},
+        ...(rootGetters ? cloneDeep(rootGetters.simulationSettings()) : {}),
         ...this.settings,
       },
     }
   }
 
-  public toJSON (): GaussianRandomFieldSerialization {
+  public toJSON(): GaussianRandomFieldSerialization {
     return {
       ...super.toJSON(),
       name: this.name,
@@ -145,6 +171,6 @@ export default class GaussianRandomField extends Simulation implements Named {
 export {
   Variogram,
   Trend,
-  TrendSerialization,
-  VariogramSerialization,
+  type TrendSerialization,
+  type VariogramSerialization,
 }

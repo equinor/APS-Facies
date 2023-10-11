@@ -2,34 +2,25 @@
   <facies-specification
     :value="value"
     :rule="rule"
-    :disable="facies => overlayFacies(facies)"
+    :disable="(facies) => overlayFacies(facies)"
   />
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 import FaciesSpecification from '@/components/specification/Facies/index.vue'
 
 import { Bayfill, Facies, Polygon, TruncationRule } from '@/utils/domain'
-import { Component, Prop, Vue } from 'vue-property-decorator'
 
-@Component({
-  components: {
-    FaciesSpecification,
+type Props = {
+  value: Polygon
+  rule: TruncationRule
+}
+const props = defineProps<Props>()
+
+function overlayFacies(facies: Facies): boolean {
+  if (props.rule instanceof Bayfill) {
+    return false
   }
-})
-export default class BackgroundFaciesSpecification extends Vue {
-  @Prop({ required: true })
-  readonly value!: Polygon
-
-  @Prop({ required: true })
-  readonly rule!: TruncationRule
-
-  overlayFacies (facies: Facies): boolean {
-    if (this.rule instanceof Bayfill) {
-      return false
-    } else {
-      return this.rule.isUsedInOverlay(facies)
-    }
-  }
+  return props.rule.isUsedInOverlay(facies)
 }
 </script>

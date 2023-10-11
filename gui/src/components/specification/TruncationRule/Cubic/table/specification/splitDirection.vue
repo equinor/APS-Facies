@@ -1,35 +1,28 @@
 <template>
-  <v-radio-group
-    v-model="splitDirection"
-    label="Split direction"
-  >
-    <v-radio
-      v-for="n in 2"
-      :key="n"
-      :label="labels[n - 1]"
-      :value="n - 1"
-    />
+  <v-radio-group v-model="splitDirection" label="Split direction">
+    <v-radio v-for="i in [0, 1]" :key="i" :label="labels[i]" :value="i" />
   </v-radio-group>
 </template>
 
-<script lang="ts">
-import { Component, Prop, Vue } from 'vue-property-decorator'
-
+<script setup lang="ts">
 import { Cubic } from '@/utils/domain'
+import { useStore } from '../../../../../../store'
+import { computed } from 'vue'
 
-@Component
-export default class SplitDirection extends Vue {
-  @Prop({ required: true })
-  readonly value!: Cubic
+const props = defineProps<{ value: Cubic }>()
+const store = useStore()
 
-  get splitDirection (): 1 | 0 { return this.value.direction.toInteger() }
-  set splitDirection (value) { this.$store.dispatch('truncationRules/changeDirection', { rule: this.value, value }) }
+const splitDirection = computed<0 | 1>({
+  get: () => props.value.direction.toInteger(),
+  set: (value: 0 | 1) =>
+    store.dispatch('truncationRules/changeDirection', {
+      rule: props.value,
+      value,
+    }),
+})
 
-  get labels (): { [_: number]: string } {
-    return {
-      0: 'Vertical',
-      1: 'Horizontal',
-    }
-  }
+const labels = {
+  0: 'Vertical',
+  1: 'Horizontal',
 }
 </script>

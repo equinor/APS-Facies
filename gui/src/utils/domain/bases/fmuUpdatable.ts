@@ -11,16 +11,15 @@ export default class FmuUpdatableValue implements FmuUpdatable {
   public value: number
   public updatable: boolean
 
-  public constructor (
-    value: number | FmuUpdatable,
-    updatable = false,
-  ) {
+  public constructor(value: number | FmuUpdatable, updatable = false) {
     if (value instanceof Object) {
       if ('updatable' in value) {
-        updatable = (value as { updatable: boolean}).updatable
+        updatable = (value as { updatable: boolean }).updatable
       }
       if (!('value' in value)) {
-        throw new APSTypeError('An object was passed, but does not contain \'value\'')
+        throw new APSTypeError(
+          "An object was passed, but does not contain 'value'",
+        )
       } else {
         value = (value as { value: number }).value
       }
@@ -29,14 +28,14 @@ export default class FmuUpdatableValue implements FmuUpdatable {
     this.updatable = updatable
   }
 
-  public toJSON (): FmuUpdatableSerialization {
+  public toJSON(): FmuUpdatableSerialization {
     return {
       value: this.value,
       updatable: this.updatable,
     }
   }
 
-  public toString (): string {
+  public toString(): string {
     return `FmuUpdatable(${this.value}, ${this.updatable})`
   }
 }

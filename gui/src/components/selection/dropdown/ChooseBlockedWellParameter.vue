@@ -6,16 +6,6 @@
   />
 </template>
 
-<script lang="ts">
-import { Component, Vue } from 'vue-property-decorator'
-
+<script setup lang="ts">
 import ChooseBwParameter from '@/components/selection/dropdown/BaseBlockedWellParameter.vue'
-
-@Component({
-  components: {
-    ChooseBwParameter,
-  },
-})
-export default class ChooseBlockedWellParameter extends Vue {
-}
 </script>

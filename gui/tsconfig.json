@@ -13,35 +13,21 @@
     "moduleResolution": "node",
     "experimentalDecorators": true,
     "esModuleInterop": true,
-    "strictPropertyInitialization": false,  // https://github.com/kaorun343/vue-property-decorator/issues/81
+    "strictPropertyInitialization": false, // https://github.com/kaorun343/vue-property-decorator/issues/81
     "isolatedModules": false,
     "removeComments": true,
-    "suppressImplicitAnyIndexErrors": true,
     "allowSyntheticDefaultImports": true,
-    "skipLibCheck": true, // TODO: Remove this once v-tooltip's compilation does not fail
     "resolveJsonModule": true,
     "sourceMap": true,
     "baseUrl": ".",
-    "types": [
-      "vuetify",
-      "node",
-      "webpack-env",
-      "jest"
-    ],
+    "types": ["vuetify", "node", "jest"],
     "paths": {
-      "@/*": [
-        "src/*"
-      ]
+      "@/*": ["src/*"]
     },
-    "lib": [
-      "es7",
-      "esnext",
-      "dom",
-      "dom.iterable",
-      "scripthost"
-    ]
+    "lib": ["es7", "esnext", "dom", "dom.iterable", "scripthost"]
   },
   "files": [
+    "./node_modules/vuetify/dist/vuetify.d.ts",
     "./src/vue-shims.d.ts"
   ],
   "include": [

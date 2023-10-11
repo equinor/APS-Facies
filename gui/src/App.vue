@@ -1,13 +1,10 @@
 <template>
   <v-app id="app">
-    <v-app-bar
-      app
-      flat
-      :color="'#ffffff'"
-    >
+    <v-app-bar app flat color="#ffffff">
       <v-col class="column">
-        <tool-bar />
-        <information-bar />
+        <the-tool-bar />
+        <!-- TODO: Figure out if this is needed. -->
+        <!-- <the-information-bar /> -->
       </v-col>
     </v-app-bar>
     <v-main>
@@ -16,52 +13,43 @@
   </v-app>
 </template>
 
-<script lang="ts">
-import { Component, Vue } from 'vue-property-decorator'
-
-import ToolBar from '@/components/TheToolBar.vue'
-import InformationBar from '@/components/TheInformationBar.vue'
+<script lang="ts" setup>
+import TheToolBar from '@/components/TheToolBar.vue'
+// import TheInformationBar from '@/components/TheInformationBar.vue'
 import MainPage from '@/pages/MainPage.vue'
+import { onBeforeMount } from 'vue'
+import { useStore } from './store'
 
-@Component({
-  components: {
-    MainPage,
-    ToolBar,
-    InformationBar,
-  },
-})
-export default class App extends Vue {
-  beforeMount (): void {
-    if (
-      !this.$store.getters.loaded
-      && !this.$store.getters.loading
-    ) {
-      // Fetch various parameters
-      this.$store.dispatch('fetch')
-    }
+const store = useStore()
+
+onBeforeMount(() => {
+  if (!store.getters.loaded && !store.getters.loading) {
+    // Fetch various parameters
+    store.dispatch('fetch')
   }
-}
+})
 </script>
 
 <style lang="scss" scoped>
-  @import 'style/main';
+@import 'style/main';
 
-  #app {
-    font-family: $font-family;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-  }
+#app {
+  font-family: $font-family;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
 
-  h1, h2 {
-    font-weight: normal;
-  }
+h1,
+h2 {
+  font-weight: normal;
+}
 
-  ul {
-    list-style-type: none;
-    padding: 0;
-  }
-  li {
-    display: inline-block;
-    margin: 0 0;
-  }
+ul {
+  list-style-type: none;
+  padding: 0;
+}
+li {
+  display: inline-block;
+  margin: 0 0;
+}
 </style>

@@ -1,4 +1,6 @@
-import FmuUpdatableValue, { FmuUpdatableSerialization } from '@/utils/domain/bases/fmuUpdatable'
+import FmuUpdatableValue, {
+  FmuUpdatableSerialization,
+} from '@/utils/domain/bases/fmuUpdatable'
 
 interface Angle {
   azimuth: FmuUpdatableValue
@@ -47,7 +49,9 @@ export interface VariogramSerialization {
   power: FmuUpdatableSerialization
 }
 
-export function unpackVariogram (variogram: VariogramSerialization): VariogramConfiguration {
+export function unpackVariogram(
+  variogram: VariogramSerialization,
+): VariogramConfiguration {
   return {
     type: variogram.type,
     azimuth: variogram.angle.azimuth.value,
@@ -71,7 +75,7 @@ export default class Variogram {
   public range: Range
   public power: FmuUpdatableValue
 
-  public constructor ({
+  public constructor({
     type = 'SPHERICAL',
     // Angles
     azimuth = 0,
@@ -95,24 +99,27 @@ export default class Variogram {
     }
     this.range = {
       main: new FmuUpdatableValue(main, !!mainUpdatable),
-      perpendicular: new FmuUpdatableValue(perpendicular, !!perpendicularUpdatable),
+      perpendicular: new FmuUpdatableValue(
+        perpendicular,
+        !!perpendicularUpdatable,
+      ),
       vertical: new FmuUpdatableValue(vertical, !!verticalUpdatable),
     }
     this.power = new FmuUpdatableValue(power, !!powerUpdatable)
   }
 
-  public get isFmuUpdatable (): boolean {
+  public get isFmuUpdatable(): boolean {
     return (
-      this.angle.azimuth.updatable
-      || this.angle.dip.updatable
-      || this.range.main.updatable
-      || this.range.perpendicular.updatable
-      || this.range.vertical.updatable
-      || (this.type === 'GENERAL_EXPONENTIAL' && this.power.updatable)
+      this.angle.azimuth.updatable ||
+      this.angle.dip.updatable ||
+      this.range.main.updatable ||
+      this.range.perpendicular.updatable ||
+      this.range.vertical.updatable ||
+      (this.type === 'GENERAL_EXPONENTIAL' && this.power.updatable)
     )
   }
 
-  public toJSON (): VariogramSerialization {
+  public toJSON(): VariogramSerialization {
     return {
       type: this.type,
       angle: this.angle,

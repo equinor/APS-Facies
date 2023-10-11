@@ -6,59 +6,56 @@
     :append-outer-icon="clearIcon"
     :disabled="loading"
     :loading="loading"
-    @change="job => selectJob(job)"
+    @change="(job: string) => selectJob(job)"
     @click:append-outer="clear"
   >
-    <v-progress-linear
-      indeterminate
-    />
+    <v-progress-linear indeterminate />
   </v-select>
 </template>
 
-<script lang="ts">
-import { Component, Vue } from 'vue-property-decorator'
-import { resetState } from '@/store'
+<script setup lang="ts">
+import { resetState, useStore } from '@/store'
 import { getJobs } from '@/components/debugging/utils'
+import { onMounted, computed, ref } from 'vue'
 
-@Component
-export default class LoadJob extends Vue {
-  private jobMapping: Record<string, JSON> = {}
-  private selectedJob: string | null = null
+const store = useStore()
 
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-ignore
-  private loading = false // TypeScript complains it is not read, even though it is used in the template
+// TODO: "JSON" is probably not the correct type, probably meant "object".
+const jobMapping = ref<Record<string, JSON>>({})
+const selectedJob = ref<string | null>(null)
 
-  get jobs (): string[] {
-    return Object.keys(this.jobMapping)
-  }
+const loading = ref(false)
 
-  get clearIcon (): string { return this.selectedJob ? '$vuetify.icons.values.clear' : '' }
+const jobs = computed(() => {
+  return Object.keys(jobMapping.value)
+})
 
-  selectJob (job: string): void {
-    this.selectedJob = job
-    const state = this.jobMapping[job]
-    this.$store.dispatch('populate', state)
-  }
+const clearIcon = computed(() => {
+  return selectedJob.value ? '$vuetify.icons.values.clear' : ''
+})
 
-  clear (): void {
-    this.selectedJob = null
-    resetState()
-  }
-
-  mounted (): void {
-    this.loading = true
-    getJobs()
-      .then(jobs => {
-        this.jobMapping = jobs
-          .reduce((jobs, job) => {
-            jobs[job.instance_name] = JSON.parse(job.jobinputjson)
-            return jobs
-          }, ({} as Record<string, JSON>))
-      })
-      .finally(() => {
-        this.loading = false
-      })
-  }
+function selectJob(job: string): void {
+  selectedJob.value = job
+  const state = jobMapping.value[job]
+  store.dispatch('populate', state)
 }
+
+function clear(): void {
+  selectedJob.value = null
+  resetState()
+}
+
+onMounted(() => {
+  loading.value = true
+  getJobs()
+    .then((receivedJobs) => {
+      jobMapping.value = receivedJobs.reduce((jobDict, job) => {
+        jobDict[job.instance_name] = JSON.parse(job.jobinputjson)
+        return jobDict
+      }, {} as Record<string, JSON>)
+    })
+    .finally(() => {
+      loading.value = false
+    })
+})
 </script>

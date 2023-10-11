@@ -3,68 +3,91 @@
     :value="selected"
     :items="facies"
     multiple
-    @input="e => update(e)"
+    @input="(e: Facies[]) => update(e)"
   />
 </template>
 
-<script lang="ts">
-import { Component, Prop, Vue } from 'vue-property-decorator'
-
+<script
+  setup
+  lang="ts"
+  generic="
+    T extends Polygon = Polygon,
+    S extends PolygonSerialization = PolygonSerialization,
+    P extends PolygonSpecification = PolygonSpecification,
+"
+>
 import { Facies } from '@/utils/domain'
 import FaciesGroup from '@/utils/domain/facies/group'
-import Polygon, { PolygonSerialization, PolygonSpecification } from '@/utils/domain/polygon/base'
+import Polygon, {
+  PolygonSerialization,
+  PolygonSpecification,
+} from '@/utils/domain/polygon/base'
 import { ID } from '@/utils/domain/types'
 import OverlayPolygon from '@/utils/domain/polygon/overlay'
 import TruncationRule from '@/utils/domain/truncationRule/base'
 
 import { ListItem } from '@/utils/typing'
+import { computed } from 'vue'
+import { useStore } from '../../../store'
 
-function isFaciesSelected (group: FaciesGroup | undefined, facies: Facies): boolean {
-  return group
-    ? group.has(facies)
-    : false
+function isFaciesSelected(
+  group: FaciesGroup | undefined,
+  facies: Facies,
+): boolean {
+  return group ? group.has(facies) : false
 }
 
-@Component
-export default class BackgroundGroupFaciesSpecification<
-  T extends Polygon = Polygon,
-  S extends PolygonSerialization = PolygonSerialization,
-  P extends PolygonSpecification = PolygonSpecification,
-> extends Vue {
-  @Prop({ required: true })
-  readonly value!: { group: ID, polygons: OverlayPolygon[]}
+type Props = {
+  value: { group: ID; polygons: OverlayPolygon[] }
+  rule: TruncationRule<T, S, P>
+}
+const props = defineProps<Props>()
+const store = useStore()
 
-  @Prop({ required: true })
-  readonly rule!: TruncationRule<T, S, P>
+const group = computed(
+  () => store.state.facies.groups.available[props.value.group],
+)
 
-  get group (): FaciesGroup | undefined { return this.$store.state.facies.groups.available[`${this.value.group}`] }
+const selected = computed(() => group.value?.facies ?? [])
 
-  get selected (): Facies[] {
-    return this.group
-      ? this.group.facies
-      : []
-  }
-
-  get facies (): ListItem<Facies>[] {
-    return (Object.values(this.$store.state.facies.available) as Facies[])
-      .filter(facies => facies.isChildOf(this.rule.parent))
-      .map(facies => {
-        return {
-          value: facies,
-          text: facies.alias,
-          disabled: !isFaciesSelected(this.group, facies) /* I.e. the user should be allowed to DESELECT an already selected facies */
-            && (!this.$store.getters['facies/availableForBackgroundFacies'](this.rule, facies)),
+const facies = computed<ListItem<Facies>[]>(() =>
+  (Object.values(store.state.facies.available) as Facies[])
+    .filter((facies) => facies.isChildOf(props.rule.parent))
+    .map((facies) => {
+      return {
+        value: facies,
+        title: facies.alias,
+        props: {
+          disabled:
+            !isFaciesSelected(
+              group.value,
+              facies,
+            ) /* I.e. the user should be allowed to DESELECT an already selected facies */ &&
+            !store.getters['facies/availableForBackgroundFacies'](
+              props.rule,
+              facies,
+            ),
         }
-      })
-  }
+      }
+    }),
+)
 
-  async update (facies: Facies[]): Promise<void> {
-    if (!this.group) {
-      const group = await this.$store.dispatch('facies/groups/add', { facies, parent: this.rule.parent })
-      await this.$store.dispatch('truncationRules/addPolygon', { rule: this.rule, group, overlay: true })
-    } else {
-      await this.$store.dispatch('facies/groups/update', { group: this.group, facies })
-    }
+async function update(facies: Facies[]): Promise<void> {
+  if (!group.value) {
+    const group = await store.dispatch('facies/groups/add', {
+      facies,
+      parent: props.rule.parent,
+    })
+    await store.dispatch('truncationRules/addPolygon', {
+      rule: props.rule,
+      group,
+      overlay: true,
+    })
+  } else {
+    await store.dispatch('facies/groups/update', {
+      group: group.value,
+      facies,
+    })
   }
 }
 </script>

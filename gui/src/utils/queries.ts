@@ -8,7 +8,7 @@ interface Counts {
   [id: string]: number
 }
 
-export function hasFaciesSpecifiedForMultiplePolygons (
+export function hasFaciesSpecifiedForMultiplePolygons(
   polygons: Polygon[] | Identified<Polygon>,
   facies: Facies | GlobalFacies | null = null,
   ignoreEmptyFacies = true,
@@ -16,21 +16,19 @@ export function hasFaciesSpecifiedForMultiplePolygons (
   if (polygons instanceof Object) polygons = Object.values(polygons)
   if (!polygons || polygons.length === 0) return false
   const faciesCount: Counts = polygons
-    .filter((polygon): boolean => facies ? getId(polygon.facies) === getId(facies) : true)
+    .filter((polygon): boolean =>
+      facies ? getId(polygon.facies) === getId(facies) : true,
+    )
     .reduce((counts: Counts, { facies }): Counts => {
       const id = getId(facies)
       if (ignoreEmptyFacies && !id) return counts
-      hasOwnProperty(counts, id)
-        ? counts[`${id}`] += 1
-        : counts[`${id}`] = 1
+      hasOwnProperty(counts, id) ? (counts[id] += 1) : (counts[id] = 1)
       return counts
     }, {})
   return Object.values(faciesCount).some((count): boolean => count > 1)
 }
 
-export {
-  getFaciesName,
-}
+export { getFaciesName }
 
 export const relativeTo = (base: string, path: string): string => {
   // Assumed to be UNIX paths
@@ -42,19 +40,16 @@ export const relativeTo = (base: string, path: string): string => {
     base: base.split('/'),
     path: path.split('/'),
   }
-  const commonParentIndex = parents.base
-    .reduce(
-      (commonIndex, directory, index) => index < parents.path.length && directory === parents.path[index]
+  const commonParentIndex = parents.base.reduce(
+    (commonIndex, directory, index) =>
+      index < parents.path.length && directory === parents.path[index]
         ? index
         : commonIndex,
-      0
-    )
+    0,
+  )
   const remaining = {
     base: parents.base.slice(commonParentIndex + 1),
     path: parents.path.slice(commonParentIndex + 1),
   }
-  return [
-    ...remaining.base.map(() => '..'),
-    ...remaining.path,
-  ].join('/')
+  return [...remaining.base.map(() => '..'), ...remaining.path].join('/')
 }

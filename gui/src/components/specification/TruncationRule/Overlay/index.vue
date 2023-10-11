@@ -1,37 +1,29 @@
 <template>
-  <v-row
-    no-gutters
-  >
+  <v-row no-gutters>
     <v-col cols="12">
       <h3>Truncation rule specification overlay facies</h3>
     </v-col>
     <v-col cols="12">
-      <overlay-facies-table
-        :value="value"
-      />
+      <overlay-facies-table :value="value" />
     </v-col>
   </v-row>
 </template>
 
-<script lang="ts">
-import { Component, Prop, Vue } from 'vue-property-decorator'
-
-import OverlayFaciesTable from './table/index.vue'
-
-import Polygon, { PolygonSerialization, PolygonSpecification } from '@/utils/domain/polygon/base'
-import OverlayTruncationRule from '@/utils/domain/truncationRule/overlay'
-
-@Component({
-  components: {
-    OverlayFaciesTable,
-  },
-})
-export default class OverlaySpecification<
+<script
+  setup
+  lang="ts"
+  generic="
   T extends Polygon = Polygon,
   S extends PolygonSerialization = PolygonSerialization,
   P extends PolygonSpecification = PolygonSpecification,
-> extends Vue {
-  @Prop({ required: true })
-  readonly value!: OverlayTruncationRule<T, S, P>
-}
+"
+>
+import OverlayFaciesTable from './table/index.vue'
+import Polygon, {
+  PolygonSerialization,
+  PolygonSpecification,
+} from '@/utils/domain/polygon/base'
+import OverlayTruncationRule from '@/utils/domain/truncationRule/overlay'
+
+defineProps<{ value: OverlayTruncationRule<T, S, P> }>()
 </script>

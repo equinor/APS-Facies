@@ -5,14 +5,12 @@
     :custom-sort="ordering"
     @input.stop
   >
-    <template
-      #item="{ item }"
-    >
+    <template #item="{ item }">
       <tr>
         <td class="text-left">
           <numeric-field
-            :value="item.angle"
-            :ranges="{min: -180.0, max: 180.0}"
+            :model-value="item.angle"
+            :ranges="{ min: -180.0, max: 180.0 }"
             :disabled="isLast(item)"
             fmu-updatable
             enforce-ranges
@@ -20,113 +18,93 @@
             use-modulus
             unit="°"
             label=""
-            @input="angle => updateAngle(item, angle)"
+            @input="(angle) => updateAngle(item, angle)"
           />
         </td>
         <td class="text-left">
-          <background-facies-specification
-            :value="item"
-            :rule="value"
-          />
+          <background-facies-specification :value="item" :rule="value" />
         </td>
-        <td
-          v-if="hasMultipleFaciesSpecified"
-        >
-          <polygon-fraction-field
-            :value="item"
-            :rule="value"
-          />
+        <td v-if="hasMultipleFaciesSpecified">
+          <polygon-fraction-field :value="item" :rule="value" />
         </td>
         <td>
-          <polygon-order
-            :value="item"
-            :rule="value"
-            min-polygons="2"
-          />
+          <polygon-order :value="item" :rule="value" min-polygons="2" />
         </td>
       </tr>
     </template>
   </base-table>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 import BaseTable from '@/components/baseComponents/BaseTable.vue'
-import { Vue, Component, Prop } from 'vue-property-decorator'
-
-import FractionField from '@/components/selection/FractionField.vue'
 import PolygonFractionField from '@/components/selection/PolygonFractionField.vue'
 import NumericField from '@/components/selection/NumericField.vue'
-import OptionalHelpItem from '@/components/table/OptionalHelpItem.vue'
 import PolygonOrder from '@/components/specification/TruncationRule/order.vue'
 import BackgroundFaciesSpecification from '@/components/specification/Facies/background.vue'
-
 import NonCubic from '@/utils/domain/truncationRule/nonCubic'
 import NonCubicPolygon from '@/utils/domain/polygon/nonCubic'
 import { HeaderItems } from '@/utils/typing'
-
 import { sortByOrder } from '@/utils'
 import { hasFaciesSpecifiedForMultiplePolygons } from '@/utils/queries'
+import { computed } from 'vue'
+import { useStore } from '../../../../store'
 
-@Component({
-  components: {
-    BaseTable,
-    BackgroundFaciesSpecification,
-    PolygonOrder,
-    OptionalHelpItem,
-    FractionField,
-    PolygonFractionField,
-    NumericField,
+const props = defineProps<{ value: NonCubic }>()
+const store = useStore()
+
+// TODO: Include 'help' messages
+const polygons = computed(() => props.value?.backgroundPolygons ?? [])
+const hasMultipleFaciesSpecified = computed(() =>
+  hasFaciesSpecifiedForMultiplePolygons(polygons.value),
+)
+
+const headers: HeaderItems = [
+  {
+    text: 'Angle',
+    value: 'angle',
   },
-})
-export default class NonCubicTable extends Vue {
-  @Prop({ required: true })
-  readonly value!: NonCubic
+  {
+    text: 'Facies',
+    value: 'facies',
+  },
+  ...(hasMultipleFaciesSpecified.value
+    ? [
+        {
+          text: 'Probability Fraction',
+          value: 'fraction',
+          help: 'The fraction of the facies probability assigned to the individual polygon',
+        },
+      ]
+    : []),
+  {
+    text: 'Order',
+    value: 'order',
+  },
+]
 
-  get polygons (): NonCubicPolygon[] {
-    // TODO: Include 'help' messages
-    return !this.value
-      ? []
-      : this.value.backgroundPolygons
-  }
+function ordering(
+  items: NonCubicPolygon[],
+  index: number,
+  isDescending: boolean,
+): NonCubicPolygon[] {
+  return sortByOrder(items, index, isDescending)
+}
 
-  get headers (): HeaderItems {
-    return [
-      {
-        text: 'Angle',
-        value: 'angle',
-      },
-      {
-        text: 'Facies',
-        value: 'facies',
-      },
-      ...(this.hasMultipleFaciesSpecified
-        ? [
-          {
-            text: 'Probability Fraction',
-            value: 'fraction',
-            help: 'The fraction of the facies probability assigned to the individual polygon',
-          },
-        ]
-        : []),
-      {
-        text: 'Order',
-        value: 'order',
-      }
-    ]
-  }
+async function updateAngle(
+  item: NonCubicPolygon,
+  value: number,
+): Promise<void> {
+  await store.dispatch('truncationRules/changeAngles', {
+    rule: props.value,
+    polygon: item,
+    value,
+  })
+}
 
-  get hasMultipleFaciesSpecified (): boolean {
-    return hasFaciesSpecifiedForMultiplePolygons(this.polygons)
-  }
-
-  ordering (items: NonCubicPolygon[], index: number, isDescending: boolean): NonCubicPolygon[] { return sortByOrder(items, index, isDescending) }
-
-  async updateAngle (item: NonCubicPolygon, value: number): Promise<void> {
-    await this.$store.dispatch('truncationRules/changeAngles', { rule: this.value, polygon: item, value })
-  }
-
-  isLast (polygon: NonCubicPolygon): boolean {
-    return this.polygons.findIndex(({ id }) => id === polygon.id) === (this.polygons.length - 1)
-  }
+function isLast(polygon: NonCubicPolygon): boolean {
+  return (
+    polygons.value.findIndex(({ id }) => id === polygon.id) ===
+    polygons.value.length - 1
+  )
 }
 </script>

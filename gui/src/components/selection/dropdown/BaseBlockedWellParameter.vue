@@ -9,26 +9,19 @@
   />
 </template>
 
-<script lang="ts">
-import { Component, Prop, Vue } from 'vue-property-decorator'
-
+<script setup lang="ts">
 import ChooseParameter from '@/components/selection/dropdown/ChooseParameter.vue'
+import { computed } from 'vue'
+import { useStore } from '../../../store'
 
-@Component({
-  components: {
-    ChooseParameter,
-  },
-})
-export default class ChooseBlockedWellLogParameter extends Vue {
-  @Prop({ required: true })
-  readonly parameterType: string
-
-  @Prop({ required: true })
-  readonly label: string
-
-  @Prop({ required: true })
-  readonly warnMessage: string
-
-  get hasFacies (): boolean { return this.$store.getters.faciesTable.length > 0 }
+type Props = {
+  parameterType: string
+  label: string
+  warnMessage: string
 }
+defineProps<Props>()
+
+const store = useStore()
+
+const hasFacies = computed(() => store.getters.faciesTable.length > 0)
 </script>

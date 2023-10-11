@@ -23,8 +23,7 @@ export interface Coded {
   readonly code: CODE
 }
 
-export interface Discrete extends Named, Coded {
-}
+export interface Discrete extends Named, Coded {}
 
 export interface ParentReference {
   readonly zone: ID

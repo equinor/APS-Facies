@@ -1,17 +1,10 @@
 <template>
-  <v-dialog
-    v-model="dialog"
-    max-width="1000px"
-    @keydown.esc="close"
-  >
+  <v-dialog v-model="dialog" max-width="1000px" @keydown.esc="close">
     <v-card>
       <v-row>
         <v-spacer />
         <v-col>
-          <div
-            id="changelog"
-            v-html="changelog"
-          />
+          <div id="changelog" v-html="changelog" />
         </v-col>
         <v-spacer />
       </v-row>
@@ -19,16 +12,15 @@
   </v-dialog>
 </template>
 
-<script lang="ts">
-import { Component, Vue } from 'vue-property-decorator'
-
+<script setup lang="ts">
 import md from '@/plugins/markdown'
+import { onMounted, ref } from 'vue'
 
 // 'axios' does not work as expected in RMS 11
 // when moving 'axios' from devDependencies
-const axios: { get: (url: string) => Promise<{data: string}> } = {
-  get (url: string): Promise<{ data: string }> {
-    return new Promise(resolve => {
+const axios: { get: (url: string) => Promise<{ data: string }> } = {
+  get(url: string): Promise<{ data: string }> {
+    return new Promise((resolve) => {
       const client = new XMLHttpRequest()
       client.open('GET', url)
       client.onreadystatechange = (): void => {
@@ -40,31 +32,30 @@ const axios: { get: (url: string) => Promise<{data: string}> } = {
       }
       client.send()
     })
-  }
+  },
 }
 
-@Component({})
-export default class ChangelogDialog extends Vue {
-  public dialog = false
-  public changelog = ''
+const dialog = ref(false)
+const changelog = ref('')
 
-  async fetchChangelog (): Promise<void> {
-    const { data } = await axios.get('/CHANGELOG.md')
-    this.changelog = md.render(data)
-  }
-
-  mounted (): void {
-    this.fetchChangelog()
-  }
-
-  public close (): void { this.dialog = false }
-
-  public open (): void { this.dialog = true }
+function close() {
+  dialog.value = false
 }
+function open() {
+  dialog.value = true
+}
+defineExpose({ open })
+
+async function fetchChangelog(): Promise<void> {
+  const { data } = await axios.get('/CHANGELOG.md')
+  changelog.value = md.render(data)
+}
+
+onMounted(fetchChangelog)
 </script>
 
 <style lang="scss">
-  #changelog {
-    flex: auto;
-  }
+#changelog {
+  flex: auto;
+}
 </style>

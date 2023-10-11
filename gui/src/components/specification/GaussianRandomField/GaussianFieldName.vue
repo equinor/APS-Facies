@@ -7,59 +7,58 @@
     @blur="$v.fieldName.$touch()"
   />
 </template>
-<script lang="ts">
-import { Component, Prop, Vue, Watch } from 'vue-property-decorator'
-
-import { required } from 'vuelidate/lib/validators'
+<script setup lang="ts">
 import { GaussianRandomField } from '@/utils/domain'
 import { Optional } from '@/utils/typing'
+import { ref, computed, watch, onMounted } from 'vue'
+import { useStore } from '../../../store'
+import useVuelidate from '@vuelidate/core'
+import { required } from '@vuelidate/validators'
+import { useInvalidation } from '@/utils/invalidation'
 
-@Component({
-  validations () {
-    return {
-      fieldName: {
-        required,
-        isUnique (value): boolean {
-          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-          // @ts-ignore
-          const current = this.value.id
-          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-          // @ts-ignore
-          return !this.fields.some(({ name, id }: GaussianRandomField) => name === value && id !== current)
-        },
-      },
-    }
+type Props = { value: GaussianRandomField }
+const props = defineProps<Props>()
+const store = useStore()
+
+const fieldName = ref<Optional<string>>(null)
+
+const fields = computed<GaussianRandomField[]>(() => store.getters.fields)
+const name = computed(() => props.value.name)
+
+const validators = {
+  fieldName: {
+    required,
+    isUnique: (value: Optional<string>) => {
+      const current = props.value.id
+      return !fields.value.some(
+        ({ name, id }: GaussianRandomField) => name === value && id !== current,
+      )
+    },
   },
-})
-export default class GaussianFieldName extends Vue {
-  @Prop({ required: true })
-  readonly value!: GaussianRandomField
-
-  fieldName: Optional<string> = null
-
-  get fields (): GaussianRandomField[] { return this.$store.getters.fields }
-
-  get name (): string { return this.value.name }
-
-  get errors (): string[] {
-    if (!this.$v.fieldName) return []
-
-    const errors: string[] = []
-    if (!this.$v.fieldName.$dirty) return errors
-    !this.$v.fieldName.required && errors.push('Is required')
-    !this.$v.fieldName.isUnique && errors.push('Must be unique')
-    return errors
-  }
-
-  @Watch('fieldName')
-  onNameChange (value: string): void {
-    if (this.$v.fieldName && !this.$v.fieldName.$invalid) {
-      this.$store.dispatch('gaussianRandomFields/changeName', { field: this.value, name: value })
-    }
-  }
-
-  mounted (): void {
-    this.fieldName = this.name
-  }
 }
+const v = useVuelidate(validators, { fieldName })
+useInvalidation(v)
+
+const errors = computed(() => {
+  if (!v.value.fieldName) return []
+
+  const errors: string[] = []
+  if (!v.value.fieldName.$dirty) return errors
+  !v.value.fieldName.required && errors.push('Is required')
+  !v.value.fieldName.isUnique && errors.push('Must be unique')
+  return errors
+})
+
+watch(fieldName, (value: Optional<string>) => {
+  if (v.value.fieldName && !v.value.fieldName.$invalid) {
+    store.dispatch('gaussianRandomFields/changeName', {
+      field: props.value,
+      name: value,
+    })
+  }
+})
+
+onMounted(() => {
+  fieldName.value = name.value
+})
 </script>

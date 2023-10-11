@@ -1,19 +1,13 @@
 <template>
-  <settings-panel
-    v-if="!!$store.getters.gridModel"
-    title="Grid information"
-  >
+  <settings-panel v-if="!!$store.getters.gridModel" title="Grid information">
     <v-container
       v-if="!$store.getters['parameters/grid/waiting']"
       class="text-center"
     >
-      <v-row
-        class="fill"
-        justify="space-around"
-      >
+      <v-row class="fill" justify="space-around">
         <v-col cols="4">
           <numeric-field
-            :value="gridSize.x"
+            :model-value="gridSize.x"
             readonly
             discrete
             unit="cell"
@@ -24,7 +18,7 @@
         </v-col>
         <v-col cols="4">
           <numeric-field
-            :value="gridSize.y"
+            :model-value="gridSize.y"
             readonly
             discrete
             unit="cell"
@@ -35,7 +29,7 @@
         </v-col>
         <v-col cols="4">
           <numeric-field
-            :value="gridSize.z"
+            :model-value="gridSize.z"
             readonly
             discrete
             unit="cell"
@@ -47,7 +41,7 @@
         <v-spacer />
         <v-col cols="4">
           <numeric-field
-            :value="simulationSettings.simulationBox.x"
+            :model-value="simulationSettings.simulationBox.x"
             readonly
             label="X"
             unit="m"
@@ -57,7 +51,7 @@
         </v-col>
         <v-col cols="4">
           <numeric-field
-            :value="simulationSettings.simulationBox.y"
+            :model-value="simulationSettings.simulationBox.y"
             readonly
             label="Y"
             unit="m"
@@ -67,7 +61,7 @@
         </v-col>
         <v-col cols="4">
           <numeric-field
-            :value="simulationSettings.simulationBox.z"
+            :model-value="simulationSettings.simulationBox.z"
             readonly
             label="Z"
             unit="m"
@@ -77,8 +71,8 @@
         </v-col>
         <v-col cols="4">
           <numeric-field
-            :value="simulationSettings.gridAzimuth"
-            :ranges="{min: -360, max: 360}"
+            :model-value="simulationSettings.gridAzimuth"
+            :ranges="{ min: -360, max: 360 }"
             readonly
             label="Grid azimuth"
             unit="°"
@@ -88,7 +82,7 @@
         </v-col>
         <v-col cols="4">
           <numeric-field
-            :value="simulationSettings.simulationBoxOrigin.x"
+            :model-value="simulationSettings.simulationBoxOrigin.x"
             readonly
             label="X"
             unit="m"
@@ -98,7 +92,7 @@
         </v-col>
         <v-col cols="4">
           <numeric-field
-            :value="simulationSettings.simulationBoxOrigin.y"
+            :model-value="simulationSettings.simulationBoxOrigin.y"
             readonly
             label="Y"
             unit="m"
@@ -108,42 +102,27 @@
         </v-col>
       </v-row>
     </v-container>
-    <v-container
-      v-else
-    >
-      <v-row
-        justify="center"
-        align="center"
-      >
-        <v-icon
-          x-large
-          v-text="$vuetify.icons.values.refreshSpinner"
-        />
+    <v-container v-else>
+      <v-row justify="center" align="center">
+        <v-icon x-large v-text="$vuetify.icons.values.refreshSpinner" />
       </v-row>
     </v-container>
   </settings-panel>
 </template>
 
-<script lang="ts">
-import { Component, Prop, Vue } from 'vue-property-decorator'
-
+<script setup lang="ts">
 import NumericField from '@/components/selection/NumericField.vue'
 
 import SettingsPanel from '@/components/dialogs/JobSettings/SettingsPanel.vue'
 
-import { Coordinate3D, SimulationSettings } from '@/utils/domain/bases/interfaces'
+import {
+  Coordinate3D,
+  SimulationSettings,
+} from '@/utils/domain/bases/interfaces'
 
-@Component({
-  components: {
-    SettingsPanel,
-    NumericField,
-  },
-})
-export default class PreviewSettings extends Vue {
-  @Prop({ required: true })
-  readonly gridSize: Coordinate3D
-
-  @Prop({ required: true })
-  readonly simulationSettings: SimulationSettings
+type Props = {
+  gridSize: Coordinate3D
+  simulationSettings: SimulationSettings
 }
+defineProps<Props>()
 </script>

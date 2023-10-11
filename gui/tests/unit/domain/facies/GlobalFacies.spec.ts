@@ -20,11 +20,15 @@ describe('Creating global facies', () => {
   })
 
   it('Should not be possible to create one with negative code', () => {
-    expect(() => new GlobalFacies({ ...simpleFaciesDefinition, code: -1 })).toThrow(CodeError)
+    expect(
+      () => new GlobalFacies({ ...simpleFaciesDefinition, code: -1 }),
+    ).toThrow(CodeError)
   })
 
   it('Should not be possible to create one with non-integer code', () => {
-    expect(() => new GlobalFacies({ ...simpleFaciesDefinition, code: 1.1 })).toThrow(APSTypeError)
+    expect(
+      () => new GlobalFacies({ ...simpleFaciesDefinition, code: 1.1 }),
+    ).toThrow(APSTypeError)
   })
 })
 
@@ -36,7 +40,7 @@ describe('When reading from RMS', () => {
     { code: 4, name: 'F4', color: '#ffd700' },
     { code: 5, name: 'F5', color: '#9932cc' },
   ]
-  const facies = rmsFacies.map(spec => new GlobalFacies(spec))
+  const facies = rmsFacies.map((spec) => new GlobalFacies(spec))
 
   it('Should have unique IDs', () => {
     expect(new Set(facies.map(({ id }) => id)).size).toBe(rmsFacies.length)
@@ -44,9 +48,9 @@ describe('When reading from RMS', () => {
 
   it('Should have the same values as from RMS', () => {
     facies.forEach((facies, index) => {
-      expect(facies.code).toBe(rmsFacies[`${index}`].code)
-      expect(facies.name).toBe(rmsFacies[`${index}`].name)
-      expect(facies.color).toBe(rmsFacies[`${index}`].color)
+      expect(facies.code).toBe(rmsFacies[index].code)
+      expect(facies.name).toBe(rmsFacies[index].name)
+      expect(facies.color).toBe(rmsFacies[index].color)
     })
   })
 })

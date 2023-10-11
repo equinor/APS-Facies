@@ -1,73 +1,55 @@
 <template>
   <v-dialog
-    v-model="dialog"
+    v-model="isOpen"
     :max-width="options.width"
-    @keydown.esc="ok()"
-    @keydown.enter="ok()"
+    @keydown.esc="close()"
+    @keydown.enter="close()"
   >
-    <v-toolbar
-      :color="options.color"
-      dark
-      dense
-    >
+    <v-toolbar :color="options.color" dark dense>
       <v-toolbar-title class="white--text">
         {{ title }}
       </v-toolbar-title>
     </v-toolbar>
     <v-card tile>
-      <v-card-text
-        v-if="html"
-        v-show="!!message"
-        v-html="message"
-      />
-      <v-card-text
-        v-else
-        v-show="!!message"
-      >
-        {{ message }}
-      </v-card-text>
+      <v-card-text v-if="html" v-show="!!message" v-html="message" />
+      <v-card-text v-else v-show="!!message" v-text="message" />
       <v-card-actions>
         <v-spacer />
-        <v-btn
-          color="gray"
-          text
-          @click.native="ok()"
-        >
-          OK
-        </v-btn>
+        <v-btn color="gray" variant="text" @click.native="close()"> OK </v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
 </template>
 
-<script lang="ts">
-import { Component, Prop, Vue } from 'vue-property-decorator'
-
+<script setup lang="ts">
 import { DialogOptions } from '@/utils/domain/bases/interfaces'
 import { Color } from '@/utils/domain/facies/helpers/colors'
+import { ref } from 'vue'
+import { useTheme } from 'vuetify'
 
-@Component
-export default class WarningDialog extends Vue {
-  dialog = false
-  message: string | null = null
-  title: string | null = null
-  options: DialogOptions = {
-    color: (this.$vuetify.theme.themes.light.warning as Color),
-    width: 290,
-  }
+withDefaults(defineProps<{ html?: boolean }>(), { html: false })
+const theme = useTheme()
+const isOpen = ref<boolean>(false)
+const message = ref<string | null>(null)
+const title = ref<string | null>(null)
+const options = ref<DialogOptions>({
+  color: theme.global.current.value.colors.warning as Color,
+  width: 290,
+})
 
-  @Prop({ default: false, type: Boolean })
-  readonly html!: boolean
-
-  open (title: string, message: string, options: DialogOptions = {}): void {
-    this.dialog = true
-    this.title = title
-    this.message = message
-    this.options = Object.assign(this.options, options)
-  }
-
-  ok (): void {
-    this.dialog = false
-  }
+function close() {
+  isOpen.value = false
 }
+
+function open(
+  newTitle: string,
+  newMessage: string,
+  newOptions: DialogOptions = {},
+) {
+  isOpen.value = true
+  title.value = newTitle
+  message.value = newMessage
+  options.value = { ...options, ...newOptions }
+}
+defineExpose({ open })
 </script>

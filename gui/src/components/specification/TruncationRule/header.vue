@@ -16,11 +16,12 @@
         :disabled="!type"
         label="Template"
       >
-        <template #item="{ item }">
+        <template #item="{ item, props }">
           <truncation-rule-preview
-            :value="item.text"
+            :value="item.raw.title"
             :type="type"
-            :disabled="item.disabled"
+            @click="props.onClick"
+            :disabled="item.raw.disabled"
           />
         </template>
       </v-combobox>
@@ -28,52 +29,56 @@
   </v-row>
 </template>
 
-<script lang="ts">
-import { Component, Vue } from 'vue-property-decorator'
+<script setup lang="ts">
+import { RootGetters } from '@/store/typing'
 
-import { RootGetters, RootState } from '@/store/typing'
-
-import IconButton from '@/components/selection/IconButton.vue'
 import TruncationRulePreview from './TruncationRulePreview.vue'
 
 import { isUUID } from '@/utils/helpers'
+import { useStore } from '../../../store'
+import { computed } from 'vue'
 
-@Component({
-  components: {
-    TruncationRulePreview,
-    IconButton,
+const store = useStore()
+
+const truncationRules = computed(
+  () => (store.getters as RootGetters)['truncationRules/ruleTypes'],
+)
+const templates = computed(
+  () => (store.getters as RootGetters)['truncationRules/ruleNames'],
+)
+
+const preset = computed(() => {
+  const rule = (store.getters as RootGetters).truncationRule
+  // TODO:  I think the typing for template here is wrong!
+  // Probably should always be a {text: string} object!
+  const { type, template } = store.state.truncationRules.preset
+  return {
+    type: type || (rule ? rule.type : ''),
+    template: template ?? rule?.name ?? '',
+  }
+})
+
+const type = computed<string>({
+  get: () => {
+    let type: string = preset.value.type
+    if (!type) return ''
+    if (isUUID(type)) {
+      return store.state.truncationRules.templates.types.available[type].name
+    }
+    const ruleTemplate = Object.values(
+      store.state.truncationRules.templates.types.available,
+    ).find((item) => item.type === type)
+
+    return ruleTemplate?.name ?? ''
+  },
+  set: (value: string) =>
+    store.dispatch('truncationRules/preset/change', { type: value }),
+})
+
+const template = computed({
+  get: () => preset.value.template,
+  set: (value: string) => {
+    store.dispatch('truncationRules/preset/change', { template: value })
   },
 })
-export default class TruncationHeader extends Vue {
-  get truncationRules (): { text: string, disabled: boolean, order: number }[] { return (this.$store.getters as RootGetters)['truncationRules/ruleTypes'] }
-  get templates (): { text: string, disabled: boolean }[] { return (this.$store.getters as RootGetters)['truncationRules/ruleNames'] }
-
-  get preset () {
-    const rule = this.$store.getters.truncationRule
-    const { type, template } = this.$store.state.truncationRules.preset
-    return {
-      type: type || (rule ? rule.type : ''),
-      template: template || {
-        text: rule ? rule.name : '',
-      },
-    }
-  }
-
-  get type (): string {
-    let type = this.preset.type
-    if (!!type && isUUID(type)) {
-      type = this.$store.state.truncationRules.templates.types.available[`${type}`]
-    } else if (!!type && !isUUID(type)) {
-      type = Object.values((this.$store.state as RootState).truncationRules.templates.types.available).find(item => item.type === type)
-    }
-    return type
-      ? type.name
-      : ''
-  }
-
-  set type (type) { this.$store.dispatch('truncationRules/preset/change', { type }) }
-
-  get template () { return this.preset.template }
-  set template (template) { this.$store.dispatch('truncationRules/preset/change', { template }) }
-}
 </script>

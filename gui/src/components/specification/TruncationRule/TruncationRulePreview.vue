@@ -5,10 +5,7 @@
     align="center"
     no-gutters
   >
-    <v-col
-      v-if="isDevelop"
-      cols="12"
-    >
+    <v-col v-if="isDevelop" cols="12">
       {{ value }}
     </v-col>
     <v-col
@@ -18,54 +15,47 @@
         justify="center"
         align="center"
       >
+    <v-col cols="12">
+      <v-row v-if="imageUrl" justify="center" align="center">
         <v-img
           aspect-ratio="1"
           eager
           :style="style"
           :alt="altText"
-          :src="imagePath"
-          :max-height="size.height"
-          :max-width="size.width"
+          :src="imageUrl"
+          :max-height="DEFAULT_TRUNCATION_RULE_TEMPLATE_PREVIEW_SIZE.height"
+          :max-width="DEFAULT_TRUNCATION_RULE_TEMPLATE_PREVIEW_SIZE.width"
         />
       </v-row>
     </v-col>
   </v-row>
 </template>
 
-<script lang="ts">
-import { Component, Prop, Vue } from 'vue-property-decorator'
-
+<script setup lang="ts">
 import { getDisabledOpacity, isDevelopmentBuild } from '@/utils/helpers/simple'
 import { DEFAULT_TRUNCATION_RULE_TEMPLATE_PREVIEW_SIZE } from '@/config'
-
-@Component({
-})
-export default class TruncationRulePreview extends Vue {
-  @Prop({ required: true })
-  readonly value!: string
-
-  @Prop({ required: true })
-  readonly type!: string
-
-  @Prop({ default: '' })
-  readonly altText!: string
-
-  @Prop({ default: false, type: Boolean })
-  readonly disabled!: boolean
-
-  get imagePath (): string {
-    // eslint-disable-next-line security/detect-non-literal-require
-    return require(`@/../public/truncation-rules/${this.type}/${this.value}.svg`)
-  }
-
-  get isDevelop (): boolean { return isDevelopmentBuild() }
-
-  get size (): { width: number, height: number } { return DEFAULT_TRUNCATION_RULE_TEMPLATE_PREVIEW_SIZE }
-
-  get style (): { opacity: number } {
-    return {
-      opacity: getDisabledOpacity(this.disabled)
-    }
-  }
+import { computed } from 'vue'
+import {
+  type TruncationRuleType,
+  truncationRuleTypeNames,
+} from '@/utils/domain/truncationRule/base'
+type Props = {
+  value: string
+  type: TruncationRuleType
+  altText?: string
+  disabled?: boolean
 }
+const props = withDefaults(defineProps<Props>(), {
+  altText: '',
+  disabled: false,
+})
+
+const imageUrl = computed(
+  () => `${window.location.origin}/public/truncation-rules/` +
+    `${truncationRuleTypeNames[props.type]}/${props.value}.svg`,
+)
+
+const isDevelop = computed(() => isDevelopmentBuild())
+
+const style = computed(() => ({ opacity: getDisabledOpacity(props.disabled) }))
 </script>

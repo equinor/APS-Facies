@@ -6,13 +6,20 @@ import Simulation, {
 } from '@/utils/domain/bases/simulation'
 import APSTypeError from '@/utils/domain/errors/type'
 import Facies from '@/utils/domain/facies/local'
-import GaussianRandomField, { GaussianRandomFieldSerialization } from '@/utils/domain/gaussianRandomField'
-import Polygon, { PolygonSerialization, PolygonSpecification } from '@/utils/domain/polygon/base'
+import GaussianRandomField, {
+  GaussianRandomFieldSerialization,
+} from '@/utils/domain/gaussianRandomField'
+import Polygon, {
+  PolygonSerialization,
+  PolygonSpecification,
+} from '@/utils/domain/polygon/base'
 import { ID } from '@/utils/domain/types'
 import { getId, identify, allSet } from '@/utils/helpers'
 import { isCloseToUnity } from '@/utils/helpers/simple'
 
-export interface TruncationRuleSerialization<S extends PolygonSerialization=PolygonSerialization> extends SimulationSerialization {
+export interface TruncationRuleSerialization<
+  S extends PolygonSerialization = PolygonSerialization,
+> extends SimulationSerialization {
   name: string
   type: string
   polygons: S[]
@@ -21,29 +28,46 @@ export interface TruncationRuleSerialization<S extends PolygonSerialization=Poly
 
 export type TruncationRuleType = 'bayfill' | 'non-cubic' | 'cubic'
 
-export type TruncationRuleConfiguration<T extends Polygon = Polygon> = SimulationConfiguration & {
-  name: string
-  polygons: Identified<T> | T[]
-  backgroundFields: (GaussianRandomField | null)[]
+export const truncationRuleTypeNames: Record<TruncationRuleType, string> = {
+  bayfill: 'Bayfill',
+  'non-cubic': 'Non-Cubic',
+  cubic: 'Cubic',
 }
 
-export interface TruncationRuleSpecification<P extends PolygonSpecification = PolygonSpecification> {
+export type TruncationRuleConfiguration<T extends Polygon = Polygon> =
+  SimulationConfiguration & {
+    name: string
+    polygons: Identified<T> | T[]
+    backgroundFields: (GaussianRandomField | null)[]
+  }
+
+export interface TruncationRuleSpecification<
+  P extends PolygonSpecification = PolygonSpecification,
+> {
   polygons: P[]
 }
 
 export default abstract class TruncationRule<
-  T extends Polygon = Polygon,
-  S extends PolygonSerialization = PolygonSerialization,
-  P extends PolygonSpecification = PolygonSpecification,
-> extends Simulation implements Named {
+    T extends Polygon = Polygon,
+    S extends PolygonSerialization = PolygonSerialization,
+    P extends PolygonSpecification = PolygonSpecification,
+  >
+  extends Simulation
+  implements Named
+{
   public readonly name: string
 
   protected _requiredGaussianFields: number
   protected _polygons: Identified<T>
   protected _backgroundFields: (GaussianRandomField | null)[]
-  protected _constraints: ([() => boolean, string])[]
+  protected _constraints: [() => boolean, string][]
 
-  protected constructor ({ name, polygons, backgroundFields, ...rest }: TruncationRuleConfiguration<T>) {
+  protected constructor({
+    name,
+    polygons,
+    backgroundFields,
+    ...rest
+  }: TruncationRuleConfiguration<T>) {
     super(rest)
     this.name = name
     this._polygons = identify(polygons)
@@ -51,70 +75,108 @@ export default abstract class TruncationRule<
     this._requiredGaussianFields = 2
 
     this._constraints = [
-      [(): boolean => allSet(this.polygons, 'facies'), 'Some polygons does not have a facies assigned to it'],
-      [(): boolean => this.polygons.length > 0, 'No polygons have been specified'],
-      [(): boolean => this.normalizedFractions, 'Some fraction of facies does not sum to one'],
-      [(): boolean => isCloseToUnity(this.cumulativeFaciesProbability), 'The sum of facies probabilities does not sum to one'],
-      [(): boolean => this.backgroundFields.filter((field): boolean => !!field).length === this._requiredGaussianFields, `The truncation rule must have ${this._requiredGaussianFields} background fields`],
-      [(): boolean => this.fields.every((field): boolean => field.valid), 'Some field is invalid'],
+      [
+        (): boolean => allSet(this.polygons, 'facies'),
+        'Some polygons does not have a facies assigned to it',
+      ],
+      [
+        (): boolean => this.polygons.length > 0,
+        'No polygons have been specified',
+      ],
+      [
+        (): boolean => this.normalizedFractions,
+        'Some fraction of facies does not sum to one',
+      ],
+      [
+        (): boolean => isCloseToUnity(this.cumulativeFaciesProbability),
+        'The sum of facies probabilities does not sum to one',
+      ],
+      [
+        (): boolean =>
+          this.backgroundFields.filter((field): boolean => !!field).length ===
+          this._requiredGaussianFields,
+        `The truncation rule must have ${this._requiredGaussianFields} background fields`,
+      ],
+      [
+        (): boolean => this.fields.every((field): boolean => field.valid),
+        'Some field is invalid',
+      ],
     ]
   }
 
-  abstract get type (): TruncationRuleType
+  abstract get type(): TruncationRuleType
 
-  public get ready (): boolean {
+  public get ready(): boolean {
     return this._constraints.every(([constraint, _]): boolean => constraint())
   }
 
-  public get isFmuUpdatable (): boolean {
+  public get isFmuUpdatable(): boolean {
     return (
-      this.fields.some(field => field.isFmuUpdatable)
-      || this.polygons.some(polygon => polygon.isFmuUpdatable)
+      this.fields.some((field) => field.isFmuUpdatable) ||
+      this.polygons.some((polygon) => polygon.isFmuUpdatable)
     )
   }
 
-  public get realization (): number[][] | null { return this.simulation }
-  public set realization (data) { this.simulation = data }
+  public get realization(): number[][] | null {
+    return this.simulation
+  }
+  public set realization(data) {
+    this.simulation = data
+  }
 
-  public get errorMessage (): string | undefined {
+  public get errorMessage(): string | undefined {
     for (const [constraint, error] of this._constraints) {
       if (!constraint()) return error
     }
     return undefined
   }
 
-  public abstract get specification (): TruncationRuleSpecification<P>
+  public abstract get specification(): TruncationRuleSpecification<P>
 
-  public get backgroundFields (): (GaussianRandomField | null)[] { return this._backgroundFields }
+  public get backgroundFields(): (GaussianRandomField | null)[] {
+    return this._backgroundFields
+  }
 
-  public get fields (): GaussianRandomField[] {
+  public get fields(): GaussianRandomField[] {
     const fields: GaussianRandomField[] = []
-    this.backgroundFields.forEach((field): void => { if (field) fields.push(field) })
+    this.backgroundFields.forEach((field): void => {
+      if (field) fields.push(field)
+    })
     return fields
   }
 
-  public get useOverlay (): boolean { return false }
+  public get useOverlay(): boolean {
+    return false
+  }
 
-  public get backgroundPolygons (): T[] {
+  public get backgroundPolygons(): T[] {
     return this.polygons
   }
 
-  public get polygons (): T[] {
-    return Object.values(this._polygons)
-      .sort((a, b): number => a.atLevel === b.atLevel ? a.order - b.order : b.atLevel - a.atLevel)
+  public get polygons(): T[] {
+    return Object.values(this._polygons).sort((a, b): number =>
+      a.atLevel === b.atLevel ? a.order - b.order : b.atLevel - a.atLevel,
+    )
   }
 
-  public isUsedInDifferentAlpha (field: GaussianRandomField | ID, channel: number): boolean {
-    const index = this.backgroundFields.findIndex((item): boolean => getId(item) === getId(field))
+  public isUsedInDifferentAlpha(
+    field: GaussianRandomField | ID,
+    channel: number,
+  ): boolean {
+    const index = this.backgroundFields.findIndex(
+      (item): boolean => getId(item) === getId(field),
+    )
     return index < 0
       ? false
-      // Channel is 1-indexed, while order of fields are 0-indexed
-      : index !== (channel - 1)
+      : // Channel is 1-indexed, while order of fields are 0-indexed
+        index !== channel - 1
   }
 
-  public isUsedInBackground (item: GaussianRandomField | Facies): boolean {
+  public isUsedInBackground(item: GaussianRandomField | Facies): boolean {
     if (item instanceof GaussianRandomField) {
-      return this.backgroundFields.some((field): boolean => getId(field) === item.id)
+      return this.backgroundFields.some(
+        (field): boolean => getId(field) === item.id,
+      )
     } else if (item instanceof Facies) {
       for (const { facies } of this.backgroundPolygons) {
         if (facies && facies.id === item.id) {
@@ -127,34 +189,40 @@ export default abstract class TruncationRule<
     }
   }
 
-  public get normalizedFractions (): boolean {
-    return this.polygons.every((polygon): boolean => this.isPolygonFractionsNormalized(polygon))
+  public get normalizedFractions(): boolean {
+    return this.polygons.every((polygon): boolean =>
+      this.isPolygonFractionsNormalized(polygon),
+    )
   }
 
-  public isPolygonFractionsNormalized (polygon: T): boolean {
+  public isPolygonFractionsNormalized(polygon: T): boolean {
     const sum = this.polygons
       .filter(({ facies }): boolean => getId(facies) === getId(polygon.facies))
       .reduce((sum, polygon): number => polygon.fraction + sum, 0)
     return isCloseToUnity(sum)
   }
 
-  protected toJSON (): TruncationRuleSerialization<S> {
+  protected toJSON(): TruncationRuleSerialization<S> {
     return {
       ...super.toJSON(),
       type: this.type,
       name: this.name,
-      polygons: Object.values(this._polygons).map((polygon): S => (polygon.toJSON() as S)),
+      polygons: Object.values(this._polygons).map(
+        (polygon): S => polygon.toJSON() as S,
+      ),
       backgroundFields: this.backgroundFields.map((field): ID => getId(field)),
     }
   }
 
-  protected _hashify (): any {
-    const spec: TruncationRuleSerialization<S> & { fields?: GaussianRandomFieldSerialization[] } = this.toJSON()
-    spec.fields = this.fields.map(field => field.toJSON())
+  protected _hashify(): any {
+    const spec: TruncationRuleSerialization<S> & {
+      fields?: GaussianRandomFieldSerialization[]
+    } = this.toJSON()
+    spec.fields = this.fields.map((field) => field.toJSON())
     return spec
   }
 
-  private get facies (): Facies[] {
+  private get facies(): Facies[] {
     const facies: Set<Facies> = new Set()
     for (const polygon of this.polygons) {
       if (polygon.facies) {
@@ -164,8 +232,10 @@ export default abstract class TruncationRule<
     return [...facies]
   }
 
-  private get cumulativeFaciesProbability (): number {
-    return this.facies
-      .reduce((sum, { previewProbability }): number => sum + (previewProbability || 0), 0)
+  private get cumulativeFaciesProbability(): number {
+    return this.facies.reduce(
+      (sum, { previewProbability }): number => sum + (previewProbability || 0),
+      0,
+    )
   }
 }

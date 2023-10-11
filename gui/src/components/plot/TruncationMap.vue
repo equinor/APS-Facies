@@ -1,9 +1,5 @@
 <template>
-  <v-row
-    class="ma-0 pa-0 shrink"
-    align="center"
-    justify="center"
-  >
+  <v-row class="ma-0 pa-0 shrink" align="center" justify="center">
     <static-plot
       :data-definition="data.polygons"
       :annotations="data.annotations"
@@ -13,10 +9,7 @@
   </v-row>
 </template>
 
-<script lang="ts">
-/* eslint-disable no-use-before-define */
-import { Component, Prop, Vue, Watch } from 'vue-property-decorator'
-
+<script setup lang="ts">
 import rms from '@/api/rms'
 
 import StaticPlot from '@/components/plot/StaticPlot.vue'
@@ -26,53 +19,46 @@ import GlobalFacies from '@/utils/domain/facies/global'
 
 import { makeTruncationRuleSpecification } from '@/utils'
 import { plotify, PlotSpecification } from '@/utils/plotting'
+import { useStore } from '../../store'
+import { computed, watch, ref } from 'vue'
 
-@Component({
-  asyncComputed: {
-    data: {
-      async get (): Promise<PlotSpecification> {
-        return plotify(
-          await rms.truncationPolygons(makeTruncationRuleSpecification((this as TruncationMap).value, this.$store.getters)),
-          (this as TruncationMap).selectedFacies
-        )
-      },
-      shouldUpdate (): boolean {
-        return (this as TruncationMap).canUpdate()
-      },
-      default (): PlotSpecification {
-        return {
-          polygons: [],
-          annotations: [],
-        }
-      },
-    },
-  },
-
-  components: {
-    StaticPlot,
-  },
-})
-export default class TruncationMap extends Vue {
-  @Prop({ required: true })
-  readonly value!: TruncationRule
-
-  @Prop({ default: false, type: Boolean })
-  readonly expand!: boolean
-
-  get selectedFacies (): GlobalFacies[] {
-    return this.$store.getters['facies/global/selected']
-  }
-
-  @Watch('selectedFacies', { deep: true })
-  handler (): void {
-    // To detect changes in alias
-    if (this.canUpdate()) {
-      this.$asyncComputed.data.update()
-    }
-  }
-
-  canUpdate (): boolean {
-    return this.$store.getters['truncationRules/ready'](this.value)
-  }
+type Props = {
+  value: TruncationRule
+  expand?: boolean
 }
+const props = withDefaults(defineProps<Props>(), { expand: false })
+const store = useStore()
+
+const data = ref<PlotSpecification>({
+  polygons: [],
+  annotations: [],
+})
+
+const selectedFacies = computed<GlobalFacies[]>(
+  () => store.getters['facies/global/selected'],
+)
+
+function canUpdate() {
+  return store.getters['truncationRules/ready'](props.value)
+}
+
+async function getPlotSpecification() {
+  return plotify(
+    await rms.truncationPolygons(
+      makeTruncationRuleSpecification(props.value, store.getters),
+    ),
+    selectedFacies.value,
+  )
+}
+
+watch(
+  selectedFacies,
+  async () => {
+    // To detect changes in alias
+    if (canUpdate()) {
+      data.value = await getPlotSpecification()
+    }
+  },
+  { deep: true },
+)
 </script>

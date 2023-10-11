@@ -1,7 +1,7 @@
 #!/bin/env python
 # -*- coding: utf-8 -*-
-# This module is used in FMU workflows to export gaussian field values to disk to be read by ERT. 
-# Here we can assume that the project.current_realisation = 0 always since FMU ONLY run with one 
+# This module is used in FMU workflows to export gaussian field values to disk to be read by ERT.
+# Here we can assume that the project.current_realisation = 0 always since FMU ONLY run with one
 # realization in the RMS project and should have shared grid and shared parameters only.
 # NOTE:
 # The run function is called when the aps model file is modified to be run from ERTBOX grid

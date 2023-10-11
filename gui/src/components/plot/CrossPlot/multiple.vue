@@ -1,7 +1,5 @@
 <template>
-  <v-container
-    class="text-center column wrap align"
-  >
+  <v-container class="text-center column wrap align">
     <v-row>
       <v-col cols="12">
         <v-select
@@ -12,93 +10,85 @@
         />
       </v-col>
     </v-row>
-    <v-row
-      align="center"
-      justify="space-around"
-    >
-      <v-col
-        v-for="([field, other], index) in combinations"
-        :key="index"
-      >
+    <v-row align="center" justify="space-around">
+      <v-col v-for="([field, other], index) in combinations" :key="index">
         <cross-plot
-          v-if="field.simulated && other.simulated "
+          v-if="field.simulated && other.simulated"
           :value="[field, other]"
         />
-        <v-progress-circular
-          v-else
-          :size="70"
-          indeterminate
-        />
+        <v-progress-circular v-else :size="70" indeterminate />
       </v-col>
     </v-row>
   </v-container>
 </template>
 
-<script lang="ts">
-import { Component, Prop, Vue, Watch } from 'vue-property-decorator'
-
+<script setup lang="ts">
 import { GaussianRandomField } from '@/utils/domain'
 import { ID } from '@/utils/domain/types'
 
 import CrossPlot from './index.vue'
+import { useStore } from '../../../store'
+import { ref, computed, watch, onBeforeMount } from 'vue'
+import type { ListItem } from '@/utils/typing'
 
-interface Item {
-  value: ID
-  text: string
-}
+const props = defineProps<{ value: GaussianRandomField[] }>()
+const store = useStore()
 
-@Component({
-  components: {
-    CrossPlot,
-  },
+const selected = ref<ID[]>([])
+const available = computed<ListItem<ID>[]>(() =>
+  props.value.map((field) => ({
+    value: field.id,
+    title: field.name,
+  })),
+)
+
+const combinations = computed<GaussianRandomField[][]>(() => {
+  const pairs: GaussianRandomField[][] = []
+  const available = selected.value.map(
+    (id) => store.state.gaussianRandomFields.available[id],
+  )
+  if (!available) return pairs
+  for (let i = 0; i < available.length; i++) {
+    for (let j = i + 1; j < available.length; j++) {
+      pairs.push([available[i], available[j]])
+    }
+  }
+  return pairs
 })
-export default class CrossPlots extends Vue {
-  @Prop({ required: true })
-  value: GaussianRandomField[]
 
-  selected: ID[] = []
+watch(
+  selected,
+  (value: ID[]) => {
+    store.dispatch('gaussianRandomFields/updateSimulations', { fields: value })
+  },
+  { deep: true },
+)
 
-  get available (): Item[] {
-    return this.value.map(field => {
-      return {
-        value: field.id,
-        text: field.name,
-      }
-    })
-  }
-
-  get combinations (): number[][] {
-    const pairs: number[][] = []
-    const available = this.selected
-      .map(id => this.$store.state.gaussianRandomFields.available[`${id}`])
-    if (!available) return pairs
-    for (let i = 0; i < available.length; i++) {
-      for (let j = i + 1; j < available.length; j++) {
-        pairs.push([available[`${i}`], available[`${j}`]])
-      }
-    }
-    return pairs
-  }
-
-  @Watch('selected', { deep: true })
-  selectionChanged (fields: ID[]): void {
-    this.$store.dispatch('gaussianRandomFields/updateSimulations', { fields })
-  }
-
-  @Watch('available', { deep: true })
-  onChange (value: Item[]): void {
-    if (this.selected.some(selectedItem => !value.find(availableItem => availableItem.value === selectedItem))) {
+watch(
+  available,
+  (value: Item[]) => {
+    if (
+      selected.value.some(
+        (selectedItem) =>
+          !value.find((availableItem) => availableItem.value === selectedItem),
+      )
+    ) {
       // That is, if there is some selected value that is no longer available
-      this.selected = this.available
-        .filter(availableItem => this.selected.some(selectedItem => selectedItem === availableItem.value))
-        .map(el => el.value)
+      selected.value = available.value
+        .filter((availableItem) =>
+          selected.value.some(
+            (selectedItem) => selectedItem === availableItem.value,
+          ),
+        )
+        .map((el) => el.value)
     }
-  }
+  },
+  { deep: true },
+)
 
-  beforeMount (): void {
-    if (this.selected.length === 0 && this.value.length >= 2) {
-      this.value.slice(0, 2).forEach(field => this.selected.push(field.id))
-    }
+onBeforeMount(() => {
+  if (selected.value.length === 0 && props.value.length >= 2) {
+    props.value.slice(0, 2).forEach((field) => selected.value.push(field.id))
   }
-}
+})
 </script>

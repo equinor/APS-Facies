@@ -3,7 +3,7 @@ import { Identified, Ordered } from '@/utils/domain/bases/interfaces'
 import Facies from '@/utils/domain/facies/local'
 import { ID, ORDER, PROBABILITY } from '@/utils/domain/types'
 
-export function getFaciesName (polygon: Polygon): string {
+export function getFaciesName(polygon: Polygon): string {
   return polygon.facies ? polygon.facies.name : ''
 }
 
@@ -33,18 +33,27 @@ export default abstract class Polygon extends BaseItem implements Ordered {
   public fraction: PROBABILITY
   public facies: Facies | null
 
-  protected constructor ({ order, facies = null, fraction = 1.0, ...rest }: PolygonArgs) {
+  protected constructor({
+    order,
+    facies = null,
+    fraction = 1.0,
+    ...rest
+  }: PolygonArgs) {
     super(rest)
     this.order = order
     this.facies = facies
     this.fraction = fraction
   }
 
-  public get overlay (): boolean { return false }
+  public get overlay(): boolean {
+    return false
+  }
 
-  public get atLevel (): number { return 0 }
+  public get atLevel(): number {
+    return 0
+  }
 
-  public get specification (): PolygonSpecification {
+  public get specification(): PolygonSpecification {
     return {
       facies: getFaciesName(this),
       fraction: this.fraction,
@@ -52,11 +61,11 @@ export default abstract class Polygon extends BaseItem implements Ordered {
     }
   }
 
-  public get isFmuUpdatable (): boolean {
+  public get isFmuUpdatable(): boolean {
     return false
   }
 
-  public toJSON (): PolygonSerialization {
+  public toJSON(): PolygonSerialization {
     return {
       id: this.id,
       facies: this.facies ? this.facies.id : null,

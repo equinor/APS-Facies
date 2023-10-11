@@ -6,68 +6,64 @@
       dismissible
       transition="slide-y-transition"
       @input="shown = false"
-    >{{ message }}</v-alert><!-- eslint-disable-line vue/multiline-html-element-content-newline -->
+    >
+      {{ message }}
+    </v-alert>
   </div>
 </template>
 
-<script lang="ts">
-import { Component, Vue, Watch } from 'vue-property-decorator'
+<script setup lang="ts">
 import { isDevelopmentBuild } from '@/config'
-
 import { delay } from 'lodash'
-
-import BaseMessage from '@/utils/domain/messages/base'
-
+import BaseMessage, { MessageType } from '@/utils/domain/messages/base'
 import { Optional } from '@/utils/typing'
+import { computed } from 'vue'
+import { ref } from 'vue'
+import { useStore } from '../store'
+import { watch } from 'vue'
 
-type MessageType = 'info' | 'error' | 'success' | 'warning'
+const store = useStore()
+const shown = ref(false)
 
-@Component
-export default class InformationBar extends Vue {
-  shown = false
+const _message = computed<{ value: string | Error | null; kind: MessageType }>(
+  () => store.state.message.value ?? { value: null, kind: 'info' },
+)
 
-  get _message (): { value: Optional<string | Error>, kind: MessageType } {
-    return this.$store.state.message.value || {
-      value: null,
-      kind: 'info',
+const message = computed<Optional<string>>(() => {
+  let text = _message.value.value
+  if (text === null) return text
+
+  if (text instanceof Error) {
+    if (isDevelopmentBuild()) {
+      throw message
+    } else {
+      text = text.message
     }
   }
+  return text.trim()
+})
 
-  get message (): Optional<string> {
-    let message = this._message.value
-    if (message instanceof Error) {
-      if (isDevelopmentBuild()) {
-        throw message
-      } else {
-        message = message.message
-      }
-    }
-    if (message) message = message.trim()
-    return message
-  }
+const type = computed<MessageType>(() => _message.value.kind)
 
-  get type (): MessageType { return this._message.kind }
-
-  @Watch('_message')
-  onUpdate (message: BaseMessage): void {
-    if (message.value) {
-      this.shown = true
-      const { use, wait } = this.$store.state.message.autoDismiss
-      if (use) {
-        delay(() => { this.shown = false }, wait)
-      }
+// TODO: Not sure what is wrong with the typing here.
+watch(_message, (message: BaseMessage) => {
+  if (message.value) {
+    shown.value = true
+    const { use, wait } = store.state.message.autoDismiss
+    if (use) {
+      delay(() => (shown.value = false), wait)
     }
   }
-}
+})
 </script>
 
 <style lang="scss" scoped>
-  #information-bar {
-    .v-alert {
-      margin: 0 auto;
-      border-width: 0 0 0;
-      white-space: pre-line;
-      line-height: 1.0;
-    }
+#information-bar {
+  .v-alert {
+    margin: 0 auto;
+    border-width: 0 0 0;
+    white-space: pre-line;
+    line-height: 1;
   }
+}
 </style>

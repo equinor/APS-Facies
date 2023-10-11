@@ -1,56 +1,39 @@
 <template>
-  <base-tooltip
-    :message="active ? message : inactiveMessage"
-  >
-    <v-icon
-      :color="color"
-    >
+  <base-tooltip :message="active ? message : inactiveMessage">
+    <v-icon :color="color">
       {{ __icon }}
     </v-icon>
   </base-tooltip>
 </template>
 
-<script lang="ts">
-import { Component, Prop, Vue } from 'vue-property-decorator'
-
+<script setup lang="ts">
 import BaseTooltip from '@/components/baseComponents/BaseTooltip.vue'
 import { GlobalFacies } from '@/utils/domain'
 import { ID } from '@/utils/domain/types'
-import { VuetifyIcon } from 'vuetify/types/services/icons'
+// Doesn't exist in v3?
+// import { VuetifyIcon } from "vuetify/types/services/icons";
+import { computed } from 'vue'
+import vuetify from '@/plugins/vuetify'
 
-@Component({
-  components: {
-    BaseTooltip,
-  },
-})
-export default class InformationalIcon extends Vue {
-  @Prop({ required: true })
-  readonly value!: GlobalFacies
-
-  @Prop({ required: true })
-  readonly icon!: string
-
-  @Prop({ default: undefined })
-  readonly current?: ID
-
-  @Prop({ default: false, type: Boolean })
-  readonly active!: boolean
-
-  @Prop({ default: undefined })
-  readonly message?: string
-
-  @Prop({ default: undefined })
-  readonly inactiveMessage?: string
-
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  get __icon (): VuetifyIcon | undefined {
-    const icons = this.$vuetify.icons.values
-    const iconName = `${this.icon}${!this.active ? 'Negated' : ''}`
-    return icons[`${iconName}`]
-  }
-
-  get isCurrent (): boolean { return this.current === this.value.id }
-
-  get color (): string | undefined { return this.isCurrent ? 'white' : undefined }
+type Props = {
+  value: GlobalFacies
+  icon: string
+  current?: ID
+  active?: boolean
+  message?: string
+  inactiveMessage?: string
 }
+const props = withDefaults(defineProps<Props>(), { active: false })
+
+// TODO: typing
+const __icon = computed(() => {
+  const icons = vuetify.icons.values
+  const iconName = `${props.icon}${!props.active ? 'Negated' : ''}`
+  return iconName
+  return icons[iconName]
+})
+
+const isCurrent = computed(() => props.current === props.value.id)
+
+const color = computed(() => (isCurrent.value ? 'white' : undefined))
 </script>

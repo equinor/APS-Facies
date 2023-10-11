@@ -1,6 +1,6 @@
 import ZoneRegionDependent, {
   DependentConfiguration,
-  DependentSerialization
+  DependentSerialization,
 } from '@/utils/domain/bases/zoneRegionDependent'
 
 export type CrossSectionType = 'IJ' | 'IK' | 'JK'
@@ -18,12 +18,12 @@ export interface CrossSectionSerialization extends DependentSerialization {
 export default class CrossSection extends ZoneRegionDependent {
   public type: CrossSectionType
 
-  public constructor ({ type, ...rest }: CrossSectionArgs) {
+  public constructor({ type, ...rest }: CrossSectionArgs) {
     super(rest)
     this.type = type
   }
 
-  public toJSON (): CrossSectionSerialization {
+  public toJSON(): CrossSectionSerialization {
     return {
       ...super.toJSON(),
       type: this.type,

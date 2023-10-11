@@ -1,145 +1,134 @@
 <template>
   <base-table
-    :value="value"
+    :value="modelValue"
     :headers="headers"
     :loading="loading"
     :loading-text="loadingText"
     :items="items"
     :no-data-text="noDataText"
-    :expanded="expanded"
+    :expanded="props.expanded"
   >
-    <template
-      #item="{ item, isSelected, on }"
-    >
+    <template #item="{ item, isSelected }">
       <tr
         :class="isCurrent(item) ? 'font-weight-bold' : ''"
-        :style="isCurrent(item) ? selectedStyle : ''"
+        :style="isCurrent(item) ? currentStyle : ''"
         @click="() => propagateCurrent(item)"
-        v-on="on"
       >
         <td>
-          <v-popover
+          <floating-tooltip
             :disabled="!selectDisabled"
-            trigger="hover"
+            :triggers="['hover']"
+            style="flex-shrink: 1"
           >
             <v-checkbox
               :style="{ marginTop: 0 }"
               :value="isSelected"
-              :input-value="!_isIndeterminate(item) && isSelected"
-              :indeterminate="_isIndeterminate(item)"
+              :input-value="!isIndeterminate(item) && isSelected"
+              :indeterminate="isIndeterminate(item)"
               :disabled="selectDisabled"
               :color="isCurrent(item) ? 'white' : undefined"
               primary
               hide-details
-              @change="e => updateSelection(item, e)"
+              @change="(e: boolean) => updateSelection(item, e)"
               @click.passive.stop
             />
-            <span slot="popover">
-              {{ selectError }}
-            </span>
-          </v-popover>
+            <template #popper>{{ selectError }}</template>
+          </floating-tooltip>
         </td>
         <slot
           :item="item"
           :isSelected="isSelected"
           :isCurrent="isCurrent(item)"
-          :on="on"
           name="item"
         />
       </tr>
     </template>
-    <template
-      #expanded-item="{ item, headers }"
-    >
-      <slot
-        :item="item"
-        :headers="headers"
-        name="expanded-item"
-      />
+    <template #expanded-item="{ item, columns }">
+      <slot :item="item" :columns="columns" name="expanded-item" />
     </template>
   </base-table>
 </template>
 
-<script lang="ts">
-import { Component, Prop, Vue } from 'vue-property-decorator'
-
+<script setup lang="ts" generic="T extends Identifiable">
 import BaseTable from '@/components/baseComponents/BaseTable.vue'
-import BaseItem from '@/utils/domain/bases/baseItem'
 import SelectableItem from '@/utils/domain/bases/selectableItem'
 import { ID } from '@/utils/domain/types'
-import { VuetifyThemeItem } from 'vuetify/types/services/theme'
+import { computed } from 'vue'
+import { useTheme } from 'vuetify'
+import type { HeaderItem } from '@/utils/typing'
+import type { Identifiable } from '@/utils/domain/bases/interfaces'
 
-interface Header {
-  text: string
-  align?: string
-  sortable?: boolean
-  value: string
+const props = withDefaults(defineProps<{
+  modelValue: T[]
+  headers: HeaderItem[]
+  items: T[]
+  current?: ID
+  expanded?: number[]
+  loading?: boolean
+  loadingText?: string
+  noDataText?: string
+  selectDisabled?: boolean
+  selectError?: string
+}>(), {
+  current: undefined,
+  expanded: () => [],
+  loading: false,
+  loadingText: '$vuetify.dataIterator.loadingText',
+  noDataText: '$vuetify.noDataText',
+  selectDisabled: false,
+  type: Boolean,
+  selectError: undefined,
+})
+
+const emit = defineEmits<{
+  (event: 'update:model-value', value: T[]): void
+  (event: 'update:current', value: ID): void
+  (event: 'update:expanded', value: T[]): void
+}>()
+
+defineSlots<{
+  item(props: { item: T, isSelected: boolean, isCurrent: boolean }): void
+  'expanded-item'(props: { item: T, columns: VuetifyColumns }): void
+}>()
+
+const theme = useTheme()
+const currentStyle = computed(() => {
+  return {
+    background: theme.global.current.value.colors.primary,
+    color: 'white',
+  }
+})
+
+function isCurrent(item: T): boolean {
+  if (!props.current) return false
+  return item.id === props.current
 }
 
-@Component({
-  components: {
-    BaseTable,
-  },
-})
-export default class SelectionTable<T extends BaseItem> extends Vue {
-  @Prop({ required: true })
-  readonly value!: T[]
+function propagateCurrent(item: T): void {
+  emit('update:current', item.id!)
+}
 
-  @Prop({ required: true })
-  readonly headers!: Header[]
-
-  @Prop({ required: true })
-  readonly items!: T[]
-
-  @Prop({ default: undefined })
-  readonly current!: ID | undefined
-
-  @Prop({ default: () => [] })
-  readonly expanded: number[]
-
-  @Prop({ default: false, type: Boolean })
-  readonly loading!: boolean
-
-  @Prop({ default: '$vuetify.dataIterator.loadingText' })
-  readonly loadingText!: string
-
-  @Prop({ default: '$vuetify.noDataText' })
-  readonly noDataText!: string
-
-  @Prop({ default: false, type: Boolean })
-  readonly selectDisabled!: boolean
-
-  @Prop({ default: undefined })
-  readonly selectError!: string | undefined
-
-  get selectedStyle (): { background: VuetifyThemeItem, color: string } {
-    return {
-      background: this.$vuetify.theme.themes.light.primary,
-      color: 'white',
-    }
+function updateSelection(item: T, value: boolean): void {
+  if (value) {
+    emit('update:model-value', [...props.modelValue, item])
+  } else {
+    emit(
+      'update:model-value',
+      props.modelValue.filter((el) => el.id !== item.id),
+    )
   }
+}
 
-  isCurrent (item: T): boolean {
-    if (!this.current) return false
-    return item.id === this.current
-  }
-
-  propagateCurrent (item: T): void {
-    this.$emit('update:current', item)
-  }
-
-  updateSelection (item: T, value: boolean): void {
-    if (value) {
-      this.$emit('input', [...this.value, item])
-    } else {
-      this.$emit('input', this.value.filter(el => el.id !== item.id))
-    }
-  }
-
-  _isIndeterminate (item: T): boolean {
-    return item instanceof SelectableItem
-      ? item.selected === 'intermediate'
-      : false
-  }
+function isIndeterminate(item: T): boolean {
+  return item instanceof SelectableItem
+    ? item.selected === 'intermediate'
+    : false
 }
 </script>
+
+<style scoped>
+td,
+:deep(td) {
+  background: unset !important;
+}
+</style>

@@ -23,7 +23,7 @@ export interface MinMax {
   max: number
 }
 
-export interface Constants extends MinMax{
+export interface Constants extends MinMax {
   tolerance: number
 }
 

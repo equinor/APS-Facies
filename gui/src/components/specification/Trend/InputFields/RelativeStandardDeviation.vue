@@ -6,31 +6,18 @@
     property-type="relativeStdDev"
     label="Relative std. dev."
     trend
-    @update:error="e => propagateError(e)"
+    @update:error="(e: boolean) => emit('update:error', e)"
   />
 </template>
 
-<script lang="ts">
-import { Component, Prop, Vue } from 'vue-property-decorator'
+<script setup lang="ts">
 import StorableNumericField from '@/components/specification/StorableNumericField.vue'
 import { GaussianRandomField } from '@/utils/domain'
 import { MinMax } from '@/api/types'
 
-@Component({
-  components: {
-    StorableNumericField,
-  },
-})
-export default class RelativeStandardDeviation extends Vue {
-  @Prop({ required: true })
-  readonly value!: GaussianRandomField
-
-  get ranges (): MinMax {
-    return { min: 0, max: 1 }
-  }
-
-  propagateError (value: boolean): void {
-    this.$emit('update:error', value)
-  }
-}
+defineProps<{ value: GaussianRandomField }>()
+const emit = defineEmits<{
+  (event: 'update:error', error: boolean): void
+}>()
+const ranges: MinMax = { min: 0, max: 1 }
 </script>

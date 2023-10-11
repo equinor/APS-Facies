@@ -1,38 +1,35 @@
 <template>
-  <v-popover
-    :trigger="trigger"
+  <floating-tooltip
+    :triggers="[trigger]"
     :disabled="!_message || disabled"
     :open="_open"
   >
     <slot />
-    <span
-      slot="popover"
-      v-html="_message"
-    />
-  </v-popover>
+    <template #popper v-html="_message" />
+  </floating-tooltip>
 </template>
 
-<script lang="ts">
-import { Component, Prop, Vue } from 'vue-property-decorator'
+<script setup lang="ts">
+import { computed } from 'vue'
 
-@Component({
-})
-export default class BaseTooltip extends Vue {
-  @Prop({ default: '' })
-  readonly message!: string
-
-  @Prop({ default: 'hover' })
-  readonly trigger!: 'hover' | 'manual'
-
-  @Prop({ default: false, type: Boolean })
-  readonly disabled!: boolean
-
-  @Prop({ default: false, type: Boolean })
-  readonly open!: boolean
-
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  get _open (): boolean | undefined { return this.trigger === 'manual' ? this.open : undefined }
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  get _message (): string | undefined { return this.message || undefined }
+type Props = {
+  message?: string
+  trigger?: 'hover' | 'manual'
+  disabled?: boolean
+  open?: boolean
 }
+
+const props = withDefaults(defineProps<Props>(), {
+  message: '',
+  trigger: 'hover',
+  disabled: false,
+  open: false,
+})
+
+const _open = computed(() => {
+  return props.trigger === 'manual' ? props.open : undefined
+})
+const _message = computed(() => {
+  return props.message || undefined
+})
 </script>

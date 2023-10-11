@@ -8,7 +8,7 @@ export type OrientationString = 'V' | 'H'
 export default class Direction {
   public readonly orientation: Orientation
 
-  public constructor (direction: Orientation | Direction | OrientationString) {
+  public constructor(direction: Orientation | Direction | OrientationString) {
     if (direction instanceof Direction) {
       direction = direction.orientation
     } else if (direction === 'V') {
@@ -19,23 +19,19 @@ export default class Direction {
     this.orientation = direction
   }
 
-  public get label (): string {
-    return this.orientation === Orientation.VERTICAL
-      ? 'Vertical'
-      : 'Horizontal'
+  public get label(): string {
+    return this.orientation === Orientation.VERTICAL ? 'Vertical' : 'Horizontal'
   }
 
-  public get specification (): OrientationString {
+  public get specification(): OrientationString {
     return this.orientation === Orientation.VERTICAL ? 'V' : 'H'
   }
 
-  public toString (): OrientationString {
+  public toString(): OrientationString {
     return this.specification
   }
 
-  public toInteger (): 0 | 1 {
-    return this.orientation === Orientation.VERTICAL
-      ? 0
-      : 1
+  public toInteger(): 0 | 1 {
+    return this.orientation === Orientation.VERTICAL ? 0 : 1
   }
 }

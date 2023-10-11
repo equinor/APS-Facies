@@ -1,69 +1,60 @@
 <template>
-  <v-edit-dialog
-    lazy
-    @open="reset"
-  >
+  <v-edit-dialog lazy @open="reset">
     {{ value[field] }}
     <v-text-field
       slot="input"
-      v-model="$data._fieldValue"
+      v-model="_fieldValue"
       :label="label"
       :type="numeric ? 'number' : 'text'"
       :error-messages="errorMessages"
       single-line
       @keydown.enter="submit"
-      @update:error="err => propagateError(err)"
+      @update:error="(e: boolean) => emit('update:error', e)"
     />
   </v-edit-dialog>
 </template>
 
-<script lang="ts">
-import { Component, Prop, Vue } from 'vue-property-decorator'
+<script setup lang="ts" generic="T">
+import { computed } from 'vue'
+import { onBeforeMount } from 'vue'
+import { ref } from 'vue'
 
-@Component({
+type Props = {
+  value: T
+  field: string
+  label: string
+  numeric: boolean
+  restrictions: ((value: string) => string)[]
+}
+const props = withDefaults(defineProps<Props>(), {
+  label: 'Edit',
+  numeric: false,
+  restrictions: () => [],
 })
-export default class EditableCell<T> extends Vue {
-  _fieldValue: string = this.fieldValue
+const emit = defineEmits<{
+  (event: 'submit', value: T & { [key: string]: number | string }): void
+  (event: 'update:error', error: boolean): void
+}>()
 
-  @Prop({ required: true })
-  readonly value: T
+const _fieldValue = ref('')
+function reset(): void {
+  _fieldValue.value = props.value[props.field]
+}
+onBeforeMount(() => reset())
 
-  @Prop({ required: true })
-  readonly field: string
+const errorMessages = computed(() =>
+  props.restrictions
+    .map((restriction) => restriction(_fieldValue.value))
+    .filter((errorMessage) => !!errorMessage),
+)
 
-  @Prop({ required: false, default: 'Edit' })
-  readonly label: string
+function submit(): void {
+  if (errorMessages.value.length > 0) return
 
-  @Prop({ default: false, type: Boolean })
-  readonly numeric: boolean
-
-  @Prop({ default: () => [] })
-  readonly restrictions!: ((value: string) => string)[]
-
-  get fieldValue (): string { return this.value[this.field] }
-
-  get errorMessages (): string[] {
-    return this.restrictions
-      .map(restriction => restriction(this.$data._fieldValue))
-      .filter(errorMessage => !!errorMessage)
-  }
-
-  submit (): void {
-    if (this.errorMessages.length > 0) return
-
-    const value = this.$data._fieldValue
-    this.$emit('submit', {
-      ...this.value,
-      [this.field]: this.numeric ? Number(value) : value,
-    })
-  }
-
-  reset (): void {
-    this.$data._fieldValue = this.fieldValue
-  }
-
-  propagateError (error: boolean): void {
-    this.$emit('update:error', error)
-  }
+  const value = _fieldValue.value
+  emit('submit', {
+    ...props.value,
+    [props.field]: props.numeric ? Number(value) : value,
+  })
 }
 </script>

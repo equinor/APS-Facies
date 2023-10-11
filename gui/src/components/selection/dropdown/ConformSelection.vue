@@ -1,47 +1,43 @@
 <template>
-  <v-select
-    v-model="conformity"
-    :items="options"
-    :dark="dark"
-  />
+  <v-select v-model="conformity" :items="options" :dark="dark" />
 </template>
 
-<script lang="ts">
-import { Component, Prop, Vue } from 'vue-property-decorator'
-
+<script setup lang="ts">
 import { Zone } from '@/utils/domain'
 import { ZoneConformOption } from '@/utils/domain/zone'
 import { ListItem } from '@/utils/typing'
+import { computed } from 'vue'
+import { useStore } from '../../../store'
 
-@Component({
-})
-export default class ConformSelection extends Vue {
-  @Prop({ required: true })
-  readonly value: Zone
-
-  @Prop({ default: false, type: Boolean })
-  readonly dark: boolean
-
-  get conformity (): ZoneConformOption { return this.value.conformity }
-  set conformity (value: ZoneConformOption) {
-    this.$store.dispatch('zones/conformity', { zone: this.value, value }, { root: true })
-  }
-
-  get options (): ListItem<string>[] {
-    return [
-      {
-        value: 'TopConform',
-        text: 'Top Conform',
-      },
-      {
-        value: 'BaseConform',
-        text: 'Base Conform',
-      },
-      {
-        value: 'Proportional',
-        text: 'Proportional',
-      },
-    ]
-  }
+type Props = {
+  value: Zone
+  dark?: boolean
 }
+const props = withDefaults(defineProps<Props>(), { dark: false })
+const store = useStore()
+
+const conformity = computed({
+  get: () => props.value.conformity,
+  set: (value: ZoneConformOption) =>
+    store.dispatch(
+      'zones/conformity',
+      { zone: props.value, value },
+      { root: true },
+    ),
+})
+
+const options: ListItem<string>[] = [
+  {
+    value: 'TopConform',
+    title: 'Top Conform',
+  },
+  {
+    value: 'BaseConform',
+    title: 'Base Conform',
+  },
+  {
+    value: 'Proportional',
+    title: 'Proportional',
+  },
+]
 </script>

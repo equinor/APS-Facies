@@ -1,8 +1,5 @@
 <template>
-  <v-row
-    dense
-    no-gutters
-  >
+  <v-row dense no-gutters>
     <v-col>
       <informational-icon
         v-if="parentSelected && isFaciesFromRms"
@@ -26,44 +23,38 @@
   </v-row>
 </template>
 
-<script lang="ts">
-import { Component, Prop, Vue } from 'vue-property-decorator'
-
+<script setup lang="ts">
 import { ID } from '@/utils/domain/types'
 import { GlobalFacies } from '@/utils/domain'
 
 import InformationalIcon from './InformationalIcon.vue'
+import { useStore } from '../../../store'
+import { computed } from 'vue'
 
-@Component({
-  components: {
-    InformationalIcon,
-  },
-})
-export default class InformationalIcons extends Vue {
-  @Prop({ required: true })
-  readonly value!: GlobalFacies
-
-  @Prop({ default: undefined })
-  readonly current?: ID
-
-  get isObserved (): boolean {
-    return this.value.isObserved({
-      zone: this.$store.getters.zone,
-      region: this.$store.getters.region,
-    })
-  }
-
-  get isFaciesFromRms (): boolean {
-    return this.$store.getters['facies/isFromRMS'](this.value)
-  }
-
-  get parentSelected (): boolean {
-    const zoneSelected = !!this.$store.getters.zone
-    if (this.$store.getters.useRegions) {
-      const regionSelected = !!this.$store.getters.region
-      return zoneSelected && regionSelected
-    }
-    return zoneSelected
-  }
+type Props = {
+  value: GlobalFacies
+  current?: ID
 }
+const props = defineProps<Props>()
+const store = useStore()
+
+const isObserved = computed(() =>
+  props.value.isObserved({
+    zone: store.getters.zone,
+    region: store.getters.region,
+  }),
+)
+
+const isFaciesFromRms = computed(() =>
+  store.getters['facies/isFromRMS'](props.value),
+)
+
+const parentSelected = computed(() => {
+  const zoneSelected = !!store.getters.zone
+  if (store.getters.useRegions) {
+    const regionSelected = !!store.getters.region
+    return zoneSelected && regionSelected
+  }
+  return zoneSelected
+})
 </script>

@@ -1,49 +1,45 @@
 <template>
   <settings-panel title="FMU Settings">
-    <v-row
-      no-gutters
-    >
+    <v-row no-gutters>
       <v-col class="dense">
-        <warning-dialog
-          ref="confirm"
-          html
+        <warning-dialog ref="confirm" html />
+        <v-checkbox
+          v-model="_runFmuWorkflows"
+          v-tooltip="
+            'Enable updating of model parameters and Gaussian fields by FMU.'
+          "
+          label="Run APS facies update in AHM/ERT"
         />
-          <v-checkbox
-            v-model="_runFmuWorkflows"
-            v-tooltip="'Enable updating of model parameters and Gaussian fields by FMU.'"
-            label="Run APS facies update in AHM/ERT"
-          />
       </v-col>
       <v-col>
         <v-checkbox
           v-model="_onlyUpdateFromFmu"
-          v-tooltip="'Enable updating of model parameters by FMU but not Gaussian fields.'"
+          v-tooltip="
+            'Enable updating of model parameters by FMU but not Gaussian fields.'
+          "
           label="Only run uncertainty update"
         />
       </v-col>
     </v-row>
     <div v-if="_runFmuWorkflows || _onlyUpdateFromFmu">
-      <v-row
-        v-if="!_onlyUpdateFromFmu"
-      >
+      <v-row v-if="!_onlyUpdateFromFmu">
         <v-col cols="6">
-          <v-popover
-            trigger="hover"
-            :disabled="hasGrid"
-          >
+          <floating-tooltip trigger="hover" :disabled="hasGrid">
             <v-combobox
               v-model="_fmuGrid"
               label="ERT/FMU simulation box grid"
               :disabled="!hasGrid"
               :items="fmuGrids"
-              @keydown.enter.stop="() => {/* Intentionally left blank, to stop event propagating to parent
-               and closing the dialog, when enter is used to confirm the selected grid name */}"
+              @keydown.enter.stop="
+                () => {
+                  /* Intentionally left blank, to stop event propagating to parent
+               and closing the dialog, when enter is used to confirm the selected grid name */
+                }
+              "
             />
-            <span slot="popover">No grid model has been selected</span>
-          </v-popover>
-          <v-row
-            v-if="!fmuGridExists"
-          >
+            <template #popper>No grid model has been selected</template>
+          </floating-tooltip>
+          <v-row v-if="!fmuGridExists">
             <v-col cols="6">
               <span>The specified grid does not exist.</span>
               <v-checkbox
@@ -52,12 +48,15 @@
               />
               <numeric-field
                 v-model="_maxLayersInFmu"
-                :ranges="{ min: minimumErtLayers, max: Number.POSITIVE_INFINITY }"
+                :ranges="{
+                  min: minimumErtLayers,
+                  max: Number.POSITIVE_INFINITY,
+                }"
                 :disabled="!createFmuGrid"
                 :ignore-errors="!createFmuGrid"
                 :required="createFmuGrid"
                 label="Number of layers in ERTBOX grid"
-                @update:error="e => update('fmuGridDepth', e)"
+                @update:error="(e) => update('fmuGridDepth', e)"
               />
             </v-col>
           </v-row>
@@ -68,12 +67,11 @@
             row
             label="Exchange of Gaussian Fields with FMU"
           >
+            <v-radio label="Simulate and export to FMU" value="generate" />
             <v-radio
-              label="Simulate and export to FMU"
-              value="generate"
-            />
-            <v-radio
-              v-tooltip="'Use this option in assisted history matching with ERT.'"
+              v-tooltip="
+                'Use this option in assisted history matching with ERT.'
+              "
               label="Automatic select between Simulate/Export and Import"
               value="automatic_detect"
             />
@@ -86,14 +84,18 @@
             />
             <v-select
               v-model="_customTrendExtrapolationMethod"
-              v-tooltip="'Extrapolation method for custom trends to fill undefined grid cells in ERT/FMU grid.'"
+              v-tooltip="
+                'Extrapolation method for custom trends to fill undefined grid cells in ERT/FMU grid.'
+              "
               :items="customTrendExtrapolationMethods"
               :disabled="!hasRmsParamTrend"
               label="RMS_PARAM trend extrapolation method for ERT/FMU grid."
             />
             <v-checkbox
               v-model="_onlyUpdateResidualFields"
-              v-tooltip="'Export/Import only the Gaussian Residual for GRF with trend to/from ERT. The trend part of the GRF is added by APS before applying truncation rule. '"
+              v-tooltip="
+                'Export/Import only the Gaussian Residual for GRF with trend to/from ERT. The trend part of the GRF is added by APS before applying truncation rule. '
+              "
               label="For GRF with trend let ERT only update the residual field."
               :disabled="!_runFmuWorkflows"
             />
@@ -104,13 +106,17 @@
         <v-row no-gutters>
           <v-checkbox
             v-model="_exportFmuConfigFiles"
-            v-tooltip="'When running this job from RMS workflow, FMU config and template files with APS parameters are exported automatically.'"
+            v-tooltip="
+              'When running this job from RMS workflow, FMU config and template files with APS parameters are exported automatically.'
+            "
             label="Export APS model and FMU config files."
             :disabled="!_runFmuWorkflows && !_onlyUpdateFromFmu"
           />
           <v-checkbox
             v-model="_useNonStandardFmu"
-            v-tooltip="'Use non-standard customized settings for FMU files and directories. File .aps_config will be used. '"
+            v-tooltip="
+              'Use non-standard customized settings for FMU files and directories. File .aps_config will be used. '
+            "
             label="Use non-standard FMU files and directory structure."
             :disabled="!_runFmuWorkflows && !_onlyUpdateFromFmu"
           />
@@ -120,18 +126,15 @@
   </settings-panel>
 </template>
 
-<script lang="ts">
-import { Component, Prop, Vue, Watch } from 'vue-property-decorator'
-
+<script setup lang="ts">
 import SettingsPanel from '@/components/dialogs/JobSettings/SettingsPanel.vue'
 import NumericField from '@/components/selection/NumericField.vue'
 import WarningDialog from '@/components/dialogs/JobSettings/WarningDialog.vue'
-import FileSelection from '@/components/selection/FileSelection.vue'
-import BaseTooltip from '@/components/baseComponents/BaseTooltip.vue'
-
-import { Store } from '@/store/typing'
-import { ListItem } from '@/utils/typing'
-import GridModel from '@/utils/domain/gridModel'
+import { useStore } from '../../../store'
+import { computed, ref, watch } from 'vue'
+import {
+  type FieldFormats,
+} from '@/stores/fmu/options'
 
 interface Invalid {
   fmuGridDepth: boolean
@@ -139,197 +142,177 @@ interface Invalid {
 
 type FieldUsage = 'generate' | 'automatic_detect'
 
+type Props = {
+  importFields: boolean
+  runFmuWorkflows: boolean
+  onlyUpdateFromFmu: boolean
+  fmuGrid: string
+  createFmuGrid: boolean
+  maxLayersInFmu: number
+  fieldFileFormat: FieldFormats
+  customTrendExtrapolationMethod: string
+  exportFmuConfigFiles: boolean
+  onlyUpdateResidualFields: boolean
+  useNonStandardFmu: boolean
+  exportErtBoxGrid: boolean
+}
 
-@Component({
-  components: {
-    BaseTooltip,
-    FileSelection,
-    WarningDialog,
-    SettingsPanel,
-    NumericField,
+const props = defineProps<Props>()
+
+const emit = defineEmits<{
+  (event: 'update:importFields', value: boolean): void
+  (event: 'update:runFmuWorkflows', value: boolean): void
+  (event: 'update:onlyUpdateFromFmu', value: boolean): void
+  (event: 'update:fmuGrid', value: string): void
+  (event: 'update:createFmuGrid', value: boolean): void
+  (event: 'update:maxLayersInFmu', value: number): void
+  (event: 'update:fieldFileFormat', value: FieldFormats): void
+  (event: 'update:customTrendExtrapolationMethod', value: string): void
+  (event: 'update:exportFmuConfigFiles', value: boolean): void
+  (event: 'update:onlyUpdateResidualFields', value: boolean): void
+  (event: 'update:useNonStandardFmu', value: boolean): void
+  (event: 'update:exportErtBoxGrid', value: boolean): void
+  (event: 'update:error', error: boolean): void
+}>()
+
+const store = useStore()
+const minimumErtLayers = computed(() => store.state.fmu.maxDepth.minimum)
+const fieldFileFormats = computed(() => store.state.fmu.fieldFileFormat.legal)
+const customTrendExtrapolationMethods = computed(
+  () => store.state.fmu.customTrendExtrapolationMethod.legal,
+)
+const availableGridModels = computed(() =>
+  Object.values(store.state.gridModels.available),
+)
+// Settings for handling regions, and ERT-mode
+// not used?
+const useRegions = computed(() => store.state.regions.use)
+const gridHasReverseFaults = computed(
+  () => store.getters['gridModels/current']?.hasDualIndexSystem,
+)
+const invalid = ref<Invalid>({
+  fmuGridDepth: false,
+})
+
+const hasErrors = computed(() => {
+  return Object.values(invalid.value).some((invalid) => invalid)
+})
+watch(hasErrors, (value: boolean) => emit('update:error', value))
+
+const _fmuGrid = computed({
+  get: () => props.fmuGrid,
+  set: (value: string | { value: string }) => {
+    const newValue = typeof value === 'string' ? value : value.value
+    emit('update:fmuGrid', newValue)
   },
 })
-export default class FmuSettings extends Vue {
-  invalid: Invalid = {
-    fmuGridDepth: false
+
+const _onlyUpdateFromFmu = computed({
+  get: () => props.onlyUpdateFromFmu,
+  set: (value: boolean) => emit('update:onlyUpdateFromFmu', value),
+})
+watch(_onlyUpdateFromFmu, (value: boolean) => {
+  if (value) _runFmuWorkflows.value = true
+})
+
+const _createFmuGrid = computed({
+  get: () => props.createFmuGrid,
+  set: (value: boolean) => emit('update:createFmuGrid', value),
+})
+
+const _runFmuWorkflows = computed({
+  get: () => props.runFmuWorkflows,
+  set: (value: boolean) => emit('update:runFmuWorkflows', value),
+})
+watch(_runFmuWorkflows, (value: boolean) => {
+  if (value) _onlyUpdateFromFmu.value = true
+})
+
+const _maxLayersInFmu = computed({
+  get: () => props.maxLayersInFmu ?? 12,
+  set: (value: number) => emit('update:maxLayersInFmu', value),
+})
+
+const _importFields = computed({
+  get: () => (props.importFields ? 'automatic_detect' : 'generate'),
+  set: (value: FieldUsage) =>
+    emit('update:importFields', value === 'automatic_detect'),
+})
+
+const _fieldFileFormat = computed({
+  get: () => props.fieldFileFormat,
+  set: (value: string) => emit('update:fieldFileFormat', value),
+})
+
+const _customTrendExtrapolationMethod = computed({
+  get: () => props.customTrendExtrapolationMethod,
+  set: (value: string) => emit('update:customTrendExtrapolationMethod', value),
+})
+
+const _exportFmuConfigFiles = computed({
+  get: () => props.exportFmuConfigFiles,
+  set: (value: boolean) => emit('update:exportFmuConfigFiles', value),
+})
+
+const _onlyUpdateResidualFields = computed({
+  get: () => props.onlyUpdateResidualFields,
+  set: (value: boolean) => emit('update:onlyUpdateResidualFields', value),
+})
+
+const _useNonStandardFmu = computed({
+  get: () => props.useNonStandardFmu,
+  set: (value: boolean) => emit('update:useNonStandardFmu', value),
+})
+
+//  maybe not needed?
+const _exportErtBoxGrid = computed({
+  get: () => props.exportErtBoxGrid,
+  set: (value: boolean) => emit('update:exportErtBoxGrid', value),
+})
+
+function update(type: string, value: boolean): void {
+  if (type === 'fmuGridDepth') {
+    value = value && props.createFmuGrid
   }
-
-  @Prop({ required: true, type: Boolean })
-  readonly importFields: boolean
-
-  @Prop({ required: true, type: Boolean })
-  readonly runFmuWorkflows: boolean
-
-  @Prop({ required: true, type: Boolean })
-  readonly onlyUpdateFromFmu: boolean
-
-  @Prop({ required: true })
-  readonly fmuGrid: string
-
-  @Prop({ required: true, type: Boolean })
-  readonly createFmuGrid: boolean
-
-  @Prop({ required: true })
-  readonly maxLayersInFmu: number
-
-  @Prop({ required: true })
-  readonly fieldFileFormat: string
-
-  @Prop({ required: true })
-  readonly customTrendExtrapolationMethod: string
-
-  @Prop({ required: true, type: Boolean })
-  readonly exportFmuConfigFiles: boolean
-
-  @Prop({ required: true, type: Boolean })
-  readonly onlyUpdateResidualFields: boolean
-
-  @Prop({ required: true, type: Boolean })
-  readonly useNonStandardFmu: boolean
-
-  @Prop({ required: true, type: Boolean })
-  readonly exportErtBoxGrid: boolean
-
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-ignore
-  get _fmuGrid (): string { return this.fmuGrid }
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-ignore
-  set _fmuGrid (value: string | { value: string }) {
-    if (typeof (value) !== 'string') {
-      value = value.value
-    }
-    this.$emit('update:fmuGrid', value)
-  }
-
-  get _onlyUpdateFromFmu (): boolean { return this.onlyUpdateFromFmu }
-  set _onlyUpdateFromFmu (toggle: boolean) {
-    this.$emit('update:onlyUpdateFromFmu', toggle)
-    if (toggle) {
-      this._runFmuWorkflows = false
-    }
-  }
-
-  get _createFmuGrid (): boolean { return this.createFmuGrid }
-  set _createFmuGrid (value: boolean) { this.$emit('update:createFmuGrid', value) }
-
-  get _runFmuWorkflows (): boolean { return this.runFmuWorkflows }
-  set _runFmuWorkflows (toggled: boolean) {
-    this.$emit('update:runFmuWorkflows', toggled)
-    if (toggled) {
-      this._onlyUpdateFromFmu = false
-    }
-  }
-
-  get _maxLayersInFmu (): number { return this.maxLayersInFmu }
-  set _maxLayersInFmu (value: number) { this.$emit('update:maxLayersInFmu', value) }
-
-  get minimumErtLayers (): number { return (this.$store as Store).state.fmu.maxDepth.minimum }
-
-  get _importFields (): FieldUsage {
-    if (this.importFields) return 'automatic_detect'
-    else return 'generate'
-  }
-
-  set _importFields (value: FieldUsage) {
-    if (value === 'generate') this.$emit('update:importFields', false)
-    else if (value === 'automatic_detect') this.$emit('update:importFields', true)
-    else throw Error(`Invalid value, '${value}'`)
-  }
-
-  get _fieldFileFormat (): string { return this.fieldFileFormat }
-  set _fieldFileFormat (format: string) { this.$emit('update:fieldFileFormat', format) }
-
-  get fieldFileFormats (): string[] { return this.$store.state.fmu.fieldFileFormat.legal }
-
-  get _customTrendExtrapolationMethod (): string { return this.customTrendExtrapolationMethod }
-  set _customTrendExtrapolationMethod (format: string) {
-    this.$emit('update:customTrendExtrapolationMethod', format)
-  }
-
-  get customTrendExtrapolationMethods (): string[] {
-    return this.$store.state.fmu.customTrendExtrapolationMethod.legal
-  }
-
-  get _exportFmuConfigFiles (): boolean { return this.exportFmuConfigFiles }
-  set _exportFmuConfigFiles (toggle: boolean) {
-    this.$emit('update:exportFmuConfigFiles', toggle)
-  }
-
-  get _onlyUpdateResidualFields (): boolean { return this.onlyUpdateResidualFields }
-  set _onlyUpdateResidualFields (toggle: boolean) {
-    this.$emit('update:onlyUpdateResidualFields', toggle)
-  }
-
-  get _useNonStandardFmu (): boolean { return this.useNonStandardFmu }
-  set _useNonStandardFmu (toggle: boolean) {
-    this.$emit('update:useNonStandardFmu', toggle)
-  }
-
-  get _exportErtBoxGrid (): boolean { return this.exportErtBoxGrid }
-  set _exportErtBoxGrid (toggle: boolean) {
-    this.$emit('update:exportErtBoxGrid', toggle)
-  }
-
-  update (type: string, value: boolean): void {
-    if (type === 'fmuGridDepth') {
-      value = value && this.createFmuGrid
-    }
-    Vue.set(this.invalid, type, value)
-  }
-
-  get hasErrors (): boolean { return Object.values(this.invalid).some(invalid => invalid) }
-
-  get hasGrid (): boolean { return !!this.$store.getters.gridModel }
-
-  get hasRmsParamTrend (): boolean {
-    const affectedFields = Object.values((this.$store as Store).state.gaussianRandomFields.available)
-        .filter(field => field.trend.type === 'RMS_PARAM')
-    if (affectedFields.length > 0) { return true }
-    return false
-  }
-
-  get fmuGridExists (): boolean {
-    return this.availableGridModels
-      .map(grid => grid.name)
-      .includes(this._fmuGrid)
-  }
-
-  get availableGridModels (): GridModel[] { return Object.values((this.$store as Store).state.gridModels.available) }
-
-  get fmuGrids (): ListItem<string>[] {
-    const selectedGrid = (this.$store as Store).getters['gridModels/current']
-    if (!selectedGrid) return []
-
-    const dimension = selectedGrid.dimension
-    return this.availableGridModels
-      .map(grid => {
-        return {
-          value: grid.name,
-          text: grid.name,
-          disabled: !(
-            grid.dimension.x === dimension.x
-            && grid.dimension.y === dimension.y
-            && grid.dimension.z >= this.minimumErtLayers
-            && grid.name !== selectedGrid.name
-            && grid.zones === 1
-          ),
-        }
-      })
-  }
-
-  @Watch('hasErrors', { deep: true })
-  isInvalid (valid: boolean): void {
-    this.$emit('update:error', valid)
-  }
-
-  // Settings for handling regions, and ERT-mode
-  get useRegions (): boolean { return (this.$store as Store).state.regions.use }
-
-  get gridHasReverseFaults (): boolean {
-    const grid = (this.$store as Store).getters['gridModels/current']
-    return !!grid && grid.hasDualIndexSystem
-  }
-
+  invalid.value[type] = value
 }
+
+const hasGrid = computed(() => {
+  return !!store.getters.gridModel
+})
+
+const hasRmsParamTrend = computed(() => {
+  const affectedFields = Object.values(
+    store.state.gaussianRandomFields.available,
+  ).filter((field) => field.trend.type === 'RMS_PARAM')
+  return affectedFields.length > 0
+})
+
+const fmuGridExists = computed(() => {
+  return availableGridModels.value
+    .map((grid) => grid.name)
+    .includes(_fmuGrid.value)
+})
+
+const fmuGrids = computed(() => {
+  const selectedGrid = store.getters['gridModels/current']
+  if (!selectedGrid) return []
+
+  const dimension = selectedGrid.dimension
+  return availableGridModels.value.map((grid) => {
+    return {
+      value: grid.name,
+      title: grid.name,
+      props: {
+        disabled: !(
+          grid.dimension.x === dimension.x &&
+          grid.dimension.y === dimension.y &&
+          grid.dimension.z >= minimumErtLayers.value &&
+          grid.name !== selectedGrid.name &&
+          grid.zones === 1
+        ),
+      }
+    }
+  })
+})
 </script>

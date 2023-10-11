@@ -1,4 +1,7 @@
-import BaseItem, { BaseItemConfiguration, BaseItemSerialization } from '@/utils/domain/bases/baseItem'
+import BaseItem, {
+  BaseItemConfiguration,
+  BaseItemSerialization,
+} from '@/utils/domain/bases/baseItem'
 
 export interface Dimension {
   x: number
@@ -32,7 +35,15 @@ export default class GridModel extends BaseItem {
   public readonly zones: number
   public readonly hasDualIndexSystem: boolean
 
-  public constructor ({ name, order, dimension, zones, hasDualIndexSystem, exists = true, ...rest }: GridModelConfiguration) {
+  public constructor({
+    name,
+    order,
+    dimension,
+    zones,
+    hasDualIndexSystem,
+    exists = true,
+    ...rest
+  }: GridModelConfiguration) {
     super(rest)
     this.name = name
     this.exists = exists
@@ -42,7 +53,7 @@ export default class GridModel extends BaseItem {
     this.hasDualIndexSystem = hasDualIndexSystem
   }
 
-  public toJSON (): GridModelSerialization {
+  public toJSON(): GridModelSerialization {
     return {
       ...super.toJSON(),
       name: this.name,

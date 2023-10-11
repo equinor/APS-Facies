@@ -29,17 +29,17 @@ export interface RegionConfiguration extends SelectableItemConfiguration {
 export class Region extends SelectableItem {
   public readonly zone: Zone
 
-  public constructor ({ zone, ...rest }: RegionConfiguration) {
+  public constructor({ zone, ...rest }: RegionConfiguration) {
     super(rest)
     this.zone = zone
   }
 
-  public touch (): void {
+  public touch(): void {
     super.touch()
     this.zone.touch()
   }
 
-  public toJSON (): RegionSerialization {
+  public toJSON(): RegionSerialization {
     return {
       ...super.toJSON(),
       zone: this.zone.id,
@@ -58,7 +58,7 @@ export default class Zone extends SelectableItem {
   public readonly thickness: number
   public conformity: ZoneConformOption
 
-  public constructor ({
+  public constructor({
     thickness,
     regions = null,
     conformity = null,
@@ -70,11 +70,11 @@ export default class Zone extends SelectableItem {
     this.conformity = conformity
   }
 
-  public get regions (): Region[] {
+  public get regions(): Region[] {
     return Object.values(this._regions)
   }
 
-  public get selected (): SelectedType {
+  public get selected(): SelectedType {
     if (this.hasRegions) {
       if (this.regions.every(({ selected }): boolean => !!selected)) {
         return true
@@ -88,7 +88,7 @@ export default class Zone extends SelectableItem {
     }
   }
 
-  public set selected (toggled) {
+  public set selected(toggled) {
     if (this.hasRegions) {
       this.regions.forEach((region): void => {
         region.selected = toggled
@@ -98,12 +98,17 @@ export default class Zone extends SelectableItem {
     }
   }
 
-  public get hasRegions (): boolean { return this._regions && this.regions.length > 0 }
+  public get hasRegions(): boolean {
+    return this._regions && this.regions.length > 0
+  }
 
-  public toJSON (): ZoneSerialization {
+  public toJSON(): ZoneSerialization {
     return {
       ...super.toJSON(),
-      regions: this.regions.length > 0 ? this.regions.map((region): RegionSerialization => region.toJSON()) : null,
+      regions:
+        this.regions.length > 0
+          ? this.regions.map((region): RegionSerialization => region.toJSON())
+          : null,
       conformity: this.conformity,
       thickness: this.thickness,
     }

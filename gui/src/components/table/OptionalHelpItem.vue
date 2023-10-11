@@ -1,27 +1,20 @@
 <template>
-  <div>
-    <v-tooltip
-      v-if="hasHelp"
-      bottom
-    >
-      <template #activator="{ on }">
-        <span v-on="on">{{ text }}</span>
-      </template>
-      <span>
-        {{ help }}
-      </span>
-    </v-tooltip>
-    <span v-else>
-      {{ text }}
+  <v-tooltip v-if="hasHelp" bottom>
+    <template #activator="{ props }">
+      <span v-bind="props">{{ text }}</span>
+    </template>
+    <span>
+      {{ helpText }}
     </span>
-  </div>
+  </v-tooltip>
+  <span v-else>
+    {{ text }}
+  </span>
 </template>
 
-<script lang="ts">
-/* eslint-disable @typescript-eslint/ban-ts-comment */
-import { Component, Prop, Vue } from 'vue-property-decorator'
-
+<script setup lang="ts">
 import { notEmpty } from '@/utils'
+import { computed } from 'vue'
 
 interface MaybeHelpText {
   help?: string
@@ -36,24 +29,21 @@ interface Named extends MaybeHelpText {
   name: string
   [_: string]: any
 }
+type Value = Text | Named | string | number
+const props = defineProps<{ value: Value }>()
 
-@Component
-export default class OptionalHelpItem extends Vue {
-  @Prop({ required: true })
-  readonly value!: Text | Named | string | number
+const text = computed(() => {
+  if (typeof props.value === 'string') return props.value
+  if (typeof props.value === 'number') return props.value.toString()
+  // Text or Named
+  return props.value.text ?? props.value.name
+})
 
-  get text (): string {
-    // @ts-ignore
-    return this.value.text || this.value.name || this.value
-  }
+const helpText = computed(() => {
+  // string or number
+  if (typeof props.value !== 'object') return ''
+  return props.value.help
+})
 
-  get help (): string {
-    // @ts-ignore
-    return this.value.help
-  }
-
-  get hasHelp (): boolean {
-    return notEmpty(this.help)
-  }
-}
+const hasHelp = computed(() => notEmpty(helpText.value))
 </script>

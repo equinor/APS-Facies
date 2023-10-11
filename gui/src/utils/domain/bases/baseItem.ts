@@ -18,28 +18,30 @@ export default class BaseItem implements Identifiable {
   protected readonly _excludeFromHash: string[]
 
   // eslint-disable-next-line no-use-before-define
-  public constructor ({ id }: BaseItemConfiguration = { id: undefined }) {
+  public constructor({ id }: BaseItemConfiguration = { id: undefined }) {
     if (!id) id = uuid()
     if (!isUUID(id)) throw TypeError('An item must have a valid UUID, as id')
     this.id = id
     this._excludeFromHash = []
   }
 
-  protected toJSON (): BaseItemSerialization {
+  protected toJSON(): BaseItemSerialization {
     return {
-      id: this.id
+      id: this.id,
     }
   }
 
-  protected _hashify (): any { return this.toJSON() }
+  protected _hashify(): any {
+    return this.toJSON()
+  }
 
-  protected get hash (): string {
+  protected get hash(): string {
     return hash(this._hashify(), {
-      excludeKeys: (key): boolean => this._excludeFromHash.includes(key)
+      excludeKeys: (key): boolean => this._excludeFromHash.includes(key),
     })
   }
 
-  protected objectify (): { [_: string]: any } {
+  protected objectify(): { [_: string]: any } {
     // Include all (computed) properties, while dumping state to JSON
     // This makes reconstruction / population _much_ easier
     // Adapted from https://stackoverflow.com/a/50785428, and https://stackoverflow.com/a/8024294
@@ -52,11 +54,11 @@ export default class BaseItem implements Identifiable {
         const desc = Object.getOwnPropertyDescriptor(proto, key)
         const hasGetter = desc && typeof desc.get === 'function'
         if (hasGetter) {
-          jsonObj[`${key}`] = this[`${key}`]
+          jsonObj[key] = this[key]
         }
       }
       // eslint-disable-next-line no-cond-assign
-    } while (proto = Object.getPrototypeOf(proto))
+    } while ((proto = Object.getPrototypeOf(proto)))
 
     return jsonObj
   }

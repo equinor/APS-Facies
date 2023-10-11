@@ -8,7 +8,7 @@
       label="Azimuth"
       unit="°"
       use-modulus
-      @update:error="e => update('azimuth', e)"
+      @update:error="(e: boolean) => update('azimuth', e)"
     />
     <dip-angle
       :value="value"
@@ -18,47 +18,47 @@
       label="Dip"
       unit="°"
       use-modulus
-      @update:error="e => update('dip', e)"
+      @update:error="(e: boolean) => update('dip', e)"
     />
   </div>
 </template>
 
-<script lang="ts">
-import { Component, Prop, Vue, Watch } from 'vue-property-decorator'
-
+<script setup lang="ts">
+import { GaussianRandomField } from '@/utils/domain'
+import { ref, watch } from 'vue'
 import StorableNumericField from '@/components/specification/StorableNumericField.vue'
 
-import { GaussianRandomField } from '@/utils/domain'
+const AzimuthAngle = StorableNumericField
+const DipAngle = StorableNumericField
 
 interface Invalid {
   azimuth: boolean
   dip: boolean
 }
 
-@Component({
-  components: {
-    azimuthAngle: StorableNumericField,
-    dipAngle: StorableNumericField,
-  },
+type Props = { value: GaussianRandomField }
+defineProps<Props>()
+
+const emit = defineEmits<{
+  (event: 'update:error', error: boolean): void
+}>()
+
+const invalid = ref<Invalid>({
+  azimuth: false,
+  dip: false,
 })
-export default class AnisotropyDirection extends Vue {
-  @Prop({ required: true })
-  readonly value!: GaussianRandomField
 
-  invalid: Invalid = {
-    azimuth: false,
-    dip: false,
-  }
+const propertyType = 'angle'
 
-  get propertyType (): string { return 'angle' }
+watch(
+  invalid,
+  () => {
+    emit('update:error', invalid.value.azimuth || invalid.value.dip)
+  },
+  { deep: true },
+)
 
-  @Watch('invalid', { deep: true })
-  onInvalidChange ({ azimuth, dip }: Invalid): void {
-    this.$emit('update:error', azimuth || dip)
-  }
-
-  update (type: 'dip' | 'azimuth', value: boolean): void {
-    Vue.set(this.invalid, type, value)
-  }
+function update(type: 'dip' | 'azimuth', value: boolean): void {
+  invalid.value[type] = value
 }
 </script>

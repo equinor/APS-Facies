@@ -7,7 +7,7 @@
       label="Parallel to Azimuth"
       unit="m"
       strictly-greater
-      @update:error="e => update('main', e)"
+      @update:error="(e: boolean) => invalid.main = e"
     />
     <perpendicular-range
       :value="value"
@@ -16,7 +16,7 @@
       label="Normal to Azimuth"
       unit="m"
       strictly-greater
-      @update:error="e => update('perpendicular', e)"
+      @update:error="(e: boolean) => invalid.perpendicular = e"
     />
     <vertical-range
       :value="value"
@@ -25,50 +25,41 @@
       label="Vertical (normal to dip)"
       unit="m"
       strictly-greater
-      @update:error="e => update('vertical', e)"
+      @update:error="(e: boolean) => invalid.vertical = e"
     />
   </div>
 </template>
 
-<script lang="ts">
-import { Component, Prop, Vue, Watch } from 'vue-property-decorator'
-
+<script setup lang="ts">
 import { GaussianRandomField } from '@/utils/domain'
 
+import { ref, watch } from 'vue'
 import StorableNumericField from '@/components/specification/StorableNumericField.vue'
+
+const MainRange = StorableNumericField
+const PerpendicularRange = StorableNumericField
+const VerticalRange = StorableNumericField
+
+type Props = { value: GaussianRandomField }
+defineProps<Props>()
+const emit = defineEmits<{
+  (event: 'update:error', error: boolean): void
+}>()
 
 interface Invalid {
   main: boolean
   perpendicular: boolean
   vertical: boolean
 }
-
-@Component({
-  components: {
-    MainRange: StorableNumericField,
-    PerpendicularRange: StorableNumericField,
-    VerticalRange: StorableNumericField,
-  },
+const invalid = ref<Invalid>({
+  main: false,
+  perpendicular: false,
+  vertical: false,
 })
-export default class RangeSpecification extends Vue {
-  @Prop({ required: true })
-  readonly value: GaussianRandomField
 
-  invalid: Invalid = {
-    main: false,
-    perpendicular: false,
-    vertical: false,
-  }
+const propertyType = 'range'
 
-  get propertyType (): string { return 'range' }
-
-  @Watch('invalid', { deep: true })
-  onInvalidChanged ({ vertical, perpendicular, main }: Invalid): void {
-    this.$emit('update:error', vertical || perpendicular || main)
-  }
-
-  update (type: string, value: boolean): void {
-    Vue.set(this.invalid, type, value)
-  }
-}
+watch(invalid, ({ vertical, perpendicular, main }) => {
+  emit('update:error', vertical || perpendicular || main)
+})
 </script>

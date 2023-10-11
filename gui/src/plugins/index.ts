@@ -1,7 +1,3 @@
 import './rms'
 import './swatches'
 import './vuetify'
-import './validation'
-import './asyncCumputed'
-import './tooltip'
-import './typescript'

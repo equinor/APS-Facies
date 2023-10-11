@@ -1,156 +1,150 @@
 <template>
-  <v-container
-    fluid
-  >
-    <v-row
-      align="center"
-      justify="center"
-    >
+  <v-container fluid>
+    <v-row align="center" justify="center">
       <section-title>Preview</section-title>
-      <preview-header
-        :value="rule"
-      />
+      <preview-header :value="rule" />
     </v-row>
     <v-row>
-      <v-expansion-panels
-        v-model="expanded"
-        accordion
-        multiple
-      >
+      <v-expansion-panels v-model="expanded" accordion multiple>
         <v-expansion-panel
           v-tooltip.bottom="truncationRuleError"
           :disabled="!hasTruncationRule"
         >
-          <v-expansion-panel-header>
+          <v-expansion-panel-title>
             <h3>Truncation rule</h3>
-          </v-expansion-panel-header>
-          <v-expansion-panel-content>
-            <v-col
-              class="justify-center align-center"
-            >
-              <truncation-map
-                v-if="!!rule"
-                :value="rule"
-              />
+          </v-expansion-panel-title>
+          <v-expansion-panel-text>
+            <v-col class="justify-center align-center">
+              <truncation-map v-if="!!rule" :value="rule" />
             </v-col>
-          </v-expansion-panel-content>
+          </v-expansion-panel-text>
         </v-expansion-panel>
         <v-expansion-panel
           v-tooltip.bottom="realizationError"
           :disabled="!hasRealization"
         >
-          <v-expansion-panel-header>
+          <v-expansion-panel-title>
             <h3>Realization</h3>
-          </v-expansion-panel-header>
-          <v-expansion-panel-content>
-            <facies-realization
-              v-if="rule"
-              :value="rule"
-            />
-          </v-expansion-panel-content>
+          </v-expansion-panel-title>
+          <v-expansion-panel-text>
+            <facies-realization v-if="rule" :value="rule" />
+          </v-expansion-panel-text>
         </v-expansion-panel>
         <v-expansion-panel>
-          <v-expansion-panel-header>
+          <v-expansion-panel-title>
             <h3>Transformed Gaussian Random Fields</h3>
-          </v-expansion-panel-header>
-          <v-expansion-panel-content>
-            <gaussian-plots
-              :value="fields"
-            />
-          </v-expansion-panel-content>
+          </v-expansion-panel-title>
+          <v-expansion-panel-text>
+            <gaussian-plots :value="fields" />
+          </v-expansion-panel-text>
         </v-expansion-panel>
         <v-expansion-panel
           v-tooltip.bottom="crossPlotErrors"
           :disabled="!hasEnoughFieldsForCrossPlot"
         >
-          <v-expansion-panel-header>
+          <v-expansion-panel-title>
             <h3>Cross plots</h3>
-          </v-expansion-panel-header>
-          <v-expansion-panel-content>
-            <cross-plots
-              :value="fields"
-            />
-          </v-expansion-panel-content>
+          </v-expansion-panel-title>
+          <v-expansion-panel-text>
+            <cross-plots :value="fields" />
+          </v-expansion-panel-text>
         </v-expansion-panel>
       </v-expansion-panels>
     </v-row>
   </v-container>
 </template>
 
-<script lang="ts">
-import { Component, Vue, Watch } from 'vue-property-decorator'
-
+<script setup lang="ts">
 import SectionTitle from '@/components/baseComponents/headings/SectionTitle.vue'
-
 import TruncationMap from '@/components/plot/TruncationMap.vue'
 import FaciesRealization from '@/components/plot/FaciesRealization.vue'
 import GaussianPlots from '@/components/plot/GaussianPlot/multiple.vue'
-
 import PreviewHeader from '@/components/visualization/preview/header.vue'
 import CrossPlots from '@/components/plot/CrossPlot/multiple.vue'
-
-import { Store } from '@/store/typing'
 import { GaussianRandomField, TruncationRule } from '@/utils/domain'
+import { useStore } from '../store'
+import { computed, watch } from 'vue'
 
-@Component({
-  components: {
-    SectionTitle,
-    CrossPlots,
-    PreviewHeader,
-    GaussianPlots,
-    FaciesRealization,
-    TruncationMap,
-  },
+const store = useStore()
+
+const expanded = computed<number[]>({
+  get: () => store.getters['panels/preview'],
+  set: (indices: number[]) =>
+    store.dispatch('panels/change', { type: 'preview', indices }),
 })
-export default class ElementPreview extends Vue {
-  get expanded (): number[] { return this.$store.getters['panels/preview'] }
-  set expanded (indices) { this.$store.dispatch('panels/change', { type: 'preview', indices }) }
 
-  get fields (): GaussianRandomField[] { return Object.values((this.$store as Store).getters.fields) }
+const fields = computed<GaussianRandomField[]>(() => {
+  return Object.values(store.getters.fields)
+})
 
-  get rule (): TruncationRule { return this.$store.getters.truncationRule }
+const rule = computed<TruncationRule>(() => {
+  return store.getters.truncationRule
+})
 
-  get hasTruncationRule (): boolean { return !!this.rule }
+const hasTruncationRule = computed<boolean>(() => {
+  return !!rule.value
+})
 
-  get hasRealization (): boolean { return !!(this.rule && this.rule.realization) }
+const hasRealization = computed<boolean>(() => {
+  return !!(rule.value && rule.value.realization)
+})
 
-  get hasEnoughFieldsForCrossPlot (): boolean { return this.fields.length >= 2 }
+const hasEnoughFieldsForCrossPlot = computed<boolean>(() => {
+  return fields.value.length >= 2
+})
 
-  get truncationRuleError (): string | undefined {
-    return !this.hasTruncationRule
-      ? 'No truncation rule has been specified'
-      : undefined
-  }
+const truncationRuleError = computed<string | undefined>(() => {
+  return !hasTruncationRule.value
+    ? 'No truncation rule has been specified'
+    : undefined
+})
 
-  get realizationError (): string | undefined {
-    return this.truncationRuleError || !this.hasRealization
-      ? 'The realization has not been simulated'
-      : undefined
-  }
+const realizationError = computed<string | undefined>(() => {
+  return truncationRuleError.value || !hasRealization.value
+    ? 'The realization has not been simulated'
+    : undefined
+})
 
-  get crossPlotErrors (): string | undefined {
-    return !this.hasEnoughFieldsForCrossPlot
-      ? 'There must be at least two Gaussian Fields before their cross variance plot can be made'
-      : undefined
-  }
+const crossPlotErrors = computed<string | undefined>(() => {
+  return !hasEnoughFieldsForCrossPlot.value
+    ? 'There must be at least two Gaussian Fields before their cross variance plot can be made'
+    : undefined
+})
 
-  @Watch('fields', { deep: true })
-  async showCrossPlot (fields: GaussianRandomField[]): Promise<void> {
-    if (fields.length < 2) {
-      await this.$store.dispatch('panels/close', { type: 'preview', panel: 'crossPlots' })
+watch(
+  fields,
+  async (value: GaussianRandomField[]) => {
+    if (value.length < 2) {
+      await store.dispatch('panels/close', {
+        type: 'preview',
+        panel: 'crossPlots',
+      })
     }
-  }
+  },
+  { deep: true },
+)
 
-  @Watch('rule', { deep: true })
-  async showTruncationMap (value: TruncationRule): Promise<void> {
+watch(
+  rule,
+  async (value: TruncationRule) => {
     const type = 'preview'
     if (value) {
-      await this.$store.dispatch('panels/open', { type, panel: 'truncationRuleMap' })
+      await store.dispatch('panels/open', {
+        type,
+        panel: 'truncationRuleMap',
+      })
 
-      await this.$store.dispatch(`panels/${value.realization ? 'open' : 'close'}`, { type, panel: 'truncationRuleRealization' })
+      await store.dispatch(`panels/${value.realization ? 'open' : 'close'}`, {
+        type,
+        panel: 'truncationRuleRealization',
+      })
     } else {
-      await this.$store.dispatch('panels/close', { type, panel: ['truncationRuleMap', 'truncationRuleRealization'] })
+      await store.dispatch('panels/close', {
+        type,
+        panel: ['truncationRuleMap', 'truncationRuleRealization'],
+      })
     }
-  }
-}
+  },
+  { deep: true },
+)
 </script>

@@ -7,7 +7,7 @@ describe('When making an FMU-updatable value', () => {
     expect(fmuValue.value).toBe(value)
   })
 
-  it('Should have a default value of \'non-updatable\', when none is given', () => {
+  it("Should have a default value of 'non-updatable', when none is given", () => {
     const value = new FmuUpdatableValue(0)
     expect(value.updatable).toBe(false)
   })

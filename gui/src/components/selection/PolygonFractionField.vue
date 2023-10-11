@@ -3,65 +3,76 @@
     :value="value.fraction"
     :append-icon="appendIcon"
     :disabled="disabled"
-    @input="fraction => updateFactor(value, fraction)"
+    @input="(fraction) => updateFactor(value, fraction)"
     @click:append="normalizeFractions()"
   />
 </template>
 
-<script lang="ts">
-import { Component, Prop, Vue } from 'vue-property-decorator'
-
+<script
+  setup
+  lang="ts"
+  generic="
+    T extends Polygon = Polygon, 
+    S extends PolygonSerialization = PolygonSerialization, 
+    P extends PolygonSpecification = PolygonSpecification
+  "
+>
 import FractionField from '@/components/selection/FractionField.vue'
 
-import Polygon, { PolygonSerialization, PolygonSpecification } from '@/utils/domain/polygon/base'
+import Polygon, {
+  PolygonSerialization,
+  PolygonSpecification,
+} from '@/utils/domain/polygon/base'
 import TruncationRule from '@/utils/domain/truncationRule/base'
 
 import { hasFaciesSpecifiedForMultiplePolygons } from '@/utils/queries'
 import { getId } from '@/utils'
-import { VuetifyIcon } from 'vuetify/types/services/icons'
+import { computed } from 'vue'
+import vuetify from '../../plugins/vuetify'
+import { useStore } from '../../store'
 
-@Component({
-  components: {
-    FractionField,
-  },
+type Props = {
+  value: T
+  rule: TruncationRule<T, S, P>
+}
+const props = defineProps<Props>()
+const store = useStore()
+
+const disabled = computed(() => {
+  return (
+    !hasFaciesSpecifiedForMultiplePolygons(
+      props.rule.polygons,
+      props.value.facies,
+    ) || !props.value.facies
+  )
 })
-export default class PolygonFractionField<
-  T extends Polygon = Polygon,
-  S extends PolygonSerialization = PolygonSerialization,
-  P extends PolygonSpecification = PolygonSpecification,
-> extends Vue {
-  @Prop({ required: true })
-  readonly value!: T
 
-  @Prop({ required: true })
-  readonly rule!: TruncationRule<T, S, P>
+// type: VuetifyIcon
+const appendIcon = computed(() => {
+  return disabled.value || props.rule.isPolygonFractionsNormalized(props.value)
+    ? ''
+    : vuetify.icons.values.refresh
+})
 
-  get disabled (): boolean {
-    return (
-      !hasFaciesSpecifiedForMultiplePolygons(this.rule.polygons, this.value.facies)
-      || !this.value.facies
-    )
-  }
+async function updateFactor(polygon: T, value: number): Promise<void> {
+  await store.dispatch(
+    'truncationRules/changeProportionFactors',
+    { rule: props.rule, polygon, value },
+    { root: true },
+  )
+}
 
-  get appendIcon (): VuetifyIcon {
-    return this.disabled || this.rule.isPolygonFractionsNormalized(this.value)
-      ? ''
-      : this.$vuetify.icons.values.refresh
-  }
-
-  async updateFactor (polygon: T, value: number): Promise<void> {
-    await this.$store.dispatch(
-      'truncationRules/changeProportionFactors',
-      { rule: this.rule, polygon, value }, { root: true }
-    )
-  }
-
-  async normalizeFractions (): Promise<void> {
-    const polygons: T[] = this.rule.polygons
-      .filter((polygon: T): boolean => getId(polygon.facies) === getId(this.value.facies))
-    const sum = polygons
-      .reduce((sum, polygon): number => polygon.fraction + sum, 0)
-    await Promise.all(polygons.map(polygon => this.updateFactor(polygon, polygon.fraction / sum)))
-  }
+async function normalizeFractions(): Promise<void> {
+  const polygons: T[] = props.rule.polygons.filter(
+    (polygon: T): boolean =>
+      getId(polygon.facies) === getId(props.value.facies),
+  )
+  const sum = polygons.reduce(
+    (sum, polygon): number => polygon.fraction + sum,
+    0,
+  )
+  await Promise.all(
+    polygons.map((polygon) => updateFactor(polygon, polygon.fraction / sum)),
+  )
 }
 </script>

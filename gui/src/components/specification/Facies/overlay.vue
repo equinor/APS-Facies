@@ -2,37 +2,35 @@
   <facies-specification
     :value="value"
     :rule="rule"
-    :disable="facies => backgroundFacies(facies)"
+    :disable="(facies) => backgroundFacies(facies)"
   />
 </template>
 
-<script lang="ts">
-import { Component, Prop, Vue } from 'vue-property-decorator'
-
+<script
+  setup
+  lang="ts"
+  generic="
+    T extends Polygon = Polygon,
+    S extends PolygonSerialization = PolygonSerialization,
+    P extends PolygonSpecification = PolygonSpecification,
+"
+>
 import FaciesSpecification from '@/components/specification/Facies/index.vue'
 
 import { OverlayPolygon, Polygon, Facies } from '@/utils/domain'
-import { PolygonSerialization, PolygonSpecification } from '@/utils/domain/polygon/base'
+import {
+  PolygonSerialization,
+  PolygonSpecification,
+} from '@/utils/domain/polygon/base'
 import OverlayTruncationRule from '@/utils/domain/truncationRule/overlay'
 
-@Component({
-  components: {
-    FaciesSpecification,
-  }
-})
-export default class OverlayFaciesSpecification<
-  T extends Polygon = Polygon,
-  S extends PolygonSerialization = PolygonSerialization,
-  P extends PolygonSpecification = PolygonSpecification,
-> extends Vue {
-  @Prop({ required: true })
-  readonly value!: OverlayPolygon
+type Props = {
+  value: OverlayPolygon
+  rule: OverlayTruncationRule<T, S, P>
+}
+const props = defineProps<Props>()
 
-  @Prop({ required: true })
-  readonly rule!: OverlayTruncationRule<T, S, P>
-
-  backgroundFacies (facies: Facies): boolean {
-    return this.rule.isUsedInBackground(facies)
-  }
+function backgroundFacies(facies: Facies): boolean {
+  return props.rule.isUsedInBackground(facies)
 }
 </script>

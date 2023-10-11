@@ -1,37 +1,31 @@
 <template>
-  <v-container
-    class="align justify center"
-    fluid
-  >
+  <v-container class="align justify center" fluid>
     <v-row>
-      <v-expansion-panels
-        v-model="expanded"
-        accordion
-        multiple
-        elevation="0"
-      >
+      <v-expansion-panels v-model="expanded" accordion multiple elevation="0">
         <section-title>{{ title }}</section-title>
         <v-expansion-panel
           v-tooltip.bottom-start="!hasFacies && 'No Facies has been selected'"
           :disabled="!hasFacies"
         >
-          <v-expansion-panel-header>
+          <v-expansion-panel-title>
             <section-title>Probabilities for Facies</section-title>
-          </v-expansion-panel-header>
-          <v-expansion-panel-content>
+          </v-expansion-panel-title>
+          <v-expansion-panel-text>
             <facies-probability-cube />
-          </v-expansion-panel-content>
+          </v-expansion-panel-text>
         </v-expansion-panel>
         <v-expansion-panel
-          v-tooltip.bottom="!hasEnoughFacies && 'Too few Facies has been selected'"
+          v-tooltip.bottom="
+            !hasEnoughFacies && 'Too few Facies has been selected'
+          "
           :disabled="!hasEnoughFacies"
         >
-          <v-expansion-panel-header>
+          <v-expansion-panel-title>
             <section-title>Truncation Rule</section-title>
-          </v-expansion-panel-header>
-          <v-expansion-panel-content>
+          </v-expansion-panel-title>
+          <v-expansion-panel-text>
             <truncation-rule />
-          </v-expansion-panel-content>
+          </v-expansion-panel-text>
         </v-expansion-panel>
         <gaussian-random-fields />
       </v-expansion-panels>
@@ -39,79 +33,84 @@
   </v-container>
 </template>
 
-<script lang="ts">
-import { Component, Vue, Watch } from 'vue-property-decorator'
-
+<script setup lang="ts">
 import GaussianRandomFields from '@/components/specification/GaussianRandomField/multiple.vue'
 import FaciesProbabilityCube from '@/components/specification/FaciesProbabilityCube/index.vue'
 import TruncationRule from '@/components/specification/TruncationRule/index.vue'
 import SectionTitle from '@/components/baseComponents/headings/SectionTitle.vue'
-import IconButton from '@/components/selection/IconButton.vue'
 
 import { isEmpty } from '@/utils'
 
 import { Facies } from '@/utils/domain'
+import { useStore } from '../store'
+import { computed, watch } from 'vue'
 
 type Option = 'number' | 'name'
 
-@Component({
-  components: {
-    IconButton,
-    SectionTitle,
-    FaciesProbabilityCube,
-    GaussianRandomFields,
-    TruncationRule,
-  },
+const store = useStore()
+const options = computed(() => {
+  const showNameOrNumber = store.state.options.showNameOrNumber
+  return {
+    zone: showNameOrNumber.zone.value as Option,
+    region: showNameOrNumber.region.value as Option,
+  }
 })
-export default class ElementSettings extends Vue {
-  get options (): { zone: Option, region: Option } {
-    const showNameOrNumber = this.$store.state.options.showNameOrNumber
-    return {
-      zone: showNameOrNumber.zone.value,
-      region: showNameOrNumber.region.value,
+
+const expanded = computed<number[]>({
+  get: () => store.getters['panels/settings'],
+  set: (indices: number[]) =>
+    store.dispatch('panels/change', { type: 'settings', indices }),
+})
+
+const title = computed<string>(() =>
+  `Settings for ${zoneName.value}`.concat(
+    useRegions.value ? ` / ${regionName.value}` : '',
+  ),
+)
+
+const useRegions = computed<boolean>(() => store.state.regions.use)
+
+// TODO: Combine common logic in zone/regionName
+const zoneName = computed<string>(() => {
+  const current = store.getters.zone
+  return isEmpty(current)
+    ? ''
+    : options.value.zone === 'name'
+    ? current.name
+    : `Zone ${current.code}`
+})
+
+const regionName = computed<string>(() => {
+  const current = store.getters.region
+  return isEmpty(current)
+    ? ''
+    : options.value.region === 'name'
+    ? current.name
+    : `Region ${current.code}`
+})
+
+const _facies = computed<Facies[]>(() => store.getters['facies/selected'])
+
+const hasFacies = computed<boolean>(() => _facies.value.length > 0)
+
+const hasEnoughFacies = computed<boolean>(
+  () => _facies.value.length >= 2,
+) /* TODO: Use a constant */
+
+watch(
+  _facies,
+  async () => {
+    await store.dispatch(`panels/${hasEnoughFacies.value ? 'open' : 'close'}`, {
+      type: 'settings',
+      panel: 'truncationRule',
+    })
+    if (!hasFacies.value) {
+      await store.dispatch('panels/close', {
+        type: 'settings',
+        panel: ['truncationRule', 'faciesProbability'],
+      })
     }
-  }
-
-  get expanded (): number[] { return this.$store.getters['panels/settings'] }
-  set expanded (indices) { this.$store.dispatch('panels/change', { type: 'settings', indices }) }
-
-  get title (): string { return `Settings for ${this.zoneName}`.concat(this.useRegions ? ` / ${this.regionName}` : '') }
-
-  get useRegions (): boolean {
-    return this.$store.state.regions.use
-  }
-
-  // TODO: Combine common logic in zone/regionName
-  get zoneName (): string {
-    const current = this.$store.getters.zone
-    return isEmpty(current)
-      ? ''
-      : this.options.zone === 'name'
-        ? current.name
-        : `Zone ${current.code}`
-  }
-
-  get regionName (): string {
-    const current = this.$store.getters.region
-    return isEmpty(current)
-      ? ''
-      : this.options.region === 'name'
-        ? current.name
-        : `Region ${current.code}`
-  }
-
-  get _facies (): Facies[] { return this.$store.getters['facies/selected'] }
-
-  get hasFacies (): boolean { return this._facies.length > 0 }
-
-  get hasEnoughFacies (): boolean { return this._facies.length >= 2 /* TODO: Use a constant */ }
-
-  @Watch('_facies', { deep: true })
-  async truncationRuleVisibility (): Promise<void> {
-    await this.$store.dispatch(`panels/${this.hasEnoughFacies ? 'open' : 'close'}`, { type: 'settings', panel: 'truncationRule' })
-    if (!this.hasFacies) {
-      await this.$store.dispatch('panels/close', { type: 'settings', panel: ['truncationRule', 'faciesProbability'] })
-    }
-  }
-}
+  },
+  { deep: true },
+)
 </script>
