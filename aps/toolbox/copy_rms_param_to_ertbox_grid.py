@@ -114,7 +114,8 @@ copy_rms_param_to_ertbox_grid.run(params)
     ]
     check_missing_keywords_list(params, required_kw_list)
     mode = params['Mode']
-
+    if params["debug_level"] == Debug.VERBOSE:
+        print(f"-- Realization number:  {project.current_realisation}")
     if mode == 'from_geo_to_ertbox':
         # The names of the parameters in ertbox is automatically set to
         # <zone_name>_<param_name_from_geomodel> since it follows
@@ -210,6 +211,7 @@ def from_geogrid_to_ertbox(project, params):
 
 
 def from_ertbox_to_geogrid(project, params):
+    real_number = project.current_realisation
     # Assign user specified parameters
     grid_model_name = params['GridModelName']
     ertbox_grid_model_name = params['ERTBoxGridName']
@@ -266,7 +268,7 @@ def from_ertbox_to_geogrid(project, params):
                 rms_property = ertbox_grid_model.properties[param_name]
             except KeyError:
                 raise ValueError(f"The parameter: {param_name} does not exist or is empty for grid model: {ertbox_grid_model_name}")
-            values = rms_property.get_values()
+            values = rms_property.get_values(realisation=real_number)
             field_values = values.reshape(nx, ny, nz_ertbox)
             if conformity in [Conform.Proportional, Conform.TopConform]:
                 # Only get the top n cells of field_values
