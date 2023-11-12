@@ -110,7 +110,7 @@ copy_rms_param_to_ertbox_grid.run(params)
     required_kw_list = [
         "Mode",
         "GridModelName", "ERTBoxGridName",
-        "ZoneParam", "Conformity",
+        "ZoneParam", "Conformity","SaveActiveParam",
     ]
     check_missing_keywords_list(params, required_kw_list)
     mode = params['Mode']
@@ -321,6 +321,26 @@ def _read_model_file_yml(model_file_name, debug_level=Debug.OFF):
     spec = spec_all[kw_parent] if kw_parent in spec_all else None
     if spec is None:
         raise ValueError(f"Missing keyword: {kw_parent} ")
+
+    valid_keywords =[
+        "Mode", "GridModelName", "ERTBoxGridName",
+        "ZoneParam", "GeoGridParameters", "ErtboxParameters",
+        "Conformity", "SaveActiveParam", "ExtrapolationMethod",
+        ]
+    unknown_keys = []
+    for key in list(spec.keys()):
+        if key not in valid_keywords:
+            unknown_keys.append(key)
+    if len(unknown_keys) > 0:
+        print("Unknown keywords found:")
+        for key in unknown_keys:
+            print(f"  {key}")
+        print("Defined keywords are:")
+        for key in valid_keywords:
+            print(f"  {key}")
+        raise KeyError("Unknown keywords are specified.")
+
+
     valid_strings = ['from_geo_to_ertbox', 'from_ertbox_to_geo']
     mode = get_text_value(spec, kw_parent, 'Mode', default='from_geo_to_ertbox')
     if mode not in valid_strings:
@@ -374,7 +394,7 @@ def _read_model_file_yml(model_file_name, debug_level=Debug.OFF):
         conformity_per_zone[key] = Conform(text_value)
 
 
-    save_active_param = get_bool_value(spec, 'SaveActiveParam', False)
+    save_active_param = get_bool_value(spec, 'SaveActiveParam', True)
 
     param_dict ={
         'Mode': mode,
