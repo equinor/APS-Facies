@@ -120,6 +120,7 @@ def get_trend_param_names_from_aps_model(
                             "is empty. Must be non-empty."
                         )
                     param_name_list.append(trend_param_name)
+
         zone_dict[zone_name] = (zone_number, region_number, zone_model.grid_layout, param_name_list)
         if len(param_name_list) > 0:
             use_rms_param_trend = True
@@ -275,16 +276,31 @@ def get_grid_indices(geogrid, nx, ny,start_layer, end_layer):
     return i_indices, j_indices, k_indices, zone_cell_numbers
 
 
+def get_region_param(region_param_name:str, geogrid_model, real_number):
+    # Check region parameter if used
+    region_param = None
+    if len(region_param_name) > 0:
+        if region_param_name in geogrid_model.properties:
+            region_param = geogrid_model.properties[region_param_name]
+            if region_param.is_empty(real_number):
+                raise ValueError(f"Specified region parameter {region_param_name} is empty.")
+        else:
+            raise ValueError(f"Specified region parameter {region_param_name} does not exist in {geogrid_model.name}")
+    return region_param
+
+
+
 def copy_from_geo_to_ertbox_grid(
         project,
         geo_grid_model_name: str,
         ertbox_grid_model_name: str,
         zone_dict: dict,
         extrapolation_method: ExtrapolationMethod,
-        debug_level: Debug,
-        save_active_param=True,
-        normalize_trend=False,
-        not_aps_workflow=False,
+        discrete_param_names: list = [],
+        debug_level: Debug = Debug.OFF,
+        save_active_param: bool = False,
+        normalize_trend: bool = False,
+        not_aps_workflow: bool = False,
 ):
     """
     zone_dict[zone_name] = (zone_number, region_number, conformity, param_name_list)
@@ -340,7 +356,6 @@ def copy_from_geo_to_ertbox_grid(
             print(f"--- number_layers: {number_layers}")
             print(f"--- start_layer: {start_layer}  end_layer: {end_layer}")
 
-        # TODO  Update this to handle regions when used
         i_indices, j_indices, k_indices, zone_cell_numbers = \
             get_grid_indices(geogrid, nx, ny, start_layer, end_layer)
 
@@ -366,6 +381,36 @@ def copy_from_geo_to_ertbox_grid(
                 debug_level
             )
 
+        for param_name in discrete_param_names:
+            ertbox_values_3d_masked = \
+                copy_parameters_for_zone(
+                    zone_name,
+                    geogrid_model,
+                    ertbox_grid_model_name,
+                    param_name,
+                    i_indices,
+                    j_indices,
+                    k_indices,
+                    zone_cell_numbers,
+                    conformity,
+                    nx, ny, nz, nz_ertbox,
+                    number_layers,
+                    start_layer,
+                    end_layer,
+                    real_number,
+                    param_type="int",
+                    debug_level=debug_level,
+                )
+            # Inactive cells filled with -1
+            ertbox_values_3d = ertbox_values_3d_masked.filled(0)
+            ertbox_values = np.reshape(ertbox_values_3d, nx*ny*nz_ertbox)
+            update_ertbox_properties_int(
+                prefix, zone_name, param_name,
+                ertbox_grid_model,
+                ertbox_values,
+                real_number,
+                debug_level=debug_level)
+
         for param_name in param_name_list:
             # Copy parameter for give zone from geogrid to ertbox grid
             ertbox_values_3d_masked = \
@@ -384,7 +429,8 @@ def copy_from_geo_to_ertbox_grid(
                     start_layer,
                     end_layer,
                     real_number,
-                    debug_level,
+                    param_type="float",
+                    debug_level=debug_level,
                 )
 
             # Fill values for all inactive cells in ertbox
@@ -415,24 +461,59 @@ def copy_from_geo_to_ertbox_grid(
                     ertbox_values[:] = 0.0
 
             # Create /Update ertbox properties in RMS
-            full_param_name = prefix + zone_name + "_" + param_name
-            if full_param_name in ertbox_grid_model.properties:
-                ertbox_param = ertbox_grid_model.properties[full_param_name]
-            else:
-                ertbox_param = ertbox_grid_model.properties.create(full_param_name,
-                    property_type=roxar.GridPropertyType.continuous,
-                    data_type=np.float32)
-
-            ertbox_param.set_values(ertbox_values, real_number)
+            update_ertbox_properties_float(
+                prefix, zone_name, param_name,
+                ertbox_grid_model,
+                ertbox_values,
+                real_number,
+                normalize_trend=normalize_trend,
+                debug_level=debug_level)
 
 
-            if debug_level >= Debug.VERBOSE:
-                if normalize_trend:
-                    print(f"-- Update parameter (normalized): {full_param_name}")
-                else:
-                    print(f"-- Update parameter: {full_param_name}")
 
+def update_ertbox_properties_float(
+        prefix, zone_name, param_name,
+        ertbox_grid_model,
+        ertbox_values,
+        real_number,
+        normalize_trend="False",
+        debug_level=Debug.OFF):
 
+    # Create /Update ertbox properties in RMS
+    full_param_name = prefix + zone_name + "_" + param_name
+    if full_param_name in ertbox_grid_model.properties:
+        ertbox_param = ertbox_grid_model.properties[full_param_name]
+    else:
+        ertbox_param = ertbox_grid_model.properties.create(full_param_name,
+            property_type=roxar.GridPropertyType.continuous,
+            data_type=np.float32)
+    ertbox_param.set_values(ertbox_values, real_number)
+
+    if debug_level >= Debug.VERBOSE:
+        if normalize_trend:
+            print(f"-- Update parameter (normalized): {full_param_name}")
+        else:
+            print(f"-- Update parameter: {full_param_name}")
+
+def update_ertbox_properties_int(
+        prefix, zone_name, param_name,
+        ertbox_grid_model,
+        ertbox_values,
+        real_number,
+        debug_level=Debug.OFF):
+
+    # Create /Update ertbox properties in RMS
+    full_param_name = prefix + zone_name + "_" + param_name
+    if full_param_name in ertbox_grid_model.properties:
+        ertbox_param = ertbox_grid_model.properties[full_param_name]
+    else:
+        ertbox_param = ertbox_grid_model.properties.create(full_param_name,
+            property_type=roxar.GridPropertyType.discrete,
+            data_type=np.uint16)
+    ertbox_param.set_values(ertbox_values, real_number)
+
+    if debug_level >= Debug.VERBOSE:
+        print(f"-- Update parameter: {full_param_name}")
 
 
 def extrapolate_values_for_zone(
@@ -500,7 +581,8 @@ def copy_parameters_for_zone(
         start_layer,
         end_layer,
         real_number,
-        debug_level,
+        param_type="float",
+        debug_level=Debug.OFF,
 
     ):
     """
@@ -518,12 +600,20 @@ def copy_parameters_for_zone(
         print(f"-- Zone: {zone_name} Parameter:{param_name} ")
 
     # Mask all values for geogrid parameter except the active values within the zone
-    param_values_3d_all = ma.masked_all((nx, ny, nz), dtype=np.float32)
+    if param_type == "float":
+        param_values_3d_all = ma.masked_all((nx, ny, nz), dtype=np.float32)
+    elif param_type == "int":
+        param_values_3d_all = ma.masked_all((nx, ny, nz), dtype=np.uint16)
+    else:
+        raise ValueError(f"Parameter type must be 'float' or 'int' ")
     param_values_3d_all[i_indices, j_indices, k_indices] = param_values_active[zone_cell_numbers]
 
 
     # Initially mask all values for ertbox parameter
-    ertbox_values_3d_masked = ma.masked_all((nx,ny,nz_ertbox), dtype=np.float32)
+    if param_type == "float":
+        ertbox_values_3d_masked = ma.masked_all((nx,ny,nz_ertbox), dtype=np.float32)
+    else:
+        ertbox_values_3d_masked = ma.masked_all((nx,ny,nz_ertbox), dtype=np.uint16)
 
     if debug_level >= Debug.VERY_VERBOSE:
         print(
@@ -597,7 +687,6 @@ def define_active_parameters_in_ertbox(
             print(f"--- number_layers: {number_layers}")
             print(f"--- start_layer: {start_layer}  end_layer: {end_layer}")
 
-        # TODO Also handle regions for active parameter
         i_indices, j_indices, k_indices, _ = get_grid_indices(geogrid, nx, ny, start_layer, end_layer)
 
         prefix = "aps_"
@@ -630,7 +719,7 @@ def  active_params_in_zone(
 
     # Define active parameter for geogrid
     active_3d = np.zeros((geo_nx,geo_ny,geo_nz),dtype=np.int32)
-    active_3d[geo_i_indices,geo_j_indices,geo_k_indices] = 1
+    active_3d[geo_i_indices, geo_j_indices, geo_k_indices] = 1
 
 
     # Initially mask all values for ertbox parameter
@@ -674,6 +763,7 @@ def ertbox_active_param_to_rms(prefix, real_number, zone_name, ertbox_grid_model
 
 def run(*, project, 
     save_active_param_to_ertbox=True,
+    save_region_param_to_ertbox=False,
     normalize_trend=True, 
         **kwargs):
     """
@@ -688,11 +778,18 @@ def run(*, project,
     EXTEND_LAYER_MEAN -  See doc string for copy_from_geo_to_ertbox_grid.
     REPEAT_LAYER_MEAN - See doc string for copy_from_geo_to_ertbox_grid.
     """
-    if not (kwargs['fmu_mode'] and kwargs['fmu_simulate_fields']):
+    if 'fmu_mode' in kwargs and 'fmu_simulate_fields' in kwargs:
+        if not (kwargs['fmu_mode'] and kwargs['fmu_simulate_fields']):
             return
 
     aps_model = kwargs['aps_model']
     geo_grid_model_name = aps_model.grid_model_name
+
+    if save_region_param_to_ertbox:
+        region_param_name = aps_model.region_parameter
+        discrete_param_names = []
+        discrete_param_names.append(region_param_name)
+
     ertbox_grid_model_name = kwargs['fmu_simulation_grid_name']
     debug_level = kwargs['debug_level']
     trend_extrapolation_method = kwargs['extrapolation_method']
@@ -713,6 +810,17 @@ def run(*, project,
             debug_level=debug_level
         )
 
+    if save_region_param_to_ertbox:
+        copy_from_geo_to_ertbox_grid(
+            project,
+            geo_grid_model_name,
+            ertbox_grid_model_name,
+            zone_dict,
+            trend_extrapolation_method,
+            discrete_param_names=discrete_param_names,
+            debug_level=debug_level,
+        )
+
     if not use_rms_param_trend:
         # No trend parameters to copy from geogrid to ertbox grid
         return
@@ -730,8 +838,7 @@ def run(*, project,
             ertbox_grid_model_name,
             zone_dict,
             trend_extrapolation_method,
-            debug_level,
-            save_active_param=False,
+            debug_level=debug_level,
             normalize_trend=normalize_trend)
 
     if debug_level >= Debug.ON:

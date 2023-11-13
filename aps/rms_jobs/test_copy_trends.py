@@ -19,8 +19,11 @@ def test_copy_from_geo_to_ertbox_grid(project):
         'debug_level': debug_level,
         'extrapolation_method': extrapolation_method,
     } 
+    run(project=project,
+        save_region_param_to_ertbox=True,
+        normalize_trend=True,
+        **kwargs)
 
-    run(project=project,save_trend_param=True, **kwargs)
 
 if __name__ == "__main__":
     test_copy_from_geo_to_ertbox_grid(project)

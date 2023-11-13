@@ -23,7 +23,8 @@ Resample:
     5: BaseConform
     6: BaseConform
 
-    
+  SaveActiveParam: True
+
 # Available extrapolation methods:
 #  zero, mean, extend, repeat,
 #  extend_layer_mean, repeat_layer_mean 

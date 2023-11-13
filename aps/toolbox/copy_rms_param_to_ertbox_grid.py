@@ -148,6 +148,10 @@ def from_geogrid_to_ertbox(project, params):
     # Optional parameter
     save_active_param = params.get('SaveActiveParam', False)
 
+    # Check type and existence of geogrid parameters
+    (continuous_type_param_dict, discrete_type_param_list) = \
+        check_geogrid_parameters(project, grid_model_name, param_names_geogrid_dict)
+
     # Some conversion
     conformity_dict = {}
     for znr, conform_text in conformity_dict_input.items():
@@ -187,13 +191,21 @@ def from_geogrid_to_ertbox(project, params):
             f"\nCopy RMS 3D parameters from {grid_model_name} "
             f"to {ertbox_grid_model_name} for zones:"
         )
+    if debug_level >= Debug.ON:
+        print("Continuous parameters:")
     for zone_number, zone_name in zone_code_names.items():
         if zone_number in param_names_geogrid_dict and zone_number in conformity_dict:
             zone_dict[zone_name] = \
-                (zone_number, 0, conformity_dict[zone_number], param_names_geogrid_dict[zone_number])
+                (zone_number, 0, conformity_dict[zone_number], continuous_type_param_dict[zone_number])
             zone_names_used.append(zone_name)
             if debug_level >= Debug.ON:
-                print(f"  {zone_name}: {param_names_geogrid_dict[zone_number]} ")
+                print(f"  {zone_name}:  {continuous_type_param_dict[zone_number]} ")
+
+    if debug_level >= Debug.ON:
+        print("Discrete parameters:")
+        for p in discrete_type_param_list:
+            print(f" {p} ")
+
 
     copy_from_geo_to_ertbox_grid(
             project,
@@ -201,13 +213,48 @@ def from_geogrid_to_ertbox(project, params):
             ertbox_grid_model_name,
             zone_dict,
             method,
-            debug_level,
+            discrete_param_names=discrete_type_param_list,
+            debug_level=debug_level,
             save_active_param=save_active_param,
             normalize_trend=False,
             not_aps_workflow=True)
 
     if debug_level >= Debug.ON:
         print(f"- Finished copy rms parameters from {grid_model_name} to {ertbox_grid_model_name} ")
+
+
+def check_geogrid_parameters(project, grid_model_name:str, param_names_geogrid_dict: dict):
+    if grid_model_name in project.grid_models:
+        grid_model = project.grid_models[grid_model_name]
+    else:
+        raise ValueError(f"Grid model: {grid_model_name} does not exists.")
+    if grid_model.is_empty(project.current_realisation):
+        raise ValueError(f"Grid model: {grid_model.name} is empty.")
+    properties = grid_model.properties
+    continuous_type_param_dict = {}
+    discrete_type_param_list = []
+    for zone_number, property_names in param_names_geogrid_dict.items():
+        continuous_type_param_list = []
+        for pname in property_names:
+            if pname not in properties:
+                raise ValueError(f"Grid parameter: {pname} does not exists for grid model: {grid_model.name}  ")
+
+            prop = properties[pname]
+            if prop.is_empty(project.current_realisation):
+                raise ValueError(f"Grid property: {pname} is empty for grid model: {grid_model.name}")
+            if prop.type == roxar.GridPropertyType.continuous:
+                continuous_type_param_list.append(pname)
+            elif prop.type == roxar.GridPropertyType.discrete:
+                if pname not in discrete_type_param_list:
+                    discrete_type_param_list.append(pname)
+            else:
+                raise ValueError(
+                    f"Grid parameter: {pname} for grid model: {grid_model.name} "
+                    f"has type: {prop.type} which is not implemented in this script."
+                )
+
+        continuous_type_param_dict[zone_number] = continuous_type_param_list
+    return continuous_type_param_dict, discrete_type_param_list
 
 
 def from_ertbox_to_geogrid(project, params):
