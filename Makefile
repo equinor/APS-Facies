@@ -40,7 +40,7 @@ ifeq ($(MODE),production)
 REMOVE_APS_GUI_TEMP_FOLDER := --move
 endif
 
-GIT_VERSION  = $(shell git --version)
+GIT_VERSION  = "$(shell git --version)"
 
 # Time stamp format YY daynumber_in_year hour minutes
 BUILD_NUMBER := $(shell date "+%y%j%H%M")
