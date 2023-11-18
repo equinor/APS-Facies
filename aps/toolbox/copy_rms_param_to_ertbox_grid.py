@@ -110,11 +110,12 @@ copy_rms_param_to_ertbox_grid.run(params)
     required_kw_list = [
         "Mode",
         "GridModelName", "ERTBoxGridName",
-        "ZoneParam", "Conformity",
+        "ZoneParam", "Conformity","SaveActiveParam",
     ]
     check_missing_keywords_list(params, required_kw_list)
     mode = params['Mode']
-
+    if params["debug_level"] == Debug.VERBOSE:
+        print(f"-- Realization number:  {project.current_realisation}")
     if mode == 'from_geo_to_ertbox':
         # The names of the parameters in ertbox is automatically set to
         # <zone_name>_<param_name_from_geomodel> since it follows
@@ -146,6 +147,10 @@ def from_geogrid_to_ertbox(project, params):
 
     # Optional parameter
     save_active_param = params.get('SaveActiveParam', False)
+
+    # Check type and existence of geogrid parameters
+    (continuous_type_param_dict, discrete_type_param_list) = \
+        check_geogrid_parameters(project, grid_model_name, param_names_geogrid_dict)
 
     # Some conversion
     conformity_dict = {}
@@ -186,13 +191,21 @@ def from_geogrid_to_ertbox(project, params):
             f"\nCopy RMS 3D parameters from {grid_model_name} "
             f"to {ertbox_grid_model_name} for zones:"
         )
+    if debug_level >= Debug.ON:
+        print("Continuous parameters:")
     for zone_number, zone_name in zone_code_names.items():
         if zone_number in param_names_geogrid_dict and zone_number in conformity_dict:
             zone_dict[zone_name] = \
-                (zone_number, 0, conformity_dict[zone_number], param_names_geogrid_dict[zone_number])
+                (zone_number, 0, conformity_dict[zone_number], continuous_type_param_dict[zone_number])
             zone_names_used.append(zone_name)
             if debug_level >= Debug.ON:
-                print(f"  {zone_name}: {param_names_geogrid_dict[zone_number]} ")
+                print(f"  {zone_name}:  {continuous_type_param_dict[zone_number]} ")
+
+    if debug_level >= Debug.ON:
+        print("Discrete parameters:")
+        for p in discrete_type_param_list:
+            print(f" {p} ")
+
 
     copy_from_geo_to_ertbox_grid(
             project,
@@ -200,7 +213,8 @@ def from_geogrid_to_ertbox(project, params):
             ertbox_grid_model_name,
             zone_dict,
             method,
-            debug_level,
+            discrete_param_names=discrete_type_param_list,
+            debug_level=debug_level,
             save_active_param=save_active_param,
             normalize_trend=False,
             not_aps_workflow=True)
@@ -209,7 +223,42 @@ def from_geogrid_to_ertbox(project, params):
         print(f"- Finished copy rms parameters from {grid_model_name} to {ertbox_grid_model_name} ")
 
 
+def check_geogrid_parameters(project, grid_model_name:str, param_names_geogrid_dict: dict):
+    if grid_model_name in project.grid_models:
+        grid_model = project.grid_models[grid_model_name]
+    else:
+        raise ValueError(f"Grid model: {grid_model_name} does not exists.")
+    if grid_model.is_empty(project.current_realisation):
+        raise ValueError(f"Grid model: {grid_model.name} is empty.")
+    properties = grid_model.properties
+    continuous_type_param_dict = {}
+    discrete_type_param_list = []
+    for zone_number, property_names in param_names_geogrid_dict.items():
+        continuous_type_param_list = []
+        for pname in property_names:
+            if pname not in properties:
+                raise ValueError(f"Grid parameter: {pname} does not exists for grid model: {grid_model.name}  ")
+
+            prop = properties[pname]
+            if prop.is_empty(project.current_realisation):
+                raise ValueError(f"Grid property: {pname} is empty for grid model: {grid_model.name}")
+            if prop.type == roxar.GridPropertyType.continuous:
+                continuous_type_param_list.append(pname)
+            elif prop.type == roxar.GridPropertyType.discrete:
+                if pname not in discrete_type_param_list:
+                    discrete_type_param_list.append(pname)
+            else:
+                raise ValueError(
+                    f"Grid parameter: {pname} for grid model: {grid_model.name} "
+                    f"has type: {prop.type} which is not implemented in this script."
+                )
+
+        continuous_type_param_dict[zone_number] = continuous_type_param_list
+    return continuous_type_param_dict, discrete_type_param_list
+
+
 def from_ertbox_to_geogrid(project, params):
+    real_number = project.current_realisation
     # Assign user specified parameters
     grid_model_name = params['GridModelName']
     ertbox_grid_model_name = params['ERTBoxGridName']
@@ -266,7 +315,7 @@ def from_ertbox_to_geogrid(project, params):
                 rms_property = ertbox_grid_model.properties[param_name]
             except KeyError:
                 raise ValueError(f"The parameter: {param_name} does not exist or is empty for grid model: {ertbox_grid_model_name}")
-            values = rms_property.get_values()
+            values = rms_property.get_values(realisation=real_number)
             field_values = values.reshape(nx, ny, nz_ertbox)
             if conformity in [Conform.Proportional, Conform.TopConform]:
                 # Only get the top n cells of field_values
@@ -319,6 +368,26 @@ def _read_model_file_yml(model_file_name, debug_level=Debug.OFF):
     spec = spec_all[kw_parent] if kw_parent in spec_all else None
     if spec is None:
         raise ValueError(f"Missing keyword: {kw_parent} ")
+
+    valid_keywords =[
+        "Mode", "GridModelName", "ERTBoxGridName",
+        "ZoneParam", "GeoGridParameters", "ErtboxParameters",
+        "Conformity", "SaveActiveParam", "ExtrapolationMethod",
+        ]
+    unknown_keys = []
+    for key in list(spec.keys()):
+        if key not in valid_keywords:
+            unknown_keys.append(key)
+    if len(unknown_keys) > 0:
+        print("Unknown keywords found:")
+        for key in unknown_keys:
+            print(f"  {key}")
+        print("Defined keywords are:")
+        for key in valid_keywords:
+            print(f"  {key}")
+        raise KeyError("Unknown keywords are specified.")
+
+
     valid_strings = ['from_geo_to_ertbox', 'from_ertbox_to_geo']
     mode = get_text_value(spec, kw_parent, 'Mode', default='from_geo_to_ertbox')
     if mode not in valid_strings:
@@ -372,7 +441,7 @@ def _read_model_file_yml(model_file_name, debug_level=Debug.OFF):
         conformity_per_zone[key] = Conform(text_value)
 
 
-    save_active_param = get_bool_value(spec, 'SaveActiveParam', False)
+    save_active_param = get_bool_value(spec, 'SaveActiveParam', True)
 
     param_dict ={
         'Mode': mode,
