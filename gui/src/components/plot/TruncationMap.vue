@@ -22,11 +22,9 @@ import rms from '@/api/rms'
 
 import StaticPlot from '@/components/plot/StaticPlot.vue'
 
-import GlobalFacies from '@/utils/domain/facies/global'
-
 import { makeTruncationRuleSpecification } from '@/utils'
 import { plotify, PlotSpecification } from '@/utils/plotting'
-import { computed, watch, ref } from 'vue'
+import { ref, watch } from 'vue'
 import type { TruncationRule } from '@/utils/domain/truncationRule'
 import type { Polygon } from '@/utils/domain'
 import type { PolygonSerialization, PolygonSpecification } from '@/utils/domain/polygon/base'
@@ -46,29 +44,23 @@ const data = ref<PlotSpecification>({
   annotations: [],
 })
 
-const selectedFacies = computed<GlobalFacies[]>(
-  () => faciesGlobalStore.selected,
-)
-
-function canUpdate() {
-  return ruleStore.ready(props.value)
-}
-
-async function getPlotSpecification() {
-  return plotify(
-    await rms.truncationPolygons(makeTruncationRuleSpecification(props.value)),
-    selectedFacies.value,
-  )
-}
-
 watch(
-  selectedFacies,
+  [
+    () => props.value,
+    // Vue struggles with changes in class properties
+    () => props.value.facies,
+    () => props.value.polygons.map(polygon => polygon.facies?.previewProbability),
+  ],
   async () => {
-    // To detect changes in alias
-    if (canUpdate()) {
-      data.value = await getPlotSpecification()
-    }
-  },
-  { deep: true },
-)
+    if (ruleStore.ready(props.value)) {
+
+      data.value = plotify(
+        await rms.truncationPolygons(makeTruncationRuleSpecification(props.value)),
+        faciesGlobalStore.selected,
+      )}
+  }, {
+    deep: true,
+    immediate: true,
+  })
+
 </script>
