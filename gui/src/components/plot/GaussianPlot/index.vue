@@ -1,6 +1,6 @@
 <template>
   <static-plot
-    v-tooltip.bottom="errorMessage"
+    v-tooltip.bottom="_disabled ? 'The field has changed since it was simulated' : undefined"
     :data-definition="dataDefinition"
     :disabled="_disabled"
     :expand="expand"
@@ -55,8 +55,5 @@ const dataDefinition = computed<Partial<PlotData>[]>(() => [
 
 const _disabled = computed(
   () => props.disabled || !props.value.isRepresentative,
-)
-const errorMessage = computed(() =>
-  _disabled ? 'The field has changed since it was simulated' : undefined,
 )
 </script>
