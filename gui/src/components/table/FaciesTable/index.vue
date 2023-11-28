@@ -11,7 +11,7 @@
     :select-disabled="!canSelect"
     :select-error="selectFaciesError"
   >
-    <template #item="{ item: facies }">
+    <template #item="{ item: facies }: {item: GlobalFacies }">
       <td class="dense">
         <informational-icons :value="facies" :current="currentId" />
       </td>

@@ -81,7 +81,7 @@ interface AdditionalRule {
 
 type InternalValue = BigNumber | number | string | null
 
-type Props = {
+type Props<T extends number> = {
   modelValue: FmuUpdatable<T> | number | null
   label: string
   valueType?: string
