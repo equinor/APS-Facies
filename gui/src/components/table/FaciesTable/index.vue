@@ -23,11 +23,11 @@
           v-else
           :value="facies"
           field="name"
-          @submit="changeName"
+          @submit="name => changeName(facies, name as string)"
         />
       </td>
       <td v-if="!hideAlias" class="text-left">
-        <editable-cell :value="facies" field="alias" @submit="changeAlias" />
+        <editable-cell :value="facies" field="alias" @submit="(alias) => changeAlias(facies, alias as string)" />
       </td>
       <td class="text-left">
         <span v-if="isFaciesFromRms(facies)">
@@ -39,7 +39,7 @@
           :restrictions="faciesCodeRestrictions(facies)"
           field="code"
           numeric
-          @submit="changeCode"
+          @submit="code => changeCode(facies, code as number)"
         />
       </td>
       <td
