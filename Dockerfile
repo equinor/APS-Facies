@@ -25,6 +25,7 @@ RUN --mount=type=cache,target=/var/cache/apt --mount=type=cache,target=/var/lib/
     apt autoremove -y
 
 
+RUN poetry config virtualenvs.create false --local
 COPY pyproject.toml poetry.lock ./
 RUN poetry install
 
@@ -40,7 +41,7 @@ COPY aps/__init__.py ./aps/
 COPY libraries/rms-mock/_roxar ./_roxar
 COPY libraries/rms-mock/roxar ./roxar
 
-CMD ["poetry", "run", "flask", "--app", "aps/api/app.py", "run", "--host", "0.0.0.0"]
+CMD ["flask", "--app", "aps/api/app.py", "run", "--host", "0.0.0.0"]
 
 
 FROM python AS truncation-rules
