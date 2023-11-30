@@ -5,9 +5,8 @@
         <icon-button icon="add" @click="add" />
       </v-col>
       <v-col cols="2">
-        <floating-tooltip :disabled="canRemove" trigger="hover">
+        <floating-tooltip :disabled="canRemove" trigger="hover" v-tooltip="removeError ?? undefined">
           <icon-button icon="remove" :disabled="!canRemove" @click="remove" />
-          <template #popper>{{ removeError }}</template>
         </floating-tooltip>
       </v-col>
       <v-col cols="8" />
