@@ -3,7 +3,7 @@ FROM node:16.20.2-alpine3.18 AS node
 
 ENV CODE=/code
 ENV NODE_MODULES=$CODE/node_modules
-ENV TRUNCATION_RULES=$CODE/gui/src/store/templates/truncationRules.json
+ENV TRUNCATION_RULES=src/store/templates/truncationRules.json
 
 FROM bitnami/nginx:1.25.2-debian-11-r46 AS nginx
 FROM --platform=amd64 python:3.8.18-slim-bookworm AS python
@@ -92,8 +92,8 @@ COPY gui/vue.config.js .
 
 # Static files
 COPY gui/public public
-#COPY --from=truncation-rules $TRUNCATION_RULES $TRUNCATION_RULES
-COPY --from=truncation-rules $CODE/gui/public/truncation-rules public/trunctaion-rules
+COPY --from=truncation-rules $CODE/gui/$TRUNCATION_RULES $CODE/$TRUNCATION_RULES
+COPY --from=truncation-rules $CODE/gui/public/truncation-rules $CODE/public/truncation-rules
 
 COPY gui/src src
 
@@ -104,4 +104,3 @@ USER 0
 RUN rm -f /app/*.html
 USER 1001
 COPY ./nginx/local.nginx /opt/bitnami/nginx/conf/server_blocks/local.conf
-COPY --from=truncation-rules /code/gui/public/truncation-rules /app/public/truncation-rules
