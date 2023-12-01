@@ -35,7 +35,7 @@ import type TruncationRule from '@/utils/domain/truncationRule/base'
 import { TREND_NOT_IMPLEMENTED_PREVIEW_VISUALIZATION } from '@/config'
 
 import { displayError } from '@/utils/helpers/storeInteraction'
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { usesAllFacies } from '@/stores/truncation-rules/utils'
 import { useFaciesStore } from '@/stores/facies'
 import { useTruncationRuleStore } from '@/stores/truncation-rules'
@@ -46,7 +46,18 @@ const ruleStore = useTruncationRuleStore()
 
 const waitingForSimulation = ref(false)
 
-const _allFaciesUsed = computed(() => usesAllFacies(props.value))
+const _allFaciesUsed = ref<boolean>(false)
+
+watch(
+  [
+    () => props.value,
+    // Vue 3 has some issues picking up when computed class properties (getters) have changed
+    () => (props.value as TruncationRule<T, S, P>).polygons.map(polygon => polygon.facies)
+  ],
+  () => {
+    _allFaciesUsed.value = usesAllFacies(props.value)
+  }
+)
 
 const _canSimulateAllTrends = computed(
   () =>
