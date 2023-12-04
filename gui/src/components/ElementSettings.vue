@@ -43,9 +43,8 @@ import FaciesProbabilityCube from '@/components/specification/FaciesProbabilityC
 import TruncationRule from '@/components/specification/TruncationRule/index.vue'
 import SectionTitle from '@/components/baseComponents/headings/SectionTitle.vue'
 
-import { isEmpty } from '@/utils'
-
-import { Facies } from '@/utils/domain'
+import type { Facies, Region } from '@/utils/domain'
+import  { Zone } from '@/utils/domain'
 import { computed, watch } from 'vue'
 import { usePanelStore } from '@/stores/panels'
 import { useRegionStore } from '@/stores/regions'
@@ -64,33 +63,26 @@ const expanded = computed({
   set: (panelNames: string[]) => panelStore.setOpen('settings', panelNames),
 })
 
-const title = computed<string>(() =>
-  `Settings for ${zoneName.value}` + useRegions.value
-    ? ` / ${regionName.value}`
-    : '',
-)
-
-const useRegions = computed<boolean>(() => regionStore.use)
-
 const options = computed(() => optionStore.options.showNameOrNumber)
-// TODO: Combine common logic in zone/regionName
-const zoneName = computed<string>(() => {
+
+const title = computed<string>(() => {
+  let title = ''
   const zone = zoneStore.current
-  return isEmpty(zone)
-    ? ''
-    : options.value.zone === 'name'
-    ? zone.name
-    : `Zone ${zone.code}`
+  if (zone) {
+    title = `Settings for ${getNameOrCode(zone)}`
+    const region = regionStore.current;
+    if (regionStore.use && region) {
+      title += ` / ${getNameOrCode(region)}`
+    }
+  }
+  return title
 })
 
-const regionName = computed<string>(() => {
-  const region = regionStore.current
-  return isEmpty(region)
-    ? ''
-    : options.value.region === 'name'
-    ? region.name
-    : `Region ${region.code}`
-})
+function getNameOrCode(item: Zone | Region): string | number {
+  const nameOrNumber = optionStore.options.showNameOrNumber[item instanceof Zone ? 'zone' : 'region']
+  if (nameOrNumber === 'name') return item.name
+  return `${item instanceof Zone ? 'Zone' : 'Region'} ${item.code}`
+}
 
 const _facies = computed<Facies[]>(() => faciesStore.selected)
 const hasFacies = computed<boolean>(() => _facies.value.length > 0)
