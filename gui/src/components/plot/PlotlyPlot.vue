@@ -120,7 +120,7 @@ watch(() => props.data,
 watch(() => props.layout,
   () => {
     innerLayout.value = cloneDeep(props.layout!)
-    schedule({ replot: false })
+    schedule({ replot: true })
   }
 )
 
