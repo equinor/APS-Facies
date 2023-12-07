@@ -60,7 +60,7 @@
 <script setup lang="ts">
 import cloneDeep from 'lodash/cloneDeep'
 
-import { TREND_NOT_IMPLEMENTED_PREVIEW_VISUALIZATION } from '@/config'
+import { isDevelopmentBuild, TREND_NOT_IMPLEMENTED_PREVIEW_VISUALIZATION } from '@/config'
 
 import { notEmpty } from '@/utils'
 
@@ -150,6 +150,7 @@ async function updateSimulation(renew = false): Promise<void> {
   try {
     await simulation(renew)
   } catch (reason) {
+    if (isDevelopmentBuild()) console.error(reason)
     invalidate()
   } finally {
     waitingForSimulation.value = false
