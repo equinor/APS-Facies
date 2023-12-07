@@ -28,6 +28,7 @@ import type { PlotSpecification } from '@/utils/plotting'
 import { plotify } from '@/utils/plotting'
 import { ref, computed } from 'vue'
 import { useTheme } from 'vuetify'
+import { asyncComputed } from '@vueuse/core'
 
 interface BoundingBox {
   minX: number
@@ -46,7 +47,19 @@ const emit = defineEmits<{
 }>()
 
 const plot = ref<InstanceType<typeof StaticPlot> | null>(null)
-const polygons = ref<PolygonDescription[]>([])
+const polygons = asyncComputed<PolygonDescription[]>(async () => {
+  try {
+    return await rms.truncationPolygons(
+        makeSimplifiedTruncationRuleSpecification(props.rule),
+      )
+  } catch (e) {
+    console.warn(e)
+    // Ignore, as a cubic truncation rule may be inconsistent during an (vuex) action
+    return new Promise(resolve => resolve([]))
+  }
+},
+  [],
+)
 
 const maxSize = { width: 400, height: 400 }
 
@@ -96,21 +109,6 @@ const boundingBoxes = computed<{ name: string; boundingBox: BoundingBox }[]>(
         },
       ),
     })),
-)
-
-watch(
-  props.rule,
-  async () => {
-    try {
-      const newPolygons = await rms.truncationPolygons(
-        makeSimplifiedTruncationRuleSpecification(props.rule),
-      )
-      polygons.value = newPolygons
-    } catch (e) {
-      // Ignore, as a cubic truncation rule may be inconsistent during an (vuex) action
-    }
-  },
-  { deep: true, immediate: true },
 )
 
 function clicked(e: MouseEvent): void {
