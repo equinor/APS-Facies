@@ -2,12 +2,16 @@ import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import vuetify from 'vite-plugin-vuetify'
 import { join } from 'node:path'
+import legacy from '@vitejs/plugin-legacy'
 
 const resolve = (dir: string) => join(__dirname, dir)
 const { CODESPACE_NAME } = process.env
 
 export default defineConfig({
   plugins: [
+    legacy({
+      renderModernChunks: false,
+    }),
     vue(),
     vuetify({
       autoImport: true,
