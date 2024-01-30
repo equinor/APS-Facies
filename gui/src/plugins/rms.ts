@@ -12,14 +12,11 @@ export interface RmsJob extends SerializedState {
 }
 
 export function attachRMSListeners() {
-  // @ts-ignore
   if (typeof rms !== 'undefined') {
-    // @ts-ignore
     rms.onPluginSave((): SerializedState => {
       return dumpState()
     })
 
-    // @ts-ignore
     rms.onPluginLoaded(async (data: RmsJob): Promise<void> => {
       // NOTE: an 'empty' data object from RMS, looks like this:
       // { _treeorigin: "", _version: "1.2" }

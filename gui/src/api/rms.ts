@@ -21,10 +21,8 @@ import type { Optional } from '@/utils/typing'
 
 import { rms as mock } from './roxar'
 import type { PolygonSpecification } from '@/utils/domain/polygon/base'
-const api: { call: <T>(name: string, ...args: any[]) => Promise<T> } =
-/* eslint-disable @typescript-eslint/ban-ts-comment */
-// @ts-ignore
-  typeof rms !== 'undefined' ? rms.uipy : mock.uipy
+const api =
+  (typeof rms !== 'undefined' ? rms.uipy : mock.uipy ) as { call: <T>(name: string, ...args: any[]) => Promise<T> }
 
 export default {
   projectName: (): Promise<string> => api.call('get_project_name'),
@@ -150,14 +148,12 @@ export default {
     api.call('get_aps_fmu_config', useConfig),
   createAPSFmuConfigFile: (setApsFmuConfig: boolean): Promise<void> =>
     api.call('set_aps_fmu_config', setApsFmuConfig),
-  // @ts-ignore
-  chooseDir: (mode: string, suggestion = ''): Promise<string> =>
+  chooseDir: (mode: 'save' | 'load', suggestion = ''): Promise<string | null> =>
     typeof rms !== 'undefined'
       ? rms.chooseDir(mode, suggestion)
       : new Promise((resolve) => resolve(null)),
-  // @ts-ignore
   chooseFile: (
-    mode: string,
+    mode: 'save' | 'load',
     filter: string,
     suggestion = '',
   ): Promise<string | null> =>

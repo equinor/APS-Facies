@@ -28,7 +28,8 @@
   },
   "files": [
     "./node_modules/vuetify/dist/vuetify.d.ts",
-    "./src/vue-shims.d.ts"
+    "./src/vue-shims.d.ts",
+    "./src/api/rms.d.ts"
   ],
   "include": [
     "src/**/*.ts",
