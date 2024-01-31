@@ -31,7 +31,7 @@ import GaussianPlot from './index.vue'
 import ColorScale from '@/components/plot/ColorScale.vue'
 import type { GaussianRandomField } from '@/utils/domain'
 import { DEFAULT_SIZE } from '@/config'
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch, onMounted } from 'vue'
 import { usePanelStore } from '@/stores/panels'
 import { useGaussianRandomFieldStore } from '@/stores/gaussian-random-fields'
 
@@ -53,6 +53,14 @@ const size = ref<Size>(DEFAULT_SIZE)
 const someSimulated = computed(() =>
   props.value.some((field) => field.simulated),
 )
+
+onMounted(async () => {
+  await Promise.all(
+    props.value
+      .filter(field => !field.simulated)
+      .map(field => fieldStore.updateSimulation(field))
+  )
+})
 
 watch(props.value, (value: GaussianRandomField[]) => {
   if (panelStore.panels.preview.gaussianRandomFields) {
