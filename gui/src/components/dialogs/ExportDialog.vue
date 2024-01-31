@@ -181,15 +181,15 @@ async function defaultPaths(): Promise<PathsState> {
   }
   return {
     model: {
-      path: `${modelPath}/${model}`,
+      path: `${projectPath.value}/${modelPath}/${model}`,
       disabled: false,
   },
     fmuConfig: {
-      path: `${fmuParamPath}/${fmuConfig}`,
+      path: `${projectPath.value}/${fmuParamPath}/${fmuConfig}`,
       disabled: false,
     },
     probabilityDistribution: {
-      path: `${ertParamPath}/${probabilityDistribution}`,
+      path: `${projectPath.value}/${ertParamPath}/${probabilityDistribution}`,
       disabled: false,
     },
   }
