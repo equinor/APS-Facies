@@ -36,6 +36,7 @@ import { TREND_NOT_IMPLEMENTED_PREVIEW_VISUALIZATION } from '@/config'
 
 import { displayError } from '@/utils/helpers/storeInteraction'
 import { ref, computed } from 'vue'
+import { usesAllFacies } from '@/stores/truncation-rules/utils'
 import { useFaciesStore } from '@/stores/facies'
 import { useTruncationRuleStore } from '@/stores/truncation-rules'
 
