@@ -23,11 +23,15 @@
           v-else
           :value="facies"
           field="name"
-          @submit="name => changeName(facies, name as string)"
+          @submit="name => facies.name = name || `F${facies.code}`"
         />
       </td>
       <td v-if="!hideAlias" class="text-left">
-        <editable-cell :value="facies" field="alias" @submit="(alias) => changeAlias(facies, alias as string)" />
+        <editable-cell
+          :value="facies"
+          field="alias"
+          @submit="(alias) => facies.alias = alias"
+        />
       </td>
       <td class="text-left">
         <span v-if="isFaciesFromRms(facies)">
@@ -39,7 +43,7 @@
           :restrictions="faciesCodeRestrictions(facies)"
           field="code"
           numeric
-          @submit="code => changeCode(facies, code as number)"
+          @submit="code => facies.code = code"
         />
       </td>
       <td
@@ -192,18 +196,6 @@ function faciesCodeRestrictions(
 const availableColors = computed(
   () => colorStore.current?.colors ?? [],
 )
-
-async function changeName(facies: GlobalFacies): Promise<void> {
-  faciesGlobalStore.changeName(facies.id, facies.name || `F${facies.code}`)
-}
-
-async function changeAlias(facies: GlobalFacies): Promise<void> {
-  faciesGlobalStore.changeAlias(facies.id, facies.alias)
-}
-
-async function changeCode(facies: GlobalFacies): Promise<void> {
-  faciesGlobalStore.changeCode(facies.id, facies.code)
-}
 
 function changeColorSelection(facies: GlobalFacies): void {
   const previous = expanded.value.pop()
