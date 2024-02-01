@@ -97,12 +97,12 @@ AUXILLARY := $(CODE_DIR)/auxillary
 # Paths local to the compiled app
 REQUESTS_CA_BUNDLE ?= $(SSL_CERT_FILE)
 POETRY := $(shell which poetry)
-PYTHON ?= $(POETRY) run python3
 ifneq ($(POETRY),)
 RUN := PYTHONPATH=$(PYTHONPATH) $(POETRY) run
 else
 RUN := PYTHONPATH=$(PYTHONPATH)
 endif
+PYTHON ?= $(RUN) python3
 PIP ?= $(PYTHON) -m pip
 PY.TEST := $(RUN) python -m pytest
 PIPROT := $(RUN) piprot
