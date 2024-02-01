@@ -14,7 +14,7 @@
     "experimentalDecorators": true,
     "esModuleInterop": true,
     "strictPropertyInitialization": false, // https://github.com/kaorun343/vue-property-decorator/issues/81
-    "isolatedModules": false,
+    "isolatedModules": true,
     "removeComments": true,
     "allowSyntheticDefaultImports": true,
     "resolveJsonModule": true,
