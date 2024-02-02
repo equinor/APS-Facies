@@ -17,22 +17,22 @@
           multiple
         >
           <v-expansion-panel expand value="zoneRegion" elevation="0">
-            <v-expansion-panel-title>
+            <template #title>
               <section-title>Zones and Regions</section-title>
-            </v-expansion-panel-title>
-            <v-expansion-panel-text class="pa-0">
+            </template>
+            <template #text>
               <zone-region v-if="gridModelSelected" />
               <span v-else>
                 Selection of zones and regions is not available until Grid Model
                 is selected
               </span>
-            </v-expansion-panel-text>
+            </template>
           </v-expansion-panel>
           <v-expansion-panel value="facies" elevation="0">
-            <v-expansion-panel-title>
+            <template #title>
               <section-title>Facies</section-title>
-            </v-expansion-panel-title>
-            <v-expansion-panel-text class="fill-height">
+            </template>
+            <template #text class="fill-height">
               <v-row v-if="gridModelSelected" no-gutters>
                 <v-row v-if="hasWellParameters" no-gutters>
                   <v-col class="pt-2" cols="6">
@@ -62,7 +62,7 @@
                 Selection of facies is not available until Grid Model is
                 selected
               </div>
-            </v-expansion-panel-text>
+            </template>
           </v-expansion-panel>
         </v-expansion-panels>
       </v-col>

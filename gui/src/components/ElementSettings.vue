@@ -9,12 +9,12 @@
           :disabled="!hasFacies"
           elevation="0"
         >
-          <v-expansion-panel-title>
+          <template #title>
             <section-title>Probabilities for Facies</section-title>
-          </v-expansion-panel-title>
-          <v-expansion-panel-text>
+          </template>
+          <template #text>
             <facies-probability-cube />
-          </v-expansion-panel-text>
+          </template>
         </v-expansion-panel>
         <v-expansion-panel
           value="truncationRule"
@@ -24,12 +24,12 @@
           :disabled="!hasEnoughFacies"
           elevation="0"
         >
-          <v-expansion-panel-title>
+          <template #title>
             <section-title>Truncation Rule</section-title>
-          </v-expansion-panel-title>
-          <v-expansion-panel-text>
+          </template>
+          <template #text>
             <truncation-rule />
-          </v-expansion-panel-text>
+          </template>
         </v-expansion-panel>
         <gaussian-random-fields />
       </v-expansion-panels>

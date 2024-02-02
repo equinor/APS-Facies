@@ -14,7 +14,7 @@
       <cross-section />
       <v-expansion-panels v-model="panels" variant="accordion" multiple>
         <v-expansion-panel v-for="field in fields" :key="field.id" elevation="0">
-          <v-expansion-panel-title>
+          <template #title>
             <v-row class="fill-height" align="center" justify="start">
               <v-col cols="4">
                 <gaussian-field-name :ref="field.id" :value="field" />
@@ -24,10 +24,10 @@
                 <confirmation-dialog ref="deleteDialogRefs" />
               </v-col>
             </v-row>
-          </v-expansion-panel-title>
-          <v-expansion-panel-text>
+          </template>
+          <template #text>
             <gaussian-random-field :value="field" />
-          </v-expansion-panel-text>
+          </template>
         </v-expansion-panel>
       </v-expansion-panels>
     </v-expansion-panel-text>

@@ -12,14 +12,14 @@
           value="truncationRuleMap"
           elevation="0"
         >
-          <v-expansion-panel-title>
+          <template #title>
             <h3>Truncation rule</h3>
-          </v-expansion-panel-title>
-          <v-expansion-panel-text>
+          </template>
+          <template #text>
             <v-col class="justify-center align-center">
               <truncation-map v-if="!!rule" :value="rule" />
             </v-col>
-          </v-expansion-panel-text>
+          </template>
         </v-expansion-panel>
         <v-expansion-panel
           v-tooltip.bottom="realizationError"
@@ -27,23 +27,23 @@
           value="truncationRuleRealization"
           elevation="0"
         >
-          <v-expansion-panel-title>
+          <template #title>
             <h3>Realization</h3>
-          </v-expansion-panel-title>
-          <v-expansion-panel-text>
+          </template>
+          <template #text>
             <facies-realization v-if="rule" :value="rule" />
-          </v-expansion-panel-text>
+          </template>
         </v-expansion-panel>
         <v-expansion-panel
           value="gaussianRandomFields"
           elevation="0"
         >
-          <v-expansion-panel-title>
+          <template #title>
             <h3>Transformed Gaussian Random Fields</h3>
-          </v-expansion-panel-title>
-          <v-expansion-panel-text>
+          </template>
+          <template #text>
             <gaussian-plots :value="fields" />
-          </v-expansion-panel-text>
+          </template>
         </v-expansion-panel>
         <v-expansion-panel
           v-tooltip.bottom="crossPlotErrors"
@@ -51,12 +51,12 @@
           value="crossPlots"
           elevation="0"
         >
-          <v-expansion-panel-title>
+          <template #title>
             <h3>Cross plots</h3>
-          </v-expansion-panel-title>
-          <v-expansion-panel-text>
+          </template>
+          <template #text>
             <cross-plots :value="fields" />
-          </v-expansion-panel-text>
+          </template>
         </v-expansion-panel>
       </v-expansion-panels>
     </v-row>
