@@ -233,13 +233,15 @@ export default abstract class TruncationRule<
   }
 
   private get facies(): Facies[] {
-    const facies: Set<Facies> = new Set()
-    for (const polygon of this.polygons) {
-      if (polygon.facies) {
-        facies.add(polygon.facies)
+    const found: Set<ID> = new Set()
+    const uniqueFacies: Facies[] = []
+    for (const { facies } of this.polygons) {
+      if (facies && !found.has(facies.id)) {
+        found.add(facies.id)
+        uniqueFacies.push(facies)
       }
     }
-    return [...facies]
+    return uniqueFacies
   }
 
   private get cumulativeFaciesProbability(): number {
