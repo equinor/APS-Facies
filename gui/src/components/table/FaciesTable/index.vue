@@ -1,9 +1,9 @@
 <template>
   <base-selection-table
-    :items="(facies as GlobalFacies[])"
     v-model:current="currentId"
-    :expanded="expanded"
     v-model="selected"
+    :items="(facies as GlobalFacies[])"
+    :expanded="expanded"
     :headers="headers"
     :loading="loading"
     :loading-text="'Loading Facies from RMS'"
@@ -23,14 +23,14 @@
           v-else
           :value="facies"
           field="name"
-          @submit="name => facies.name = name || `F${facies.code}`"
+          @submit="name => facies.name = name.toString() || `F${facies.code}`"
         />
       </td>
       <td v-if="!hideAlias" class="text-left">
         <editable-cell
           :value="facies"
           field="alias"
-          @submit="(alias) => facies.alias = alias"
+          @submit="(alias) => facies.alias = alias.toString()"
         />
       </td>
       <td class="text-left">
@@ -43,7 +43,7 @@
           :restrictions="faciesCodeRestrictions(facies)"
           field="code"
           numeric
-          @submit="code => facies.code = code"
+          @submit="code => facies.code = typeof code === 'number' ? code : parseInt(code, 10)"
         />
       </td>
       <td

@@ -21,7 +21,7 @@ import { getId, identify, allSet } from '@/utils/helpers'
 import { isCloseToUnity } from '@/utils/helpers/simple'
 
 export interface TruncationRuleSerialization<
-  S extends PolygonSerialization = PolygonSerialization,
+  S extends PolygonSerialization,
 > extends SimulationSerialization {
   name: string
   type: TruncationRuleType
@@ -232,7 +232,8 @@ export default abstract class TruncationRule<
     return spec
   }
 
-  private get facies(): Facies[] {
+  public get facies(): Facies[] {
+    // FIXME: Why are the facies not the same objects?
     const found: Set<ID> = new Set()
     const uniqueFacies: Facies[] = []
     for (const { facies } of this.polygons) {

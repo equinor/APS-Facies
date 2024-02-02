@@ -3,7 +3,7 @@ import hash from 'object-hash'
 
 import type { ID } from '@/utils/domain/types'
 import { isUUID } from '@/utils/helpers'
-import type { Identifiable, Identified } from './interfaces'
+import type { Identifiable } from './interfaces'
 
 export interface BaseItemSerialization {
   id: ID
@@ -39,8 +39,4 @@ export default class BaseItem implements Identifiable {
       excludeKeys: (key): boolean => this._excludeFromHash.includes(key),
     })
   }
-}
-
-export interface ItemsState<T extends BaseItem> {
-  available: Identified<T>
 }

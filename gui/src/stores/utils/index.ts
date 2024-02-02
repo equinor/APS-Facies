@@ -2,7 +2,7 @@ import { getId } from '@/utils'
 import type { Parent, ParentReference } from '@/utils/domain'
 import { useZoneStore } from '@/stores/zones'
 
-export function resolveParentReference(parentRef: ParentReference): Parent {
+export function resolveParentReference(parentRef: ParentReference | Parent): Parent {
   const zoneStore = useZoneStore()
   const zone = zoneStore.identifiedAvailable[getId(parentRef.zone)]
   if (!zone)

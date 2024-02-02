@@ -12,13 +12,13 @@ export interface HeaderItem {
   sortable?: boolean
 }
 
-export interface ListItem<T> {
+export interface ListItem<T, AdditionalProps extends object = Record<string, unknown>> {
   value?: T
   title: string
   props?: Partial<{
     disabled: boolean
     help: string
-  }>
+  }> & AdditionalProps
 }
 
 export type HeaderItems = HeaderItem[]

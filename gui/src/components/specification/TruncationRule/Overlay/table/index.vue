@@ -6,7 +6,7 @@
     item-key="id"
     @input.stop
   >
-    <template #item="{ item }: { item: Item }">
+    <template #item="{ item }">
       <tr>
         <td>
           <background-group-facies-specification :value="item" :rule="value as RULE" />

@@ -14,7 +14,7 @@ export interface CrossSectionSerialization extends DependentSerialization {
   type: CrossSectionType
 }
 
-export default class CrossSection extends ZoneRegionDependent {
+export class CrossSection extends ZoneRegionDependent {
   public type: CrossSectionType
 
   public constructor({ type, ...rest }: CrossSectionConfiguration) {
@@ -29,3 +29,5 @@ export default class CrossSection extends ZoneRegionDependent {
     }
   }
 }
+
+export default CrossSection

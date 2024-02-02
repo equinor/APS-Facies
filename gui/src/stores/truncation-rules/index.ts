@@ -37,6 +37,10 @@ import type { PolygonSerialization, PolygonSpecification } from '@/utils/domain/
 import type { TruncationRuleSerialization } from '@/utils/domain/truncationRule/base'
 import { getRelevant, isReady } from '@/stores/utils/helpers'
 import type { ID } from '@/utils/domain/types'
+import type { BayfillPolygonSerialization } from '@/utils/domain/polygon/bayfill'
+import type { NonCubicPolygonSerialization } from '@/utils/domain/polygon/nonCubic'
+import type { CubicPolygonSerialization } from '@/utils/domain/polygon/cubic'
+import type { OverlayPolygonSerialization } from '@/utils/domain/polygon/overlay'
 
 export interface RuleName {
   title: string
@@ -44,7 +48,7 @@ export interface RuleName {
   overlay: boolean
 }
 
-export function deserializeTruncationRule(rule: TruncationRuleSerialization, byId?: (field: ID) => GaussianRandomField) {
+export function deserializeTruncationRule<S extends PolygonSerialization>(rule: TruncationRuleSerialization<S>, byId?: (field: ID) => GaussianRandomField) {
   if (!byId) {
     const gaussianRandomFieldStore = useGaussianRandomFieldStore()
     byId = gaussianRandomFieldStore.byId
@@ -141,7 +145,7 @@ export const useTruncationRuleStore = defineStore('truncation-rules', () => {
   }
 
   function populate(
-    rules: TruncationRuleSerialization[],
+    rules: TruncationRuleSerialization<BayfillPolygonSerialization | NonCubicPolygonSerialization | CubicPolygonSerialization | OverlayPolygonSerialization>[],
   ) {
     const gaussianRandomFieldStore = useGaussianRandomFieldStore()
 

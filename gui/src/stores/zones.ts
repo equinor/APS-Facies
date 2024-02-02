@@ -69,7 +69,7 @@ export const useZoneStore = defineStore('zones', () => {
   })
 
   const byParent = computed(() => {
-    return (parent: { zone: Zone | ID; region?: Region | ID }) => {
+    return (parent: { zone: Zone | ID; region?: Region | ID | null }) => {
       const zone = identifiedAvailable.value[getId(parent.zone)]
       if (!parent.region) return zone
       return zone.regions.find((region) => region.id === getId(parent.region))

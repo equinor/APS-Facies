@@ -812,15 +812,14 @@ function addTruncationRuleBayFill(
 }
 
 function addTruncationRuleOverlay<
-  // eslint-disable-next-line no-use-before-define
-  T extends OverlayTruncationRule<P, S, Sp>,
-  P extends Polygon = Polygon,
-  S extends PolygonSerialization = PolygonSerialization,
-  Sp extends PolygonSpecification = PolygonSpecification,
+  T extends Polygon,
+  S extends PolygonSerialization,
+  P extends PolygonSpecification,
+  RULE extends OverlayTruncationRule<T, S, P>,
 >(
   doc: Document,
   parent: Parent,
-  truncRule: T,
+  truncRule: RULE,
   truncRuleElem: HTMLElement,
   elementName: string,
   backgroundPolygonsHandler: (backGroundModelElem: HTMLElement) => void,

@@ -37,7 +37,7 @@ import { VSelect } from 'vuetify/components'
 import type { ListItem } from '@/utils/typing'
 import { computed, ref } from 'vue'
 
-type Props = {
+const props = withDefaults(defineProps<{
   modelValue: T
   label: string
   items: ListItem<T>[]
@@ -45,8 +45,7 @@ type Props = {
   warn?: boolean
   warnMessage?: string
   warnEvenWhenEmpty?: boolean
-}
-const props = withDefaults(defineProps<Props>(), {
+}>(), {
   disabled: false,
   warn: false,
   warnMessage: '',

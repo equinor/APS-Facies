@@ -63,14 +63,12 @@ const expanded = computed({
   set: (panelNames: string[]) => panelStore.setOpen('settings', panelNames),
 })
 
-const options = computed(() => optionStore.options.showNameOrNumber)
-
 const title = computed<string>(() => {
   let title = ''
-  const zone = zoneStore.current
+  const zone = zoneStore.current as Zone
   if (zone) {
     title = `Settings for ${getNameOrCode(zone)}`
-    const region = regionStore.current;
+    const region = regionStore.current as Region
     if (regionStore.use && region) {
       title += ` / ${getNameOrCode(region)}`
     }

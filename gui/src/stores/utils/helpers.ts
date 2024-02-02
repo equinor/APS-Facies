@@ -21,9 +21,9 @@ import type { FaciesGroupSerialization } from '@/utils/domain/facies/group'
 import { resolveParentReference } from '@/stores/utils'
 
 export function usesAllFacies<
-  T extends Polygon = Polygon,
-  S extends PolygonSerialization = PolygonSerialization,
-  P extends PolygonSpecification = PolygonSpecification,
+  T extends Polygon,
+  S extends PolygonSerialization,
+  P extends PolygonSpecification,
   RULE extends TruncationRule<T, S, P>,
 >(
   rule: RULE,
@@ -45,10 +45,11 @@ export function usesAllFacies<
 }
 
 export function isReady<
-  T extends Polygon = Polygon,
-  S extends PolygonSerialization = PolygonSerialization,
-  P extends PolygonSpecification = PolygonSpecification,
->(rule: TruncationRule<T, S, P>): boolean {
+  T extends Polygon,
+  S extends PolygonSerialization,
+  P extends PolygonSpecification,
+  RULE extends TruncationRule<T, S, P>,
+>(rule: RULE): boolean {
   return !!rule && rule.ready && usesAllFacies(rule)
 }
 
@@ -77,7 +78,7 @@ export function getRelevant<T extends Dependent>(available: T[], parent: Parent)
   return available.filter(item => hasParents(item, parent.zone, parent.region))
 }
 
-export function getElements(
+export function getElements<S extends PolygonSerialization>(
   exclude: string[] = [],
 ): Element[] {
   function extractFromStore(store: () => any) {
@@ -145,7 +146,7 @@ export function getElements(
         const { remove, add, available } = useTruncationRuleStore()
         return {
           remove,
-          add: (serialization: TruncationRuleSerialization) => {
+          add: (serialization: TruncationRuleSerialization<S>) => {
             add(deserializeTruncationRule(serialization))
           },
           items: available,

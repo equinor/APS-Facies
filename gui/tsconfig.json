@@ -1,4 +1,7 @@
 {
+  "extends": [
+    "@vue/tsconfig/tsconfig.json"
+  ],
   "compilerOptions": {
     "allowJs": true,
     "target": "esnext",
@@ -21,6 +24,7 @@
     "allowSyntheticDefaultImports": true,
     "resolveJsonModule": true,
     "sourceMap": true,
+    "useDefineForClassFields": true,
     "baseUrl": ".",
     "types": ["vuetify", "node", "jest"],
     "paths": {

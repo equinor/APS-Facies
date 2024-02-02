@@ -26,7 +26,7 @@
         <td>
           <fraction-field
             :model-value="item.center"
-            @update:model-value="(val) => updateCenter(item, val)"
+            @update:model-value="(val: MaybeFmuUpdatable | null) => updateCenter(item, val)"
           />
         </td>
         <td>

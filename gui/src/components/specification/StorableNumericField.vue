@@ -91,6 +91,7 @@ const propertyValue = computed({
     getValue(
       field.value,
       props.propertyType as keyof typeof field.value,
+      // @ts-ignore
       props.subPropertyType,
     ),
   set: (value: any) =>
@@ -98,6 +99,7 @@ const propertyValue = computed({
       props.value,
       variogramOrTrend.value,
       props.propertyType as keyof typeof field.value,
+      // @ts-ignore
       props.subPropertyType,
       value,
     ),

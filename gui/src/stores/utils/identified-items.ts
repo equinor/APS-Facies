@@ -13,7 +13,7 @@ export type CurrentIdentifiedStorePopulationData<T> =
     current?: T
   }
 
-type IdentifiedItems<T extends Identifiable> = {
+export type IdentifiedItems<T extends Identifiable> = {
   available: Ref<T[]>
   identifiedAvailable: ComputedRef<Identified<T>>
   addAvailable: (item: T) => void
@@ -21,7 +21,7 @@ type IdentifiedItems<T extends Identifiable> = {
   $reset: () => void
 }
 
-type CurrentIdentifiedItems<T extends Identifiable> = IdentifiedItems<T> & {
+export type CurrentIdentifiedItems<T extends Identifiable> = IdentifiedItems<T> & {
   currentId: Ref<ID | null>
   current: ComputedRef<T | null>
 }

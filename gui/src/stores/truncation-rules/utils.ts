@@ -126,9 +126,9 @@ export function hasEnoughFacies<
 }
 
 export function usesAllFacies<
-  T extends Polygon = Polygon,
-  S extends PolygonSerialization = PolygonSerialization,
-  P extends PolygonSpecification = PolygonSpecification,
+  T extends Polygon,
+  S extends PolygonSerialization,
+  P extends PolygonSpecification,
   RULE extends TruncationRule<T, S, P>,
 >(rule: RULE): boolean {
   const faciesStore = useFaciesStore()
