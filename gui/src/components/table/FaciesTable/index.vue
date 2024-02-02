@@ -2,7 +2,7 @@
   <base-selection-table
     :items="(facies as GlobalFacies[])"
     v-model:current="currentId"
-    v-model:expanded="expanded"
+    :expanded="expanded"
     v-model="selected"
     :headers="headers"
     :loading="loading"
