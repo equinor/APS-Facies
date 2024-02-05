@@ -421,9 +421,9 @@ class RMSData:
     def load_dot_master(self) -> dict:
         try:
             project_root = Path(__file__).parent.parent.parent.parent
+            filename = self.project.filename
             with open(project_root / 'local.settings.json', encoding="utf-8") as f:
                 debug_settings = json.load(f)
-                filename = self.project.filename
                 if filename.startswith('/'):
                     filename = filename[1:]
                 project_location = Path(debug_settings['projectRootLocation']) / filename

@@ -49,8 +49,8 @@ def output_version_information(func):
             with open(plugin_root.parent / file_name) as f:
                 return f.read().strip()
         except (FileNotFoundError, NotADirectoryError):
+            plugin_file = str(plugin_root.parent.parent.absolute())
             try:
-                plugin_file = str(plugin_root.parent.parent.absolute())
                 archive = ZipFile(plugin_file, 'r')
                 return archive.read(f'aps_gui/{file_name}').decode().strip()
             except:
