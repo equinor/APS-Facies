@@ -56,7 +56,10 @@ def output_version_information(func):
             except Exception:
                 raise FileNotFoundError(f"Can not unzip and read plugin file with path {plugin_file}")
             finally:
-                archive.close()
+                try:
+                    archive.close()
+                except UnboundLocalError:
+                    pass
 
     @wraps(func)
     def decorator(config):
