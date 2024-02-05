@@ -3,6 +3,7 @@ import vue from '@vitejs/plugin-vue'
 import vuetify from 'vite-plugin-vuetify'
 import { join } from 'node:path'
 import legacy from '@vitejs/plugin-legacy'
+import checker from 'vite-plugin-checker'
 
 const resolve = (dir: string) => join(__dirname, dir)
 const { CODESPACE_NAME } = process.env
@@ -15,6 +16,10 @@ export default defineConfig({
     vue(),
     vuetify({
       autoImport: true,
+    }),
+    checker({
+      typescript: true,
+      vueTsc: true,
     }),
   ],
   resolve: {

@@ -8,6 +8,7 @@
     "noUnusedLocals": true,
     "noImplicitReturns": true,
     "jsx": "preserve",
+    "jsxImportSource": "vue",
     "emitDecoratorMetadata": true,
     "importHelpers": true,
     "moduleResolution": "node",
@@ -15,6 +16,7 @@
     "esModuleInterop": true,
     "strictPropertyInitialization": false, // https://github.com/kaorun343/vue-property-decorator/issues/81
     "isolatedModules": true,
+    "verbatimModuleSyntax": true,
     "removeComments": true,
     "allowSyntheticDefaultImports": true,
     "resolveJsonModule": true,
