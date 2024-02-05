@@ -53,7 +53,7 @@ def output_version_information(func):
             try:
                 archive = ZipFile(plugin_file, 'r')
                 return archive.read(f'aps_gui/{file_name}').decode().strip()
-            except:
+            except Exception:
                 raise FileNotFoundError(f"Can not unzip and read plugin file with path {plugin_file}")
             finally:
                 archive.close()
