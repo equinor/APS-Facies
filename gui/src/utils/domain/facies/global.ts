@@ -47,10 +47,10 @@ export default class GlobalFacies extends Discrete {
   public isObserved({ zone, region }: Partial<Parent>): boolean {
     if (!this.observed) return false
     if (!zone) return false
-    const regionNumber = region ? region.code : 0
+    const regionNumber = region ? region.code : -1
     return (
       this.observed.zones.includes(zone.code) &&
-      this.observed.regions.includes(regionNumber)
+      (regionNumber === -1 || this.observed.regions.includes(regionNumber))
     )
   }
 
