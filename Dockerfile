@@ -31,6 +31,7 @@ RUN poetry install
 FROM python AS aps
 
 COPY aps/algorithms ./aps/algorithms
+COPY aps/toolbox ./aps/toolbox
 COPY aps/api ./aps/api
 COPY aps/utils ./aps/utils
 COPY aps/rms_jobs ./aps/rms_jobs
