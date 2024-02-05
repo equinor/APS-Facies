@@ -32,10 +32,17 @@ def loggable(func):
     return wrapper
 
 
-def output_version_information(func):
+def _root_path() -> Path:
     plugin_root = Path(__file__).parent.parent.parent
+    if Path('/.dockerenv').exists():
+        return plugin_root / 'aps' / 'api' / 'pydist'
+    return plugin_root
+
+
+def output_version_information(func):
+    plugin_root = _root_path()
     if plugin_root.name != "pydist":
-        raise FileNotFoundError(f"Can not find plugin root 'pydist'. Found {plugin_root.name} ")
+        raise FileNotFoundError(f"Can not find plugin root 'pydist'. Found {plugin_root.name}")
 
     def get_content(file_name: str) -> str:
         try:
