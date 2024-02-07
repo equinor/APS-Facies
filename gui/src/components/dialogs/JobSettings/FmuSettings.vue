@@ -24,25 +24,25 @@
     <div v-if="_runFmuWorkflows || _onlyUpdateFromFmu">
       <v-row v-if="!_onlyUpdateFromFmu">
         <v-col cols="6">
-          <v-autocomplete
-            v-model="_fmuGrid"
-            label="ERT/FMU simulation box grid"
-            :disabled="!hasGrid"
-            :error-messages="!hasGrid ? 'No grid model has been selected' : null"
-            :items="fmuGrids"
-            @keydown.enter.stop="
-              () => {
-                /* Intentionally left blank, to stop event propagating to parent
-             and closing the dialog, when enter is used to confirm the selected grid name */
-              }
-            "
-          >
-            <template #message="{ message }">
-              <span style="color: rgba(var(--v-theme-error), 1); font-size: 1.5em;">
-                <strong>{{ message }}</strong>
-              </span>
-            </template>
-          </v-autocomplete>
+          <hover-helper v-slot="{ isHovering }">
+            <floating-tooltip :shown="isHovering" :disabled="hasGrid">
+              <v-autocomplete
+                v-model="_fmuGrid"
+                label="ERT/FMU simulation box grid"
+                :disabled="!hasGrid"
+                :items="fmuGrids"
+                @keydown.enter.stop="
+                  () => {
+                    /* Intentionally left blank, to stop event propagating to parent
+                 and closing the dialog, when enter is used to confirm the selected grid name */
+                  }
+                "
+              />
+              <template #popper>
+                No grid model has been selected
+              </template>
+            </floating-tooltip>
+          </hover-helper>
           <v-row v-if="!fmuGridExists">
             <v-col cols="6">
               <span>The specified grid does not exist.</span>
@@ -149,6 +149,7 @@ import {
 } from '@/stores/fmu/options'
 import { useGridModelStore } from '@/stores/grid-models'
 import { useGaussianRandomFieldStore } from '@/stores/gaussian-random-fields'
+import HoverHelper from "@/components/selection/dropdown/HoverHelper.vue";
 
 type FieldUsage = 'generate' | 'automatic_detect'
 

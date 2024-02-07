@@ -10,12 +10,12 @@
       variant="underlined"
     >
       <template #item="{ item, props }">
-        <v-list-item
-          v-bind="props"
-          :value="item.props.value"
-          :disabled="item.props.disabled"
-        >
-          <v-hover v-slot="{ isHovering }">
+        <hover-helper v-slot="{ isHovering }">
+          <v-list-item
+            v-bind="props"
+            :value="item.props.value"
+            :disabled="item.props.disabled"
+          >
             <base-tooltip
               :message="item.props.help"
               :open="isHovering && !!item.props.help"
@@ -23,8 +23,8 @@
               trigger="manual"
               class="pa-0 ma-0"
             />
-          </v-hover>
-        </v-list-item>
+          </v-list-item>
+        </hover-helper>
       </template>
     </v-select>
   </div>
@@ -32,12 +32,13 @@
 
 <script setup lang="ts" generic="T">
 import ConfirmationDialog from '@/components/specification/GaussianRandomField/ConfirmationDialog.vue'
+import HoverHelper from '@/components/selection/dropdown/HoverHelper.vue'
 import BaseTooltip from '@/components/baseComponents/BaseTooltip.vue'
 import { VSelect } from 'vuetify/components'
 import type { ListItem } from '@/utils/typing'
 import { computed, ref } from 'vue'
 
-const props = withDefaults(defineProps<{
+type Props = {
   modelValue: T
   label: string
   items: ListItem<T>[]
@@ -45,7 +46,8 @@ const props = withDefaults(defineProps<{
   warn?: boolean
   warnMessage?: string
   warnEvenWhenEmpty?: boolean
-}>(), {
+}
+const props = withDefaults(defineProps<Props>(), {
   disabled: false,
   warn: false,
   warnMessage: '',
