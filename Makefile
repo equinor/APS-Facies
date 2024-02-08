@@ -245,6 +245,8 @@ _build-front-end:
 	VUE_APP_HASH="$(LATEST_COMMIT_HASH)" \
 	$(YARN) build && \
 	mv $(WEB_DIR)/dist $(PLUGIN_DIR)
+	mkdir -p $(PLUGIN_DIR)/public
+	mv $(PLUGIN_DIR)/truncation-rules $(PLUGIN_DIR)/public
 
 copy-changelog.md:
 	cp $(WEB_DIR)/public/CHANGELOG.md $(PLUGIN_DIR)/CHANGELOG.md
