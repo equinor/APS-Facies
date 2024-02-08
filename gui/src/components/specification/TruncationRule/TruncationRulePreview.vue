@@ -24,6 +24,9 @@
                 :max-width="DEFAULT_TRUNCATION_RULE_TEMPLATE_PREVIEW_SIZE.width"
               />
             </v-row>
+          <v-row v-if="overlay">
+            <span>With overlay</span>
+          </v-row>
           </v-col>
         </v-row>
       </div>
@@ -46,10 +49,12 @@ type Props = {
   type: TruncationRuleType
   altText?: string
   disabled?: boolean
+  overlay?: boolean
 }
 const props = withDefaults(defineProps<Props>(), {
   altText: '',
   disabled: false,
+  overlay: false,
 })
 
 const imageUrl = computed(
