@@ -133,6 +133,6 @@ function updateCenter(
 <style lang="scss" scoped>
 th {
   white-space: normal;
-  overflow-wrap: break-spaces;
+  overflow-wrap: break-word;
 }
 </style>

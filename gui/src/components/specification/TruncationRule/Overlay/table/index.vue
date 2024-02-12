@@ -17,7 +17,7 @@
             :value="item.polygons"
             :rule="value as OverlayTruncationRule<T, S, P>"
           />
-          <span v-else>Select one, or more background facies </span>
+          <span v-else style="overflow-wrap: break-word">Select one, or more background facies</span>
         </td>
       </tr>
     </template>
