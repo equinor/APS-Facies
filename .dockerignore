@@ -29,7 +29,6 @@
 !gui/tsconfig.json
 !gui/.eslintrc.js
 !gui/.postcssrc.js
-!gui/babel.config.js
 !gui/vue.config.js
 !gui/vite.config.ts
 !gui/index.html

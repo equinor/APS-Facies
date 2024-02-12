@@ -90,7 +90,6 @@ COPY gui/tsconfig.json .
 COPY gui/.eslintrc.js .
 COPY gui/.postcssrc.js .
 COPY gui/vite.config.ts .
-COPY gui/babel.config.js .
 COPY gui/vue.config.js .
 COPY gui/index.html .
 
