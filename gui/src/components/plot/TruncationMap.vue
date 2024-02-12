@@ -4,6 +4,7 @@
       :data-definition="data.polygons"
       :annotations="data.annotations"
       :expand="expand"
+      :disabled="disabled"
       svg
     />
   </v-row>
@@ -44,6 +45,7 @@ const data = ref<PlotSpecification>({
   polygons: [],
   annotations: [],
 })
+const disabled = ref(false)
 
 watch(
   [
@@ -55,10 +57,14 @@ watch(
   async () => {
     if (ruleStore.ready(props.value)) {
 
+      disabled.value = false
       data.value = plotify(
         await rms.truncationPolygons(makeTruncationRuleSpecification(props.value)),
         faciesGlobalStore.selected,
-      )}
+      )
+    } else {
+      disabled.value = true
+    }
   }, {
     deep: true,
     immediate: true,
