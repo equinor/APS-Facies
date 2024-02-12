@@ -195,7 +195,13 @@ const isRmsTrendMap = computed(() => trend.value.type === 'RMS_TRENDMAP')
 
 const trendType = computed({
   get: () => props.value.trend.type,
-  set: (value: TrendType) => (props.value.trend.type = value),
+  set: (value: TrendType) => {
+    if (value === 'HYPERBOLIC' && props.value.trend.curvature.value <= 1) {
+      // Curvature for hyperbolic trends must be strictly greater than 1
+      props.value.trend.curvature.value = 1.01
+    }
+    props.value.trend.type = value
+  },
 })
 const trendParameter = computed({
   get: () => props.value.trend.parameter,
