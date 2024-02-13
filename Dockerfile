@@ -1,5 +1,5 @@
 # syntax = docker/dockerfile:1.3
-FROM node:16.20.2-alpine3.18 AS node
+FROM node:20.11.0-alpine3.18 AS node
 
 ENV CODE=/code
 ENV NODE_MODULES=$CODE/node_modules
