@@ -42,7 +42,6 @@
     ]
   },
   "files": [
-    "./node_modules/vuex/types/vue.d.ts",
     "./src/vue-shims.d.ts"
   ],
   "include": [

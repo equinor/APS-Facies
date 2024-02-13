@@ -13,16 +13,20 @@ import BayfillPolygon from '@/utils/domain/polygon/bayfill'
 import NonCubicPolygon from '@/utils/domain/polygon/nonCubic'
 import CubicPolygon from '@/utils/domain/polygon/cubic'
 import OverlayPolygon from '@/utils/domain/polygon/overlay'
-import { ParentReference } from '@/utils/domain/bases/interfaces'
-import { Parent, Dependent } from '@/utils/domain/bases/zoneRegionDependent'
+import type { ParentReference } from '@/utils/domain/bases/interfaces'
+import type {
+  Parent,
+  Dependent,
+} from '@/utils/domain/bases/zoneRegionDependent'
 
-type TruncationRule = Bayfill | NonCubic | Cubic
+export type InstantiatedOverlayTruncationRule = NonCubic | Cubic
+type InstantiatedTruncationRule = Bayfill | InstantiatedOverlayTruncationRule
 
 export {
   Direction,
-  Dependent,
-  Parent,
-  ParentReference,
+  type Dependent,
+  type Parent,
+  type ParentReference,
   Polygon,
   BayfillPolygon,
   CubicPolygon,
@@ -34,7 +38,7 @@ export {
   Facies,
   FaciesGroup,
   GaussianRandomField,
-  TruncationRule,
+  type InstantiatedTruncationRule,
   Bayfill,
   NonCubic,
   Cubic,

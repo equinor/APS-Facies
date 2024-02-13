@@ -1,19 +1,19 @@
-import store from '@/store'
+import { useMessageStore } from '@/stores/messages'
+import type { MessageType } from '@/utils/domain/messages/base'
 
-import { displayMessage as baseDisplayMessage } from '@/store/utils'
-
-export async function displayMessage (message: string, type = 'info'): Promise<void> {
-  await baseDisplayMessage(store, message, type)
+export function displayMessage(message: string, type: MessageType = 'info') {
+  const messageStore = useMessageStore()
+  messageStore.change(message, type)
 }
 
-export async function displayError (message: string): Promise<void> {
-  await displayMessage(message, 'error')
+export function displayError(message: string) {
+  displayMessage(message, 'error')
 }
 
-export async function displayWarning (message: string): Promise<void> {
-  await displayMessage(message, 'warning')
+export function displayWarning(message: string) {
+  displayMessage(message, 'warning')
 }
 
-export async function displaySuccess (message: string): Promise<void> {
-  await displayMessage(message, 'success')
+export function displaySuccess(message: string) {
+  displayMessage(message, 'success')
 }

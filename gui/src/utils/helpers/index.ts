@@ -1,6 +1,6 @@
 import { v4 as uuidv4 } from 'uuid'
-import { ID } from '@/utils/domain/types'
-import { Identifiable, Identified } from '@/utils/domain/bases/interfaces'
+import type { ID } from '@/utils/domain/types'
+import type { Identifiable, Identified } from '@/utils/domain/bases/interfaces'
 import {
   allSet,
   newSeed,
@@ -8,44 +8,45 @@ import {
   isEmpty,
   notEmpty,
 } from '@/utils/helpers/simple'
-import { NoCache } from '@/utils/helpers/decorators'
 
-function isUUID (value: string): boolean {
+function isUUID(value: unknown): value is ID {
+  if (typeof value !== 'string') return false
+
   const uuid = /^[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$/
-
-  return RegExp(uuid).test(value)
+  return uuid.test(value)
 }
 
-function getId (item: any): ID | '' {
+function getId<T extends Identifiable>(
+  item: T | ID | undefined | null,
+): ID | '' {
   if (isUUID(item)) return item
   if (item && isUUID(item.id)) return item.id
   return ''
 }
 
-type MaybeIdentified<T> = T & {
-  id?: ID
-}
-
-type HasIdentity<T> = T & {
-  id: ID
-}
-
-function identify<T> (items: MaybeIdentified<T>[] | Identified<MaybeIdentified<T>>): Identified<HasIdentity<T>> {
-  return Object.values(items).reduce((obj, item): Identified<HasIdentity<T>> => {
+function identify<T extends Identifiable>(
+  items: T[] | Identified<T>,
+): Identified<T> {
+  return Object.values(items).reduce((obj, item): Identified<T> => {
     const _id = item.id || uuidv4()
     if (!('id' in item) || item.id !== _id) {
       item.id = _id
     }
-    obj[`${_id}`] = (item as HasIdentity<T>)
+    obj[_id] = item
     return obj
-  }, ({} as Identified<HasIdentity<T>>))
+  }, {} as Identified<T>)
 }
 
-function includes<T extends Identifiable> (items: T[], item: T | ID): boolean {
+// TODO: [sindre] Should this make a deepcopy, only mutate (no return) or return a mutated object?
+function ensureIdentifiable<T extends Identifiable>(item: T): void {
+  if (!item.id) item.id = uuidv4()
+}
+
+function includes<T extends Identifiable>(items: T[], item: T | ID): boolean {
   return items.map(getId).includes(getId(item))
 }
 
-function hasOwnProperty<T> (obj: T, val: string): boolean {
+function hasOwnProperty<T, K extends string>(obj: T, val: K): boolean {
   return Object.prototype.hasOwnProperty.call(obj, val)
 }
 
@@ -53,12 +54,12 @@ export {
   isUUID,
   getId,
   identify,
+  ensureIdentifiable,
   allSet,
   newSeed,
   getRandomInt,
   isEmpty,
   notEmpty,
   includes,
-  NoCache,
   hasOwnProperty,
 }
