@@ -23,6 +23,7 @@
     "markdown-it-footnote": "^3.0.2",
     "mathjs": "^9.5.2",
     "object-hash": "^2.0.1",
+    "pinia": "^2.1.7",
     "plotly.js-dist": "^1.39.2",
     "regenerator-runtime": "^0.13.10",
     "roboto-fontface": "*",
@@ -33,7 +34,6 @@
     "vue-swatches": "^2.1.0",
     "vuelidate": "^0.7.7",
     "vuetify": "^2.7.1",
-    "vuex": "^3.0.1",
     "xml-js": "^1.6.7",
     "yargs-parser": "^20.2.4"
   },

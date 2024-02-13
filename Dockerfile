@@ -3,7 +3,7 @@ FROM node:20.11.0-alpine3.18 AS node
 
 ENV CODE=/code
 ENV NODE_MODULES=$CODE/node_modules
-ENV TRUNCATION_RULES=src/store/templates/truncationRules.json
+ENV TRUNCATION_RULES=src/stores/truncation-rules/templates/truncationRules.json
 
 FROM bitnami/nginx:1.25.2-debian-11-r46 AS nginx
 FROM --platform=amd64 python:3.8.18-slim-bookworm AS python
@@ -55,7 +55,7 @@ COPY Makefile .
 
 RUN mkdir -p \
     aps/unit_test/integration \
-    gui/src/store/templates
+    gui/src/stores/truncation-rules/templates
 RUN make generate-truncation-rules
 
 FROM node AS install
