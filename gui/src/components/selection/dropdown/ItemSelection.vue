@@ -17,6 +17,7 @@ import { requiredIf } from '@vuelidate/validators'
 import { useInvalidation } from '@/utils/invalidation'
 import type { ListItem } from '@/utils/typing'
 
+// TODO: Consider if it should be "items: T[] | ListItem<T>[]"".
 type Props = {
   modelValue: T
   items: T[] | ListItem<T>[]
