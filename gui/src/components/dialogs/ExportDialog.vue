@@ -62,10 +62,17 @@
       </v-card-text>
       <v-card-actions>
         <v-spacer />
-        <v-btn color="blue darken-1" text :disabled="hasErrors" @click="choose">
+        <v-btn
+          color="blue-darken-1"
+          variant="text"
+          :disabled="hasErrors"
+          @click="choose"
+        >
           Save
         </v-btn>
-        <v-btn color="blue darken-1" text @click="abort"> Abort </v-btn>
+        <v-btn color="blue-darken-1" variant="text" @click="abort">
+          Abort
+        </v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>

@@ -1,11 +1,13 @@
 <template>
   <v-container class="align justify center" fluid>
     <v-row>
-      <v-expansion-panels v-model="expanded" accordion multiple elevation="0">
+      <v-expansion-panels v-model="expanded" variant="accordion" multiple>
         <section-title>{{ title }}</section-title>
         <v-expansion-panel
+          value="faciesProbability"
           v-tooltip.bottom-start="!hasFacies && 'No Facies has been selected'"
           :disabled="!hasFacies"
+          elevation="0"
         >
           <v-expansion-panel-title>
             <section-title>Probabilities for Facies</section-title>
@@ -15,10 +17,12 @@
           </v-expansion-panel-text>
         </v-expansion-panel>
         <v-expansion-panel
+          value="truncationRule"
           v-tooltip.bottom="
             !hasEnoughFacies && 'Too few Facies has been selected'
           "
           :disabled="!hasEnoughFacies"
+          elevation="0"
         >
           <v-expansion-panel-title>
             <section-title>Truncation Rule</section-title>

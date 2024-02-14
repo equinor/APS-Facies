@@ -1,9 +1,9 @@
 <template>
   <facies-specification-base
-    :value="value.facies"
+    :model-value="value.facies"
     :disable="disable"
     :clearable="clearable"
-    @input.capture="(facies) => updateFacies(facies)"
+    @update:model-value="(facies) => updateFacies(facies)"
   />
 </template>
 

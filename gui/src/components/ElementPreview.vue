@@ -5,10 +5,12 @@
       <preview-header :value="rule" />
     </v-row>
     <v-row>
-      <v-expansion-panels v-model="expanded" accordion multiple>
+      <v-expansion-panels v-model="expanded" variant="accordion" multiple>
         <v-expansion-panel
           v-tooltip.bottom="truncationRuleError"
           :disabled="!hasTruncationRule"
+          value="truncationRuleMap"
+          elevation="0"
         >
           <v-expansion-panel-title>
             <h3>Truncation rule</h3>
@@ -22,6 +24,8 @@
         <v-expansion-panel
           v-tooltip.bottom="realizationError"
           :disabled="!hasRealization"
+          value="truncationRuleRealization"
+          elevation="0"
         >
           <v-expansion-panel-title>
             <h3>Realization</h3>
@@ -30,7 +34,10 @@
             <facies-realization v-if="rule" :value="rule" />
           </v-expansion-panel-text>
         </v-expansion-panel>
-        <v-expansion-panel>
+        <v-expansion-panel
+          value="gaussianRandomFields"
+          elevation="0"
+        >
           <v-expansion-panel-title>
             <h3>Transformed Gaussian Random Fields</h3>
           </v-expansion-panel-title>
@@ -41,6 +48,8 @@
         <v-expansion-panel
           v-tooltip.bottom="crossPlotErrors"
           :disabled="!hasEnoughFieldsForCrossPlot"
+          value="crossPlots"
+          elevation="0"
         >
           <v-expansion-panel-title>
             <h3>Cross plots</h3>

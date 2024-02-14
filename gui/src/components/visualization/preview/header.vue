@@ -1,12 +1,16 @@
 <template>
-  <floating-tooltip bottom :disabled="canSimulate" trigger="hover">
+  <floating-tooltip
+    placement="bottom"
+    :triggers="_explanation ? ['hover'] : []"
+    :disabled="!!_explanation"
+    v-tooltip="_explanation"
+  >
     <icon-button
-      :disabled="!canSimulate"
+      :disabled="!!_explanation"
       :waiting="waitingForSimulation"
       icon="refresh"
       @click="refresh"
     />
-    <template #popper>{{ _explanation }}</template>
   </floating-tooltip>
 </template>
 
@@ -53,13 +57,6 @@ const _canSimulateAllTrends = computed(
         field.trend.use &&
         TREND_NOT_IMPLEMENTED_PREVIEW_VISUALIZATION.includes(field.trend.type),
     ),
-)
-const canSimulate = computed(
-  () =>
-    props.value &&
-    props.value.ready &&
-    _allFaciesUsed.value &&
-    _canSimulateAllTrends.value,
 )
 
 const _explanation = computed(() => {

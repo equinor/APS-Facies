@@ -5,6 +5,7 @@
     @click.stop
     @input="$v.fieldName.$touch()"
     @blur="$v.fieldName.$touch()"
+    variant="underlined"
   />
 </template>
 <script setup lang="ts">
@@ -50,7 +51,7 @@ const errors = computed(() => {
 })
 
 watch(fieldName, (value: Optional<string>) => {
-  if (v.value.fieldName && !v.value.fieldName.$invalid) {
+  if (value && v.value.fieldName && !v.value.fieldName.$invalid) {
     store.dispatch('gaussianRandomFields/changeName', {
       field: props.value,
       name: value,

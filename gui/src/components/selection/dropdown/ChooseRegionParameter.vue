@@ -1,12 +1,12 @@
 <template>
-  <v-row justify="space-between" no-gutters>
+  <v-row justify="space-between" align="center" no-gutters>
     <v-col cols="0">
       <warning-dialog ref="warning" html />
     </v-col>
-    <v-col cols="3">
-      <v-checkbox v-model="useRegions" label="Use regions?" />
+    <v-col cols="4">
+      <v-checkbox v-model="useRegions" label="Use regions" />
     </v-col>
-    <v-col cols="9">
+    <v-col cols="8">
       <choose-parameter
         :disabled="!useRegions"
         regular

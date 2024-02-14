@@ -7,6 +7,7 @@
       "
       label="Debug level"
       :items="debugLevels"
+      variant="underlined"
     />
   </settings-panel>
 </template>

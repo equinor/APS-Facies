@@ -7,6 +7,7 @@
         :items="['IJ', 'IK', 'JK']"
         label="Cross section type"
         required
+        variant="underlined"
       />
     </v-col>
   </v-row>

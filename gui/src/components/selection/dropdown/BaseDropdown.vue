@@ -7,26 +7,22 @@
       :items="items"
       :disabled="disabled"
       :label="label"
+      variant="underlined"
     >
       <template #item="{ item, props }">
         <v-list-item
-          :key="(props.key as string)"
-          :value="item.raw.value"
-          :disabled="item.raw.disabled"
-          @click="props.onClick"
+          v-bind="props"
+          :value="item.props.value"
+          :disabled="item.props.disabled"
         >
           <v-hover v-slot="{ isHovering }">
             <base-tooltip
-              :message="item.raw.help"
-              :open="isHovering && !!item.raw.help"
-              :disabled="!item.raw.disabled && !item.raw.help"
+              :message="item.props.help"
+              :open="isHovering && !!item.props.help"
+              :disabled="!item.props.disabled && !item.props.help"
               trigger="manual"
               class="pa-0 ma-0"
-            >
-              <span :style="itemStyle(item.raw)">
-                {{ item.raw.title }}
-              </span>
-            </base-tooltip>
+            />
           </v-hover>
         </v-list-item>
       </template>
@@ -40,7 +36,6 @@ import BaseTooltip from '@/components/baseComponents/BaseTooltip.vue'
 import { VSelect } from 'vuetify/components'
 import type { ListItem } from '@/utils/typing'
 import { computed, ref } from 'vue'
-import type { CSSProperties } from 'vue'
 
 type Props = {
   modelValue: T
@@ -80,8 +75,4 @@ const selected = computed({
     }
   },
 })
-
-function itemStyle(item: ListItem<T>): CSSProperties {
-  return item.disabled ? { color: 'rgba(0, 0, 0, 0.38)' } : {}
-}
 </script>

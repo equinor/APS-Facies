@@ -6,7 +6,8 @@
       :text="text"
       :color="color"
       :outlined="outlined"
-      @click="(e: MouseEvent) => $emit('click', e)"
+      :variant="variant"
+      @click="(e: MouseEvent) => emit('click', e)"
     >
       <slot v-if="!title && !waiting" />
       <span v-if="!waiting">
@@ -23,7 +24,8 @@
 </template>
 
 <script setup lang="ts">
-import { Color } from '@/utils/domain/facies/helpers/colors'
+import type { Color } from '@/utils/domain/facies/helpers/colors'
+import type { VBtn } from 'vuetify/components'
 
 type Props = {
   title?: string
@@ -34,6 +36,7 @@ type Props = {
   text?: string
   dark?: boolean
   color?: Color
+  variant?: VBtn['variant']
 }
 
 withDefaults(defineProps<Props>(), {
@@ -45,6 +48,7 @@ withDefaults(defineProps<Props>(), {
   text: '',
   dark: false,
   color: '',
+  variant: 'text',
 })
 
 const emit = defineEmits<{

@@ -8,7 +8,7 @@
     :no-data-text="noDataText"
     :expanded="props.expanded"
   >
-    <template #item="{ item, isSelected }">
+    <template #item="{ item }: { item: T }">
       <tr
         :class="isCurrent(item) ? 'font-weight-bold' : ''"
         :style="isCurrent(item) ? currentStyle : ''"
@@ -22,23 +22,21 @@
           >
             <v-checkbox
               :style="{ marginTop: 0 }"
-              :value="isSelected"
-              :input-value="!isIndeterminate(item) && isSelected"
+              :model-value="isSelected(item)"
               :indeterminate="isIndeterminate(item)"
               :disabled="selectDisabled"
               :color="isCurrent(item) ? 'white' : undefined"
               primary
               hide-details
-              @change="(e: boolean) => updateSelection(item, e)"
-              @click.passive.stop
+              @click.passive.stop="toggleSelection(item)"
             />
             <template #popper>{{ selectError }}</template>
           </floating-tooltip>
         </td>
         <slot
           :item="item"
-          :isSelected="isSelected"
-          :isCurrent="isCurrent(item)"
+          :is-selected="isSelected(item)"
+          :is-current="isCurrent(item)"
           name="item"
         />
       </tr>
@@ -55,15 +53,15 @@ import SelectableItem from '@/utils/domain/bases/selectableItem'
 import type { ID } from '@/utils/domain/types'
 import { computed } from 'vue'
 import { useTheme } from 'vuetify'
-import type { HeaderItem } from '@/utils/typing'
+import type { HeaderItem, VuetifyColumns } from '@/utils/typing'
 import type { Identifiable } from '@/utils/domain/bases/interfaces'
 
 const props = withDefaults(defineProps<{
   modelValue: T[]
   headers: HeaderItem[]
   items: T[]
-  current?: ID
-  expanded?: number[]
+  current?: ID | null
+  expanded?: T[]
   loading?: boolean
   loadingText?: string
   noDataText?: string
@@ -104,11 +102,16 @@ function isCurrent(item: T): boolean {
   return item.id === props.current
 }
 
+const isSelected = computed(() => {
+  return (item: T) => props.modelValue.includes(item)
+})
+
 function propagateCurrent(item: T): void {
   emit('update:current', item.id!)
 }
 
-function updateSelection(item: T, value: boolean): void {
+function toggleSelection(item: T): void {
+  const value = !isSelected.value(item)
   if (value) {
     emit('update:model-value', [...props.modelValue, item])
   } else {
@@ -129,6 +132,6 @@ function isIndeterminate(item: T): boolean {
 <style scoped>
 td,
 :deep(td) {
-  background: unset !important;
+  background: unset;
 }
 </style>

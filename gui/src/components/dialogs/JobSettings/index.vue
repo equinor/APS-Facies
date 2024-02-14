@@ -12,7 +12,7 @@
     "
   >
     <template #activator="{ props }">
-      <v-btn outlined color="primary" dark v-bind="props"> Job Settings </v-btn>
+      <v-btn color="primary" v-bind="props" variant="outlined"> Job Settings </v-btn>
     </template>
     <v-card>
       <v-card-title class="text-h5" />
@@ -24,7 +24,7 @@
           v-model:import-fields="importFields"
           v-model:fmu-grid="fmuGrid"
           v-model:create-fmu-grid="createFmuGrid"
-          v-model:field-file-format="fieldFileFormat"
+          v-model:field-file-format="fieldFileFormat as FieldFormats"
           v-model:custom-trend-extrapolation-method="
             customTrendExtrapolationMethod
           "
@@ -78,7 +78,8 @@
                   <v-select
                     v-model="colorScale"
                     label="Color scale of Gaussian Random Fields"
-                    :items="store.state.options.colorScale.legal"
+                    :items="COLOR_SCALES"
+                    variant="underlined"
                   />
                 </v-col>
                 <v-col md="6">
@@ -86,13 +87,12 @@
                     v-model="faciesColorLibrary"
                     label="The color library for Facies"
                     :items="store.getters['constants/faciesColors/libraries']"
+                    variant="underlined"
                   >
                     <template #item="{ item, props }">
-                      <v-col @click="props.onClick(item.value)">
+                      <v-list-item v-bind="props">
+                        <br>
                         <v-row>
-                          <v-col cols="12">
-                            {{ item.title }}
-                          </v-col>
                           <v-col
                             v-for="color in item.value.colors"
                             :key="color"
@@ -100,7 +100,7 @@
                             :style="{ backgroundColor: color }"
                           />
                         </v-row>
-                      </v-col>
+                      </v-list-item>
                     </template>
                   </v-select>
                 </v-col>
@@ -172,8 +172,12 @@ import {
   Coordinate3D,
   SimulationSettings,
 } from '@/utils/domain/bases/interfaces'
-import { ref, computed, watch } from 'vue'
+import { ref,computed, watch } from 'vue'
 import { useStore } from '../../../store'
+import type {
+  FieldFormats,
+} from '@/stores/fmu/options'
+import { COLOR_SCALES } from '@/config'
 
 const store = useStore()
 
@@ -192,9 +196,9 @@ const automaticFaciesFill = ref(false)
 const automaticObservedFaciesSelection = ref(false)
 const filterZeroProbability = ref(false)
 const runFmuWorkflows = ref(false)
-const colorScale = ref('')
+const colorScale = ref<AllowedColorScales | null | undefined>(null)
 const faciesColorLibrary = ref<Optional<ColorLibrary>>(null)
-const maxLayersInFmu = ref<number>(0)
+const maxLayersInFmu = ref<number | null>(0)
 const debugLevel = ref<0 | 1 | 2 | 3 | 4>(0)
 const transformType = ref(0)
 const importFields = ref(false)
@@ -203,7 +207,7 @@ const createFmuGrid = ref(false)
 const onlyUpdateFromFmu = ref(false)
 const maxAllowedFractionOfValuesOutsideTolerance = ref(0)
 const toleranceOfProbabilityNormalisation = ref(0)
-const fieldFileFormat = ref('')
+const fieldFileFormat = ref<FieldFormats | null>(null)
 const customTrendExtrapolationMethod = ref('')
 const exportFmuConfigFiles = ref(false)
 const useNonStandardFmu = ref(false)
@@ -315,7 +319,7 @@ async function ok(): Promise<void> {
   ])
   // Create ERTBOX grid if createFmuGrid.value is true
   if (createFmuGrid.value) {
-    rms.createErtBoxGrid(
+    await rms.createErtBoxGrid(
       currentGridModel.value,
       fmuGrid.value,
       maxLayersInFmu.value,
@@ -334,7 +338,7 @@ async function ok(): Promise<void> {
   dialog.value = false
 }
 
-function update(type: string, value: boolean): void {
+function update(type: keyof Invalid, value: boolean): void {
   invalid.value[type] = value
 }
 </script>

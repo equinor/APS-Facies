@@ -10,10 +10,10 @@
         <td>{{ facies.alias }}</td>
         <td v-if="useProbabilityCubes">
           <v-autocomplete
-            :value="facies.probabilityCube"
+            :model-value="facies.probabilityCube"
             :items="probabilityCubes"
             clearable
-            @input="(cube: string) => changeProbabilityCube(facies, cube)"
+            @update:model-value="(cube: string) => changeProbabilityCube(facies, cube)"
           />
         </td>
         <td v-if="useProbabilityCubes">
@@ -22,9 +22,11 @@
         <td v-else>
           <fraction-field
             :model-value="facies.previewProbability"
+            @update:model-value="
+              (probability) => changeProbability(facies, probability as PROBABILITY)
+            "
             label=""
             dense
-            @input="(probability) => changeProbability(facies, probability)"
           />
         </td>
       </tr>

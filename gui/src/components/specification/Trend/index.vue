@@ -47,6 +47,7 @@
             v-model="trendParameter"
             :items="availableRmsTrendParameters"
             label="Trend parameter"
+            variant="underlined"
           />
           <v-select
             v-if="isRmsTrendMap"
@@ -54,6 +55,7 @@
             v-tooltip="'Select zone name from Zones folder for maps'"
             :items="availableRmsTrendZones"
             label="Zone name"
+            variant="underlined"
           />
           <v-select
             v-if="isRmsTrendMap"
@@ -64,6 +66,7 @@
             :items="availableRmsTrendMaps"
             :disabled="!hasDefinedRmsTrendZone"
             label="Trend map"
+            variant="underlined"
           />
           <div v-if="hasEllipticProperties">
             <curvature-specification

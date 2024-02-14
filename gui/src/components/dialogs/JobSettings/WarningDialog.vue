@@ -6,11 +6,11 @@
     @keydown.enter="close()"
   >
     <v-toolbar :color="options.color" dark dense>
-      <v-toolbar-title class="white--text">
+      <v-toolbar-title class="text-white">
         {{ title }}
       </v-toolbar-title>
     </v-toolbar>
-    <v-card tile>
+    <v-card rounded="0">
       <v-card-text v-if="html" v-show="!!message" v-html="message" />
       <v-card-text v-else v-show="!!message" v-text="message" />
       <v-card-actions>

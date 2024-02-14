@@ -1,11 +1,12 @@
 <template>
   <floating-tooltip
-    :triggers="[trigger]"
+    :triggers="trigger === 'manual' ? [] : [trigger]"
     :disabled="!_message || disabled"
-    :open="_open"
+    :shown="_open"
+    placement="bottom"
   >
     <slot />
-    <template #popper v-html="_message" />
+    <template #popper>{{ _message }}</template>
   </floating-tooltip>
 </template>
 

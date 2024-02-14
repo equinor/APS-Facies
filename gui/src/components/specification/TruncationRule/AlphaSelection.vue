@@ -1,5 +1,5 @@
 <template>
-  <v-select v-model="selected" :items="fields" clearable>
+  <v-select v-model="selected" :items="fields" clearable variant="underlined">
     <template v-if="channel" slot="label">
       <span
         >α<sub>{{ channel }}</sub></span

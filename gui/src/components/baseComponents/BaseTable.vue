@@ -1,12 +1,12 @@
 <template>
   <v-data-table
-    :value="value"
     :headers="_headers"
     :loading="loading"
     :loading-text="loadingText"
+    :expanded="_expanded"
     :items="items"
     :no-data-text="noDataText"
-    :custom-sort="customSort"
+    :sort-by="sortBy"
     :dense="dense"
     must-sort
     item-key="id"
@@ -22,8 +22,8 @@
         </th>
       </tr>
     </template>
-    <template #item="{ item, isSelected, props }">
-      <slot v-bind="props" :item="item" :isSelected="isSelected" name="item" />
+    <template #item="{ item, props }">
+      <slot v-bind="props" :item="item" name="item" />
     </template>
     <template #expanded-row="{ item, columns }">
       <slot :item="item" :columns="columns" name="expanded-item" />
@@ -39,26 +39,20 @@ import type { ID } from '@/utils/domain/types'
 import type { HeaderItem, VuetifyColumns } from '@/utils/typing'
 import { computed } from 'vue'
 import type { Identifiable } from '@/utils/domain/bases/interfaces'
+import type { VDataTable } from 'vuetify/components'
 
 type Props = {
-  value: T[]
   headers: HeaderItem[]
   items: T[]
   current?: ID
-  expanded?: number[]
+  expanded?: T[]
   loading?: boolean
   loadingText?: string
   noDataText?: string
   selectDisabled?: boolean
   selectError?: string
   elevation?: string
-  customSort?: (
-    items: T[],
-    sortBy: string[],
-    sortDesc: boolean[],
-    locale: string,
-    customSorters?: Record<string, (a: T, b: T) => number>,
-  ) => T[]
+  sortBy?: VDataTable['sortBy']
   dense?: boolean
 }
 
@@ -72,7 +66,7 @@ const props = withDefaults(defineProps<Props>(), {
   type: Boolean,
   selectError: undefined,
   elevation: '1',
-  customSort: undefined,
+  sortBy: undefined,
   dense: false,
 })
 
@@ -90,4 +84,6 @@ const _headers = computed(() =>
     ...header,
   })),
 )
+
+const _expanded = computed<ID[]>(() => props.expanded.map((item) => item.id))
 </script>

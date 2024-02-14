@@ -1,19 +1,19 @@
 <template>
-  <v-expansion-panel>
-    <v-expansion-panel-title v-slot="{ open }">
+  <v-expansion-panel value="gaussianRandomFields" elevation="0">
+    <v-expansion-panel-title v-slot="{ expanded }">
       <v-row class="pa-0 ma-0" justify="center" align="center">
         <v-col>
           <section-title>Gaussian Random Fields (GRF)</section-title>
         </v-col>
-        <v-col v-show="open" cols="2">
+        <v-col v-show="expanded" cols="2">
           <icon-button icon="add" @click="addField" />
         </v-col>
       </v-row>
     </v-expansion-panel-title>
     <v-expansion-panel-text>
       <cross-section />
-      <v-expansion-panels v-model="panel" accordion>
-        <v-expansion-panel v-for="field in fields" :key="field.id">
+      <v-expansion-panels v-model="panel" variant="accordion" multiple>
+        <v-expansion-panel v-for="field in fields" :key="field.id" elevation="0">
           <v-expansion-panel-title>
             <v-row class="fill-height" align="center" justify="start">
               <v-col cols="4">

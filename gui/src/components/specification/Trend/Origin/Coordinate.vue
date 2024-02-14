@@ -7,6 +7,7 @@
     :label="shownLabel"
     :arrow-step="arrowStep"
     allow-negative
+    enforce-ranges
     trend
     @update:error="(e: boolean) => emit('update:error', e)"
   />
@@ -22,7 +23,7 @@ type Props = {
   value: GaussianRandomField
   originType: string
   coordinateAxis: string
-  label: string
+  label?: string
 }
 const props = withDefaults(defineProps<Props>(), { label: '' })
 const emit = defineEmits<{

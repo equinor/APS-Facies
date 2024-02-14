@@ -1,34 +1,34 @@
 <template>
-  <v-row
-    class="pt-1 pb-1 pr-0 pl-0 ma-0"
-    justify="center"
-    align="center"
-    no-gutters
-  >
-    <v-col v-if="isDevelop" cols="12">
-      {{ value }}
-    </v-col>
-    <v-col
-      cols="12"
-    >
-      <v-row
-        justify="center"
-        align="center"
+  <v-list-item>
+    <template #title>
+      <v-list-item-title v-if="isDevelop || !imageUrl">
+        {{ value }}
+      </v-list-item-title>
+    </template>
+    <v-list-item-media>
+      <div
+        class="tr-preview"
+        :style="style"
       >
-    <v-col cols="12">
-      <v-row v-if="imageUrl" justify="center" align="center">
-        <v-img
-          aspect-ratio="1"
-          eager
-          :style="style"
-          :alt="altText"
-          :src="imageUrl"
-          :max-height="DEFAULT_TRUNCATION_RULE_TEMPLATE_PREVIEW_SIZE.height"
-          :max-width="DEFAULT_TRUNCATION_RULE_TEMPLATE_PREVIEW_SIZE.width"
-        />
-      </v-row>
-    </v-col>
-  </v-row>
+        <v-row>
+          <v-col>
+            <v-row>
+              <v-img
+                v-if="imageUrl"
+                aspect-ratio="1"
+                eager
+                :style="style"
+                :alt="altText"
+                :src="imageUrl"
+                :max-height="DEFAULT_TRUNCATION_RULE_TEMPLATE_PREVIEW_SIZE.height"
+                :max-width="DEFAULT_TRUNCATION_RULE_TEMPLATE_PREVIEW_SIZE.width"
+              />
+            </v-row>
+          </v-col>
+        </v-row>
+      </div>
+    </v-list-item-media>
+  </v-list-item>
 </template>
 
 <script setup lang="ts">

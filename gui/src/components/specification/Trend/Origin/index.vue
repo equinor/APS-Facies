@@ -31,6 +31,7 @@
       v-model="originType"
       :items="availableOriginTypes"
       label="Origin type"
+      variant="underlined"
     />
   </div>
 </template>

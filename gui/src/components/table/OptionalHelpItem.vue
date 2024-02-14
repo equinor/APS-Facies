@@ -1,5 +1,5 @@
 <template>
-  <v-tooltip v-if="hasHelp" bottom>
+  <v-tooltip v-if="hasHelp" location="bottom">
     <template #activator="{ props }">
       <span v-bind="props">{{ text }}</span>
     </template>

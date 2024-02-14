@@ -11,9 +11,8 @@
       :class="__class"
     >
       <v-text-field
-        ref="input"
         :class="__class"
-        :value="fieldValue"
+        :model-value="fieldValue"
         :error-messages="errors"
         :label="label"
         :suffix="_unit"
@@ -22,13 +21,16 @@
         :hint="hint"
         :persistent-hint="persistentHint"
         :append-icon="appendIcon"
-        @input.capture="(e: InputEvent) => updateValue(e)"
+        @update:model-value="(e) => {
+          v.fieldValue.$touch()
+          updateValue(e)
+        }"
         @keydown.up="increase"
         @keydown.down="decrease"
         @click:append="(e: MouseEvent) => emit('click:append', e)"
-        @update:error="(e: boolean) => propagateError(e)"
+        @blur="v.fieldValue.$touch"
+        variant="underlined"
       />
-      <!-- @blur="$v.fieldValue.$touch()" -->
     </v-col>
     <v-col v-if="isFmuUpdatable" v-bind="binding">
       <v-checkbox
@@ -43,9 +45,6 @@
 </template>
 
 <script setup lang="ts" generic="T extends number = number">
-/* eslint-disable @typescript-eslint/ban-ts-comment */
-/* eslint-disable no-use-before-define */
-
 import { BigNumber } from 'mathjs'
 import { isNumber } from 'lodash'
 
@@ -59,8 +58,8 @@ import { hasOwnProperty } from '@/utils/helpers'
 import type { FmuUpdatable } from '@/utils/domain/bases/fmuUpdatable'
 import FmuUpdatableValue from '@/utils/domain/bases/fmuUpdatable'
 import { computed, ref, watch, onMounted } from 'vue'
-import { useStore } from '../../store'
 import type { ValidationRule } from '@vuelidate/core'
+import { useStore } from '../../store'
 import useVuelidate from '@vuelidate/core'
 import { VTextField } from 'vuetify/lib/components/index.mjs'
 import { between, numeric, requiredUnless } from '@vuelidate/validators'
@@ -151,14 +150,6 @@ const validators = computed(() => {
 const v = useVuelidate(validators, { fieldValue })
 useInvalidation(v)
 
-function getUpdatable(val: FmuUpdatableValue | number | null): boolean {
-  const defaultValue = false
-  return isEmpty(val)
-    ? defaultValue
-    : val instanceof FmuUpdatableValue
-    ? val.updatable
-    : defaultValue
-}
 const updatable = computed({
   get: () => {
     const defaultValue = false
@@ -181,6 +172,7 @@ const constants = computed<MinMax>(() =>
 )
 
 const _unit = computed(() => {
+  if (!props.unit) return ''
   if (props.discrete) {
     if (!props.unit) return ''
     const irregular = {}
@@ -250,13 +242,14 @@ onMounted(() => {
   fieldValue.value = getValue(props.modelValue)
 })
 
-function hasChanged(value: BigNumber | FmuUpdatableValue): boolean {
+function hasChanged(
+  value: T | BigNumber | FmuUpdatable<T> | number | null,
+): boolean {
   // Helper method to deal with letting the '.' appear in the textfield
   // Returns this.fieldValue != value, in the proper types
   try {
     return math.unequal(
-      // Not sure why it won't allow this...
-      math.bignumber(fieldValue.value),
+      math.bignumber(fieldValue.value as InternalValue),
       getValue(value) ?? 0,
     ) as boolean
   } catch (e) {
@@ -265,24 +258,27 @@ function hasChanged(value: BigNumber | FmuUpdatableValue): boolean {
 }
 
 function emitChange(value: BigNumber | boolean | null): void {
-  const payload =
-    props.modelValue === null || !hasOwnProperty(props.modelValue, 'value')
-      ? Number(value)
-      : typeof value === 'boolean'
-      ? { value: Number(fieldValue.value), updatable: value }
-      : { value: Number(value), updatable: updatable.value }
+  let payload: FmuUpdatableValue | number
+  if (props.fmuUpdatable || hasOwnProperty(props.modelValue, 'value')) {
+    payload = typeof value === 'boolean'
+      ? new FmuUpdatableValue(Number(fieldValue.value), value)
+      : new FmuUpdatableValue(Number(value), updatable.value)
+  } else {
+    payload = Number(value)
+  }
 
-  if ($v.fieldValue) $v.fieldValue.$touch()
+  v.value.fieldValue?.$touch()
 
-  emit(
-    'update:model-value',
-    props.fmuUpdatable ? new FmuUpdatableValue(payload) : payload,
-  )
+  emit('update:model-value', payload)
 }
 
-function updateValue(value: BigNumber | string | InputEvent): void {
-  if (value instanceof InputEvent) {
-    value = (value.target as HTMLInputElement).value
+function updateValue(event: BigNumber | string | InputEvent): void {
+  let value: BigNumber | string | null
+
+  if (event instanceof InputEvent) {
+    value = (event.target as HTMLInputElement).value
+  } else {
+    value = event
   }
 
   if (typeof value === 'string') {
@@ -296,11 +292,10 @@ function updateValue(value: BigNumber | string | InputEvent): void {
     }
   }
 
-  let numericValue = getValue(value)
+  let numericValue: BigNumber | null = null
   if (/^[+-]?(\d+(\.\d*)?|\.\d+)$/.test(value.toString())) {
     numericValue = getValue(value)
   } else if (value === '') {
-    // @ts-ignore
     value = null
     numericValue = null
   } else if (value === '-') {
@@ -308,14 +303,12 @@ function updateValue(value: BigNumber | string | InputEvent): void {
   } else if (value === '+') {
     value = ''
   } else {
-    // @ts-ignore
-    value =
-      props.modelValue instanceof FmuUpdatableValue
+    numericValue =
+      math.bignumber(
+        (props.modelValue instanceof FmuUpdatableValue
         ? props.modelValue.value
         : props.modelValue
-    // Hack to make sure illegal values are not displayed in the text field
-    // @ts-ignore
-    inputElement.lazyValue = value
+      ) as number)
   }
   if (/^[+-]?\d+\.0*$/.test((value || '').toString())) {
     fieldValue.value = value
@@ -332,21 +325,21 @@ function updateValue(value: BigNumber | string | InputEvent): void {
   emitChange(numericValue)
 }
 
-function getValue(value: FmuUpdatableValue | InternalValue): BigNumber | null {
+function getValue(value: FmuUpdatableValue<T> | FmuUpdatable<T> | InternalValue): BigNumber | null {
   if (value === null) return null
   if (isEmpty(value) && !isNumber(value)) return null
-  if (value instanceof FmuUpdatableValue) value = value.value
+  if (value instanceof FmuUpdatableValue || (typeof value === 'object' && 'value' in value)) value = value.value
   if (value === '-') value = 0
+  if (typeof value === 'string') {
+    value = math.bignumber(value)
+  }
   if (props.useModulus) {
     if (math.larger(value, max.value)) value = min.value
     else if (math.smaller(value, min.value)) value = max.value
   }
-  if (typeof value === 'string') {
-    value = math.bignumber(value)
-  }
   if (props.enforceRanges) {
-    if (value < min.value) value = min.value
-    if (value > max.value) value = max.value
+    if (math.smaller(value, min.value)) value = min.value
+    if (math.larger(value, max.value)) value = max.value
   }
   return math.bignumber(value)
 }
@@ -355,7 +348,7 @@ function increase(): void {
   if (props.readonly) return
   updateValue(
     math.add(
-      math.bignumber(fieldValue.value),
+      math.bignumber(fieldValue.value as InternalValue),
       math.bignumber(props.arrowStep),
     ) as BigNumber,
   )
@@ -365,17 +358,10 @@ function decrease(): void {
   if (props.readonly) return
   updateValue(
     math.subtract(
-      math.bignumber(fieldValue.value),
+      math.bignumber(fieldValue.value as InternalValue),
       math.bignumber(props.arrowStep),
     ) as BigNumber,
   )
-}
-
-function propagateError(error: boolean): void {
-  if (props.ignoreErrors) {
-    error = false
-  }
-  emit('update:error', error)
 }
 
 watch(props, (value: Props) => {

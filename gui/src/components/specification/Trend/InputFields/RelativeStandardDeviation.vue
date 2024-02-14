@@ -12,8 +12,8 @@
 
 <script setup lang="ts">
 import StorableNumericField from '@/components/specification/StorableNumericField.vue'
-import { GaussianRandomField } from '@/utils/domain'
-import { MinMax } from '@/api/types'
+import type { GaussianRandomField } from '@/utils/domain'
+import type { MinMax } from '@/api/types'
 
 defineProps<{ value: GaussianRandomField }>()
 const emit = defineEmits<{

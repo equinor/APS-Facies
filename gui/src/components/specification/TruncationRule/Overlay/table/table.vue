@@ -2,7 +2,7 @@
   <base-table
     :headers="headers"
     :items="polygons"
-    :custom-sort="ordering"
+    :sort-by="[{ key: 'order', order: 'asc' }]"
     elevation="0"
     @input.stop
   >
@@ -11,22 +11,22 @@
         <td>
           <alpha-selection
             :value="item.field"
-            :rule="rule"
+            :rule="props.rule"
             :group="item.group.id"
             hide-label
-            @input="(field: string) => updateField(item, field)"
+            @input="(field: string|null) => updateField(item, field!)"
           />
         </td>
         <td>
-          <overlay-facies-specification :value="item" :rule="rule" />
+          <overlay-facies-specification :value="item" :rule="props.rule" />
         </td>
         <td v-if="needFraction">
-          <polygon-fraction-field :value="item" :rule="rule" />
+          <polygon-fraction-field :value="item" :rule="props.rule" />
         </td>
         <td>
           <fraction-field
             :model-value="item.center"
-            @input="(val) => updateCenter(item, val)"
+            @update:model-value="(val) => updateCenter(item, val)"
           />
         </td>
         <td>
@@ -63,7 +63,6 @@ import type { ID } from '@/utils/domain/types'
 import { Store } from '@/store/typing'
 import type { HeaderItems } from '@/utils/typing'
 import { hasFaciesSpecifiedForMultiplePolygons } from '@/utils/queries'
-import { sortByOrder } from '@/utils'
 import { computed } from 'vue'
 import { useStore } from '../../../../../store'
 
@@ -75,18 +74,6 @@ const props = defineProps<Props>()
 const store = useStore()
 
 const polygons = computed(() => props.value)
-
-// TODO: Not used?
-const fieldOptions = computed<{ value: ID; text: string; disabled: boolean }[]>(
-  () =>
-    Object.values((this.$store as Store).getters.fields).map((field) => {
-      return {
-        value: field.id,
-        text: field.name,
-        disabled: false,
-      }
-    }),
-)
 
 const needFraction = computed(() =>
   hasFaciesSpecifiedForMultiplePolygons(props.rule.overlayPolygons),
@@ -123,14 +110,6 @@ const headers = computed<HeaderItems>(() => [
     value: 'order',
   },
 ])
-
-function ordering(
-  items: OverlayPolygon[],
-  index: number,
-  isDescending: boolean,
-): OverlayPolygon[] {
-  return sortByOrder(items, index, isDescending)
-}
 
 async function updateField(
   polygon: OverlayPolygon,

@@ -1,9 +1,9 @@
 <template>
   <fraction-field
-    :value="value.fraction"
+    :model-value="props.value.fraction"
     :append-icon="appendIcon"
     :disabled="disabled"
-    @input="(fraction) => updateFactor(value, fraction)"
+    @update:model-value="(fraction) => updateFactor(props.value, fraction as number)"
     @click:append="normalizeFractions()"
   />
 </template>

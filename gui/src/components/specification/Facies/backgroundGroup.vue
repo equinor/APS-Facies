@@ -1,9 +1,10 @@
 <template>
   <v-select
-    :value="selected"
+    :model-value="selected"
     :items="facies"
     multiple
-    @input="(e: Facies[]) => update(e)"
+    @update:model-value="(e: Facies[]) => update(e)"
+    variant="underlined"
   />
 </template>
 

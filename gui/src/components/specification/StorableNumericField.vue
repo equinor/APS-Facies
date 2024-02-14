@@ -10,6 +10,7 @@
     :ranges="ranges"
     :arrow-step="arrowStep"
     :use-modulus="useModulus"
+    :enforce-ranges="enforceRanges"
     @update:error="(e: boolean) => emit('update:error', e)"
   />
 </template>
@@ -50,6 +51,7 @@ type Props = {
   trend?: boolean
   arrowStep?: number
   ranges?: Optional<MinMax>
+  enforceRanges?: boolean
 }
 const props = withDefaults(defineProps<Props>(), {
   subPropertyType: undefined,
@@ -62,6 +64,7 @@ const props = withDefaults(defineProps<Props>(), {
   trend: false,
   arrowStep: 1,
   ranges: null,
+  enforceRanges: false,
 })
 const store = useStore()
 const emit = defineEmits<{

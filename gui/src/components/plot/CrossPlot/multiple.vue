@@ -7,6 +7,7 @@
           :items="available"
           label="Gaussian Fields to be used"
           multiple
+          variant="underlined"
         />
       </v-col>
     </v-row>

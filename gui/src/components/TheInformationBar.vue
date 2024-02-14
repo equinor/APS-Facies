@@ -1,9 +1,9 @@
 <template>
-  <div id="information-bar">
+  <div id="information-bar" v-if="shown">
     <v-alert
       :value="shown"
       :type="type"
-      dismissible
+      closable
       transition="slide-y-transition"
       @input="shown = false"
     >

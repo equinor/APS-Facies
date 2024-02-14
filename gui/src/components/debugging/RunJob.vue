@@ -1,6 +1,7 @@
 <template>
   <wait-button
     :waiting="executing"
+    variant="elevated"
     @click="execute"
   >
     RUN

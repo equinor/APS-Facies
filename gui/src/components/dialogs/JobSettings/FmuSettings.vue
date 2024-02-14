@@ -64,7 +64,7 @@
         <v-col cols="6">
           <v-radio-group
             v-model="_importFields"
-            row
+            inline
             label="Exchange of Gaussian Fields with FMU"
           >
             <v-radio label="Simulate and export to FMU" value="generate" />
@@ -79,18 +79,24 @@
           <v-row no-gutters>
             <v-select
               v-model="_fieldFileFormat"
-              :items="fieldFileFormats"
+              :items="FIELD_FORMATS"
               label="File format for export of Gaussian Random Fields"
+              variant="underlined"
             />
+          </v-row>
+          <v-row no-gutters>
             <v-select
               v-model="_customTrendExtrapolationMethod"
               v-tooltip="
                 'Extrapolation method for custom trends to fill undefined grid cells in ERT/FMU grid.'
               "
-              :items="customTrendExtrapolationMethods"
+              :items="TREND_EXTRAPOLATION_METHODS"
               :disabled="!hasRmsParamTrend"
               label="RMS_PARAM trend extrapolation method for ERT/FMU grid."
+              variant="underlined"
             />
+          </v-row>
+          <v-row no-gutters>
             <v-checkbox
               v-model="_onlyUpdateResidualFields"
               v-tooltip="
@@ -133,7 +139,9 @@ import WarningDialog from '@/components/dialogs/JobSettings/WarningDialog.vue'
 import { useStore } from '../../../store'
 import { computed, ref, watch } from 'vue'
 import {
+  FIELD_FORMATS,
   type FieldFormats,
+  TREND_EXTRAPOLATION_METHODS,
 } from '@/stores/fmu/options'
 
 interface Invalid {
@@ -148,7 +156,7 @@ type Props = {
   onlyUpdateFromFmu: boolean
   fmuGrid: string
   createFmuGrid: boolean
-  maxLayersInFmu: number
+  maxLayersInFmu: number | null
   fieldFileFormat: FieldFormats
   customTrendExtrapolationMethod: string
   exportFmuConfigFiles: boolean
@@ -177,18 +185,8 @@ const emit = defineEmits<{
 
 const store = useStore()
 const minimumErtLayers = computed(() => store.state.fmu.maxDepth.minimum)
-const fieldFileFormats = computed(() => store.state.fmu.fieldFileFormat.legal)
-const customTrendExtrapolationMethods = computed(
-  () => store.state.fmu.customTrendExtrapolationMethod.legal,
-)
 const availableGridModels = computed(() =>
   Object.values(store.state.gridModels.available),
-)
-// Settings for handling regions, and ERT-mode
-// not used?
-const useRegions = computed(() => store.state.regions.use)
-const gridHasReverseFaults = computed(
-  () => store.getters['gridModels/current']?.hasDualIndexSystem,
 )
 const invalid = ref<Invalid>({
   fmuGridDepth: false,
@@ -209,10 +207,13 @@ const _fmuGrid = computed({
 
 const _onlyUpdateFromFmu = computed({
   get: () => props.onlyUpdateFromFmu,
-  set: (value: boolean) => emit('update:onlyUpdateFromFmu', value),
-})
-watch(_onlyUpdateFromFmu, (value: boolean) => {
-  if (value) _runFmuWorkflows.value = true
+  set: (toggled: boolean) => {
+    emit('update:onlyUpdateFromFmu', toggled)
+    if (toggled) {
+      // _onlyUpdateFromFmu and _runFmuWorkflows are mutually exclusive
+      _runFmuWorkflows.value = false
+    }
+  },
 })
 
 const _createFmuGrid = computed({
@@ -222,10 +223,13 @@ const _createFmuGrid = computed({
 
 const _runFmuWorkflows = computed({
   get: () => props.runFmuWorkflows,
-  set: (value: boolean) => emit('update:runFmuWorkflows', value),
-})
-watch(_runFmuWorkflows, (value: boolean) => {
-  if (value) _onlyUpdateFromFmu.value = true
+  set: (toggled: boolean) => {
+    emit('update:runFmuWorkflows', toggled)
+    if (toggled) {
+      // _runFmuWorkflows and _onlyUpdateFromFmu are mutually exclusive
+      _onlyUpdateFromFmu.value = false
+    }
+  },
 })
 
 const _maxLayersInFmu = computed({
@@ -239,9 +243,9 @@ const _importFields = computed({
     emit('update:importFields', value === 'automatic_detect'),
 })
 
-const _fieldFileFormat = computed({
+const _fieldFileFormat = computed<FieldFormats>({
   get: () => props.fieldFileFormat,
-  set: (value: string) => emit('update:fieldFileFormat', value),
+  set: (value: FieldFormats) => emit('update:fieldFileFormat', value),
 })
 
 const _customTrendExtrapolationMethod = computed({
@@ -256,7 +260,9 @@ const _exportFmuConfigFiles = computed({
 
 const _onlyUpdateResidualFields = computed({
   get: () => props.onlyUpdateResidualFields,
-  set: (value: boolean) => emit('update:onlyUpdateResidualFields', value),
+  set: (toggle: boolean) => {
+    emit('update:onlyUpdateResidualFields', toggle)
+  },
 })
 
 const _useNonStandardFmu = computed({
@@ -264,13 +270,7 @@ const _useNonStandardFmu = computed({
   set: (value: boolean) => emit('update:useNonStandardFmu', value),
 })
 
-//  maybe not needed?
-const _exportErtBoxGrid = computed({
-  get: () => props.exportErtBoxGrid,
-  set: (value: boolean) => emit('update:exportErtBoxGrid', value),
-})
-
-function update(type: string, value: boolean): void {
+function update(type: keyof Invalid, value: boolean): void {
   if (type === 'fmuGridDepth') {
     value = value && props.createFmuGrid
   }

@@ -1,5 +1,5 @@
 <template>
-  <v-row dense no-gutters>
+  <v-row :dense="true" no-gutters>
     <v-col>
       <informational-icon
         v-if="parentSelected && isFaciesFromRms"

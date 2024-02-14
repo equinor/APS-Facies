@@ -2,35 +2,25 @@
   <v-row align="center" justify="center" no-gutters>
     <v-col cols="6">
       <v-col class="pa-0">
-        <v-icon
-          :disabled="!canDecrease"
-          small
-          @click="() => emit('input', -1)"
-          v-text="'$vuetify.icons.values.up'"
-        />
+        <v-icon :disabled="!canDecrease" small @click="() => emit('input', -1)"
+          >$up</v-icon
+        >
       </v-col>
       <v-col class="pa-0">
-        <v-icon
-          :disabled="!canIncrease"
-          small
-          @click="() => emit('input', +1)"
-          v-text="'$vuetify.icons.values.down'"
-        />
+        <v-icon :disabled="!canIncrease" small @click="() => emit('input', +1)"
+          >$down</v-icon
+        >
       </v-col>
     </v-col>
     <v-col cols="6">
-      <v-icon
-        :disabled="!canRemove"
-        small
-        @click="() => emit('delete')"
-        v-text="'$vuetify.icons.values.remove'"
-      />
-      <v-icon
-        :disabled="!canAdd"
-        small
-        @click="() => emit('add')"
-        v-text="'$vuetify.icons.values.add'"
-      />
+      <v-col class="pa-0">
+        <v-icon :disabled="!canRemove" small @click="() => emit('delete')"
+          >$remove</v-icon
+        >
+        </v-col>
+        <v-col class="pa-0">
+        <v-icon :disabled="!canAdd" small @click="() => emit('add')">$add</v-icon>
+      </v-col>
     </v-col>
   </v-row>
 </template>

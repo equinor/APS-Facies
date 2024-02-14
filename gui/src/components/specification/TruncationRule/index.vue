@@ -1,36 +1,34 @@
 <template>
-  <v-row no-gutters>
-    <truncation-header />
-    <div v-if="rule">
-      <v-row no-gutters>
-        <v-col v-if="notBayfill" cols="12">
-          <floating-tooltip :disabled="canUseOverlay" trigger="hover">
-            <v-checkbox
-              v-model="useOverlay"
-              :disabled="!canUseOverlay"
-              class="tooltip-target"
-              label="Include Overlay Facies"
-            />
-            <template #popper>{{ useOverlayTooltip }}</template>
-          </floating-tooltip>
-        </v-col>
-      </v-row>
-      <v-row no-gutters>
-        <v-col cols="12">
-          <component
-            :is="truncationRuleComponent"
-            v-if="truncationRuleComponent && rule"
-            :value="rule"
+  <truncation-header />
+  <div v-if="rule">
+    <v-row no-gutters>
+      <v-col v-if="notBayfill" cols="12">
+        <floating-tooltip :disabled="canUseOverlay" trigger="hover">
+          <v-checkbox
+            v-model="useOverlay"
+            :disabled="!canUseOverlay"
+            class="tooltip-target"
+            label="Include Overlay Facies"
           />
-        </v-col>
-      </v-row>
-      <v-row v-if="useOverlay" no-gutters>
-        <v-col cols="12">
-          <overlay-facies :value="rule" />
-        </v-col>
-      </v-row>
-    </div>
-  </v-row>
+          <template #popper>{{ useOverlayTooltip }}</template>
+        </floating-tooltip>
+      </v-col>
+    </v-row>
+    <v-row no-gutters>
+      <v-col cols="12">
+        <component
+          :is="truncationRuleComponent"
+          v-if="truncationRuleComponent && rule"
+          :value="rule"
+        />
+      </v-col>
+    </v-row>
+    <v-row v-if="useOverlay" no-gutters>
+      <v-col cols="12">
+        <overlay-facies :value="rule" />
+      </v-col>
+    </v-row>
+  </div>
 </template>
 
 <script setup lang="ts">

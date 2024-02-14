@@ -1,5 +1,5 @@
 <template>
-  <v-select v-model="conformity" :items="options" :dark="dark" />
+  <v-select v-model="conformity" :items="options" :dark="dark" variant="underlined"/>
 </template>
 
 <script setup lang="ts">

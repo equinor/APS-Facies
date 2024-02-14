@@ -1,11 +1,16 @@
 <template>
-  <v-row no-gutters>
+  <v-row
+    no-gutters
+    class="truncation-rule-header"
+  >
     <v-col>
       <v-select
         ref="chooseTruncationRuleType"
         v-model="type"
         :items="truncationRules"
         label="Rule"
+        item-props
+        variant="underlined"
       />
     </v-col>
     <v-col>
@@ -15,13 +20,15 @@
         :items="templates"
         :disabled="!type"
         label="Template"
+        variant="underlined"
       >
         <template #item="{ item, props }">
           <truncation-rule-preview
-            :value="item.raw.title"
-            :type="type"
-            @click="props.onClick"
-            :disabled="item.raw.disabled"
+            v-bind="props"
+            :value="item.title"
+            :type="type!"
+            :disabled="item.props.disabled"
+            :overlay="item.props.overlay"
           />
         </template>
       </v-combobox>

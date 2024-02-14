@@ -1,13 +1,11 @@
 <template>
-  <v-container class="fill-height" fluid>
-    <v-row v-if="loading">
-      <v-col cols="12" justify="center" align="center">
-        <v-progress-circular :size="70" indeterminate />
-        <span>{{ loadingMessage }}</span>
-      </v-col>
+  <v-container fluid>
+    <v-row v-if="loading" class="d-flex align-content-center flex-column align-center">
+      <v-progress-circular :size="70" indeterminate/>
+      <span>{{ loadingMessage }}</span>
     </v-row>
     <v-row v-else>
-      <v-col cols="4">
+      <v-col cols="4" class="pa-0">
         <scrollable-area>
           <selection />
         </scrollable-area>

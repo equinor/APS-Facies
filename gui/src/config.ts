@@ -50,7 +50,9 @@ export const COLOR_SCALES = [
   'Viridis',
   'YlGnBu',
   'YlOrRd',
-]
+] as const
+
+export type AllowedColorScales = (typeof COLOR_SCALES)[number]
 
 export const DEFAULT_CROSS_SECTION = {
   type: 'IJ',

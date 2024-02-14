@@ -24,7 +24,7 @@
       <export-state />
     </v-row>
     <job-settings />
-    <v-btn v-if="false" disabled outlined color="primary"> Run Settings </v-btn>
+    <v-btn v-if="false" disabled variant="outlined" color="primary"> Run Settings </v-btn>
     <icon-button
       icon="changelog"
       color="primary"

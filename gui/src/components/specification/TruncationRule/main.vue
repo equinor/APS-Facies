@@ -1,17 +1,15 @@
 <template>
+  <h3>Alpha selection</h3>
+  <alpha-fields :value="props.value" :min-fields="minFields" />
+  <h3>Truncation rule specification background facies</h3>
   <v-row no-gutters>
-    <h3>Alpha selection</h3>
-    <alpha-fields :value="value" :min-fields="minFields" />
-    <h3>Truncation rule specification background facies</h3>
-    <v-row no-gutters>
-      <v-col>
-        <v-row no-gutters>
-          <v-col>
-            <component :is="table" :value="value" />
-          </v-col>
-        </v-row>
-      </v-col>
-    </v-row>
+    <v-col>
+      <v-row no-gutters>
+        <v-col>
+          <component :is="props.table" :value="value" />
+        </v-col>
+      </v-row>
+    </v-col>
   </v-row>
 </template>
 

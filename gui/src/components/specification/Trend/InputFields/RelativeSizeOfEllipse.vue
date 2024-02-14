@@ -19,6 +19,7 @@ import { computed } from 'vue'
 import { useStore } from '../../../../store'
 
 const props = defineProps<{ value: GaussianRandomField }>()
+const store = useStore()
 const emit = defineEmits<{
   (event: 'update:error', error: boolean): void
 }>()

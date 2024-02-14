@@ -18,7 +18,7 @@
           />
           <v-progress-circular v-else :size="70" indeterminate />
         </v-col>
-        <v-col cols="1" align-self="end">
+        <v-col cols="2" align-self="end">
           <color-scale v-if="someSimulated" />
         </v-col>
       </v-row>

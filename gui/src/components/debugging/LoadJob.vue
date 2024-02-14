@@ -1,13 +1,12 @@
 <template>
   <v-select
+    v-model="selectedJob"
     label="RMS job"
-    :value="selectedJob"
+    clearable
     :items="jobs"
-    :append-outer-icon="clearIcon"
     :disabled="loading"
     :loading="loading"
-    @change="(job: string) => selectJob(job)"
-    @click:append-outer="clear"
+    variant="underlined"
   >
     <v-progress-linear indeterminate />
   </v-select>
@@ -29,21 +28,6 @@ const loading = ref(false)
 const jobs = computed(() => {
   return Object.keys(jobMapping.value)
 })
-
-const clearIcon = computed(() => {
-  return selectedJob.value ? '$vuetify.icons.values.clear' : ''
-})
-
-function selectJob(job: string): void {
-  selectedJob.value = job
-  const state = jobMapping.value[job]
-  store.dispatch('populate', state)
-}
-
-function clear(): void {
-  selectedJob.value = null
-  resetState()
-}
 
 onMounted(() => {
   loading.value = true

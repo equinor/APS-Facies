@@ -1,11 +1,12 @@
 <template>
   <v-select
-    :value="modelValue"
+    :model-value="props.modelValue"
     :items="items"
     :label="label"
     :error-messages="errors"
+    variant="underlined"
     @blur="$v.value.$touch()"
-    @input.capture="(e: T) => $emit('update:model-value', e)"
+    @update:model-value="(e) => $emit('update:model-value', e as T)"
   />
 </template>
 

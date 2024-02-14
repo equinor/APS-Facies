@@ -6,65 +6,64 @@
       </v-card-title>
       <v-card-text>
         <v-row>
-          <v-row>
-            <!--Seed-->
-            <v-col cols="10">
-              <numeric-field
-                v-model="settings.seed"
-                :ranges="{ min: 0, max: Math.pow(2, 64) - 1 }"
-                label="Seed"
-              />
-            </v-col>
-            <v-col cols="2">
-              <icon-button icon="random" @click="settings.seed = newSeed()" />
-            </v-col>
-          </v-row>
-          <v-col cols="6">
-            <v-checkbox
-              :value="settings.gridModel.use"
-              label="Use model grid"
-              @change="(val) => (settings.gridModel.use = val)"
+          <!--Seed-->
+          <v-col cols="10">
+            <numeric-field
+              v-model="settings.seed"
+              :ranges="{ min: 0, max: Math.pow(2, 64) - 1 }"
+              label="Seed"
             />
           </v-col>
-          <v-col cols="6" />
-          <v-row v-if="settings.gridModel.use" justify="space-around">
-            <v-col cols="4">
-              <numeric-field
-                v-model="settings.gridModel.size.x"
-                discrete
-                unit="cell"
-                label="X"
-                hint="The size of the grid to be simulated"
-                persistent-hint
-              />
-            </v-col>
-            <v-col cols="4">
-              <numeric-field
-                v-model="settings.gridModel.size.y"
-                discrete
-                unit="cell"
-                label="Y"
-                hint="The size of the grid to be simulated"
-                persistent-hint
-              />
-            </v-col>
-            <v-col cols="4">
-              <numeric-field
-                v-model="settings.gridModel.size.z"
-                discrete
-                unit="cell"
-                label="Z"
-                hint="The size of the grid to be simulated"
-                persistent-hint
-              />
-            </v-col>
-          </v-row>
+          <v-col cols="2">
+            <icon-button icon="random" @click="settings.seed = newSeed()" />
+          </v-col>
+        </v-row>
+        <v-col cols="6">
+          <v-checkbox
+            v-model="settings.gridModel.use"
+            label="Use model grid"
+          />
+        </v-col>
+        <v-col cols="6" />
+        <v-row v-if="settings.gridModel.use" justify="space-around">
+          <v-col cols="4">
+            <numeric-field
+              v-model="settings.gridModel.size.x"
+              discrete
+              unit="cell"
+              label="X"
+              hint="The size of the grid to be simulated"
+              persistent-hint
+            />
+          </v-col>
+          <v-col cols="4">
+            <numeric-field
+              v-model="settings.gridModel.size.y"
+              discrete
+              unit="cell"
+              label="Y"
+              hint="The size of the grid to be simulated"
+              persistent-hint
+            />
+          </v-col>
+          <v-col cols="4">
+            <numeric-field
+              v-model="settings.gridModel.size.z"
+              discrete
+              unit="cell"
+              label="Z"
+              hint="The size of the grid to be simulated"
+              persistent-hint
+            />
+          </v-col>
         </v-row>
       </v-card-text>
       <v-card-actions>
         <v-spacer />
-        <v-btn color="blue darken-1" text @click="cancel"> Close </v-btn>
-        <v-btn color="blue darken-1" text @click="save"> Save </v-btn>
+        <v-btn color="blue darken-1" variant="text" @click="cancel">
+          Close
+        </v-btn>
+        <v-btn color="blue darken-1" variant="text" @click="save"> Save </v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
@@ -129,7 +128,7 @@ const options = ref<DialogOptions>({
   width: 290,
 })
 
-async function open(newSettings: Settings, newOptions: DialogOptions = {}) {
+async function open(newSettings: Settings, newOptions: DialogOptions = {}): Promise<ReturnValue> {
   dialog.value = true
   settings.value = newSettings
   options.value = { ...options.value, ...newOptions }

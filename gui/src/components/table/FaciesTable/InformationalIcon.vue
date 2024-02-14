@@ -1,39 +1,47 @@
 <template>
   <base-tooltip :message="active ? message : inactiveMessage">
-    <v-icon :color="color">
-      {{ __icon }}
-    </v-icon>
+    <v-icon
+      v-if="hasIcon"
+      :color="color"
+      :icon="__icon"
+    />
   </base-tooltip>
 </template>
 
 <script setup lang="ts">
 import BaseTooltip from '@/components/baseComponents/BaseTooltip.vue'
-import { GlobalFacies } from '@/utils/domain'
-import { ID } from '@/utils/domain/types'
-// Doesn't exist in v3?
-// import { VuetifyIcon } from "vuetify/types/services/icons";
+import type { GlobalFacies } from '@/utils/domain'
+import type { ID } from '@/utils/domain/types'
 import { computed } from 'vue'
 import vuetify from '@/plugins/vuetify'
 
-type Props = {
+const props = withDefaults(defineProps<{
   value: GlobalFacies
   icon: string
-  current?: ID
+  current?: ID | null
   active?: boolean
   message?: string
   inactiveMessage?: string
-}
-const props = withDefaults(defineProps<Props>(), { active: false })
-
-// TODO: typing
-const __icon = computed(() => {
-  const icons = vuetify.icons.values
-  const iconName = `${props.icon}${!props.active ? 'Negated' : ''}`
-  return iconName
-  return icons[iconName]
+}>(), {
+  active: false,
+  current: null,
+  message: undefined,
+  inactiveMessage: undefined,
 })
+
+const __icon = computed(() => `$${props.icon}${!props.active ? 'Negated' : ''}`)
 
 const isCurrent = computed(() => props.current === props.value.id)
 
 const color = computed(() => (isCurrent.value ? 'white' : undefined))
+
+const hasIcon = computed<boolean>(() => {
+  // Vuetify 3 will throw an error if the icon does not exist, rather than not showing anything as was the case in 2
+  const name = __icon.value.replace('$', '')
+  const exists = !!vuetify.icons.aliases[name]
+  if (!exists) {
+    console.warn(`Tried to use icon ${name}, but it does not exist`)
+  }
+  return exists
+})
 </script>

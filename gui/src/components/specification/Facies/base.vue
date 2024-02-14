@@ -1,10 +1,5 @@
 <template>
-  <v-select
-    :items="faciesOptions"
-    :value="selected"
-    :clearable="clearable"
-    @input.capture="(facies: Value) => $emit('input', facies)"
-  />
+  <v-select :items="faciesOptions" v-model="selected" :clearable="clearable" variant="underlined" />
 </template>
 
 <script setup lang="ts">
@@ -16,24 +11,25 @@ import { ListItem } from '@/utils/typing'
 import { useStore } from '../../../store'
 import { computed } from 'vue'
 
-type Value = Facies | ID | Facies[] | ID[]
-
 type Props = {
-  value: Value
-  disable: boolean | ((facies: Facies) => boolean)
-  clearable: boolean
+  modelValue: Facies | null
+  disable?: boolean | ((facies: Facies) => boolean)
+  clearable?: boolean
 }
 const props = withDefaults(defineProps<Props>(), {
   disable: false,
   clearable: false,
 })
+const emit = defineEmits<{
+  (event: 'update:model-value', value: Facies | null): void
+}>()
 const store = useStore()
 
 const selectedFacies = computed<Facies[]>(
   () => store.getters['facies/selected'],
 )
 const selected = computed<ID | ID[]>(() =>
-  Array.isArray(props.value) ? props.value.map(getId) : getId(props.value),
+  Array.isArray(props.modelValue) ? props.modelValue.map(getId) : getId(props.modelValue),
 )
 
 const faciesOptions = computed<ListItem<string>[]>(() => {

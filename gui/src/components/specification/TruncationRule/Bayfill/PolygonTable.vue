@@ -23,7 +23,7 @@
             v-if="!!polygon.slantFactor"
             :model-value="polygon.slantFactor"
             fmu-updatable
-            @input="(factor: number) => updateFactor(polygon, factor)"
+            @update:model-value="(factor) => updateFactor(polygon, factor)"
           />
           <slot v-else />
         </td>

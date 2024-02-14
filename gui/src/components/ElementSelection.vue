@@ -1,17 +1,22 @@
 <template>
-  <v-container class="align justify center" fluid>
+  <v-container class="align justify center pa-0" fluid>
     <v-row>
       <v-col>
         <choose-grid-model />
+      </v-col>
+      <v-col>
         <choose-facies-realization-parameter v-if="currentGridModel" />
-
+      </v-col>
+    </v-row>
+    <v-row>
+      <v-col>
         <v-expansion-panels
           v-if="currentGridModel"
           v-model="panels"
-          accordion
+          variant="accordion"
           multiple
         >
-          <v-expansion-panel expand>
+          <v-expansion-panel expand value="zoneRegion" elevation="0">
             <v-expansion-panel-title>
               <section-title>Zones and Regions</section-title>
             </v-expansion-panel-title>
@@ -23,12 +28,12 @@
               </span>
             </v-expansion-panel-text>
           </v-expansion-panel>
-          <v-expansion-panel>
+          <v-expansion-panel value="facies" elevation="0">
             <v-expansion-panel-title>
               <section-title>Facies</section-title>
             </v-expansion-panel-title>
             <v-expansion-panel-text class="fill-height">
-              <v-row v-if="currentGridModel">
+              <v-row v-if="currentGridModel" no-gutters>
                 <v-row v-if="hasWellParameters" no-gutters>
                   <v-col class="pt-2" cols="6">
                     <choose-blocked-well-parameter />

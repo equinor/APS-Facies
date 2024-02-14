@@ -16,9 +16,9 @@
 </template>
 
 <script setup lang="ts">
-import { FmuUpdatable } from '@/utils/domain/bases/fmuUpdatable'
+import type { FmuUpdatable } from '@/utils/domain/bases/fmuUpdatable'
 
-import { MinMax } from '@/api/types'
+import type { MinMax } from '@/api/types'
 import NumericField from '@/components/selection/NumericField.vue'
 import type { PROBABILITY } from '@/utils/domain/types'
 

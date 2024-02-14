@@ -1,8 +1,9 @@
 <template>
   <base-table
+    :value="polygons"
     :headers="headers"
     :items="polygons"
-    :custom-sort="ordering"
+    :sort-by="[{ key: 'order', order: 'asc' }]"
     @input.stop
   >
     <template #item="{ item }">
@@ -18,7 +19,7 @@
             use-modulus
             unit="°"
             label=""
-            @input="(angle) => updateAngle(item, angle)"
+            @update:model-value="(angle) => updateAngle(item, angle)"
           />
         </td>
         <td class="text-left">
@@ -28,7 +29,7 @@
           <polygon-fraction-field :value="item" :rule="value" />
         </td>
         <td>
-          <polygon-order :value="item" :rule="value" min-polygons="2" />
+          <polygon-order :value="item" :rule="value" :min-polygons="2" />
         </td>
       </tr>
     </template>
@@ -44,7 +45,6 @@ import BackgroundFaciesSpecification from '@/components/specification/Facies/bac
 import NonCubic from '@/utils/domain/truncationRule/nonCubic'
 import NonCubicPolygon from '@/utils/domain/polygon/nonCubic'
 import { HeaderItems } from '@/utils/typing'
-import { sortByOrder } from '@/utils'
 import { hasFaciesSpecifiedForMultiplePolygons } from '@/utils/queries'
 import { computed } from 'vue'
 import { useStore } from '../../../../store'
@@ -81,14 +81,6 @@ const headers: HeaderItems = [
     value: 'order',
   },
 ]
-
-function ordering(
-  items: NonCubicPolygon[],
-  index: number,
-  isDescending: boolean,
-): NonCubicPolygon[] {
-  return sortByOrder(items, index, isDescending)
-}
 
 async function updateAngle(
   item: NonCubicPolygon,

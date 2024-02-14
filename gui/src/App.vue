@@ -1,13 +1,12 @@
 <template>
   <v-app id="app">
-    <v-app-bar app flat color="#ffffff">
+    <v-app-bar flat color="#ffffff">
       <v-col class="column">
         <the-tool-bar />
-        <!-- TODO: Figure out if this is needed. -->
-        <!-- <the-information-bar /> -->
       </v-col>
     </v-app-bar>
     <v-main>
+    <the-information-bar />
       <main-page />
     </v-main>
   </v-app>
@@ -15,7 +14,7 @@
 
 <script lang="ts" setup>
 import TheToolBar from '@/components/TheToolBar.vue'
-// import TheInformationBar from '@/components/TheInformationBar.vue'
+import TheInformationBar from '@/components/TheInformationBar.vue'
 import MainPage from '@/pages/MainPage.vue'
 import { onBeforeMount } from 'vue'
 import { useStore } from './store'
