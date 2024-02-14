@@ -5,7 +5,7 @@
     no-data-text="No Facies selected"
     elevation="0"
   >
-    <template #item="{ item: facies }">
+    <template #item="{ item: facies }: { item: Facies }">
       <tr>
         <td>{{ facies.alias }}</td>
         <td v-if="useProbabilityCubes">
@@ -17,7 +17,7 @@
           />
         </td>
         <td v-if="useProbabilityCubes">
-          {{ parseFloat(facies.previewProbability).toFixed(2) }}
+          {{ facies.previewProbability !== null ? facies.previewProbability.toFixed(2) : '-' }}
         </td>
         <td v-else>
           <fraction-field

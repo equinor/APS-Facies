@@ -14,20 +14,20 @@
 <script
   setup
   lang="ts"
-  generic="
-  T extends Polygon = Polygon,
-  S extends PolygonSerialization = PolygonSerialization,
-  P extends PolygonSpecification = PolygonSpecification,
+  generic="T extends Polygon,
+  S extends PolygonSerialization,
+  P extends PolygonSpecification,
+  RULE extends TruncationRule<T, S, P>
 "
 >
-import { ID } from '@/utils/domain/types'
-import TruncationRule from '@/utils/domain/truncationRule/base'
-import Polygon, {
+import type { ID } from '@/utils/domain/types'
+import type TruncationRule from '@/utils/domain/truncationRule/base'
+import type {
+  Polygon,
   PolygonSerialization,
   PolygonSpecification,
 } from '@/utils/domain/polygon/base'
-import { GaussianRandomField } from '@/utils/domain'
-import { Store } from '@/store/typing'
+import type { GaussianRandomField } from '@/utils/domain'
 
 import AlphaSelection from './AlphaSelection.vue'
 import { computed } from 'vue'
@@ -48,7 +48,7 @@ function defaultChannels(num: number): AlphaField[] {
 }
 
 type Props = {
-  value: TruncationRule<T, S, P>
+  value: RULE
   minFields: number
 }
 const props = withDefaults(defineProps<Props>(), { minFields: 2 })

@@ -61,7 +61,7 @@ import FaciesRealization from '@/components/plot/FaciesRealization.vue'
 import GaussianPlots from '@/components/plot/GaussianPlot/multiple.vue'
 import PreviewHeader from '@/components/visualization/preview/header.vue'
 import CrossPlots from '@/components/plot/CrossPlot/multiple.vue'
-import { GaussianRandomField, TruncationRule } from '@/utils/domain'
+import { GaussianRandomField } from '@/utils/domain'
 import { useStore } from '../store'
 import { computed, watch } from 'vue'
 
@@ -77,7 +77,7 @@ const fields = computed<GaussianRandomField[]>(() => {
   return Object.values(store.getters.fields)
 })
 
-const rule = computed<TruncationRule>(() => {
+const rule = computed(() => {
   return store.getters.truncationRule
 })
 
@@ -126,7 +126,7 @@ watch(
 
 watch(
   rule,
-  async (value: TruncationRule) => {
+  async (value) => {
     const type = 'preview'
     if (value) {
       await store.dispatch('panels/open', {

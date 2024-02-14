@@ -1,7 +1,7 @@
 /**
  * Mock of the rms.uipy object available in RMS 11
  */
-import {
+import type {
   AverageParameterProbabilities,
   CodeName,
   RmsFacies,
@@ -12,12 +12,15 @@ import {
   Paths,
   Job,
 } from '@/api/types'
-import { TruncationRuleDescription } from '@/utils'
-import { GaussianRandomFieldSpecification } from '@/utils/domain/gaussianRandomField'
-import { ZoneConfiguration } from '@/utils/domain/zone'
-import { Optional } from '@/utils/typing'
+import type { TruncationRuleDescription } from '@/utils'
+import type {
+  GaussianRandomFieldSpecification,
+} from '@/utils/domain/gaussianRandomField'
+import type { ZoneConfiguration } from '@/utils/domain/zone'
+import type { Optional } from '@/utils/typing'
 
 import { rms as mock } from './roxar'
+import type { PolygonSpecification } from '@/utils/domain/polygon/base'
 const api: { call: <T>(name: string, ...args: any[]) => Promise<T> } =
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 // @ts-ignore
@@ -76,7 +79,10 @@ export default {
       blockedWellLogName,
       regionParameter,
     ),
-  truncationPolygons: <T extends TruncationRuleDescription>(
+  truncationPolygons: <
+    P extends PolygonSpecification,
+    T extends TruncationRuleDescription<P>,
+  >(
     specification: T,
   ): Promise<PolygonDescription[]> =>
     api.call('get_truncation_map_polygons', specification),
@@ -99,14 +105,14 @@ export default {
   simulateGaussianField: (
     field: GaussianRandomFieldSpecification,
   ): Promise<number[][]> => api.call('simulate_gaussian_field', field),
-  simulateRealization: (
+  simulateRealization: <P extends PolygonSpecification,>(
     fields: GaussianRandomFieldSpecification[],
-    truncationRule: TruncationRuleDescription,
+    truncationRule: TruncationRuleDescription<P>,
   ): Promise<number[][]> =>
     api.call('simulate_realization', fields, truncationRule),
   averageProbabilityCubes: (
     gridName: string,
-    probabilityCubeParameters: string,
+    probabilityCubeParameters: string[],
     zoneNumber: number,
     regionParameter: Optional<string> = null,
     regionNumber: Optional<number> = null,

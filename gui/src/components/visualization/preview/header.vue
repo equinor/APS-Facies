@@ -13,19 +13,20 @@
 <script
   setup
   lang="ts"
-  generic="
-  T extends Polygon = Polygon,
-  S extends PolygonSerialization = PolygonSerialization,
-  P extends PolygonSpecification = PolygonSpecification,
+  generic="T extends Polygon,
+  S extends PolygonSerialization,
+  P extends PolygonSpecification,
+  RULE extends TruncationRule<T, S, P>
 "
 >
 import IconButton from '@/components/selection/IconButton.vue'
 
-import Polygon, {
+import type {
+  Polygon,
   PolygonSerialization,
   PolygonSpecification,
 } from '@/utils/domain/polygon/base'
-import TruncationRule from '@/utils/domain/truncationRule/base'
+import type TruncationRule from '@/utils/domain/truncationRule/base'
 
 import { TREND_NOT_IMPLEMENTED_PREVIEW_VISUALIZATION } from '@/config'
 import { usesAllFacies } from '@/store/utils/helpers'
@@ -34,7 +35,7 @@ import { displayError } from '@/utils/helpers/storeInteraction'
 import { ref, computed } from 'vue'
 import { useStore } from '../../../store'
 
-const props = defineProps<{ value: TruncationRule<T, S, P> }>()
+const props = defineProps<{ value: RULE }>()
 const store = useStore()
 
 const waitingForSimulation = ref(false)

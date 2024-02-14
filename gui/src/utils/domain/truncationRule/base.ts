@@ -48,9 +48,9 @@ export interface TruncationRuleSpecification<
 }
 
 export default abstract class TruncationRule<
-    T extends Polygon = Polygon,
-    S extends PolygonSerialization = PolygonSerialization,
-    P extends PolygonSpecification = PolygonSpecification,
+    T extends Polygon,
+    S extends PolygonSerialization,
+    P extends PolygonSpecification,
   >
   extends Simulation
   implements Named

@@ -11,27 +11,28 @@
 <script
   setup
   lang="ts"
-  generic="
-  T extends Polygon = Polygon,
-  S extends PolygonSerialization = PolygonSerialization,
-  P extends PolygonSpecification = PolygonSpecification,
+  generic="T extends Polygon,
+  S extends PolygonSerialization,
+  P extends PolygonSpecification,
+  RULE extends TruncationRule<T, S, P>
 "
 >
-import { GaussianRandomField } from '@/utils/domain'
+import type { GaussianRandomField } from '@/utils/domain'
 import OverlayTruncationRule from '@/utils/domain/truncationRule/overlay'
-import TruncationRule from '@/utils/domain/truncationRule/base'
-import Polygon, {
+import type TruncationRule from '@/utils/domain/truncationRule/base'
+import type {
+  Polygon,
   PolygonSerialization,
   PolygonSpecification,
 } from '@/utils/domain/polygon/base'
-import { ID } from '@/utils/domain/types'
-import { ListItem } from '@/utils/typing'
+import type { ID } from '@/utils/domain/types'
+import type { ListItem } from '@/utils/typing'
 import { useStore } from '../../../store'
 import { computed } from 'vue'
 
 type Props = {
   value: GaussianRandomField | null
-  rule: TruncationRule<T, S, P>
+  rule: RULE
   channel?: number
   group?: ID | ''
 }

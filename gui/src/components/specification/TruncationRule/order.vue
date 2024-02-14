@@ -13,17 +13,17 @@
 <script
   setup
   lang="ts"
-  generic="
-  T extends Polygon = Polygon,
-  S extends PolygonSerialization = PolygonSerialization,
-  P extends PolygonSpecification = PolygonSpecification,
+  generic="T extends Polygon,
+  S extends PolygonSerialization,
+  P extends PolygonSpecification,
+  RULE extends OverlayTruncationRule<T, S, P>
 "
 >
-import Polygon, {
+import type {
+  Polygon,
   PolygonSerialization,
   PolygonSpecification,
 } from '@/utils/domain/polygon/base'
-import TruncationRule from '@/utils/domain/truncationRule/base'
 import OverlayTruncationRule from '@/utils/domain/truncationRule/overlay'
 
 import { OverlayPolygon } from '@/utils/domain'
@@ -34,7 +34,7 @@ import { useStore } from '../../../store'
 
 type Props = {
   value: T
-  rule: TruncationRule<T, S, P>
+  rule: RULE
   overlay?: boolean
   minPolygons?: number
 }

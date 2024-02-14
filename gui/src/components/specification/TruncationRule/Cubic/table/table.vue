@@ -1,6 +1,6 @@
 <template>
   <base-table :headers="headers" :items="polygons" must-sort>
-    <template #item="{ item }">
+    <template #item="{ item }: { item: CubicPolygon }">
       <tr>
         <td v-for="index in value.levels" :key="index">
           {{

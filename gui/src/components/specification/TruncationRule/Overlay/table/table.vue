@@ -40,35 +40,36 @@
 <script
   setup
   lang="ts"
-  generic="
-  T extends Polygon = Polygon,
-  S extends PolygonSerialization = PolygonSerialization,
-  P extends PolygonSpecification = PolygonSpecification,
+  generic="T extends OverlayPolygon,
+  S extends PolygonSerialization,
+  P extends PolygonSpecification,
+  RULE extends OverlayTruncationRule<T, S, P> | InstantiatedOverlayTruncationRule
 "
 >
-import OverlayTruncationRule from '@/utils/domain/truncationRule/overlay'
+import type OverlayTruncationRule from '@/utils/domain/truncationRule/overlay'
 import FractionField from '@/components/selection/FractionField.vue'
 import PolygonFractionField from '@/components/selection/PolygonFractionField.vue'
 import PolygonOrder from '@/components/specification/TruncationRule/order.vue'
 import OverlayFaciesSpecification from '@/components/specification/Facies/overlay.vue'
 import AlphaSelection from '@/components/specification/TruncationRule/AlphaSelection.vue'
-import Polygon, {
+import type {
   PolygonSerialization,
   PolygonSpecification,
 } from '@/utils/domain/polygon/base'
+import type { InstantiatedOverlayTruncationRule } from '@/utils/domain'
 import BaseTable from '@/components/baseComponents/BaseTable.vue'
-import OverlayPolygon from '@/utils/domain/polygon/overlay'
-import { ID } from '@/utils/domain/types'
+import type OverlayPolygon from '@/utils/domain/polygon/overlay'
+import type { ID } from '@/utils/domain/types'
 import { Store } from '@/store/typing'
-import { HeaderItems } from '@/utils/typing'
+import type { HeaderItems } from '@/utils/typing'
 import { hasFaciesSpecifiedForMultiplePolygons } from '@/utils/queries'
 import { sortByOrder } from '@/utils'
 import { computed } from 'vue'
 import { useStore } from '../../../../../store'
 
 type Props = {
-  value: OverlayPolygon[]
-  rule: OverlayTruncationRule<T, S, P>
+  value: T[]
+  rule: RULE
 }
 const props = defineProps<Props>()
 const store = useStore()

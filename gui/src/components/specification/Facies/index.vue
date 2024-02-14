@@ -10,28 +10,22 @@
 <script
   setup
   lang="ts"
-  generic="
-    T extends Polygon = Polygon,
-    S extends PolygonSerialization = PolygonSerialization,
-    P extends PolygonSpecification = PolygonSpecification,
+  generic="T extends Polygon,
+  RULE extends InstantiatedTruncationRule
 "
 >
-import { ID } from '@/utils/domain/types'
-import Facies from '@/utils/domain/facies/local'
-import Polygon, {
-  PolygonSerialization,
-  PolygonSpecification,
-} from '@/utils/domain/polygon/base'
-import TruncationRule from '@/utils/domain/truncationRule/base'
+import type Facies from '@/utils/domain/facies/local'
+import type Polygon from '@/utils/domain/polygon/base'
+import type { InstantiatedTruncationRule } from '@/utils/domain'
 
 import FaciesSpecificationBase from './base.vue'
 import { useStore } from '../../../store'
 
 type Props = {
-  value: Polygon
-  rule: TruncationRule<T, S, P>
-  clearable: boolean
-  disable: boolean | ((facies: Facies) => boolean)
+  value: T
+  rule: RULE
+  clearable?: boolean
+  disable?: boolean | ((facies: Facies) => boolean)
 }
 const props = withDefaults(defineProps<Props>(), {
   clearable: false,

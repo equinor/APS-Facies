@@ -52,7 +52,7 @@
 <script setup lang="ts" generic="T extends Identifiable">
 import BaseTable from '@/components/baseComponents/BaseTable.vue'
 import SelectableItem from '@/utils/domain/bases/selectableItem'
-import { ID } from '@/utils/domain/types'
+import type { ID } from '@/utils/domain/types'
 import { computed } from 'vue'
 import { useTheme } from 'vuetify'
 import type { HeaderItem } from '@/utils/typing'

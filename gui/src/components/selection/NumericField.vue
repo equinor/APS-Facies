@@ -42,7 +42,7 @@
   </v-row>
 </template>
 
-<script setup lang="ts">
+<script setup lang="ts" generic="T extends number = number">
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 /* eslint-disable no-use-before-define */
 
@@ -56,6 +56,7 @@ import { Optional } from '@/utils/typing'
 import { notEmpty, isEmpty } from '@/utils'
 import { hasOwnProperty } from '@/utils/helpers'
 
+import type { FmuUpdatable } from '@/utils/domain/bases/fmuUpdatable'
 import FmuUpdatableValue from '@/utils/domain/bases/fmuUpdatable'
 import { computed, ref, watch, onMounted } from 'vue'
 import { useStore } from '../../store'
@@ -74,7 +75,7 @@ interface AdditionalRule {
 type InternalValue = BigNumber | number | string | null
 
 type Props = {
-  modelValue: FmuUpdatableValue | number | null
+  modelValue: FmuUpdatable<T> | number | null
   label: string
   valueType?: string
   unit?: string

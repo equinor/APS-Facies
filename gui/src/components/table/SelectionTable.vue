@@ -8,7 +8,7 @@
     :no-data-text="_noDataText"
     v-model:current="current"
   >
-    <template #item="{ item, isCurrent }">
+    <template #item="{ item, isCurrent }: { item: T, isCurrent: boolean }">
       <td v-if="showName" class="text-start">
         {{ item.name }}
       </td>

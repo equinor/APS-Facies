@@ -15,15 +15,23 @@
   </v-row>
 </template>
 
-<script setup lang="ts">
+<script
+    setup
+    lang="ts"
+    generic="T extends Polygon,
+    S extends PolygonSerialization,
+    P extends PolygonSpecification,
+    RULE extends TruncationRule<T, S, P>
+">
 import AlphaFields from '@/components/specification/TruncationRule/AlphaFields.vue'
 
-import { TruncationRule } from '@/utils/domain'
+import type { TruncationRule } from '@/utils/domain/truncationRule'
 import { computed } from 'vue'
 import { type Component } from 'vue'
+import type { Polygon, PolygonSerialization, PolygonSpecification } from '@/utils/domain/polygon/base'
 
 type Props = {
-  value: TruncationRule
+  value: RULE
   table: Component
 }
 const props = defineProps<Props>()

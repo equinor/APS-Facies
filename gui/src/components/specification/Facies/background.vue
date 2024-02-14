@@ -1,19 +1,29 @@
 <template>
   <facies-specification
     :value="value"
-    :rule="rule"
+    :rule="rule as InstantiatedTruncationRule"
     :disable="(facies) => overlayFacies(facies)"
   />
 </template>
 
-<script setup lang="ts">
+<script
+  setup
+  lang="ts"
+  generic="T extends Polygon,
+    S extends PolygonSerialization,
+    P extends PolygonSpecification,
+    RULE extends TruncationRule<T, S, P>
+"
+>
 import FaciesSpecification from '@/components/specification/Facies/index.vue'
 
-import { Bayfill, Facies, Polygon, TruncationRule } from '@/utils/domain'
+import type { Bayfill, Facies, InstantiatedTruncationRule, Polygon } from '@/utils/domain'
+import type { TruncationRule } from '@/utils/domain/truncationRule'
+import type { PolygonSerialization, PolygonSpecification } from '@/utils/domain/polygon/base'
 
 type Props = {
   value: Polygon
-  rule: TruncationRule
+  rule: RULE
 }
 const props = defineProps<Props>()
 

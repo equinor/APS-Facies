@@ -9,14 +9,24 @@
   </v-row>
 </template>
 
-<script setup lang="ts">
-import { PlotData } from 'plotly.js'
+<script
+  setup
+  lang="ts"
+  generic="T extends Polygon,
+  S extends PolygonSerialization,
+  P extends PolygonSpecification,
+  RULE extends TruncationRule<T, S, P>
+"
+>
+import type { PlotData } from 'plotly.js-dist-min'
 
-import { GlobalFacies, TruncationRule } from '@/utils/domain'
+import type { GlobalFacies, Polygon } from '@/utils/domain'
 
 import StaticPlot from '@/components/plot/StaticPlot.vue'
 import { useStore } from '../../store'
 import { computed } from 'vue'
+import type { TruncationRule } from '@/utils/domain/truncationRule'
+import type { PolygonSerialization, PolygonSpecification } from '@/utils/domain/polygon/base'
 
 function filterOnCode(data: number[][] | null, code: number): (1 | null)[][] {
   if (!data) return []
@@ -24,7 +34,7 @@ function filterOnCode(data: number[][] | null, code: number): (1 | null)[][] {
 }
 
 type Props = {
-  value: TruncationRule
+  value: RULE
   expand?: boolean
   disabled?: boolean
 }

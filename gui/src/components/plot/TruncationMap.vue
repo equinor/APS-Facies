@@ -9,21 +9,31 @@
   </v-row>
 </template>
 
-<script setup lang="ts">
+<script
+  setup
+  lang="ts"
+  generic="T extends Polygon,
+    S extends PolygonSerialization,
+    P extends PolygonSpecification,
+    RULE extends TruncationRule<T, S, P>
+"
+>
 import rms from '@/api/rms'
 
 import StaticPlot from '@/components/plot/StaticPlot.vue'
 
-import { TruncationRule } from '@/utils/domain'
 import GlobalFacies from '@/utils/domain/facies/global'
 
 import { makeTruncationRuleSpecification } from '@/utils'
 import { plotify, PlotSpecification } from '@/utils/plotting'
 import { useStore } from '../../store'
 import { computed, watch, ref } from 'vue'
+import type { TruncationRule } from '@/utils/domain/truncationRule'
+import type { Polygon } from '@/utils/domain'
+import type { PolygonSerialization, PolygonSpecification } from '@/utils/domain/polygon/base'
 
 type Props = {
-  value: TruncationRule
+  value: RULE
   expand?: boolean
 }
 const props = withDefaults(defineProps<Props>(), { expand: false })

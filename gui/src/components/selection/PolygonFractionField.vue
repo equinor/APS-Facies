@@ -11,29 +11,31 @@
 <script
   setup
   lang="ts"
-  generic="
-    T extends Polygon = Polygon, 
-    S extends PolygonSerialization = PolygonSerialization, 
-    P extends PolygonSpecification = PolygonSpecification
-  "
+  generic="T extends Polygon,
+  S extends PolygonSerialization,
+  P extends PolygonSpecification,
+  RULE extends TruncationRule<T, S, P> | InstantiatedTruncationRule
+"
 >
 import FractionField from '@/components/selection/FractionField.vue'
 
-import Polygon, {
+import type {
+  Polygon,
   PolygonSerialization,
   PolygonSpecification,
 } from '@/utils/domain/polygon/base'
-import TruncationRule from '@/utils/domain/truncationRule/base'
+import type TruncationRule from '@/utils/domain/truncationRule/base'
 
 import { hasFaciesSpecifiedForMultiplePolygons } from '@/utils/queries'
 import { getId } from '@/utils'
 import { computed } from 'vue'
-import vuetify from '../../plugins/vuetify'
+import vuetify from '@/plugins/vuetify'
+import type { InstantiatedTruncationRule } from '@/utils/domain'
 import { useStore } from '../../store'
 
 type Props = {
   value: T
-  rule: TruncationRule<T, S, P>
+  rule: RULE
 }
 const props = defineProps<Props>()
 const store = useStore()

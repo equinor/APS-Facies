@@ -1,7 +1,7 @@
 import BaseItem from '@/utils/domain/bases/baseItem'
-import { Identified, Ordered } from '@/utils/domain/bases/interfaces'
-import Facies from '@/utils/domain/facies/local'
-import { ID, ORDER, PROBABILITY } from '@/utils/domain/types'
+import type { Ordered } from '@/utils/domain/bases/interfaces'
+import type Facies from '@/utils/domain/facies/local'
+import type { ID, ORDER, PROBABILITY } from '@/utils/domain/types'
 
 export function getFaciesName(polygon: Polygon): string {
   return polygon.facies ? polygon.facies.name : ''
@@ -28,7 +28,7 @@ export interface PolygonSerialization extends BasePolygonSpec<ID | null> {
   overlay: boolean
 }
 
-export default abstract class Polygon extends BaseItem implements Ordered {
+export abstract class Polygon extends BaseItem implements Ordered {
   public order: ORDER
   public fraction: PROBABILITY
   public facies: Facies | null
@@ -76,4 +76,4 @@ export default abstract class Polygon extends BaseItem implements Ordered {
   }
 }
 
-export type Polygons = Identified<Polygon>
+export default Polygon

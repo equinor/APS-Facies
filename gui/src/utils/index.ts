@@ -12,14 +12,14 @@ import {
 } from '@/utils/domain/bases/interfaces'
 import { RootGetters, RootState } from '@/store/typing'
 
-import { PolygonSpecification } from '@/utils/domain/polygon/base'
-import { TruncationRule } from '@/utils/domain/truncationRule'
-import {
+import type { PolygonSerialization, PolygonSpecification } from '@/utils/domain/polygon/base'
+import type { TruncationRule } from '@/utils/domain/truncationRule'
+import type {
   TruncationRuleSpecification,
   TruncationRuleType,
 } from '@/utils/domain/truncationRule/base'
-import { Parent, Polygon } from '@/utils/domain'
-import { ID } from '@/utils/domain/types'
+import type { Parent, Polygon } from '@/utils/domain'
+import type { ID } from '@/utils/domain/types'
 
 import { hasParents } from '@/utils/domain/bases/zoneRegionDependent'
 
@@ -105,9 +105,14 @@ export interface TruncationRuleDescription {
   constantParameters: boolean
 }
 
-function makeSimplifiedTruncationRuleSpecification(
-  rule: TruncationRule,
-): TruncationRuleDescription {
+function makeSimplifiedTruncationRuleSpecification<
+  T extends Polygon,
+  S extends PolygonSerialization,
+  P extends PolygonSpecification,
+  RULE extends TruncationRule<T, S, P>,
+>(
+  rule: RULE,
+): TruncationRuleDescription<P> {
   return {
     type: rule.type,
     globalFaciesTable: (rule.backgroundPolygons as Polygon[]).map(
@@ -137,9 +142,13 @@ function makeSimplifiedTruncationRuleSpecification(
   }
 }
 
-function makeGlobalFaciesTableSpecification(
-  { rootGetters }: { rootGetters: RootGetters },
-  rule: TruncationRule,
+function makeGlobalFaciesTableSpecification<
+  T extends Polygon,
+  S extends PolygonSerialization,
+  P extends PolygonSpecification,
+  RULE extends TruncationRule<T, S, P>,
+>(
+  rule: RULE,
 ): GlobalFaciesSpecification[] {
   const facies = rootGetters['facies/selected'].filter((facies): boolean =>
     rootGetters.options.filterZeroProbability
@@ -180,8 +189,13 @@ function makeGlobalFaciesTableSpecification(
   )
 }
 
-function makeGaussianRandomFieldSpecification(
-  rule: TruncationRule,
+function makeGaussianRandomFieldSpecification<
+  T extends Polygon,
+  S extends PolygonSerialization,
+  P extends PolygonSpecification,
+  RULE extends TruncationRule<T, S, P>,
+>(
+  rule: RULE,
 ): GaussianRandomFieldSpecification[] {
   return rule.fields.map((field): GaussianRandomFieldSpecification => {
     return {
@@ -193,8 +207,13 @@ function makeGaussianRandomFieldSpecification(
   })
 }
 
-function makeTruncationRuleSpecification(
-  rule: TruncationRule,
+function makeTruncationRuleSpecification<
+  T extends Polygon,
+  S extends PolygonSerialization,
+  P extends PolygonSpecification,
+  RULE extends TruncationRule<T, S, P>,
+>(
+  rule: RULE,
   rootGetters: RootGetters,
 ): TruncationRuleDescription {
   return {

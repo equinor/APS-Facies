@@ -10,23 +10,24 @@
 <script
   setup
   lang="ts"
-  generic="
-    T extends Polygon = Polygon,
-    S extends PolygonSerialization = PolygonSerialization,
-    P extends PolygonSpecification = PolygonSpecification,
+  generic="T extends Polygon,
+  S extends PolygonSerialization,
+  P extends PolygonSpecification,
+  RULE extends OverlayTruncationRule<T, S, P>
 "
 >
-import { Facies } from '@/utils/domain'
-import FaciesGroup from '@/utils/domain/facies/group'
-import Polygon, {
+import type { Facies } from '@/utils/domain'
+import type FaciesGroup from '@/utils/domain/facies/group'
+import type {
+  Polygon,
   PolygonSerialization,
   PolygonSpecification,
 } from '@/utils/domain/polygon/base'
-import { ID } from '@/utils/domain/types'
-import OverlayPolygon from '@/utils/domain/polygon/overlay'
-import TruncationRule from '@/utils/domain/truncationRule/base'
+import type { ID } from '@/utils/domain/types'
+import type OverlayPolygon from '@/utils/domain/polygon/overlay'
+import type OverlayTruncationRule from '@/utils/domain/truncationRule/overlay'
 
-import { ListItem } from '@/utils/typing'
+import type { ListItem } from '@/utils/typing'
 import { computed } from 'vue'
 import { useStore } from '../../../store'
 
@@ -39,7 +40,7 @@ function isFaciesSelected(
 
 type Props = {
   value: { group: ID; polygons: OverlayPolygon[] }
-  rule: TruncationRule<T, S, P>
+  rule: RULE
 }
 const props = defineProps<Props>()
 const store = useStore()
