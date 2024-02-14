@@ -12,7 +12,7 @@
 <script setup lang="ts">
 import StaticPlot from '@/components/plot/StaticPlot.vue'
 
-import { GaussianRandomField } from '@/utils/domain'
+import type { GaussianRandomField } from '@/utils/domain'
 
 import { DEFAULT_SIZE } from '@/config'
 import type { ColorScale, ColorMapping } from '@/components/plot/utils'

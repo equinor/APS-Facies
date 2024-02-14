@@ -1,6 +1,6 @@
-import { Color } from '@/utils/domain/facies/helpers/colors'
-import { CODE, ID } from '@/utils/domain/types'
-import { Optional } from '@/utils/typing/simple'
+import type { Color } from '@/utils/domain/facies/helpers/colors'
+import type { CODE, ID } from '@/utils/domain/types'
+import type { Optional } from '@/utils/typing/simple'
 
 export interface Newable<T> {
   new (...args: any[]): T
@@ -8,7 +8,6 @@ export interface Newable<T> {
 
 export interface Identifiable {
   id: ID
-  [_: string]: any
 }
 
 export interface Selectable {

@@ -21,7 +21,7 @@
           <overlay-facies-specification :value="item" :rule="props.rule" />
         </td>
         <td v-if="needFraction">
-          <polygon-fraction-field :value="item" :rule="props.rule" />
+          <polygon-fraction-field :value="item" :rule="props.rule as TruncationRule<T, S, P>" />
         </td>
         <td>
           <fraction-field
@@ -30,7 +30,7 @@
           />
         </td>
         <td>
-          <polygon-order :value="item" :rule="rule" overlay />
+          <polygon-order :value="item" :rule="props.rule as OverlayTruncationRule<T, S, P>" overlay />
         </td>
       </tr>
     </template>
@@ -56,6 +56,7 @@ import type {
   PolygonSerialization,
   PolygonSpecification,
 } from '@/utils/domain/polygon/base'
+import { TruncationRule } from '@/utils/domain/truncationRule'
 import type { InstantiatedOverlayTruncationRule } from '@/utils/domain'
 import BaseTable from '@/components/baseComponents/BaseTable.vue'
 import type OverlayPolygon from '@/utils/domain/polygon/overlay'
@@ -66,14 +67,13 @@ import { computed } from 'vue'
 import { useGaussianRandomFieldStore } from '@/stores/gaussian-random-fields'
 import type { MaybeFmuUpdatable } from '@/utils/domain/bases/fmuUpdatable'
 
-type Props = {
+const props = defineProps<{
   value: T[]
   rule: RULE
-}
-const props = defineProps<Props>()
+}>()
 const fieldStore = useGaussianRandomFieldStore()
 
-const polygons = computed(() => props.value)
+const polygons = computed<T[]>(() => props.value)
 
 const needFraction = computed(() =>
   hasFaciesSpecifiedForMultiplePolygons(props.rule.overlayPolygons),

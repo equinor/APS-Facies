@@ -6,7 +6,7 @@
     :sort-by="[{ key: 'order', order: 'asc' }]"
     @input.stop
   >
-    <template #item="{ item }">
+    <template #item="{ item }: { item: NonCubicPolygon }">
       <tr>
         <td class="text-left">
           <numeric-field
@@ -42,15 +42,14 @@ import PolygonFractionField from '@/components/selection/PolygonFractionField.vu
 import NumericField from '@/components/selection/NumericField.vue'
 import PolygonOrder from '@/components/specification/TruncationRule/order.vue'
 import BackgroundFaciesSpecification from '@/components/specification/Facies/background.vue'
-import NonCubic from '@/utils/domain/truncationRule/nonCubic'
-import NonCubicPolygon from '@/utils/domain/polygon/nonCubic'
-import { HeaderItems } from '@/utils/typing'
+import type NonCubic from '@/utils/domain/truncationRule/nonCubic'
+import type NonCubicPolygon from '@/utils/domain/polygon/nonCubic'
+import type { HeaderItems } from '@/utils/typing'
 import { hasFaciesSpecifiedForMultiplePolygons } from '@/utils/queries'
 import { computed } from 'vue'
-import { useTruncationRuleStore } from '@/stores/truncation-rules'
+import type { MaybeFmuUpdatable } from '@/utils/domain/bases/fmuUpdatable'
 
 const props = defineProps<{ value: NonCubic }>()
-const ruleStore = useTruncationRuleStore()
 
 // TODO: Include 'help' messages
 const polygons = computed(() => props.value?.backgroundPolygons ?? [])
@@ -84,10 +83,13 @@ const headers: HeaderItems = [
 
 async function updateAngle(
   item: NonCubicPolygon,
-  value: number,
+  value: MaybeFmuUpdatable | null,
 ): Promise<void> {
-  // TODO: [sindre] FmuUpdatable again
-  item.angle = value
+  if (value !== null)
+  item.angle = typeof value === "number" ? {
+    value,
+    updatable: false
+  } : value
 }
 
 function isLast(polygon: NonCubicPolygon): boolean {

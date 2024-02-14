@@ -16,7 +16,7 @@
         {{ item.code }}
       </td>
       <td v-if="showConformity" class="text-start">
-        <conform-selection :value="item" :dark="isCurrent" />
+        <conform-selection :value="item as Zone" :dark="isCurrent" />
       </td>
       <td>
         <v-row justify="center" align="center">
@@ -49,11 +49,11 @@ import IconButton from '@/components/selection/IconButton.vue'
 import ConformSelection from '@/components/selection/dropdown/ConformSelection.vue'
 
 import { computed } from 'vue'
-import { HeaderItem } from '@/utils/typing'
-import { ID } from '@/utils/domain/types'
+import type { HeaderItem } from '@/utils/typing'
+import type { ID } from '@/utils/domain/types'
 import { useZoneStore } from '@/stores/zones'
 import { useRegionStore } from '@/stores/regions'
-import { Region, Zone } from '@/utils/domain'
+import type { Region, Zone } from '@/utils/domain'
 import { useCopyPasteStore } from '@/stores/copy-paste'
 import { useFmuOptionStore } from '@/stores/fmu/options'
 

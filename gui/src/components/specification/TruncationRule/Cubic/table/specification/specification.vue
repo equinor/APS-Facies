@@ -18,14 +18,15 @@ import rms from '@/api/rms'
 
 import StaticPlot from '@/components/plot/StaticPlot.vue'
 
-import { ID } from '@/utils/domain/types'
-import { Cubic } from '@/utils/domain'
-import CubicPolygon from '@/utils/domain/polygon/cubic'
-import { PolygonDescription } from '@/api/types'
+import type { ID } from '@/utils/domain/types'
+import type { Cubic } from '@/utils/domain'
+import type CubicPolygon from '@/utils/domain/polygon/cubic'
+import type { PolygonDescription } from '@/api/types'
 
 import { getId, makeSimplifiedTruncationRuleSpecification } from '@/utils'
-import { plotify, PlotSpecification } from '@/utils/plotting'
-import { ref, computed, watch } from 'vue'
+import type { PlotSpecification } from '@/utils/plotting'
+import { plotify } from '@/utils/plotting'
+import { ref, computed } from 'vue'
 import { useTheme } from 'vuetify'
 
 interface BoundingBox {

@@ -1,9 +1,10 @@
-import ZoneRegionDependent, {
+import type {
   DependentConfiguration,
   DependentSerialization,
 } from '@/utils/domain/bases/zoneRegionDependent'
-import Facies from '@/utils/domain/facies/local'
-import { ID } from '@/utils/domain/types'
+import ZoneRegionDependent from '@/utils/domain/bases/zoneRegionDependent'
+import type Facies from '@/utils/domain/facies/local'
+import type { ID } from '@/utils/domain/types'
 import { getId } from '@/utils/helpers'
 import { checkFaciesId } from './helpers'
 

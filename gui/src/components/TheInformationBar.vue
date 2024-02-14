@@ -15,8 +15,8 @@
 <script setup lang="ts">
 import { isDevelopmentBuild } from '@/config'
 import { delay } from 'lodash'
-import { MessageType } from '@/utils/domain/messages/base'
-import { Optional } from '@/utils/typing'
+import type { MessageType } from '@/utils/domain/messages/base'
+import type { Optional } from '@/utils/typing'
 import { computed, ref, watch } from 'vue'
 import { useMessageStore } from '@/stores/messages'
 
@@ -47,7 +47,6 @@ const message = computed<Optional<string>>(() => {
 
 const type = computed<MessageType>(() => _message.value.kind)
 
-// TODO: Not sure what is wrong with the typing here.
 watch(
   _message,
   (message: { value: string | Error | null; kind: MessageType }) => {

@@ -72,9 +72,9 @@
 <script setup lang="ts">
 import APSError from '@/utils/domain/errors/base'
 
-import { DialogOptions } from '@/utils/domain/bases/interfaces'
-import { Optional } from '@/utils/typing'
-import { Color } from '@/utils/domain/facies/helpers/colors'
+import type { DialogOptions } from '@/utils/domain/bases/interfaces'
+import type { Optional } from '@/utils/typing'
+import type { Color } from '@/utils/domain/facies/helpers/colors'
 
 import NumericField from '@/components/selection/NumericField.vue'
 import IconButton from '@/components/selection/IconButton.vue'
@@ -82,31 +82,26 @@ import IconButton from '@/components/selection/IconButton.vue'
 import { newSeed } from '@/utils'
 import { ref } from 'vue'
 import { useTheme } from 'vuetify'
+import type { Settings } from '@/utils/domain/gaussianRandomField'
 
-interface Settings {
-  crossSection: {
-    type: Optional<'IJ' | 'IK' | 'JK'>
-  }
-  gridModel: {
-    use: boolean
-    size: {
-      x: number
-      y: number
-      z: number
-    }
-  }
-  seed: Optional<number>
-}
-
-interface ReturnValue {
-  save: boolean
-  settings: Settings | Record<string, undefined>
+type ReturnValue  = {
+  save: true
+  settings: Settings
+} | {
+  save: false,
+  settings: null
 }
 
 const dialog = ref(false)
 const resolve = ref<Optional<({ save, settings }: ReturnValue) => void>>(null)
 const reject = ref<Optional<({ save, settings }: ReturnValue) => void>>(null)
-const settings = ref<Settings>({
+const settings = ref<Settings | {
+  crossSection : {
+    type: null
+  },
+  gridModel: Settings['gridModel']
+  seed: null
+}>({
   crossSection: {
     type: null,
   },
@@ -132,9 +127,9 @@ async function open(newSettings: Settings, newOptions: DialogOptions = {}): Prom
   dialog.value = true
   settings.value = newSettings
   options.value = { ...options.value, ...newOptions }
-  return new Promise((res, rej) => {
-    resolve.value = res
-    reject.value = rej
+  return new Promise((_resolve, _reject) => {
+    resolve.value = _resolve
+    reject.value = _reject
   })
 }
 defineExpose({ open })
@@ -142,14 +137,14 @@ defineExpose({ open })
 function save(): void {
   if (!resolve.value)
     throw new APSError('The `resolve` callback has not been set')
-  resolve.value({ save: true, settings: settings.value })
+  resolve.value({ save: true, settings: settings.value as Settings })
   dialog.value = false
 }
 
 function cancel(): void {
   if (!resolve.value)
     throw new APSError('The `resolve` callback has not been set')
-  resolve.value({ save: false, settings: {} })
+  resolve.value({ save: false, settings: null })
   dialog.value = false
 }
 </script>

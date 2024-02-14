@@ -17,7 +17,7 @@ export interface DiscreteConfiguration
   extends IDiscrete,
     BaseItemConfiguration {}
 
-export default class Discrete extends BaseItem implements IDiscrete {
+export class Discrete extends BaseItem implements IDiscrete {
   public readonly name: string
   public readonly code: CODE
 
@@ -32,10 +32,7 @@ export default class Discrete extends BaseItem implements IDiscrete {
   }) {
     super({ id })
     this.name = name
-    if (!isInteger(code))
-      throw new APSTypeError(
-        `A discrete item MUST have an integer as code. Was ${code}`,
-      )
+    if (!isInteger(code)) throw new APSTypeError(`A discrete item MUST have an integer as code. Was ${code}`)
     if (code < 0) throw new CodeError(code)
     this.code = code
   }
@@ -52,3 +49,5 @@ export default class Discrete extends BaseItem implements IDiscrete {
     return `${this.constructor.name}(name='${this.name}', code=${this.code})`
   }
 }
+
+export default Discrete

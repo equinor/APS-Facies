@@ -1,16 +1,22 @@
-import { Identified } from '@/utils/domain/bases/interfaces'
-import { ID } from '@/utils/domain/types'
+import type { Identified } from '@/utils/domain/bases/interfaces'
+import type { ID } from '@/utils/domain/types'
 import { identify } from '@/utils/helpers'
 import SelectableItem, {
-  SelectableItemConfiguration,
-  SelectableSerialization,
-  SelectedType,
+  type SelectableItemConfiguration,
+  type SelectableSerialization,
+  type SelectedType,
 } from './bases/selectableItem'
 /* eslint-disable no-use-before-define */
 
 type Regions = Identified<Region>
 
 export type ZoneConformOption = 'top' | 'bottom' | 'proportional' | null
+
+
+export function isValidConformity(gridLayout: string): gridLayout is Exclude<ZoneConformOption, null> {
+  const validGridLayout: ZoneConformOption[] = ['top', 'bottom', 'proportional']
+  return (validGridLayout as string[]).includes(gridLayout)
+}
 
 export interface ZoneSerialization extends SelectableSerialization {
   regions: RegionSerialization[] | null
@@ -49,7 +55,7 @@ export class Region extends SelectableItem {
 
 export interface ZoneConfiguration extends SelectableItemConfiguration {
   thickness: number
-  regions?: Region[] | null
+  regions?: Omit<RegionConfiguration, 'zone'>[] | null
   conformity?: ZoneConformOption
 }
 

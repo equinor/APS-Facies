@@ -4,8 +4,8 @@ import CrossSection, {
 import cloneDeep from 'lodash/cloneDeep'
 
 import { newSeed } from '@/utils/helpers'
-import { Named } from '@/utils/domain/bases/interfaces'
-import { Parent } from '@/utils/domain/bases/zoneRegionDependent'
+import type { Named } from '@/utils/domain/bases/interfaces'
+import type { Parent } from '@/utils/domain/bases/zoneRegionDependent'
 import Simulation, {
   type SimulationConfiguration,
   type SimulationSerialization,
@@ -18,7 +18,7 @@ import Variogram, {
   type VariogramSerialization,
 } from '@/utils/domain/gaussianRandomField/variogram'
 
-interface Settings {
+export interface Settings {
   crossSection: CrossSection
   gridModel: {
     use: boolean

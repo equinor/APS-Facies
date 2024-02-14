@@ -4,7 +4,7 @@
       <h3>Truncation rule specification overlay facies</h3>
     </v-col>
     <v-col cols="12">
-      <overlay-facies-table :value="value" />
+      <overlay-facies-table :value="props.value" />
     </v-col>
   </v-row>
 </template>
@@ -26,5 +26,5 @@ import type {
 import type { InstantiatedOverlayTruncationRule, OverlayPolygon } from '@/utils/domain'
 import type OverlayTruncationRule from '@/utils/domain/truncationRule/overlay'
 
-defineProps<{ value: OverlayTruncationRule<T, S, P> }>()
+const props = defineProps<{ value: RULE }>()
 </script>

@@ -12,8 +12,8 @@
 <script setup lang="ts">
 import BaseDropdown from '@/components/selection/dropdown/BaseDropdown.vue'
 
-import { ListItem } from '@/utils/typing'
-import GridModel from '@/utils/domain/gridModel'
+import type { ListItem } from '@/utils/typing'
+import type GridModel from '@/utils/domain/gridModel'
 import { computed } from 'vue'
 import { useGridModelStore } from '@/stores/grid-models'
 
@@ -33,7 +33,7 @@ const available = computed<ListItem<GridModel>[]>(() =>
 )
 
 const gridModel = computed({
-  get: () => gridModelStore.current,
+  get: () => gridModelStore.current as GridModel | null,
   set: (value: GridModel | null) => {
     if (!value) return
     gridModelStore.select(value)

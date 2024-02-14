@@ -1,12 +1,14 @@
-import BayfillPolygon, {
-  BayfillPolygonSerialization,
-  BayfillPolygonSpecification,
+import type BayfillPolygon from '@/utils/domain/polygon/bayfill'
+import {
+  type BayfillPolygonSerialization,
+  type BayfillPolygonSpecification,
 } from '@/utils/domain/polygon/bayfill'
-import TruncationRule, {
+import type {
   TruncationRuleConfiguration,
   TruncationRuleSpecification,
 } from '@/utils/domain/truncationRule/base'
-import { ID } from '@/utils/domain/types'
+import TruncationRule from '@/utils/domain/truncationRule/base'
+import type { ID } from '@/utils/domain/types'
 
 export type BayfillSpecification =
   TruncationRuleSpecification<BayfillPolygonSpecification>
@@ -64,5 +66,9 @@ export default class Bayfill extends TruncationRule<
 
   public get type(): 'bayfill' {
     return 'bayfill'
+  }
+
+  public toJSON() {
+    return super.toJSON()
   }
 }

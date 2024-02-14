@@ -6,10 +6,10 @@
     item-key="id"
     @input.stop
   >
-    <template #item="{ item }">
+    <template #item="{ item }: { item: Item }">
       <tr>
         <td>
-          <background-group-facies-specification :value="item" :rule="value" />
+          <background-group-facies-specification :value="item" :rule="value as RULE" />
         </td>
         <td>
           <polygon-table
@@ -68,7 +68,7 @@ function allBackgroundPolygonsHasSomeFacies(
   )
 }
 
-const props = defineProps<{ value: OverlayTruncationRule<T, S, P> }>()
+const props = defineProps<{ value: RULE }>()
 
 const groups = computed(() => {
   let overlay: { group: ID; polygons: OverlayPolygon[] }[] = []
@@ -93,7 +93,9 @@ const groups = computed(() => {
   return overlay
 })
 
-const idGroups = computed(() =>
+type Item = {id: ID, polygons: Array<OverlayPolygon>}
+
+const idGroups = computed((): Array<Item> =>
   groups.value.map(({ group, polygons }) => ({ id: group, polygons })),
 )
 

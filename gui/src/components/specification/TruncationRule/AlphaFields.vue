@@ -4,7 +4,7 @@
       <alpha-selection
         :channel="item.channel"
         :value="item.selected"
-        :rule="value"
+        :rule="value as RULE"
         @input="(val: ID | null) => update(item, val)"
       />
     </v-col>
@@ -36,14 +36,14 @@ import { useGaussianRandomFieldStore } from '@/stores/gaussian-random-fields'
 
 interface AlphaField {
   channel: number
-  selected: GaussianRandomField | string | null
+  selected: GaussianRandomField | null
 }
 
 function defaultChannels(num: number): AlphaField[] {
-  const items = []
+  const items: AlphaField[] = []
   for (let i = 1; i <= num; i++) {
     // NOTE: The alpha channels are (supposed to be) 1-indexed
-    items.push({ channel: i, selected: '' })
+    items.push({ channel: i, selected: null })
   }
   return items
 }

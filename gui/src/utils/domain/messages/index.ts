@@ -1,4 +1,5 @@
-import BaseMessage, { MessageType } from '@/utils/domain/messages/base'
+import type { MessageType } from '@/utils/domain/messages/base'
+import BaseMessage from '@/utils/domain/messages/base'
 
 export function getMessage(
   message: string,

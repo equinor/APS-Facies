@@ -1,7 +1,8 @@
-import BaseItem, {
+import type {
   BaseItemConfiguration,
   BaseItemSerialization,
 } from '@/utils/domain/bases/baseItem'
+import BaseItem from '@/utils/domain/bases/baseItem'
 
 export interface Dimension {
   x: number

@@ -73,7 +73,7 @@ import PowerSpecification from '@/components/specification/GaussianRandomField/P
 import VisualizationSettingsDialog from '@/components/specification/GaussianRandomField/VisualizationSettingsDialog.vue'
 import IconButton from '@/components/selection/IconButton.vue'
 
-import Field from '@/utils/domain/gaussianRandomField'
+import type Field from '@/utils/domain/gaussianRandomField'
 import { ref, computed, onBeforeMount, watch } from 'vue'
 import { useConstantsOptionsVariogramsStore } from '@/stores/constants/options'
 import { useGaussianRandomFieldStore } from '@/stores/gaussian-random-fields'
@@ -142,7 +142,7 @@ onBeforeMount(() => {
 
 async function simulation(renew = false): Promise<void> {
   if (renew) fieldStore.newSeed(props.value)
-  fieldStore.updateSimulation(props.value)
+  await fieldStore.updateSimulation(props.value)
 }
 
 async function updateSimulation(renew = false): Promise<void> {
@@ -157,7 +157,7 @@ async function updateSimulation(renew = false): Promise<void> {
 }
 
 async function openVisualizationSettings(): Promise<void> {
-  // TODO: Fix typing here
+  if (!visualisationSettingsDialog.value) return /* TODO: or throw an exception */
   const { save, settings } = await visualisationSettingsDialog.value?.open(
     cloneDeep(props.value.settings),
   )

@@ -1,8 +1,9 @@
-import BaseItem, {
+import type {
   BaseItemConfiguration,
   BaseItemSerialization,
 } from '@/utils/domain/bases/baseItem'
-import { Color } from '@/utils/domain/facies/helpers/colors'
+import BaseItem from '@/utils/domain/bases/baseItem'
+import type { Color } from '@/utils/domain/facies/helpers/colors'
 
 export interface ColorLibrarySpecification extends BaseItemConfiguration {
   name: string

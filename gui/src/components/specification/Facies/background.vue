@@ -17,9 +17,10 @@
 >
 import FaciesSpecification from '@/components/specification/Facies/index.vue'
 
-import type { Bayfill, Facies, InstantiatedTruncationRule, Polygon } from '@/utils/domain'
+import type { Facies, InstantiatedTruncationRule, Polygon } from '@/utils/domain'
 import type { TruncationRule } from '@/utils/domain/truncationRule'
 import type { PolygonSerialization, PolygonSpecification } from '@/utils/domain/polygon/base'
+import { isOverlayTruncationRule } from '@/utils/domain/truncationRule/helpers'
 
 type Props = {
   value: Polygon
@@ -28,9 +29,9 @@ type Props = {
 const props = defineProps<Props>()
 
 function overlayFacies(facies: Facies): boolean {
-  if (props.rule instanceof Bayfill) {
-    return false
+  if (isOverlayTruncationRule(props.rule)) {
+    return props.rule.isUsedInOverlay(facies)
   }
-  return props.rule.isUsedInOverlay(facies)
+  return false
 }
 </script>

@@ -29,7 +29,7 @@
 <script setup lang="ts">
 import GaussianPlot from './index.vue'
 import ColorScale from '@/components/plot/ColorScale.vue'
-import { GaussianRandomField } from '@/utils/domain'
+import type { GaussianRandomField } from '@/utils/domain'
 import { DEFAULT_SIZE } from '@/config'
 import { ref, computed, watch } from 'vue'
 import { usePanelStore } from '@/stores/panels'
@@ -55,7 +55,7 @@ const someSimulated = computed(() =>
 )
 
 watch(props.value, (value: GaussianRandomField[]) => {
-  if (panelStore.panels.preview.gaussianRandomFields.open) {
+  if (panelStore.panels.preview.gaussianRandomFields) {
     fieldStore.updateSimulations(value)
   }
 })

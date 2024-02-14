@@ -11,7 +11,7 @@
           <background-facies-specification :value="item" :rule="value" />
         </td>
         <td v-if="hasMultipleFaciesSpecified">
-          <polygon-fraction-field :value="item" :rule="value" />
+          <polygon-fraction-field :value="item" :rule="value as Cubic" />
         </td>
       </tr>
     </template>
@@ -24,10 +24,10 @@ import BaseTable from '@/components/baseComponents/BaseTable.vue'
 import BackgroundFaciesSpecification from '@/components/specification/Facies/background.vue'
 import PolygonFractionField from '@/components/selection/PolygonFractionField.vue'
 
-import { CubicPolygon } from '@/utils/domain'
+import type { CubicPolygon } from '@/utils/domain'
 import { hasFaciesSpecifiedForMultiplePolygons } from '@/utils/queries'
 
-import Cubic from '@/utils/domain/truncationRule/cubic'
+import type Cubic from '@/utils/domain/truncationRule/cubic'
 import { computed } from 'vue'
 
 function makeLevelsHeader(levels: number): { text: string; value: string }[] {

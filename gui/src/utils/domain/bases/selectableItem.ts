@@ -1,8 +1,9 @@
-import Discrete, {
+import type {
   DiscreteConfiguration,
   DiscreteSerialization,
 } from './discrete'
-import { Selectable } from './interfaces'
+import Discrete from './discrete'
+import type { Selectable } from './interfaces'
 
 export type SelectedType = boolean | 'intermediate'
 

@@ -14,8 +14,7 @@
 </template>
 
 <script setup lang="ts">
-import { Optional } from '@/utils/typing'
-import CrossSection, {
+import type {
   CrossSectionType,
 } from '@/utils/domain/gaussianRandomField/crossSection'
 
@@ -24,15 +23,10 @@ import { useGaussianRandomFieldCrossSectionStore } from '@/stores/gaussian-rando
 
 const crossSectionStore = useGaussianRandomFieldCrossSectionStore()
 
-const crossSection = computed<Optional<CrossSection>>(
-  () => crossSectionStore.current,
-)
-
 const type = computed({
-  get: () => crossSection.value?.type ?? 'IJ',
+  get: () => crossSectionStore.current.type,
   set: (value: CrossSectionType) => {
-    if (!crossSection.value) return
-    crossSectionStore.changeType(crossSection.value.id, value)
+    crossSectionStore.changeType(value)
   },
 })
 </script>

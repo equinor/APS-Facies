@@ -1,19 +1,22 @@
-import { Named } from '@/utils/domain/bases'
-import { Identified } from '@/utils/domain/bases/interfaces'
-import Simulation, {
+import type { Named } from '@/utils/domain/bases'
+import type { Identified } from '@/utils/domain/bases/interfaces'
+import type {
   SimulationConfiguration,
   SimulationSerialization,
 } from '@/utils/domain/bases/simulation'
+import Simulation from '@/utils/domain/bases/simulation'
 import APSTypeError from '@/utils/domain/errors/type'
 import Facies from '@/utils/domain/facies/local'
-import GaussianRandomField, {
+import type {
   GaussianRandomFieldSerialization,
 } from '@/utils/domain/gaussianRandomField'
-import Polygon, {
+import GaussianRandomField from '@/utils/domain/gaussianRandomField'
+import type {
+  Polygon,
   PolygonSerialization,
   PolygonSpecification,
 } from '@/utils/domain/polygon/base'
-import { ID } from '@/utils/domain/types'
+import type { ID } from '@/utils/domain/types'
 import { getId, identify, allSet } from '@/utils/helpers'
 import { isCloseToUnity } from '@/utils/helpers/simple'
 
@@ -21,7 +24,7 @@ export interface TruncationRuleSerialization<
   S extends PolygonSerialization = PolygonSerialization,
 > extends SimulationSerialization {
   name: string
-  type: string
+  type: TruncationRuleType
   polygons: S[]
   backgroundFields: ID[]
 }
@@ -34,7 +37,7 @@ export const truncationRuleTypeNames: Record<TruncationRuleType, string> = {
   cubic: 'Cubic',
 }
 
-export type TruncationRuleConfiguration<T extends Polygon = Polygon> =
+export type TruncationRuleConfiguration<T extends Polygon> =
   SimulationConfiguration & {
     name: string
     polygons: Identified<T> | T[]
@@ -42,7 +45,7 @@ export type TruncationRuleConfiguration<T extends Polygon = Polygon> =
   }
 
 export interface TruncationRuleSpecification<
-  P extends PolygonSpecification
+  P extends PolygonSpecification,
 > {
   polygons: P[]
 }
@@ -107,7 +110,7 @@ export default abstract class TruncationRule<
   abstract get type(): TruncationRuleType
 
   public get ready(): boolean {
-    return this._constraints.every(([constraint, _]): boolean => constraint())
+    return this._constraints.every(([constraint]): boolean => constraint())
   }
 
   public get isFmuUpdatable(): boolean {
@@ -158,9 +161,11 @@ export default abstract class TruncationRule<
       a.atLevel === b.atLevel ? a.order - b.order : b.atLevel - a.atLevel,
     )
   }
+
   public addPolygon(polygon: T) {
     this._polygons[polygon.id] = polygon
   }
+
   public removePolygon(polygon: T) {
     delete this._polygons[polygon.id]
   }
@@ -174,8 +179,7 @@ export default abstract class TruncationRule<
     )
     return index < 0
       ? false
-      : // Channel is 1-indexed, while order of fields are 0-indexed
-        index !== channel - 1
+        : index !== channel - 1 /* Channel is 1-indexed, while order of fields are 0-indexed */
   }
 
   public isUsedInBackground(item: GaussianRandomField | Facies): boolean {
@@ -201,7 +205,7 @@ export default abstract class TruncationRule<
     )
   }
 
-  public isPolygonFractionsNormalized(polygon: T): boolean {
+  public isPolygonFractionsNormalized<T extends Polygon>(polygon: T): boolean {
     const sum = this.polygons
       .filter(({ facies }): boolean => getId(facies) === getId(polygon.facies))
       .reduce((sum, polygon): number => polygon.fraction + sum, 0)

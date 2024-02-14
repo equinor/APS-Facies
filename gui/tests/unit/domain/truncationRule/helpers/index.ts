@@ -1,7 +1,7 @@
 import GlobalFacies from '@/utils/domain/facies/global'
 import { apsColors } from '@/utils/domain/facies/helpers/colors'
 import GaussianRandomField from '@/utils/domain/gaussianRandomField'
-import { CODE } from '@/utils/domain/types'
+import type { CODE } from '@/utils/domain/types'
 import Zone from '@/utils/domain/zone'
 
 export function generateFields(num: number, zone: Zone): GaussianRandomField[] {

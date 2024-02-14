@@ -1,24 +1,26 @@
 import APSTypeError from '@/utils/domain/errors/type'
-import FaciesGroup from '@/utils/domain/facies/group'
+import type FaciesGroup from '@/utils/domain/facies/group'
 import Facies from '@/utils/domain/facies/local'
 import GaussianRandomField from '@/utils/domain/gaussianRandomField'
-import Polygon, {
-  PolygonSerialization,
-  PolygonSpecification,
+import type Polygon from '@/utils/domain/polygon/base'
+import {
+  type PolygonSerialization,
+  type PolygonSpecification,
 } from '@/utils/domain/polygon/base'
 import OverlayPolygon, {
-  CENTER,
-  OverlayPolygonSerialization,
+  type CENTER,
+  type OverlayPolygonSerialization,
 } from '@/utils/domain/polygon/overlay'
 import TruncationRule, {
-  TruncationRuleConfiguration,
-  TruncationRuleSerialization,
-  TruncationRuleSpecification,
+  type TruncationRuleConfiguration,
+  type TruncationRuleSerialization,
+  type TruncationRuleSpecification,
 } from '@/utils/domain/truncationRule/base'
-import { ID } from '@/utils/domain/types'
+import type { ID } from '@/utils/domain/types'
 import { allSet, getId } from '@/utils/helpers'
+import type { TruncationRule as BaseTruncationRule } from '@/utils/domain/truncationRule/index'
 
-export type OverlayTruncationRuleArgs<T extends Polygon = Polygon> =
+export type OverlayTruncationRuleArgs<T extends Polygon> =
   TruncationRuleConfiguration<T> & {
     overlay?: {
       use: boolean
@@ -33,21 +35,21 @@ interface OverlayPolygonSpecification extends PolygonSpecification {
 }
 
 export interface OverlaySpecification<
-  P extends PolygonSpecification = PolygonSpecification,
+  P extends PolygonSpecification,
 > extends TruncationRuleSpecification<P> {
   overlay: OverlayPolygonSpecification[] | null
 }
 
 export interface OverlaySerialization<
-  P extends PolygonSerialization = PolygonSerialization,
+  P extends PolygonSerialization,
 > extends TruncationRuleSerialization<P | OverlayPolygonSerialization> {
   _useOverlay: boolean
 }
 
 export default abstract class OverlayTruncationRule<
-  T extends Polygon = Polygon,
-  S extends PolygonSerialization = PolygonSerialization,
-  P extends PolygonSpecification = PolygonSpecification,
+  T extends Polygon,
+  S extends PolygonSerialization,
+  P extends PolygonSpecification,
 > extends TruncationRule<
   T | OverlayPolygon,
   S | OverlayPolygonSerialization,
@@ -63,7 +65,7 @@ export default abstract class OverlayTruncationRule<
     /* TODO: deprecate / combine overlay / _useOverlay */
     super(rest)
     this._useOverlay =
-      typeof _useOverlay === 'undefined'
+      _useOverlay === undefined
         ? overlay
           ? overlay.use
           : false
@@ -165,4 +167,13 @@ export default abstract class OverlayTruncationRule<
       _useOverlay: this.useOverlay,
     }
   }
+}
+
+export function isOverlayTruncationRule<
+  T extends Polygon,
+  S extends PolygonSerialization,
+  P extends PolygonSpecification,
+  RULE extends BaseTruncationRule<T, S, P>
+>(rule: RULE | OverlayTruncationRule<T, S, P>): rule is OverlayTruncationRule<T, S, P> {
+  return 'overlay' in rule && !!rule.overlay
 }

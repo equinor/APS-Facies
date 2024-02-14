@@ -39,7 +39,7 @@
     <v-row justify="center" no-gutters>
       <cubic-topology-specification
         v-if="value.backgroundPolygons.length > 0"
-        v-model="selected"
+        v-model="selected as CubicPolygon[]"
         :rule="value"
       />
     </v-row>
@@ -56,7 +56,7 @@ import CubicTopologySpecification from '@/components/specification/TruncationRul
 import NumericField from '@/components/selection/NumericField.vue'
 import WaitButton from '@/components/baseComponents/WaitButton.vue'
 
-import { Cubic, CubicPolygon } from '@/utils/domain'
+import type { Cubic, CubicPolygon } from '@/utils/domain'
 import { ref, computed } from 'vue'
 import { useTruncationRuleStore } from '@/stores/truncation-rules'
 

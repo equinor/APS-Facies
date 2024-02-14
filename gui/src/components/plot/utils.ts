@@ -1,4 +1,4 @@
-import { Color } from '@/utils/domain/facies/helpers/colors'
+import type { Color } from '@/utils/domain/facies/helpers/colors'
 
 export type ColorScale = string | {
   value: number

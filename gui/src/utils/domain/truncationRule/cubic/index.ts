@@ -1,19 +1,20 @@
 import { DEFAULT_CUBIC_LEVELS } from '@/config'
 import CubicPolygon, {
-  CubicPolygonSerialization,
-  CubicPolygonSpecification,
+  type CubicPolygonSerialization,
+  type CubicPolygonSpecification,
 } from '@/utils/domain/polygon/cubic'
-import OverlayPolygon from '@/utils/domain/polygon/overlay'
+import type OverlayPolygon from '@/utils/domain/polygon/overlay'
+import type { Orientation } from './direction'
 import Direction, {
-  Orientation,
-  OrientationString,
+  type OrientationString,
 } from '@/utils/domain/truncationRule/cubic/direction'
 import OverlayTruncationRule, {
-  OverlaySerialization,
-  OverlaySpecification,
-  OverlayTruncationRuleArgs,
+  type OverlaySerialization,
+  type OverlaySpecification,
+  type OverlayTruncationRuleArgs,
 } from '@/utils/domain/truncationRule/overlay'
 import { sample } from 'lodash'
+export { Orientation } from './direction'
 
 export type CubicTruncationRuleArgs =
   OverlayTruncationRuleArgs<CubicPolygon> & {
@@ -106,4 +107,4 @@ export default class Cubic extends OverlayTruncationRule<
   }
 }
 
-export { Direction, Orientation }
+export { Direction }

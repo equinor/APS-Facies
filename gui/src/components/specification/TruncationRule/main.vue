@@ -28,11 +28,10 @@ import { computed } from 'vue'
 import { type Component } from 'vue'
 import type { Polygon, PolygonSerialization, PolygonSpecification } from '@/utils/domain/polygon/base'
 
-type Props = {
+const props = defineProps<{
   value: RULE
   table: Component
-}
-const props = defineProps<Props>()
+}>()
 
 const minFields = computed(() => (props.value.type === 'bayfill' ? 3 : 2))
 </script>

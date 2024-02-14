@@ -3,17 +3,18 @@
 </template>
 
 <script setup lang="ts">
-import { Zone } from '@/utils/domain'
-import { ZoneConformOption } from '@/utils/domain/zone'
-import { ListItem } from '@/utils/typing'
+import type { Zone } from '@/utils/domain'
+import type { ZoneConformOption } from '@/utils/domain/zone'
+import type { ListItem } from '@/utils/typing'
 import { computed } from 'vue'
 import { useZoneStore } from '@/stores/zones'
 
-type Props = {
+const props = withDefaults(defineProps<{
   value: Zone
   dark?: boolean
-}
-const props = withDefaults(defineProps<Props>(), { dark: false })
+}>(), {
+  dark: false,
+})
 
 const zoneStore = useZoneStore()
 

@@ -32,13 +32,12 @@ import BasePolygonOrder from '@/components/specification/PolygonOrder.vue'
 import { computed } from 'vue'
 import { useTruncationRuleStore } from '@/stores/truncation-rules'
 
-type Props = {
+const props = withDefaults(defineProps<{
   value: T
   rule: RULE
   overlay?: boolean
   minPolygons?: number
-}
-const props = withDefaults(defineProps<Props>(), {
+}>(), {
   overlay: false,
   minPolygons: 0,
 })

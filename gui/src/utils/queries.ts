@@ -1,7 +1,8 @@
-import GlobalFacies from '@/utils/domain/facies/global'
-import Facies from '@/utils/domain/facies/local'
-import Polygon, { getFaciesName } from '@/utils/domain/polygon/base'
-import { Identified } from '@/utils/domain/bases/interfaces'
+import type GlobalFacies from '@/utils/domain/facies/global'
+import type Facies from '@/utils/domain/facies/local'
+import type Polygon from '@/utils/domain/polygon/base'
+import { getFaciesName } from '@/utils/domain/polygon/base'
+import type { Identified } from '@/utils/domain/bases/interfaces'
 import { getId, hasOwnProperty } from '@/utils/helpers'
 
 interface Counts {

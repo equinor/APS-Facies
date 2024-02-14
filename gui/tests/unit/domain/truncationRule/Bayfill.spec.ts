@@ -1,7 +1,7 @@
 import FmuUpdatableValue from '@/utils/domain/bases/fmuUpdatable'
 import GlobalFacies from '@/utils/domain/facies/global'
 import Facies from '@/utils/domain/facies/local'
-import BayfillPolygon from '@/utils/domain/polygon/bayfill'
+import BayfillPolygon, { type SlantFactorArgs } from '@/utils/domain/polygon/bayfill'
 import Bayfill from '@/utils/domain/truncationRule/bayfill'
 import { identify } from '@/utils/helpers'
 import { createFacies, generateFields, selectedZone } from './helpers'
@@ -11,13 +11,13 @@ const zone = selectedZone({ code: 0, name: 'Upper', thickness: 12 })
 const facies = createFacies(5)
 
 const polygons = identify(
-  [
+  ([
     { name: 'Floodplain', slantFactor: 0.5 },
     { name: 'Subbay', slantFactor: 0.5 },
-    { name: 'Wave influenced Bayfill', slantFactor: null },
+    { name: 'Wave influenced Bayfill' },
     { name: 'Bayhead Delta', slantFactor: 0.5 },
-    { name: 'Lagoon', slantFactor: null },
-  ].map(
+    { name: 'Lagoon' },
+  ] as SlantFactorArgs[]).map(
     (config, index) =>
       new BayfillPolygon({
         ...config,

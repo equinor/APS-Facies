@@ -1,6 +1,7 @@
-import FmuUpdatableValue, {
+import type {
   FmuUpdatableSerialization,
 } from '@/utils/domain/bases/fmuUpdatable'
+import FmuUpdatableValue from '@/utils/domain/bases/fmuUpdatable'
 
 interface Angle {
   azimuth: FmuUpdatableValue

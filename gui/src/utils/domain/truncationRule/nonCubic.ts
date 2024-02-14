@@ -1,10 +1,11 @@
-import NonCubicPolygon, {
-  NonCubicPolygonSerialization,
-  NonCubicPolygonSpecification,
+import type NonCubicPolygon from '@/utils/domain/polygon/nonCubic';
+import {
+  type NonCubicPolygonSerialization,
+  type NonCubicPolygonSpecification,
 } from '@/utils/domain/polygon/nonCubic'
 import OverlayTruncationRule, {
-  OverlaySpecification,
-  OverlayTruncationRuleArgs,
+  type OverlaySpecification,
+  type OverlayTruncationRuleArgs,
 } from '@/utils/domain/truncationRule/overlay'
 
 export type NonCubicSpecification =
@@ -21,5 +22,9 @@ export default class NonCubic extends OverlayTruncationRule<
 
   public get type(): 'non-cubic' {
     return 'non-cubic'
+  }
+
+  public toJSON () {
+    return super.toJSON()
   }
 }

@@ -36,7 +36,7 @@
 <script setup lang="ts">
 import WaitBtn from '@/components/baseComponents/WaitButton.vue'
 
-import { ProbabilityCube } from '@/utils/domain/facies/local'
+import type { ProbabilityCube } from '@/utils/domain/facies/local'
 
 import { notEmpty } from '@/utils'
 import { isCloseToUnity } from '@/utils/helpers/simple'
@@ -90,7 +90,7 @@ async function average() {
   }
 }
 
-async function normalize() {
+function normalize() {
   const allEmpty = selectedFacies.value.every(
     (facies) => facies.previewProbability === null,
   )
@@ -98,7 +98,7 @@ async function normalize() {
   if (allEmpty) {
     faciesStore.normalizeEmpty()
   } else {
-    await faciesStore.normalize()
+    faciesStore.normalize()
   }
 }
 </script>

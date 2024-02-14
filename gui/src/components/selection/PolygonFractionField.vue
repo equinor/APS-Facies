@@ -32,11 +32,10 @@ import { computed } from 'vue'
 import vuetify from '@/plugins/vuetify'
 import type { InstantiatedTruncationRule } from '@/utils/domain'
 
-type Props = {
+const props = defineProps<{
   value: T
   rule: RULE
-}
-const props = defineProps<Props>()
+}>()
 
 const disabled = computed(() => {
   return (

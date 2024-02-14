@@ -22,8 +22,8 @@
 </template>
 
 <script setup lang="ts">
-import { DialogOptions } from '@/utils/domain/bases/interfaces'
-import { Color } from '@/utils/domain/facies/helpers/colors'
+import type { DialogOptions } from '@/utils/domain/bases/interfaces'
+import type { Color } from '@/utils/domain/facies/helpers/colors'
 import { ref } from 'vue'
 import { useTheme } from 'vuetify'
 

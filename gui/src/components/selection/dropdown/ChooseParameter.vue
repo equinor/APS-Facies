@@ -18,8 +18,8 @@ import { computed } from 'vue'
 import { useParameterRegionStore } from '@/stores/parameters/region'
 import { useParameterBlockedWellStore } from '@/stores/parameters/blocked-well'
 import { useParameterBlockedWellLogStore } from '@/stores/parameters/blocked-well-log'
+import type { ParameterType } from '@/utils/domain/types'
 
-type ParameterType = 'region' | 'blockedWell' | 'blockedWellLog'
 type Props = {
   label: string
   parameterType: ParameterType

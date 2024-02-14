@@ -5,7 +5,7 @@
     :label="label"
     :error-messages="errors"
     variant="underlined"
-    @blur="v.value.$touch()"
+    @blur="v.$touch()"
     @update:model-value="(e) => $emit('update:model-value', e as T)"
   />
 </template>
@@ -15,10 +15,11 @@ import { computed, watch } from 'vue'
 import { useVuelidate } from '@vuelidate/core'
 import { requiredIf } from '@vuelidate/validators'
 import { useInvalidation } from '@/utils/invalidation'
+import type { ListItem } from '@/utils/typing'
 
 type Props = {
   modelValue: T
-  items: T[]
+  items: T[] | ListItem<T>[]
   constraints: { required: boolean }
   label?: string
 }

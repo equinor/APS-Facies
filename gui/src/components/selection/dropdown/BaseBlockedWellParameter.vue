@@ -13,9 +13,10 @@
 import ChooseParameter from '@/components/selection/dropdown/ChooseParameter.vue'
 import { computed } from 'vue'
 import { useFaciesGlobalStore } from '@/stores/facies/global'
+import type { BlockedWellParameterType } from '@/utils/domain/types'
 
 type Props = {
-  parameterType: string
+  parameterType: BlockedWellParameterType
   label: string
   warnMessage: string
 }

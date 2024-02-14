@@ -1,10 +1,11 @@
 import hexRgb from 'hex-rgb'
 
 import APSTypeError from '@/utils/domain/errors/type'
-import { Color } from '@/utils/domain/facies/helpers/colors'
+import type { Color } from '@/utils/domain/facies/helpers/colors'
 import colors from 'vuetify/util/colors'
 
-import { PolygonDescription } from '@/api/types'
+import type { PolygonDescription } from '@/api/types'
+import type { XAxisName, YAxisName } from 'plotly.js-dist-min'
 
 function svgPoint(point: [number, number], width = 1, height = 1): string {
   return `${point[0] * width},${point[1] * height}`
@@ -107,7 +108,7 @@ function getTextColor(backgroundColor: string): string {
 }
 
 interface PolygonSpecification {
-  type: string
+  type: 'rect' | 'circle' | 'line' | 'path'
   path: string
   fillcolor: Color
   name: string
@@ -119,8 +120,8 @@ interface PolygonSpecification {
 interface AnnotationSpecification {
   x: number
   y: number
-  xref: string
-  yref: string
+  xref: 'paper' | XAxisName
+  yref: 'paper' | YAxisName
   text: string
   font: {
     color: Color
@@ -133,7 +134,11 @@ export interface PlotSpecification {
   annotations: AnnotationSpecification[]
 }
 
-type FaciesTable = { name: string; color: string; alias: string }[]
+type FaciesTable = {
+  name: string
+  color: string
+  alias: string
+}[]
 
 export function plotify(
   polygons: PolygonDescription[],

@@ -31,7 +31,7 @@
         </v-row>
         <v-row>
           <file-selection
-            v-model="pathsState.model"
+            v-model="pathsState.model.path"
             label="Model file"
             :relative-to="projectPath"
             @update:error="(err: boolean) => setInvalid('model', err)"
@@ -99,16 +99,12 @@ interface State {
 }
 
 interface PathsState {
-  model: string
+  model: State
   fmuConfig: State
   probabilityDistribution: State
 }
 
-interface Invalid {
-  model: boolean
-  fmuConfig: boolean
-  probabilityDistribution: boolean
-}
+type Invalid = Record<keyof PathsState, boolean>
 
 const modelFileExporterStore = useModelFileExporterStore()
 const fmuOptionStore = useFmuOptionStore()
@@ -119,7 +115,7 @@ const reject = ref<((reason: string) => void) | null>(null)
 const fetched = ref(false)
 const projectPath = ref('')
 const pathsState = ref<PathsState>({
-  model: '',
+  model: { path: '', disabled: false },
   fmuConfig: { path: '', disabled: true },
   probabilityDistribution: { path: '', disabled: true },
 })
@@ -164,8 +160,8 @@ const fmuMode = computed(
 const hasErrors = computed(() => {
   if (!_hasFmuUpdatableValues.value) return invalid.value.model
 
-  return Object.keys(invalid.value)
-    .filter((key) => !pathsState.value[key].disabled)
+  return (Object.keys(invalid.value) as (keyof Invalid)[])
+    .filter((key) => !(pathsState.value)[key].disabled)
     .some((key) => invalid.value[key])
 })
 
@@ -177,14 +173,17 @@ const disabledMessage = computed<string | undefined>(() => {
 
 async function defaultPaths(): Promise<PathsState> {
   const { model, fmuConfig, probabilityDistribution } = DEFAULT_MODEL_FILE_NAMES
-  const defaultRelativeExportPaths = await rms.apsFmuConfig(
+  const [modelPath, ertParamPath, fmuParamPath] = await rms.apsFmuConfig(
     fmuOptionStore.options.useNonStandardFmu,
   )
-  const modelPath = defaultRelativeExportPaths[0]
-  const ertParamPath = defaultRelativeExportPaths[1]
-  const fmuParamPath = defaultRelativeExportPaths[2]
+  if (!projectPath.value) {
+    await updateProjectPath()
+  }
   return {
-    model: `${modelPath}/${model}`,
+    model: {
+      path: `${modelPath}/${model}`,
+      disabled: false,
+  },
     fmuConfig: {
       path: `${fmuParamPath}/${fmuConfig}`,
       disabled: false,
@@ -217,12 +216,12 @@ function choose(): void {
 
   const paths: Paths = !_hasFmuUpdatableValues.value
     ? {
-        model: pathsState.value.model,
+        model: pathsState.value.model.path,
         fmuConfig: null,
         probabilityDistribution: null,
       }
     : {
-        model: pathsState.value.model,
+        model: pathsState.value.model.path,
         fmuConfig: getPath(pathsState.value.fmuConfig),
         probabilityDistribution: getPath(
           pathsState.value.probabilityDistribution,

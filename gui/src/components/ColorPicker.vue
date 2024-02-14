@@ -19,7 +19,9 @@ type Props = {
   colors: string[]
 }
 const props = defineProps<Props>()
-const emit = defineEmits<{ 'update:modelValue': [value: string] }>()
+const emit = defineEmits<{
+  (event: 'update:modelValue', value: string): void
+}>()
 
 const value = computed({
   get: () => props.modelValue,

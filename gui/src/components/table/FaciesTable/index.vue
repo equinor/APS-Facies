@@ -67,7 +67,7 @@ import BaseSelectionTable from '@/components/baseComponents/BaseSelectionTable.v
 import ColorPicker from '@/components/ColorPicker.vue'
 import InformationalIcons from '@/components/table/FaciesTable/InformationalIcons.vue'
 
-import { GlobalFacies } from '@/utils/domain'
+import type { Facies, GlobalFacies } from '@/utils/domain'
 
 import { hasCurrentParents } from '@/utils'
 import { ref, computed } from 'vue'
@@ -104,8 +104,8 @@ const noDataText = computed(() =>
     : 'There are no facies for the selected well logs. You may still add new facies.',
 )
 
-const facies = computed(() =>
-  faciesGlobalStore.available.sort((a, b) => a.code - b.code),
+const facies = computed<GlobalFacies[]>(() =>
+  [...faciesGlobalStore.available as GlobalFacies[]].sort((a, b) => a.code - b.code)
 )
 const parent = computed(() => rootStore.parent)
 
@@ -141,11 +141,11 @@ const headers = computed(() => [
   },
 ])
 
-const selected = computed({
+const selected = computed<GlobalFacies[]>({
   get: () => {
-    return faciesGlobalStore.available.filter((globalFacies) =>
-      faciesStore.available.some(
-        (localFacies) =>
+    return (faciesGlobalStore.available as GlobalFacies[]).filter((globalFacies) =>
+      (faciesStore.available as Facies[]).some(
+        (localFacies: Facies) =>
           hasCurrentParents(localFacies) &&
           localFacies.facies.id === globalFacies.id,
       ),

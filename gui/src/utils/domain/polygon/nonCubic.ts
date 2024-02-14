@@ -1,11 +1,13 @@
-import FmuUpdatableValue, {
+import type {
   FmuUpdatable,
 } from '@/utils/domain/bases/fmuUpdatable'
-import Polygon, {
+import FmuUpdatableValue from '@/utils/domain/bases/fmuUpdatable'
+import type {
   PolygonArgs,
   PolygonSerialization,
   PolygonSpecification,
 } from '@/utils/domain/polygon/base'
+import Polygon from '@/utils/domain/polygon/base'
 
 export type NonCubicPolygonArgs = PolygonArgs & {
   angle?: FmuUpdatable | number

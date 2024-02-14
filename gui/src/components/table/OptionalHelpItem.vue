@@ -16,27 +16,22 @@
 import { notEmpty } from '@/utils'
 import { computed } from 'vue'
 
-interface MaybeHelpText {
-  help?: string
-}
+const props = defineProps<{
+  value: ({
+    help?: string
+  } & ({
+    text: string
+  } | {
+    name: string
+  })) | string | number | undefined
+}>()
 
-interface Text extends MaybeHelpText {
-  text: string
-  [_: string]: any
-}
-
-interface Named extends MaybeHelpText {
-  name: string
-  [_: string]: any
-}
-type Value = Text | Named | string | number
-const props = defineProps<{ value: Value }>()
-
-const text = computed(() => {
+const text = computed<string>(() => {
+  if (props.value === undefined) return ''
   if (typeof props.value === 'string') return props.value
   if (typeof props.value === 'number') return props.value.toString()
   // Text or Named
-  return props.value.text ?? props.value.name
+  return 'text' in props.value ? props.value.text : props.value.name
 })
 
 const helpText = computed(() => {

@@ -16,11 +16,11 @@
 </template>
 
 <script setup lang="ts">
-import { MinMax } from '@/api/types'
-import { Optional } from '@/utils/typing'
-import { GaussianRandomField } from '@/utils/domain'
-import Trend from '@/utils/domain/gaussianRandomField/trend'
-import Variogram from '@/utils/domain/gaussianRandomField/variogram'
+import type { MinMax } from '@/api/types'
+import type { Optional } from '@/utils/typing'
+import type { GaussianRandomField } from '@/utils/domain'
+import type Trend from '@/utils/domain/gaussianRandomField/trend'
+import type Variogram from '@/utils/domain/gaussianRandomField/variogram'
 
 import NumericField from '@/components/selection/NumericField.vue'
 
@@ -41,7 +41,7 @@ function getValue<T extends Trend | Variogram>(
 type TrendProps<T extends Trend = Trend> = {
   trend: true
   propertyType: keyof T
-  subPropertyType?: keyof T[keyof T]
+  subPropertyType?: keyof T[keyof T] | string
 }
 type VariogramProps<T extends Variogram = Variogram> = {
   trend: false
@@ -51,6 +51,7 @@ type VariogramProps<T extends Variogram = Variogram> = {
 
 type Props = (TrendProps | VariogramProps) & {
   value: GaussianRandomField
+  trend?: boolean
   label?: string
   valueType?: string
   unit?: string

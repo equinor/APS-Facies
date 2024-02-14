@@ -25,7 +25,7 @@
     </v-row>
     <v-row v-if="useOverlay" no-gutters>
       <v-col cols="12">
-        <overlay-facies :value="rule" />
+        <overlay-facies :value="rule as InstantiatedOverlayTruncationRule" />
       </v-col>
     </v-row>
   </div>
@@ -38,8 +38,8 @@ import CubicSpecification from '@/components/specification/TruncationRule/Cubic/
 import TruncationHeader from '@/components/specification/TruncationRule/header.vue'
 import OverlayFacies from '@/components/specification/TruncationRule/Overlay/index.vue'
 
-import { Bayfill } from '@/utils/domain'
-import { Optional } from '@/utils/typing'
+import { Bayfill, type InstantiatedOverlayTruncationRule } from '@/utils/domain'
+import type { Optional } from '@/utils/typing'
 import type { TruncationRuleType } from '@/utils/domain/truncationRule/base'
 import { computed } from 'vue'
 import type { Component } from 'vue'
@@ -60,14 +60,13 @@ const truncationRuleType = computed<Optional<TruncationRuleType>>(() => {
 })
 
 const truncationRuleComponent = computed<Optional<Component>>(() => {
-  const mapping = {
-    Cubic: CubicSpecification,
-    'Non-Cubic': NonCubicSpecification,
-    Bayfill: BayfillSpecification,
+  const mapping: Record<TruncationRuleType, Component> = {
+    cubic: CubicSpecification,
+    'non-cubic': NonCubicSpecification,
+    bayfill: BayfillSpecification,
   }
-  // TODO: Remove `as` coercion
   return truncationRuleType.value && rule.value
-    ? mapping[truncationRuleType.value.name as keyof typeof mapping]
+    ? mapping[truncationRuleType.value]
     : null
 })
 
@@ -89,7 +88,7 @@ const hasEnoughFacies = computed(() => {
   if (!rule.value) return true
   const numFacies = faciesStore.selected.length
   const numFaciesInBackground = new Set(
-    rule.value.backgroundPolygons
+    (rule.value!).backgroundPolygons
       .map((polygon) => polygon.facies)
       .filter((facies) => !!facies),
   ).size
@@ -111,7 +110,7 @@ const overlayErrors = computed<{ check: boolean; errorMessage: string }[]>(
 
 const canUseOverlay = computed(
   () =>
-    overlayErrors.value.every(({ check }) => check) || rule.value?.useOverlay,
+    overlayErrors.value.every(({ check }) => check) || !!rule.value?.useOverlay,
 )
 
 const useOverlayTooltip = computed(

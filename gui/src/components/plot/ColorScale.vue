@@ -3,7 +3,7 @@
 </template>
 
 <script setup lang="ts">
-import { MinMax } from '@/api/types'
+import type { MinMax } from '@/api/types'
 import StaticPlot from './StaticPlot.vue'
 import type { ColorMapping, ColorScale } from './utils'
 import { colorMapping as mapColors } from './utils'
@@ -16,6 +16,7 @@ type Props = {
   range?: MinMax
 }
 const props = withDefaults(defineProps<Props>(), {
+  colorScale: undefined,
   range: () => ({ min: 0, max: 1 }),
 })
 const optionStore = useOptionStore()

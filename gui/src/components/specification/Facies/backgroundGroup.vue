@@ -42,7 +42,7 @@ function isFaciesSelected(
 }
 
 type Props = {
-  value: { group: ID; polygons: OverlayPolygon[] }
+  value: { id: ID; polygons: OverlayPolygon[] }
   rule: RULE
 }
 const props = defineProps<Props>()
@@ -51,7 +51,7 @@ const faciesGroupStore = useFaciesGroupStore()
 const truncationRuleStore = useTruncationRuleStore()
 
 const group = computed(
-  () => faciesGroupStore.identifiedAvailable[props.value.group],
+  () => faciesGroupStore.identifiedAvailable[props.value.id],
 )
 
 const selected = computed(() => group.value?.facies ?? [])

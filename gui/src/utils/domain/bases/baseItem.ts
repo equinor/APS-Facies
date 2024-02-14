@@ -1,9 +1,9 @@
 import { v4 as uuid } from 'uuid'
 import hash from 'object-hash'
 
-import { ID } from '@/utils/domain/types'
+import type { ID } from '@/utils/domain/types'
 import { isUUID } from '@/utils/helpers'
-import { Identifiable, Identified } from './interfaces'
+import type { Identifiable, Identified } from './interfaces'
 
 export interface BaseItemSerialization {
   id: ID

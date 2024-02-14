@@ -1,14 +1,16 @@
 import APSError from '@/utils/domain/errors/base'
-import GaussianRandomField from '@/utils/domain/gaussianRandomField'
-import FaciesGroup from '@/utils/domain/facies/group'
-import { ID } from '@/utils/domain/types'
-import Polygon, {
+import type GaussianRandomField from '@/utils/domain/gaussianRandomField'
+import type FaciesGroup from '@/utils/domain/facies/group'
+import type { ID } from '@/utils/domain/types'
+import type {
   PolygonArgs,
   PolygonSerialization,
   PolygonSpecification,
 } from './base'
+import Polygon from './base'
+import type { MaybeFmuUpdatable } from '@/utils/domain/bases/fmuUpdatable'
 
-export type CENTER = number
+export type CENTER = MaybeFmuUpdatable
 
 export interface OverlayPolygonArgs extends PolygonArgs {
   group: FaciesGroup
@@ -17,14 +19,14 @@ export interface OverlayPolygonArgs extends PolygonArgs {
 }
 
 export interface OverlayPolygonSpecification extends PolygonSpecification {
-  center: number
+  center: CENTER
   field: string
   over: string[]
 }
 
 export interface OverlayPolygonSerialization extends PolygonSerialization {
   group: ID
-  center: number
+  center: CENTER
   field: ID | null
 }
 
@@ -65,6 +67,10 @@ export default class OverlayPolygon extends Polygon {
       group: this.group.id,
       center: this.center,
       field: this.field ? this.field.id : null,
-    }
+    } as OverlayPolygonSerialization
   }
+}
+
+export function isOverlayPolygonSerialization(polygon: PolygonSerialization): polygon is OverlayPolygonSerialization {
+  return polygon.overlay
 }

@@ -1,6 +1,6 @@
 declare module 'vue-swatches' {
-  import { Identified } from '@/domain/bases/interfaces'
-  import ColorLibrary from '@/domain/colorLibrary'
+  import { Identified } from '@/utils/domain/bases/interfaces'
+  import ColorLibrary from '@/utils/domain/colorLibrary'
   import type { defineComponent } from 'vue'
 
   type VueSwatchesProps = {

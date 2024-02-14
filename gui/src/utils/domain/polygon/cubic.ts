@@ -1,14 +1,15 @@
 import { DEFAULT_CUBIC_LEVELS } from '@/config'
-import Polygon, {
+import type {
   PolygonArgs,
   PolygonSerialization,
   PolygonSpecification,
 } from '@/utils/domain/polygon/base'
-import { ID } from '@/utils/domain/types'
+import Polygon from '@/utils/domain/polygon/base'
+import type { ID } from '@/utils/domain/types'
 
 export type Level = number[]
 
-interface CubicPolygonArgs extends PolygonArgs {
+export interface CubicPolygonArgs extends PolygonArgs {
   // eslint-disable-next-line no-use-before-define
   parent?: CubicPolygon | null
   // eslint-disable-next-line no-use-before-define

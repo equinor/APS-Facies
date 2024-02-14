@@ -1,4 +1,4 @@
-import { ID } from '@/utils/domain/types'
+import type { ID } from '@/utils/domain/types'
 
 export interface CodeName {
   code: number

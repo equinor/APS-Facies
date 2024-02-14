@@ -1,6 +1,6 @@
 import { v5 as uuidv5 } from 'uuid'
 
-import {
+import type {
   Named,
   SimulationSettings,
 } from '@/utils/domain/bases/interfaces'
@@ -14,7 +14,8 @@ import type {
 import type { Parent, Polygon } from '@/utils/domain'
 import type { ID } from '@/utils/domain/types'
 
-import { Dependent, hasParents } from '@/utils/domain/bases/zoneRegionDependent'
+import type { Dependent } from '@/utils/domain/bases/zoneRegionDependent'
+import { hasParents } from '@/utils/domain/bases/zoneRegionDependent'
 
 
 import {
@@ -31,6 +32,8 @@ import { useFaciesStore } from '@/stores/facies'
 import { useOptionStore } from '@/stores/options'
 import { useRootStore } from '@/stores'
 import { useZoneStore } from '@/stores/zones'
+import { isOverlayTruncationRule } from '@/utils/domain/truncationRule/overlay'
+import type { OverlayPolygonSpecification } from '@/utils/domain/polygon/overlay'
 
 function defaultSimulationSettings(): SimulationSettings {
   return {
@@ -42,7 +45,7 @@ function defaultSimulationSettings(): SimulationSettings {
 }
 
 function simplify<
-  P extends PolygonSpecification,
+  P extends PolygonSpecification | OverlayPolygonSpecification,
   Spec extends TruncationRuleSpecification<P>,
 >(specification: Spec, includeOverlay = true): Spec {
   return {
@@ -131,9 +134,8 @@ function makeGlobalFaciesTableSpecification<
   const optionStore = useOptionStore()
 
   const facies = faciesStore.selected.filter((facies) =>
-    optionStore.options.filterZeroProbability
-      ? !!facies.previewProbability && facies.previewProbability > 0
-      : true,
+    !optionStore.options.filterZeroProbability ||
+      (!!facies.previewProbability && facies.previewProbability > 0),
   )
   const cumulativeProbability = facies.reduce(
     (sum, { previewProbability }): number => sum + Number(previewProbability),
@@ -149,13 +151,11 @@ function makeGlobalFaciesTableSpecification<
       let polygon = (rule.polygons as Polygon[]).find(
         (polygon): boolean => getId(polygon.facies) === id,
       )
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
-      if (isEmpty(polygon) && rule.overlay) {
+      if (isEmpty(polygon) && isOverlayTruncationRule(rule)) {
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
-        polygon = Object.values(rule.overlay).find(
-          (polygon): boolean => polygon.facies.id === id,
+        polygon = (Object.values(rule.overlay) as OverlayPolygon[]).find(
+          (polygon): boolean => polygon.facies?.id === id,
         )
       }
       return {
@@ -195,21 +195,17 @@ function makeTruncationRuleSpecification<
 >(
   rule: RULE,
 ): TruncationRuleDescription<P> {
-  const faciesStore = useFaciesStore()
   return {
     type: rule.type,
     globalFaciesTable: makeGlobalFaciesTableSpecification(rule),
     gaussianRandomFields: makeGaussianRandomFieldSpecification(rule),
     values: rule.specification,
-    constantParameters: !faciesStore.available.some(
-      // TODO: [sindre] should this be global or non-global facies?
-      // Used to be global, but global doesn't have .probabilityCube
-      (facies): boolean => !!facies.probabilityCube,
-    ),
+    // Not using constant parameters, is not implemented in the gui (yet)
+    constantParameters: true,
   }
 }
 
-function hasCurrentParents(item: Dependent): boolean {
+function hasCurrentParents<T extends Dependent>(item: T): boolean {
   const zoneStore = useZoneStore()
   const rootStore = useRootStore()
   if (!zoneStore.current) return false

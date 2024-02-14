@@ -1,5 +1,5 @@
 import { ZoneRegionDependent } from '@/utils/domain/bases/index'
-import {
+import type {
   DependentConfiguration,
   DependentSerialization,
 } from '@/utils/domain/bases/zoneRegionDependent'

@@ -4,7 +4,7 @@
     :items="polygons"
     @input.stop
   >
-    <template #item="{ item: polygon }">
+    <template #item="{ item: polygon }: { item: BayfillPolygon }">
       <tr>
         <td class="text-left">
           <optional-help-item :value="polygon.name" />
@@ -38,8 +38,11 @@ import OptionalHelpItem from '@/components/table/OptionalHelpItem.vue'
 import FaciesSpecification from '@/components/specification/Facies/index.vue'
 import BaseTable from '@/components/baseComponents/BaseTable.vue'
 
-import { Bayfill, BayfillPolygon, Facies } from '@/utils/domain'
+import type { Bayfill, BayfillPolygon, Facies } from '@/utils/domain'
 import { computed } from 'vue'
+import type { FmuUpdatable } from '@/utils/domain/bases/fmuUpdatable'
+import FmuUpdatableValue from '@/utils/domain/bases/fmuUpdatable'
+import { requireSlantFactor } from '@/utils/domain/polygon/bayfill'
 
 const props = defineProps<{ value: Bayfill }>()
 
@@ -60,10 +63,13 @@ function isFaciesUsed(polygon: BayfillPolygon): (facies: Facies) => boolean {
 
 function updateFactor(
   item: BayfillPolygon,
-  value: number,
+  value: number | FmuUpdatable | null,
 ): void {
-  // TODO: [sindre] How do FmuUpdatable values work?
-  // TODO: [seb] Make usages decide if they should use fmuUpdatable
-  item.slantFactor = value
+  if (requireSlantFactor(item.name)) {
+    if (typeof  value === 'number') {
+      value = new FmuUpdatableValue(value)
+    }
+    item.slantFactor = value
+  }
 }
 </script>

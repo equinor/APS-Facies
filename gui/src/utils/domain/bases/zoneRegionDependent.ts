@@ -1,14 +1,15 @@
 import { v5 as uuidv5 } from 'uuid'
 import { getId } from '@/utils/helpers'
-import Region from '@/utils/domain/region'
-import { ID } from '@/utils/domain/types'
-import Zone from '@/utils/domain/zone'
-import BaseItem, {
+import type Region from '@/utils/domain/region'
+import type { ID } from '@/utils/domain/types'
+import type Zone from '@/utils/domain/zone'
+import type {
   BaseItemConfiguration,
   BaseItemSerialization,
 } from './baseItem'
-import { ParentReference } from './interfaces'
-import { Optional } from '@/utils/typing'
+import BaseItem from './baseItem'
+import type { ParentReference } from './interfaces'
+import type { Optional } from '@/utils/typing'
 
 export interface Parent {
   zone: Zone
@@ -23,7 +24,7 @@ interface ParentConfiguration extends BaseItemConfiguration {
 
 interface ZoneRegionConfiguration extends BaseItemConfiguration {
   zone: Zone
-  region: Optional<Region>
+  region?: Optional<Region>
   parent?: never
 }
 

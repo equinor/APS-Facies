@@ -25,6 +25,7 @@ import IconButton from '@/components/selection/IconButton.vue'
 import { computed } from 'vue'
 import { useFaciesStore } from '@/stores/facies'
 import { useFaciesGlobalStore } from '@/stores/facies/global'
+import type { GlobalFacies } from '@/utils/domain'
 
 withDefaults(defineProps<{ hideAlias?: boolean }>(), { hideAlias: false })
 
@@ -33,13 +34,13 @@ const faciesGlobalStore = useFaciesGlobalStore()
 
 const current = computed(() => faciesGlobalStore.current)
 const canRemove = computed(() =>
-  !!current.value ? !faciesStore.isFromRMS(current.value) : false,
+  !!current.value ? !faciesStore.isFromRMS(current.value as GlobalFacies) : false,
 )
 
 const removeError = computed(() => {
   if (!current.value) return 'A facies must be selected'
   if (!canRemove.value)
-    return `The selected facies (${current.value.name}) is from RMS, and cannot be deleted from this GUI`
+    return `The selected facies (${current.value!.name}) is from RMS, and cannot be deleted from this GUI`
   return ''
 })
 

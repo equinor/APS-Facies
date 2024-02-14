@@ -12,7 +12,7 @@
 <script setup lang="ts">
 import CubicTruncationRuleSpecification from '@/components/specification/TruncationRule/Cubic/table/specification/index.vue'
 import CubicFaciesSelection from '@/components/specification/TruncationRule/Cubic/table/table.vue'
-import { Cubic } from '@/utils/domain'
+import type { Cubic } from '@/utils/domain'
 
 defineProps<{ value: Cubic }>()
 </script>
