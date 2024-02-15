@@ -1,76 +1,149 @@
+<!--
+Credit to Aurélio A. Heckert; https://github.com/aurium
+Adjusted from https://github.com/aurium/vue-plotly/blob/master/src/components/Plotly.vue
+to fit what we originally had
+Originally licensed under MIT
+-->
 <template>
-  <div ref="plot" class="vue-plotly" />
+  <div :id="id" ref="plot" />
 </template>
 <script setup lang="ts">
-import Plotly, { Config, Layout, PlotData, PlotlyHTMLElement } from 'plotly.js'
-import debounce from 'lodash/debounce'
-import { ref } from 'vue'
-import { onMounted } from 'vue'
-import { computed } from 'vue'
+import type {
+  PropType,
+} from 'vue'
+import {
+  ref,
+  onMounted,
+  onBeforeUnmount,
+  onUpdated,
+  getCurrentInstance,
+  watch,
+  nextTick,
+  useAttrs,
+} from 'vue'
+import type { PlotlyHTMLElement, Data, Layout } from 'plotly.js-dist-min'
+import Plotly from 'plotly.js-dist-min'
+import events from './events'
+import { camelize } from './utils/helper'
+import { useResizeObserver } from '@vueuse/core'
+import { cloneDeep, isEqual } from 'lodash'
 
-// TODO: implement more if we need it
+const instance = getCurrentInstance()
+if (!instance) throw Error('Bad component initialization')
 
-type Props = {
-  autoResize: boolean
-  options: Partial<Config>
-  data: Partial<PlotData>[]
-  layout: Partial<Layout>
-  watchShallow?: boolean
-}
-const props = withDefaults(defineProps<Props>(), {
-  watchShallow: false,
-})
+const plot = ref<PlotlyHTMLElement>({} as PlotlyHTMLElement)
 
-const plot = ref<PlotlyHTMLElement | null>(null)
-const resizeListener = ref<EventListener | null>(null)
-// const clickListener = ref((event: PlotMouseEvent) => emit('click', event))
+defineExpose({ plot })
+defineEmits(events.map(e => e.eventName))
 
-const dataRevision = ref(1)
+type Scheduled = { replot: boolean }
+const scheduled = ref<null | Scheduled>(null)
 
-const internalLayout = computed<Partial<Layout>>(() => ({
-  ...props.layout,
-  datarevision: dataRevision.value,
-}))
-
-function initEvents() {
-  if (props.autoResize) {
-    resizeListener.value = () => {
-      dataRevision.value++
-      debounce(react, 200) // TODO: THIS DOES NOTHING, RIGHT?
-    }
-    window.addEventListener('resize', resizeListener.value)
+const props = defineProps({
+  data: Array as PropType<Data[]>,
+  layout: Object as PropType<Partial<Layout>>,
+  id: {
+    type: String,
+    required: false,
+    default: null
   }
-  // container.value!.on('plotly_click', clickListener.value)
-}
-
-function getOptions(): Partial<Config> {
-  const el = plot.value!
-  let options = props.options ?? {}
-
-  // if width/height is not specified for toImageButton, default to el.clientWidth/clientHeight
-  options.toImageButtonOptions = options.toImageButtonOptions ?? {}
-  options.toImageButtonOptions.width =
-    options.toImageButtonOptions.width ?? el.clientWidth
-  options.toImageButtonOptions.height =
-    options.toImageButtonOptions.height ?? el.clientHeight
-  return options
-}
-
-// weird plotly term for "redraw"
-async function react() {
-  plot.value = await Plotly.react(
-    plot.value!,
-    props.data,
-    internalLayout.value,
-    getOptions(),
-  )
-}
-
-onMounted(() => {
-  react()
-  initEvents()
 })
 
-defineExpose({ plot, react })
+const innerLayout = ref<Partial<Plotly.Layout>>({ ...props.layout })
+
+const throttleDelay = 100
+let lastResize = 0 // Timestamp
+
+const onResize = ()=> {
+  const next = lastResize + throttleDelay - Date.now()
+  if (next <= 0) doResize()
+  else setTimeout(doResize, next)
+}
+
+const doResize = ()=> {
+  lastResize = Date.now()
+  Plotly.Plots.resize(plot.value)
+}
+
+// Hey, attrs are not reactve. Sorry.
+const getOptions = ()=> {
+  const attrs = useAttrs()
+  const optionsFromAttrs = Object.keys(attrs).reduce((acc, key) => {
+    acc[camelize(key)] = attrs[key]
+    return acc
+  }, {} as Record<string, unknown>) as Record<string, unknown>
+  return {
+    responsive: false,
+    staticPlot: true,
+    ...optionsFromAttrs,
+    displayModeBar: false,
+    displaylogo: false,
+  } as Partial<Plotly.Config>
+}
+
+const options = ref<Partial<Plotly.Config>>(getOptions())
+
+onMounted(()=> {
+  Plotly.newPlot(plot.value, props.data || [], innerLayout.value, options.value)
+  events.forEach(evt => {
+    if (!plot.value) return
+    plot.value.on(evt.eventName, evt.handler(instance))
+  })
+  useResizeObserver(plot, onResize)
+})
+
+onBeforeUnmount(()=> {
+  events.forEach(event => {
+    if (!plot.value) return
+    plot.value.removeAllListeners(event.eventName)
+  })
+  Plotly.purge(plot.value)
+})
+
+// watch for attrs or a computed based on that wont work.
+// "the attrs object here always reflects the latest fallthrough attributes,
+// it isn't reactive [...] you can use onUpdated()."
+// https://vuejs.org/guide/components/attrs.html#accessing-fallthrough-attributes-in-javascript
+onUpdated(()=> {
+  const updatedOpts = getOptions()
+  if (!isEqual(options.value, updatedOpts)) {
+    options.value = updatedOpts
+    schedule({ replot: true })
+  }
+})
+
+watch(() => props.data,
+  ()=> schedule({ replot: true }),
+  { deep: true }
+)
+
+watch(() => props.layout,
+  () => {
+    innerLayout.value = cloneDeep(props.layout!)
+    schedule({ replot: false })
+  }
+)
+
+function schedule(context: Scheduled) {
+  if (scheduled.value) {
+    (scheduled.value as Scheduled).replot = (scheduled.value as Scheduled).replot || context.replot
+    return
+  }
+  scheduled.value = context
+  nextTick(() => {
+    const replot = scheduled.value?.replot
+    scheduled.value = null
+    if (replot) {
+      react()
+      return
+    }
+    if ((innerLayout.value.height ?? 0) > 0) {
+      Plotly.relayout(plot.value, innerLayout.value)
+    }
+  })
+}
+
+function react() {
+  Plotly.react(plot.value, props.data || [], innerLayout.value, options.value)
+}
 </script>
-<style></style>

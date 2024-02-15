@@ -8,8 +8,8 @@
 <script setup lang="ts">
 import { DEFAULT_POINT_SIZE } from '@/config'
 import StaticPlot from '@/components/plot/StaticPlot.vue'
-import { GaussianRandomField } from '@/utils/domain'
-import { PlotData } from 'plotly.js'
+import type { GaussianRandomField } from '@/utils/domain'
+import type { PlotData } from 'plotly.js-dist-min'
 import { computed } from 'vue'
 
 const props = defineProps<{
@@ -26,8 +26,8 @@ const dataDefinition = computed<Partial<PlotData>[]>(() =>
           type: 'scattergl',
           mode: 'markers',
           marker: { size: DEFAULT_POINT_SIZE },
-          x: field.value.simulation?.flat(),
-          y: other.value.simulation?.flat(),
+          x: field.value.simulation?.flat() as number[],
+          y: other.value.simulation?.flat() as number[],
         },
       ]
     : [],

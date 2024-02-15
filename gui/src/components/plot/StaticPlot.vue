@@ -1,25 +1,21 @@
 <template>
   <plotly-plot
+    ref="plot"
     :data="__content"
     :layout="__layout"
     :options="__options"
     auto-resize
-    @click="(e) => $emit('click', e)"
+    @click="(e: MouseEvent) => $emit('click', e)"
     @resize="resize"
-    ref="plot"
   />
 </template>
 
 <script setup lang="ts">
 import { getDisabledOpacity } from '@/utils/helpers/simple'
-
-// TODO: REPLACE (had some issues with d3 not working.)
-// import VuePlot from "@statnett/vue-plotly";
-
 import { notEmpty } from '@/utils'
 import { DEFAULT_SIZE } from '@/config'
-import { Optional } from '@/utils/typing'
-import { Config, Layout, LayoutAxis, PlotData, Shape } from 'plotly.js'
+import type { Optional } from '@/utils/typing'
+import type { Annotations, Config, Layout, LayoutAxis, PlotData, Shape } from 'plotly.js-dist-min'
 import { ref, computed, onBeforeUnmount, onMounted, onBeforeMount } from 'vue'
 import PlotlyPlot from './PlotlyPlot.vue'
 
@@ -30,7 +26,7 @@ type Size = {
 
 type Props = {
   dataDefinition: Partial<PlotData | Shape>[]
-  annotations?: Record<string, unknown>[]
+  annotations?: Array<Partial<Annotations>>
   width?: number
   height?: number
   maxWidth?: number
@@ -39,7 +35,7 @@ type Props = {
   svg?: boolean
   expand?: boolean
   disabled?: boolean
-  axisNames?: { x: Optional<string>; y: Optional<string> }
+  axisNames?: Record<'x' | 'y', Optional<string>>
 }
 const props = withDefaults(defineProps<Props>(), {
   annotations: () => [],
@@ -60,9 +56,13 @@ const plot = ref<InstanceType<typeof PlotlyPlot> | null>(null)
 const __content = computed<Partial<PlotData>[]>(() => {
   if (!props.svg) {
     return (props.dataDefinition as Partial<PlotData>[]).map((obj) => {
-      // @ts-ignore
-      obj.opacity = getDisabledOpacity(this.disabled)
-      return obj
+      const opacity = getDisabledOpacity(props.disabled)
+      return {
+        ...obj,
+        height: props.height,
+        width: props.width,
+        opacity,
+      }
     })
   } else {
     return [
@@ -75,11 +75,16 @@ const __content = computed<Partial<PlotData>[]>(() => {
   }
 })
 
+function getScaleRatio(data: Partial<PlotData>[]): number {
+  if (!notEmpty(data) || data.length === 0) return 1
+  const { x, y } = data[0]
+  if (!x || !y) return 1
+  if (x?.length === 0 || y?.length === 0) return 1
+  return x.length / y.length
+}
+
 const __layout = computed<Partial<Layout>>(() => {
-  const scaleRatio =
-    notEmpty(__content.value) && __content.value.length > 0
-      ? __content.value.length / (__content.value[0].x?.length ?? 1)
-      : 1
+  const scaleRatio = getScaleRatio(__content.value)
 
   const _axis: Partial<LayoutAxis> = {
     ticks: '',
@@ -104,6 +109,7 @@ const __layout = computed<Partial<Layout>>(() => {
       visible: true,
     }),
   }
+  const opacity = getDisabledOpacity(props.disabled)
 
   return {
     ...size.value,
@@ -121,7 +127,15 @@ const __layout = computed<Partial<Layout>>(() => {
     paper_bgcolor: 'rgba(0,0,0,0)',
     /* eslint-disable-next-line @typescript-eslint/naming-convention */
     plot_bgcolor: 'rgba(0,0,0,0)',
-    ...(props.svg && { shapes: props.dataDefinition as Partial<Shape>[] }),
+    ...(props.svg && {
+      shapes: (props.dataDefinition as Partial<Shape>[])
+        .map(shape => {
+          return {
+            ...shape,
+            opacity,
+          } as Partial<Shape>
+        })
+    }),
     annotations: props.annotations,
   }
 })

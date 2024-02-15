@@ -7,7 +7,7 @@ import { MinMax } from '@/api/types'
 import StaticPlot from './StaticPlot.vue'
 import type { ColorMapping, ColorScale } from './utils'
 import { colorMapping as mapColors } from './utils'
-import { PlotData } from 'plotly.js'
+import type { PlotData } from 'plotly.js-dist-min'
 import { computed } from 'vue'
 import { useOptionStore } from '@/stores/options'
 
