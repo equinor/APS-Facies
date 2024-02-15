@@ -104,12 +104,18 @@ const headers = computed<HeaderItem[]>(() => [
 ])
 
 const items = computed<T[]>(() => {
+  let items: T[] = []
   switch (props.itemType) {
     case 'zone':
-      return zoneStore.available as T[]
+      items = zoneStore.available as T[]
+      break
     case 'region':
-      return (zoneStore.current?.regions as T[]) ?? []
+      items = (zoneStore.current?.regions as T[]) ?? []
+      break
+    default:
+      throw new Error(`Invalid item-type; expected 'zone' or 'region', received '${props.itemType}'`)
   }
+  return items.sort((a, b) => a.code - b.code)
 })
 
 const currentId = computed({
