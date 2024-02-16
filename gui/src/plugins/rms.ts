@@ -11,37 +11,39 @@ export interface RmsJob extends SerializedState {
   _version: string
 }
 
-// @ts-ignore
-if (typeof rms !== 'undefined') {
+export function attachRMSListeners() {
   // @ts-ignore
-  rms.onPluginSave((): SerializedState => {
-    return dumpState()
-  })
+  if (typeof rms !== 'undefined') {
+    // @ts-ignore
+    rms.onPluginSave((): SerializedState => {
+      return dumpState()
+    })
 
-  // @ts-ignore
-  rms.onPluginLoaded(async (data: RmsJob): Promise<void> => {
-    // NOTE: an 'empty' data object from RMS, looks like this:
-    // { _treeorigin: "", _version: "1.2" }
-    const rootStore = useRootStore()
-    if (Object.keys(data).length > 2) {
-      await rootStore.populate(data)
-    } else {
-      const match = /^Grid models\/(.*)$/g.exec(data._treeorigin)
-      if (match) {
-        let gridModel = match[1]
-        // The resulting output may include a nested path (/-separated), while a grid model MAY have the '/' character
-        const { available, select } = useGridModelStore()
-        const gridModelNames = available.map(model => model.name)
-        for (const model of gridModelNames) {
-          if (gridModel.includes(model)) {
-            gridModel = model
-            break
+    // @ts-ignore
+    rms.onPluginLoaded(async (data: RmsJob): Promise<void> => {
+      // NOTE: an 'empty' data object from RMS, looks like this:
+      // { _treeorigin: "", _version: "1.2" }
+      const rootStore = useRootStore()
+      if (Object.keys(data).length > 2) {
+        await rootStore.populate(data)
+      } else {
+        const match = /^Grid models\/(.*)$/g.exec(data._treeorigin)
+        if (match) {
+          let gridModel = match[1]
+          // The resulting output may include a nested path (/-separated), while a grid model MAY have the '/' character
+          const { available, select } = useGridModelStore()
+          const gridModelNames = available.map(model => model.name)
+          for (const model of gridModelNames) {
+            if (gridModel.includes(model)) {
+              gridModel = model
+              break
+            }
+          }
+          if (gridModel) {
+            await select(gridModel)
           }
         }
-        if (gridModel) {
-          await select(gridModel)
-        }
       }
-    }
-  })
+    })
+  }
 }

@@ -1,20 +1,20 @@
 // The Vue build version to load with the `import` command
 // (runtime-only or standalone) has been set in webpack.base.conf with an alias.
-import './plugins' // TODO: What is this for? Seems old-school.
+import 'vue-swatches/dist/vue-swatches.css'
 
 import { createApp } from 'vue'
+import { createPinia } from 'pinia'
+import { useTooltip } from './plugins/tooltip'
+import { attachRMSListeners } from './plugins/rms'
+import vuetify from './plugins/vuetify'
 import App from './App.vue'
+
 const app = createApp(App)
 
-import vuetify from './plugins/vuetify'
 app.use(vuetify)
-
-import { createPinia } from 'pinia'
 app.use(createPinia())
+attachRMSListeners()
 
-import { vTooltip, Tooltip } from 'floating-vue'
-import 'floating-vue/dist/style.css'
-app.directive('tooltip', vTooltip)
-app.component('FloatingTooltip', Tooltip)
+useTooltip(app)
 
 app.mount('#app')
