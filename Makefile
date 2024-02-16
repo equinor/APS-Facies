@@ -181,7 +181,7 @@ export MATPLOTLIBRC
 
 COLOR = \033[32;01m
 NO_COLOR = \033[0m
-.PHONY: help run package.json matplotlibrc dotenv VERSION COMMIT
+.PHONY: help run package.json matplotlibrc dotenv VERSION COMMIT STUB_VERSION
 
 # Build / clean / run
 build: clean-all init
@@ -296,6 +296,10 @@ mock-VERSION:
 mock-COMMIT:
 	echo $(LATEST_COMMIT_HASH_LONG) > $(SOURCE_DIR)/api/COMMIT
 	ln -sf $(SOURCE_DIR)/api/COMMIT $(CODE_DIR)/COMMIT
+
+mock-STUB_VERSION:
+	cat $(CODE_DIR)/bin/STUB_VERSION > $(SOURCE_DIR)/api/STUB_VERSION
+	ln -sf $(SOURCE_DIR)/api/STUB_VERSION $(CODE_DIR)/STUB_VERSION
 
 init: dependencies init-workflow package.json local.settings.json dotenv generate-truncation-rules
 

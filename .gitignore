@@ -462,8 +462,10 @@ prog/
 *.bak
 aps/api/VERSION
 aps/api/COMMIT
+aps/api/STUB_VERSION
 COMMIT
 VERSION
+STUB_VERSION
 
 # Unit testing
 aps/unit_test/fmu_attributes.txt
