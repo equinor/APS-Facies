@@ -4,6 +4,7 @@
   "private": true,
   "description": "The GUI component of the APS workflow",
   "author": "Sindre Nistad <snis@equinor.com>",
+  "type": "module",
   "scripts": {
     "build": "vite build",
     "lint": "vite lint",
