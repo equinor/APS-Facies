@@ -35,7 +35,7 @@ import type TruncationRule from '@/utils/domain/truncationRule/base'
 import { TREND_NOT_IMPLEMENTED_PREVIEW_VISUALIZATION } from '@/config'
 
 import { displayError } from '@/utils/helpers/storeInteraction'
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { usesAllFacies } from '@/stores/truncation-rules/utils'
 import { useFaciesStore } from '@/stores/facies'
 import { useTruncationRuleStore } from '@/stores/truncation-rules'
@@ -45,6 +45,8 @@ const faciesStore = useFaciesStore()
 const ruleStore = useTruncationRuleStore()
 
 const waitingForSimulation = ref(false)
+
+const _explanation = ref<string | undefined>(undefined)
 
 const _canSimulateAllTrends = computed(
   () =>
@@ -57,17 +59,23 @@ const _canSimulateAllTrends = computed(
     ),
 )
 
-const _explanation = computed(() => {
-  if (!props.value) return 'No truncation rule has been specified'
-  if (!usesAllFacies(props.value)) return 'More facies are selected, than are used'
-  if (!_canSimulateAllTrends.value) {
-    return `Some Gaussian Random Field uses a trend that cannot be simulated in the previewer (${TREND_NOT_IMPLEMENTED_PREVIEW_VISUALIZATION.reduce(
-      (prev, curr: string) => `${prev}${prev ? ', ' : ''}'${curr}'`,
-      '',
-    )})`
-  }
-  if (!props.value.ready) return props.value.errorMessage
-  return undefined
+watch([
+  props.value,
+], () => {
+  _explanation.value = (() => {
+    // Ensure `ready`, and `errorMessage` are executed every time there is a change in props.value
+    // otherwise vue / pinia seem to have problems detecting that the result will change
+    if (!props.value) return 'No truncation rule has been specified'
+    if (!usesAllFacies(props.value)) return 'More facies are selected, than are used'
+    if (!_canSimulateAllTrends.value) {
+      return `Some Gaussian Random Field uses a trend that cannot be simulated in the previewer (${TREND_NOT_IMPLEMENTED_PREVIEW_VISUALIZATION.reduce(
+        (prev, curr: string) => `${prev}${prev ? ', ' : ''}'${curr}'`,
+        '',
+      )})`
+    }
+    if (!props.value.ready) return props.value.errorMessage
+    return undefined
+  })()
 })
 
 async function refresh(): Promise<void> {
