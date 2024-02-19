@@ -1,31 +1,42 @@
 <template>
-  <v-row align="center" justify="center" no-gutters>
-    <v-col cols="6">
-      <v-col class="pa-0">
-        <v-icon :disabled="!canDecrease" small @click="() => emit('input', -1)"
-          >$up</v-icon
-        >
-      </v-col>
-      <v-col class="pa-0">
-        <v-icon :disabled="!canIncrease" small @click="() => emit('input', +1)"
-          >$down</v-icon
-        >
-      </v-col>
+  <v-row align="center" justify="center">
+    <v-col cols="auto">
+      <v-row>
+        <polygon-order-button
+          :disabled="!canDecrease"
+          icon="$up"
+          @click="() => emit('input', -1)"
+        />
+      </v-row>
+      <v-row>
+        <polygon-order-button
+          :disabled="!canIncrease"
+          icon="$down"
+          @click="() => emit('input', +1)"
+        />
+      </v-row>
     </v-col>
-    <v-col cols="6">
-      <v-col class="pa-0">
-        <v-icon :disabled="!canRemove" small @click="() => emit('delete')"
-          >$remove</v-icon
-        >
-        </v-col>
-        <v-col class="pa-0">
-        <v-icon :disabled="!canAdd" small @click="() => emit('add')">$add</v-icon>
-      </v-col>
+    <v-col cols="auto">
+      <v-row>
+        <polygon-order-button
+          :disabled="!canRemove"
+          icon="$remove"
+          @click="() => emit('delete')"
+        />
+      </v-row>
+      <v-row>
+        <polygon-order-button
+          :disabled="!canAdd"
+          icon="$add"
+          @click="() => emit('add')"
+        />
+      </v-row>
     </v-col>
   </v-row>
 </template>
 
 <script setup lang="ts">
+import PolygonOrderButton from './PolygonOrderButton.vue'
 type Props = {
   canIncrease?: boolean
   canDecrease?: boolean
