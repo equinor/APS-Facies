@@ -4,6 +4,7 @@
       <v-row>
         <polygon-order-button
           :disabled="!canDecrease"
+          help="Move polygon up"
           icon="$up"
           @click="() => emit('input', -1)"
         />
@@ -11,6 +12,7 @@
       <v-row>
         <polygon-order-button
           :disabled="!canIncrease"
+          help="Move polygon down"
           icon="$down"
           @click="() => emit('input', +1)"
         />
@@ -20,6 +22,7 @@
       <v-row>
         <polygon-order-button
           :disabled="!canRemove"
+          help="Remove this polygon"
           icon="$remove"
           @click="() => emit('delete')"
         />
@@ -27,6 +30,7 @@
       <v-row>
         <polygon-order-button
           :disabled="!canAdd"
+          help="Add a new polygon below this polygon"
           icon="$add"
           @click="() => emit('add')"
         />
