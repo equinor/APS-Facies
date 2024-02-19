@@ -7,6 +7,7 @@ import { createPinia } from 'pinia'
 import { useTooltip } from './plugins/tooltip'
 import { attachRMSListeners } from './plugins/rms'
 import vuetify from './plugins/vuetify'
+// @ts-ignore
 import App from './App.vue'
 
 const app = createApp(App)
