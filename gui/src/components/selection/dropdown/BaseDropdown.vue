@@ -7,6 +7,7 @@
       :items="items"
       :disabled="disabled"
       :label="label"
+      :loading="loading"
       variant="underlined"
     >
       <template #item="{ item, props }">
@@ -43,12 +44,14 @@ type Props = {
   label: string
   items: ListItem<T>[]
   disabled?: boolean
+  loading?: boolean
   warn?: boolean
   warnMessage?: string
   warnEvenWhenEmpty?: boolean
 }
 const props = withDefaults(defineProps<Props>(), {
   disabled: false,
+  loading: false,
   warn: false,
   warnMessage: '',
   warnEvenWhenEmpty: false,

@@ -5,9 +5,11 @@ import rms from '@/api/rms'
 import { useGridModelStore } from '@/stores/grid-models'
 import { APSError } from '@/utils/domain/errors'
 import { useFaciesGlobalStore } from '@/stores/facies/global'
+import { ref } from 'vue'
 
 export const useParameterRegionStore = defineStore('parameter-region', () => {
   const { available, selected, $reset } = useSelectableChoice<string>()
+  const loading = ref(false)
 
   async function select(regionParameter: string | null) {
     if (regionParameter !== null && !available.value.includes(regionParameter)) {
@@ -29,14 +31,20 @@ export const useParameterRegionStore = defineStore('parameter-region', () => {
   }
 
   async function refresh() {
+    loading.value = true
     const gridModelStore = useGridModelStore()
     const { current: gridModel} = gridModelStore
     if (!gridModel) {
+      loading.value = false
       throw new APSError(
         "Can't refresh region parameter store without a selected grid model.",
       )
     }
-    available.value = await rms.regionParameters(gridModel.name)
+    try {
+      available.value = await rms.regionParameters(gridModel.name)
+    } finally {
+      loading.value = false
+    }
   }
 
   async function fetch() {
@@ -44,7 +52,7 @@ export const useParameterRegionStore = defineStore('parameter-region', () => {
     await refresh()
   }
 
-  return { available, selected, select, refresh, fetch, $reset }
+  return { available, selected, select, refresh, fetch, $reset, loading }
 })
 
 if (import.meta.hot) {

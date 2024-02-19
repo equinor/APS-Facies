@@ -12,11 +12,13 @@ import { useParameterBlockedWellStore } from './blocked-well'
 import type { TruncationRule } from '@/utils/domain/truncationRule'
 import type { PolygonSerialization, PolygonSpecification } from '@/utils/domain/polygon/base'
 import type Polygon from '@/utils/domain/polygon/base'
+import { ref } from 'vue'
 
 export const useParameterBlockedWellLogStore = defineStore(
   'parameter-blocked-well-log',
   () => {
     const { available, selected, $reset } = useSelectableChoice<string>()
+    const loading = ref(false)
 
     function _removeFaciesDependent<
       T extends Polygon,
@@ -73,14 +75,19 @@ export const useParameterBlockedWellLogStore = defineStore(
     }
 
     async function refresh() {
+      loading.value = true
       const gridModelStore = useGridModelStore()
       const gridModel = gridModelStore.current
       const parameterBlockedWellStore = useParameterBlockedWellStore()
       const blockedWell = parameterBlockedWellStore.selected
-      available.value =
-        gridModel && blockedWell
-          ? await rms.blockedWellLogParameters(gridModel.name, blockedWell)
-          : []
+      try {
+        available.value =
+          gridModel && blockedWell
+            ? await rms.blockedWellLogParameters(gridModel.name, blockedWell)
+            : []
+      } finally {
+        loading.value = false
+      }
     }
 
     return {
@@ -90,6 +97,7 @@ export const useParameterBlockedWellLogStore = defineStore(
       fetch,
       refresh,
       $reset,
+      loading,
     }
   },
 )

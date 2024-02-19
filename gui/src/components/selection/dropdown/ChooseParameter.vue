@@ -8,6 +8,7 @@
     :warn="warn"
     :warn-even-when-empty="warnEvenWhenEmpty"
     :warn-message="warnMessage"
+    :loading="store.loading"
   />
 </template>
 
