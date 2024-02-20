@@ -24,7 +24,7 @@ const conformity = computed({
     zoneStore.setConformity(props.value, value),
 })
 
-const options: ListItem<string>[] = [
+const options: ListItem<ZoneConformOption>[] = [
   {
     value: 'TopConform',
     title: 'Top Conform',

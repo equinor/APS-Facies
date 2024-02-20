@@ -69,6 +69,9 @@ import { XMLParser } from 'fast-xml-parser'
 import { useModelFileExporterStore } from '@/stores/model-file-exporter'
 import { useRootStore } from '@/stores'
 import { useModelFileLoaderStore } from '@/stores/model-file-loader'
+import { APSError } from '@/utils/domain/errors'
+import type { ID } from '@/utils/domain/types'
+import { v4 as uuidv4 } from 'uuid'
 
 const betaBuild: boolean = import.meta.env.VUE_APP_BUILD_MODE !== 'stable'
 const versionNumber: Optional<string> =
@@ -96,9 +99,86 @@ async function loadModelFile(
     displayError('The file is empty, or it does not exist')
   } else {
     try {
-      // TODO: Check whether this new XML parser actually outputs similar json.
-      // json = xml2json(fileContent, { compact: false, ignoreComment: true });
-      const xmlParser = new XMLParser()
+      let polygonOrder = 0
+      let previousPath: string | null = null
+
+      class Node {
+        public id: ID
+        public parent: Node | null
+        public children: Node[]
+        constructor(root: null | Node) {
+          this.id = uuidv4()
+          this.parent = root
+          this.children = []
+          if (root) {
+            root.add(this)
+          }
+
+        }
+        public add(child: Node): void {
+          child.parent = this
+          this.children.push(child)
+        }
+      }
+
+      let node: Node | null = null
+      const xmlParser = new XMLParser({
+        ignoreAttributes: false,
+        trimValues: true,
+        updateTag(tagName, jPath, attrs) {
+          if (jPath.includes('Trunc2D_Cubic.BackGroundModel')) {
+            if (/\.L\d+(\.ProbFrac)?$/.test(jPath)) {
+              const previousLevel: number = previousPath?.replace('.ProbFrac', '').split('.').length ?? 0
+              const currentLevel = jPath.replace('.ProbFrac', '').split('.').length
+              if (previousLevel === 0 || previousPath === null) {
+                // New cubic truncation rule
+                node = new Node(null)
+              } else if (currentLevel > previousLevel) {
+                // We go down one level
+                node = new Node(node)
+              } else if (currentLevel < previousLevel) {
+                // We go up one level
+                node = node!.parent
+                if (/^L\d+$/.test(tagName)) {
+                  // That is, is a new level, adjacent to the previous
+                  node = new Node(node!.parent)
+                }
+              } else if (previousPath?.endsWith('ProbFrac') && /L\d+$/.test(tagName)) {
+                // That is, we go up one level from a leaf / ProgFrac to a new 'empy' node
+                node = new Node(node!.parent)
+              } else if (/L\d+$/.test(previousPath ?? '') && tagName === 'ProbFrac') {
+                // That is, we go from a 'node' down to a new level
+              }
+
+              if (/L\d+/.test(tagName)) {
+                if (!node) throw new APSError('Uninitialized tree')
+
+                attrs['@_id'] = node.id
+                attrs['@_parentId'] = node.parent?.id ?? ''
+                attrs['@_order'] = polygonOrder.toString(10)
+                polygonOrder += 1
+              }
+
+              if (tagName === 'ProbFrac') {
+                if (node === null) throw new APSError('<L1> is Missing from <Trunc2D_Cubic><BackGroundModel>')
+                attrs['@_order'] = polygonOrder.toString(10)
+                attrs['@_parentId'] = node.id
+
+                polygonOrder += 1
+              }
+
+              previousPath = jPath
+            }
+          }
+          if (tagName === 'TruncationRule') {
+            // Reset order for each truncation rule
+            polygonOrder = 0
+            previousPath = null
+            node = null
+          }
+          return tagName
+        },
+      })
       const jsObject = xmlParser.parse(fileContent)
       json = JSON.stringify(jsObject)
     } catch (err: any) {

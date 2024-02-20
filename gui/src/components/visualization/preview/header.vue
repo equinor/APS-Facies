@@ -40,11 +40,12 @@ import { usesAllFacies } from '@/stores/truncation-rules/utils'
 import { useFaciesStore } from '@/stores/facies'
 import { useTruncationRuleStore } from '@/stores/truncation-rules'
 import { useParameterGridSimulationBoxStore } from '@/stores/parameters/grid/simulation-box'
+import { storeToRefs } from 'pinia'
 
 const props = defineProps<{ value: RULE }>()
 const faciesStore = useFaciesStore()
 const ruleStore = useTruncationRuleStore()
-const parameterSimboxStore = useParameterGridSimulationBoxStore()
+const parameterSimboxStore = storeToRefs(useParameterGridSimulationBoxStore())
 
 const waitingForSimulation = ref(false)
 
@@ -70,7 +71,7 @@ watch([
     // otherwise vue / pinia seem to have problems detecting that the result will change
     if (!props.value) return 'No truncation rule has been specified'
     if (!usesAllFacies(props.value)) return 'More facies are selected, than are used'
-    if (parameterSimboxStore.waiting) return 'Computing simulation box size'
+    if (parameterSimboxStore.waiting.value) return 'Computing simulation box size'
     if (!_canSimulateAllTrends.value) {
       return `Some Gaussian Random Field uses a trend that cannot be simulated in the previewer (${TREND_NOT_IMPLEMENTED_PREVIEW_VISUALIZATION.reduce(
         (prev, curr: string) => `${prev}${prev ? ', ' : ''}'${curr}'`,
@@ -83,7 +84,7 @@ watch([
 })
 
 async function refresh(): Promise<void> {
-  await faciesStore.normalize()
+  faciesStore.normalize()
   waitingForSimulation.value = true
   try {
     await ruleStore.updateRealization(props.value)

@@ -26,11 +26,9 @@ import FmuUpdatableValue from '@/utils/domain/bases/fmuUpdatable'
 import type CrossSection from '@/utils/domain/gaussianRandomField/crossSection'
 import type {
   TrendConfiguration,
-  TrendType,
 } from '@/utils/domain/gaussianRandomField/trend'
 import type { VariogramConfiguration } from '@/utils/domain/gaussianRandomField/variogram'
 import type OverlayTruncationRule from '@/utils/domain/truncationRule/overlay'
-import { hasOwnProperty } from '@/utils/helpers'
 import type { Optional } from '@/utils/typing'
 import { usePanelStore } from '@/stores/panels'
 import type {
@@ -52,7 +50,7 @@ import { useGridModelStore } from '@/stores/grid-models'
 import { useParameterZoneStore } from '@/stores/parameters/zone'
 import { useParameterRegionStore } from '@/stores/parameters/region'
 import { useParameterRealizationStore } from '@/stores/parameters/realization'
-import type { FieldFormats } from '@/stores/fmu/options'
+import type { FieldFormats, TrendExtrapolationMethod } from '@/stores/fmu/options'
 import { useFmuOptionStore } from '@/stores/fmu/options'
 import { useFaciesGlobalStore } from '@/stores/facies/global'
 import { displayMessage } from '@/utils/helpers/storeInteraction'
@@ -60,7 +58,7 @@ import type Zone from '@/utils/domain/zone'
 import { isValidConformity, type Region } from '@/utils/domain/zone'
 import { useParameterBlockedWellStore } from '@/stores/parameters/blocked-well'
 import { useParameterBlockedWellLogStore } from '@/stores/parameters/blocked-well-log'
-import { isNumber } from 'lodash'
+import { isArray, isNumber } from 'lodash';
 import { useRegionStore } from '@/stores/regions'
 import { useTruncationRuleStore } from '@/stores/truncation-rules'
 import { useTruncationRulePresetStore } from '@/stores/truncation-rules/presets'
@@ -74,13 +72,9 @@ import type { TransformType } from '@/stores/parameters/transform-type'
 import { isTransformType, useParameterTransformTypeStore } from '@/stores/parameters/transform-type'
 import type { DebugLevel } from '@/stores/parameters/debug-level'
 import { isDebugLevel, useParameterDebugLevelStore } from '@/stores/parameters/debug-level'
-import type { PolygonSerialization, PolygonSpecification } from "@/utils/domain/polygon/base";
-
-interface XMLElement {
-  elements: XMLElement[]
-  declaration: any
-  [_: string]: any
-}
+import type { PolygonSerialization, PolygonSpecification } from '@/utils/domain/polygon/base'
+import type { ID } from '@/utils/domain/types'
+import type { ProbabilityCube } from '@/utils/domain/facies/local'
 
 interface JobSettingsParam {
   runFmuWorkflows: boolean
@@ -109,55 +103,49 @@ function ensureArray<T>(value: T | T[]): T[] {
   return Array.isArray(value) ? value : [value]
 }
 
-function getNodeValue(
-  container: XMLElement,
-  prop: Optional<string> = null,
-): Optional<XMLElement> {
-  let value: XMLElement | undefined = container
-  if (prop) value = container.elements.find((el): boolean => el.name === prop)
-  if (typeof value === 'undefined') return null
-  return value
+function getMandatoryNodeValue<T extends object, P extends keyof T>(
+  container: T,
+  prop: P,
+): Exclude<T[P], undefined> {
+  const value = container[prop]
+  if (!value) throw new KeywordError(prop as string)
+  return value as Exclude<T[P], undefined>
 }
 
-function getMandatoryNodeValue(
-  container: XMLElement,
-  prop: string,
-): XMLElement {
-  const value = getNodeValue(container, prop)
-  if (!value) throw new KeywordError(prop)
-  return value
+function getName(container: { '@_name': string }): string {
+  return container['@_name'].trim()
 }
 
-function getNodeValues(container: XMLElement, prop: string): XMLElement[] {
-  return container.elements.filter((el): boolean => el.name === prop)
-}
-
-function getName(container: XMLElement, prop: Optional<string> = null): string {
-  let value: XMLElement | undefined = container
-  if (prop) value = container.elements.find((el): boolean => el.name === prop)
-  if (!value) return ''
-  return value.attributes.name.trim()
-}
-
-function getTextValue(
-  elem: XMLElement,
-  prop: Optional<string> = null,
+function getTextValue<T extends object>(
+  elem: T | string,
+  prop: Optional<keyof T> = null,
 ): Optional<string> {
-  let value = getNodeValue(elem, prop)
-  if (!value) return null
-
-  if (value.elements.length === 1 && value.elements[0].type === 'text') {
-    value = value.elements[0].text
+  let value: unknown = elem
+  if (prop) {
+    if (typeof elem === 'string') {
+      throw new TypeError('prop cannot be used with a string as element')
+    }
+    value = elem[prop]
   }
-  if (value) {
-    return value.trim()
+  // The parser we use (fast-xml-parser) will give numbers if they appear in a text node
+  if (!value && value !== 0) return null
+  if (typeof value === 'string') return value.trim()
+  try {
+    if (typeof value === 'object' && '#text' in value) {
+      value = (value['#text'] as string)
+    }
+  } catch {
+    // ignore, as the `in` operator throws an error when used on non-objects
+    // also; typeof null === 'object', which will also throw an error
   }
+  if (typeof value === 'string') return value.trim()
+  if (value || value === 0) return String(value)
   return null
 }
 
-function getOriginType(
-  elem: XMLElement,
-  prop: Optional<string> = null,
+function getOriginType<T extends object>(
+  elem: T,
+  prop: Optional<keyof T> = null,
 ): 'RELATIVE' | 'ABSOLUTE' {
   let value = getTextValue(elem, prop)
   if (value) {
@@ -170,18 +158,21 @@ function getOriginType(
   return value as 'RELATIVE' | 'ABSOLUTE'
 }
 
-function isFMUUpdatable(
-  elem: XMLElement,
-  prop: Optional<string> = null,
+function isFMUUpdatable<T extends object>(
+  elem: MaybeFmuUpdatable | T,
+  prop: Optional<keyof T> = null,
 ): boolean {
-  let value = null
-  if (prop) value = elem.elements.find((el): boolean => el.name === prop)
-  return !!(value && value.attributes && value.attributes.kw)
+  let value = elem
+  if (prop) {
+    value = (elem as T)[prop] as MaybeFmuUpdatable
+  }
+  if (typeof value === 'number') return false
+  return !!(value && '@_kw' in value && value["@_kw"])
 }
 
-function getNumericValue(
-  elem: XMLElement,
-  prop: Optional<string> = null,
+function getNumericValue<T extends object>(
+  elem: T,
+  prop: Optional<keyof T> = null,
 ): Optional<number> {
   const text = getTextValue(elem, prop)
   if (text) {
@@ -190,16 +181,16 @@ function getNumericValue(
   return null
 }
 
-function getMandatoryNumericValue<T extends number>(elem: XMLElement, prop: string, guard?: (value: number) => value is T): T {
+function getMandatoryNumericValue<T extends number, Obj extends object>(elem: Obj, prop: keyof Obj, guard?: (value: number) => value is T): T {
   const value = getNumericValue(elem, prop)
-  if (value === null) throw new KeywordError(prop)
-  if (guard && !guard(value)) throw new Error(`'${prop}' has an illegal value`)
+  if (value === null) throw new KeywordError(prop as string)
+  if (guard && !guard(value)) throw new Error(`'${prop as string}' has an illegal value`)
   return value as T
 }
 
-function getBooleanValue(
-  elem: XMLElement,
-  prop: Optional<string> = null,
+function getBooleanValue<T extends object>(
+  elem: T,
+  prop: Optional<keyof T> = null,
 ): Optional<boolean> {
   const value = getNumericValue(elem, prop)
   if (value || value === 0) {
@@ -208,25 +199,24 @@ function getBooleanValue(
   return null
 }
 
-function getStackingDirection(
-  elem: XMLElement,
-  prop: Optional<string> = null,
+function getStackingDirection<Trend extends { directionStacking: -1 | 1 }>(
+  elem: Trend,
 ): 'PROGRADING' | 'RETROGRADING' {
-  const direction = getTextValue(elem, prop)
-  if (direction === '1') {
+  const direction = elem.directionStacking
+  if (direction === 1) {
     return 'PROGRADING'
   }
-  if (direction === '-1') {
+  if (direction === -1) {
     return 'RETROGRADING'
   }
   throw new APSError('Stacking direction is defined incorrectly for trend')
 }
 
-function getParent(zoneModel: XMLElement): Parent {
+function getParent(zoneModel: ZoneModelContentItem): Parent {
   const zoneStore = useZoneStore()
-  const zoneNumber = parseInt(zoneModel.attributes.number)
-  const regionNumber = zoneModel.attributes.regionNumber
-    ? parseInt(zoneModel.attributes.regionNumber)
+  const zoneNumber = parseInt(zoneModel['@_number'], 10)
+  const regionNumber = zoneModel['@_regionNumber']
+    ? parseInt(zoneModel['@_regionNumber'], 10)
     : null
   return zoneStore.byCode(zoneNumber, regionNumber)
 }
@@ -236,16 +226,16 @@ function getFacies(
   parent: Parent,
 ): Facies | undefined {
   const { available } = useFaciesStore()
-  return Object.values(available as Facies[])
+  return (available as Facies[])
     .filter((facies): boolean => facies.isChildOf(parent))
     .find((facies): boolean => facies.name === name)
 }
 
 function getBackgroundFacies(
-  container: XMLElement,
+  container: TruncationRuleOverlayModelGroupContent,
   parent: Parent,
 ): Facies[] {
-  const over = getNodeValues(container, 'BackGround')
+  const over = ensureArray(container.BackGround)
 
   const backgroundFacies: Facies[] = []
   for (const el of over) {
@@ -257,20 +247,24 @@ function getBackgroundFacies(
   return backgroundFacies
 }
 
+type ExpectedBayfillFaciesNames = Exclude<BayfillFacies, 'Bayhead Delta' | 'Wave influenced Bayfill'> | 'BHD' | 'WBF'
+
 function getFaciesFromBayfill(
-  container: XMLElement,
-  item: string,
+  container: TruncationRuleContentBayfill,
+  item: ExpectedBayfillFaciesNames | BayfillFacies,
   parent: Parent,
 ): Facies {
-  const mappig: Record<string, string> = {
-    'Bayhead Delta': 'BHD',
-    'Wave influenced Bayfill': 'WBF',
+  switch (item) {
+    case 'Bayhead Delta':
+      item = 'BHD'
+      break
+    case 'Wave influenced Bayfill':
+      item = 'WBF'
+      break
   }
-  if (item in mappig) item = mappig[item]
-  const backgroundModel = getNodeValue(container, 'BackGroundModel')
-  if (!backgroundModel) throw new KeywordError('BackGroundModel')
+  const backgroundModel = getMandatoryNodeValue(container, 'BackGroundModel')
 
-  const name = getTextValue(backgroundModel, item)
+  const name = backgroundModel[item]
   if (!name) throw new APSError('The polygon does not have a Facies')
 
   const facies = getFacies(name, parent)
@@ -280,20 +274,33 @@ function getFaciesFromBayfill(
   return facies
 }
 
+type ExpectedSlantFactorKeys = 'SF' | 'YSF' | 'SBHD'
+
+function getSlantFactorKey(facies: SlantFactorFacies): ExpectedSlantFactorKeys | null {
+    switch (facies) {
+      case 'Floodplain':
+        return  'SF'
+      case "Subbay":
+        return  'YSF'
+      case "Bayhead Delta":
+        return  'SBHD'
+      default:
+        return null
+  }
+}
+
+
 function getSlantFactor(
-  container: XMLElement,
+  container: TruncationRuleContentBayfill,
   item: SlantFactorFacies,
 ): FmuUpdatableValue {
-  const mapping: Record<SlantFactorFacies, 'SF' | 'YSF' | 'SBHD'> = {
-    Floodplain: 'SF',
-    Subbay: 'YSF',
-    'Bayhead Delta': 'SBHD',
-  }
-  const element = getNodeValue(container, 'BackGroundModel')
-  if (!element) throw new APSError()
+
+  const key = getSlantFactorKey(item)
+  if (key === null) throw new KeywordError(item)
+  const element = getMandatoryNodeValue(container, 'BackGroundModel')
   return new FmuUpdatableValue({
-          value: getMandatoryNumericValue(element, mapping[item]),
-          updatable: isFMUUpdatable(element, mapping[item]),
+          value: getMandatoryNumericValue(element, key),
+          updatable: isFMUUpdatable(element, key),
     })
 }
 
@@ -312,8 +319,14 @@ function getAlphaField(
   return field
 }
 
+type AlphaFieldsContent = {
+  BackGroundModel: {
+    AlphaFields: string
+  }
+}
+
 function getAlphaFields(
-  container: XMLElement,
+  container: AlphaFieldsContent,
   parent: Parent,
 ): GaussianRandomField[] {
   const alphaFields = getTextValue(
@@ -329,15 +342,15 @@ function getAlphaFields(
     )
 }
 
-function getDirection(container: XMLElement): 'V' | 'H' {
+function getDirection(container: TruncationRuleContentCubic): 'V' | 'H' {
   return getMandatoryNodeValue(
     getMandatoryNodeValue(container, 'BackGroundModel'),
     'L1',
-  ).attributes.direction
+  )['@_direction']
 }
 
 function makeBayfillTruncationRule(
-  container: XMLElement,
+  container: TruncationRuleContentBayfill,
   parent: Parent,
 ): Bayfill {
   const names = [
@@ -376,51 +389,39 @@ function makeBayfillTruncationRule(
 
 function getOverlayPolygon(
   backgroundFacies: FaciesGroup,
-  container: XMLElement,
+  container: TruncationRuleOverlayModelGroupContent['AlphaField'][number],
   order: number,
   parent: Parent,
 ): OverlayPolygon {
   return new OverlayPolygon({
     group: backgroundFacies,
     center: getNumericValue(container, 'TruncIntervalCenter') || 0,
-    field: getAlphaField(container.attributes.name, parent),
+    field: getAlphaField(getName(container), parent),
     fraction: getNumericValue(container, 'ProbFrac') || 0,
-    facies: getFacies(getName(container, 'ProbFrac'), parent),
+    facies: getFacies(getName(container.ProbFrac), parent),
     order,
   })
 }
 
 function getOverlayPolygons(
-  group: XMLElement,
+  group: TruncationRuleOverlayModelGroupContent,
   parent: Parent,
   offset = 0,
 ): OverlayPolygon[] {
   const { get } = useFaciesGroupStore()
   const backgroundFacies = get(getBackgroundFacies(group, parent), parent)
-  const _getOverlayPolygon = (el: XMLElement, index = 0): OverlayPolygon =>
-    getOverlayPolygon(backgroundFacies, el, offset + index + 1, parent)
-  const polygons = ensureArray(getNodeValues(group, 'AlphaField'))
-  return polygons.map(_getOverlayPolygon)
-}
-
-function hasElement(container: XMLElement, property: string): boolean {
-  const naive = container[property]
-  if (typeof naive === 'undefined' && hasOwnProperty(container, 'elements')) {
-    return !!container.elements.find((el): boolean => el.name === property)
-  }
-  return !!naive
+  const polygons = ensureArray(group.AlphaField)
+  return polygons.map((el, index) => getOverlayPolygon(backgroundFacies, el, offset + index + 1, parent))
 }
 
 function makeOverlayPolygons(
-  container: XMLElement,
+  container: TruncationRuleContentOverlay,
   parent: Parent,
   offset = 0,
 ): OverlayPolygon[] {
   const overlayPolygons = []
-  if (hasElement(container, 'OverLayModel')) {
-    const groups = ensureArray(
-      getNodeValues(getMandatoryNodeValue(container, 'OverLayModel'), 'Group'),
-    )
+  if ('OverLayModel' in container) {
+    const groups = ensureArray((getMandatoryNodeValue(container, 'OverLayModel').Group))
     for (const group of groups) {
       const polygons: OverlayPolygon[] = getOverlayPolygons(
         group,
@@ -433,15 +434,18 @@ function makeOverlayPolygons(
   return overlayPolygons
 }
 
+type TruncationRuleContentOverlay = TruncationRuleContentNonCubic | TruncationRuleContentCubic
+
 function makeOverlayTruncationRule<
   T extends Polygon,
   S extends PolygonSerialization,
   P extends PolygonSpecification,
   RULE extends OverlayTruncationRule<T, S, P>,
+  CONTAINER extends TruncationRuleContentOverlay
 >(
-  container: XMLElement,
+  container: CONTAINER,
   parent: Parent,
-  makeBackgroundPolygons: (container: XMLElement) => T[],
+  makeBackgroundPolygons: (container: CONTAINER['BackGroundModel']) => T[],
   _class: Newable<RULE>,
   extra = {},
 ): RULE {
@@ -468,13 +472,13 @@ function makeOverlayTruncationRule<
 }
 
 function makeNonCubicTruncationRule(
-  container: XMLElement,
+  container: TruncationRuleContentNonCubic,
   parent: Parent,
 ): NonCubic {
   function makeNonCubicBackgroundFacies(
-    container: XMLElement,
+    container: TruncationRuleContentNonCubic['BackGroundModel'],
   ): NonCubicPolygon[] {
-    return getNodeValues(container, 'Facies').map(
+    return (container.Facies).map(
       (element, index): NonCubicPolygon =>
         new NonCubicPolygon({
           angle: {
@@ -496,45 +500,109 @@ function makeNonCubicTruncationRule(
 }
 
 function makeCubicTruncationRule(
-  container: XMLElement,
+  container: TruncationRuleContentCubic,
   parent: Parent,
 ): Cubic {
-  function getPolygon(
-    element: XMLElement,
-    order: number,
-    root: Optional<CubicPolygon>,
-    parent: Parent,
-  ): CubicPolygon {
-    return new CubicPolygon({
-      parent: root,
-      fraction: getNumericValue(element) || 0,
-      facies: getFacies(getName(element), parent),
-      order,
+  type NodeTag = Attributes<{
+    id: string
+    parentId: string
+    order: string
+  }>
+  function flattenHierarchy(container: TruncationRuleContentCubic['BackGroundModel']): (ProcessedProbabilityFraction | NodeTag)[] {
+    const elements: (ProcessedProbabilityFraction | NodeTag)[] = []
+    const items = Object.values(container.L1).flat()
+
+    elements.push({
+      '@_id': container.L1['@_id'],
+      '@_parentId': '',
+      '@_order': '-1',
     })
-  }
-  function getChildren(
-    container: XMLElement,
-    root: Optional<CubicPolygon>,
-  ): CubicPolygon[] {
-    const polygons = []
-    let order = 1
 
-    if (!root && hasElement(container, 'L1')) {
-      container = getNodeValue(container, 'L1') as XMLElement
-      root = new CubicPolygon({ parent: root, order: -1 })
-    }
-    if (root) polygons.push(root)
-
-    if (!container) return polygons
-    for (const element of container.elements) {
-      if (element.name === 'ProbFrac') {
-        polygons.push(getPolygon(element, order, root, parent))
-      } else if (/L[0-9]+/.exec(element.name)) {
-        polygons.push(
-          ...getChildren(element, new CubicPolygon({ parent: root, order })),
-        )
+    while (items.length > 0) {
+      const item = items.pop()
+      if (typeof item === 'string') {
+        continue
+      } else if (isArray(item)) {
+        elements.push(...(items as ProcessedProbabilityFraction[]))
+      } else if ('#text' in item) {
+        elements.push(item)
+      } else {
+        elements.push({
+          '@_id': item['@_id'],
+          '@_parentId': item['@_parentId'],
+          '@_order': item['@_order'],
+        } as NodeTag)
+        items.push(...Object.values(item).flat())
       }
-      order += 1
+    }
+
+    return elements
+      .sort((a, b) => {
+        return parseInt(a['@_order'], 10) - parseInt(b['@_order'], 10)
+      })
+  }
+
+  function getChildren(
+    container: TruncationRuleContentCubic['BackGroundModel'],
+  ): CubicPolygon[] {
+    // Flatten the hierarchy
+    const flattened = flattenHierarchy(container)
+    const polygons: CubicPolygon[] = []
+    const parents = flattened.reduce((nodes, polygon) => {
+      if ('@_id' in polygon) {
+        if (polygon['@_parentId'] && !(polygon['@_parentId'] in nodes)) {
+          const parent = new CubicPolygon({
+            parent: null, // Not known at the moment
+            order: parseInt(polygon['@_order'], 10),
+            id: polygon['@_parentId'],
+          })
+          nodes[parent.id] = parent
+        }
+        if (!(polygon['@_id'] in nodes)) {
+          const parent = nodes[polygon['@_parentId']]
+          nodes[polygon['@_id']] = new CubicPolygon({
+            parent,
+            order: parseInt(polygon['@_order'], 10),
+            id: polygon['@_id'],
+          })
+        }
+      }
+      return nodes
+    }, {} as Record<string, CubicPolygon>)
+
+    polygons.push(...Object.values(parents))
+
+    flattened.forEach((polygon) => {
+      if ('#text' in polygon) {
+          polygons.push(new CubicPolygon({
+            parent: parents[polygon['@_parentId']],
+            fraction: getNumericValue(polygon) || 0,
+            facies: getFacies(getName(polygon), parent),
+            order: parseInt(polygon['@_order'], 10),
+          }))
+      }
+    })
+
+    // Ensure each level / group have an order between 1 and the number of siblings
+    polygons.forEach(parent => {
+      if (parent.children.length > 0){
+        const orderMapping = parent.children
+          .map(child => child.order)
+          .sort((a, b) => a - b)
+          .reduce((mapping, child, index) => ({
+            ...mapping,
+          [child]: index + 1
+        }), {} as Record<number, number>)
+
+        parent.children.forEach(child => {
+          child.order = orderMapping[child.order]
+        })
+      }
+    })
+
+    if (polygons.filter(({ parent }) => parent === null).length !== 1) {
+      console.error(polygons.filter(({ parent}) => parent === null))
+      throw new APSError('The truncation rule does not have as unique root')
     }
     return polygons
   }
@@ -542,7 +610,7 @@ function makeCubicTruncationRule(
   return makeOverlayTruncationRule(
     container,
     parent,
-    (container: XMLElement): CubicPolygon[] => getChildren(container, null),
+    (container): CubicPolygon[] => getChildren(container),
     Cubic,
     {
       direction: getDirection(container),
@@ -550,39 +618,67 @@ function makeCubicTruncationRule(
   )
 }
 
-function getTrend(gaussFieldFromFile: XMLElement): Optional<Trend> {
-  const container = getNodeValue(gaussFieldFromFile, 'Trend')
+type TrendDescription = {
+  type: 'LINEAR',
+  container: LinearTrend
+} | {
+  type: 'ELLIPTIC',
+  container: EllipticTrend,
+} | {
+  type: 'ELLIPTIC_CONE',
+  container: EllipticConeTrend,
+} | {
+  type: 'HYPERBOLIC',
+  container: HyperbolicTrend,
+} | {
+  type: 'RMS_PARAM',
+  container: RMSParameterTrend,
+} | {
+  type: 'RMS_TRENDMAP',
+  container: RMSTrendMapTrend,
+}
+
+function extractTrend(container: ZoneModelGaussFieldContent['Trend']): TrendDescription {
+  if ('Linear3D' in container) {
+    return {
+      type: 'LINEAR',
+      container: container.Linear3D,
+    }
+  } else if ('Elliptic3D' in container) {
+    return {
+      type: 'ELLIPTIC',
+      container: container.Elliptic3D,
+    }
+  } else if ('EllipticCone3D' in container) {
+    return {
+      type: 'ELLIPTIC_CONE',
+      container: container.EllipticCone3D,
+    }
+  } else if ('Hyperbolic3D' in container) {
+    return {
+      type: 'HYPERBOLIC',
+      container: container.Hyperbolic3D,
+    }
+  } else if ('RMSParameter' in container) {
+    return {
+      type: 'RMS_PARAM',
+      container: container.RMSParameter
+    }
+  } else if ('RMSTrendMap' in container) {
+    return {
+      type: 'RMS_TRENDMAP',
+      container: container.RMSTrendMap,
+    }
+  } else {
+    throw new APSError('No trend type was given, or it was illegal')
+  }
+}
+
+function getTrend(gaussFieldFromFile: ZoneModelGaussFieldContent): Optional<Trend> {
+  const container = gaussFieldFromFile.Trend
   if (!container) return null
 
-  let type: Optional<TrendType> = null
-  let trendContainer: Optional<XMLElement> = null
-  const [LINEAR, ELLIPTIC, ELLIPTIC_CONE, HYPERBOLIC, RMS_PARAM, RMS_TRENDMAP] =
-    [
-      'LINEAR',
-      'ELLIPTIC',
-      'ELLIPTIC_CONE',
-      'HYPERBOLIC',
-      'RMS_PARAM',
-      'RMS_TRENDMAP',
-    ] as TrendType[]
-
-  const types: { name: TrendType; prop: string }[] = [
-    { name: LINEAR, prop: 'Linear3D' },
-    { name: ELLIPTIC, prop: 'Elliptic3D' },
-    { name: ELLIPTIC_CONE, prop: 'EllipticCone3D' },
-    { name: HYPERBOLIC, prop: 'Hyperbolic3D' },
-    { name: RMS_PARAM, prop: 'RMSParameter' },
-    { name: RMS_TRENDMAP, prop: 'RMSTrendMap' },
-  ]
-  for (const { name, prop } of types) {
-    if (hasElement(container as XMLElement, prop)) {
-      type = name
-      trendContainer = getNodeValue(container as XMLElement, prop)
-      break
-    }
-  }
-  if (!type) throw new APSError('No trend type was given, or it was illegal')
-  if (!trendContainer) return null
+  const { type, container: trendContainer } = extractTrend(container)
 
   const options: TrendConfiguration = {
     use: true,
@@ -590,17 +686,14 @@ function getTrend(gaussFieldFromFile: XMLElement): Optional<Trend> {
     relativeStdDev: getMandatoryNumericValue(gaussFieldFromFile, 'RelStdDev'),
     relativeStdDevUpdatable: isFMUUpdatable(gaussFieldFromFile, 'RelStdDev'),
   }
-  if ([LINEAR, ELLIPTIC, ELLIPTIC_CONE, HYPERBOLIC].includes(type)) {
+  if ('azimuth' in trendContainer) {
     options.azimuth = getMandatoryNumericValue(trendContainer, 'azimuth')
     options.azimuthUpdatable = isFMUUpdatable(trendContainer, 'azimuth')
-    options.stackingDirection = getStackingDirection(
-      trendContainer,
-      'directionStacking',
-    )
+    options.stackingDirection = getStackingDirection(trendContainer)
     options.stackAngle = getMandatoryNumericValue(trendContainer, 'stackAngle')
     options.stackAngleUpdatable = isFMUUpdatable(trendContainer, 'stackAngle')
   }
-  if ([ELLIPTIC, ELLIPTIC_CONE, HYPERBOLIC].includes(type)) {
+  if ('curvature' in trendContainer) {
     options.curvature = getMandatoryNumericValue(trendContainer, 'curvature')
     options.curvatureUpdatable = isFMUUpdatable(trendContainer, 'curvature')
     options.originType = getOriginType(trendContainer, 'origintype')
@@ -608,15 +701,13 @@ function getTrend(gaussFieldFromFile: XMLElement): Optional<Trend> {
     options.originXUpdatable = isFMUUpdatable(trendContainer, 'origin_x')
     options.originY = getMandatoryNumericValue(trendContainer, 'origin_y')
     options.originYUpdatable = isFMUUpdatable(trendContainer, 'origin_y')
-  }
-  if ([ELLIPTIC, HYPERBOLIC, ELLIPTIC_CONE].includes(type)) {
     options.originZ = getMandatoryNumericValue(
       trendContainer,
       'origin_z_simbox',
     )
     options.originZUpdatable = isFMUUpdatable(trendContainer, 'origin_z_simbox')
   }
-  if ([ELLIPTIC_CONE, HYPERBOLIC].includes(type)) {
+  if ('migrationAngle' in trendContainer) {
     options.migrationAngle = getMandatoryNumericValue(
       trendContainer,
       'migrationAngle',
@@ -632,10 +723,10 @@ function getTrend(gaussFieldFromFile: XMLElement): Optional<Trend> {
       'relativeSize',
     )
   }
-  if ([RMS_PARAM].includes(type)) {
+  if ('TrendParamName' in trendContainer) {
     options.parameter = getTextValue(trendContainer, 'TrendParamName')
   }
-  if ([RMS_TRENDMAP].includes(type)) {
+  if ('TrendMapName' in trendContainer) {
     options.trendMapName = getTextValue(trendContainer, 'TrendMapName')
     options.trendMapZone = getTextValue(trendContainer, 'TrendMapZone')
   }
@@ -643,7 +734,7 @@ function getTrend(gaussFieldFromFile: XMLElement): Optional<Trend> {
   return new Trend(options)
 }
 
-function getVariogram(gaussFieldFromFile: XMLElement): Variogram {
+function getVariogram(gaussFieldFromFile: ZoneModelGaussFieldContent): Variogram {
   const container = getMandatoryNodeValue(gaussFieldFromFile, 'Vario')
   const type = getName(container)
   const options: VariogramConfiguration = {
@@ -675,22 +766,22 @@ function getCrossSection(
   return fetch(parent.zone, parent.region)
 }
 
-function getZoneNumber(zoneModel: XMLElement): number {
-  const zoneNumber = parseInt(zoneModel.attributes.number, 10)
+function getZoneNumber(zoneModel: ZoneModelContentItem): number {
+  const zoneNumber = parseInt(zoneModel['@_number'], 10)
   return zoneNumber
 }
 
-function getMandatoryTextValue(element: XMLElement, keyword: string) {
-  if (hasElement(element, keyword)) {
-    return String(getTextValue(element, keyword))
+function getMandatoryTextValue<T extends object>(element: T, keyword: keyof T): T[keyof T] | string {
+  if (keyword in element) {
+    return String((element[keyword] as string).trim())
   }
-  throw new KeywordError(keyword)
+  throw new KeywordError(keyword as string)
 }
 
-const jobSettings = (apsModelContainer: XMLElement) => {
+const jobSettings = (apsModelContainer: APSModelContent, modelFileContainsFmuSettings: boolean) => {
   const default_settings: JobSettingsParam = {
     runFmuWorkflows: false,
-    onlyUpdateFromFmu: false,
+    onlyUpdateFromFmu: modelFileContainsFmuSettings,
     simulationGrid: 'ERTBOX',
     importFields: false,
     fieldFileFormat: 'roff',
@@ -704,12 +795,12 @@ const jobSettings = (apsModelContainer: XMLElement) => {
     transformType: 0,
     debugLevel: 1,
   }
-  const jobSettingsElement = getNodeValue(apsModelContainer, 'JobSettings')
+  const jobSettingsElement = apsModelContainer.JobSettings
   if (jobSettingsElement == null) {
     return default_settings
   }
 
-  const fmuSettingsElement = getMandatoryNodeValue(
+   const fmuSettingsElement = getMandatoryNodeValue(
     jobSettingsElement,
     'FmuSettings',
   )
@@ -723,30 +814,32 @@ const jobSettings = (apsModelContainer: XMLElement) => {
   let onlyResidual = false
   let useAPSConfigFile = false
   let exportErtBox = true
-  if (fmuMode === 'FIELDS') {
-    updateGRFElement = getMandatoryNodeValue(fmuSettingsElement, 'UpdateGRF')
-    ertBoxGrid = getMandatoryTextValue(updateGRFElement, 'ErtBoxGrid')
-    exportErtBox =
-      getMandatoryTextValue(updateGRFElement, 'ExportErtBoxGrid') === 'YES'
-    exchangeMode =
-      getMandatoryTextValue(updateGRFElement, 'ExchangeMode') === 'AUTO'
-    fileFormat = getMandatoryTextValue(updateGRFElement, 'FileFormat')
-    extrapolationMethod = getMandatoryTextValue(
-      updateGRFElement,
-      'ExtrapolationMethod',
-    )
-    exportCheck =
-      getMandatoryTextValue(fmuSettingsElement, 'ExportConfigFiles') === 'YES'
-    onlyResidual =
-      getMandatoryTextValue(fmuSettingsElement, 'UseResidualFields') === 'YES'
-    useAPSConfigFile =
-      getMandatoryTextValue(fmuSettingsElement, 'UseNonStandardFMU') === 'YES'
-  }
-  if (fmuMode === 'NOFIELD') {
-    exportCheck =
-      getMandatoryTextValue(fmuSettingsElement, 'ExportConfigFiles') === 'YES'
-    useAPSConfigFile =
-      getMandatoryTextValue(fmuSettingsElement, 'UseNonStandardFMU') === 'YES'
+  switch (fmuMode) {
+    case "FIELDS":
+      updateGRFElement = getMandatoryNodeValue(fmuSettingsElement, 'UpdateGRF')
+      ertBoxGrid = getMandatoryTextValue(updateGRFElement, 'ErtBoxGrid')
+      exportErtBox =
+        getTextValue(updateGRFElement, 'ExportErtBoxGrid') === 'YES'
+      exchangeMode =
+        getMandatoryTextValue(updateGRFElement, 'ExchangeMode') === 'AUTO'
+      fileFormat = getMandatoryTextValue(updateGRFElement, 'FileFormat')
+      extrapolationMethod = getMandatoryTextValue(
+        updateGRFElement,
+        'ExtrapolationMethod',
+      )
+      exportCheck =
+        getMandatoryTextValue(fmuSettingsElement, 'ExportConfigFiles') === 'YES'
+      onlyResidual =
+        getMandatoryTextValue(fmuSettingsElement, 'UseResidualFields') === 'YES'
+      useAPSConfigFile =
+        getMandatoryTextValue(fmuSettingsElement, 'UseNonStandardFMU') === 'YES'
+      break
+    case "NOFIELD":
+      exportCheck =
+        getMandatoryTextValue(fmuSettingsElement, 'ExportConfigFiles') === 'YES'
+      useAPSConfigFile =
+        getMandatoryTextValue(fmuSettingsElement, 'UseNonStandardFMU') === 'YES'
+      break
   }
 
   const runSettingsElement = getMandatoryNodeValue(
@@ -791,6 +884,254 @@ const jobSettings = (apsModelContainer: XMLElement) => {
   return settings
 }
 
+type Attributes<Type> = {
+  [Property in keyof Type as `@_${string & Property}`]: Type[Property]
+}
+
+interface JobSettingsContent {
+  FmuSettings: {
+    FmuMode: 'OFF' | 'ON' | 'FIELDS' | 'NOFIELD' | 'NOFIELDS'
+    UpdateGRF?: {
+      ErtBoxGrid: string
+      ExportErtBoxGrid: 'YES' | 'NO'
+      ExchangeMode: 'AUTO' | 'SIMULATE'
+      FileFormat: FieldFormats
+      ExtrapolationMethod: TrendExtrapolationMethod
+    }
+    ExportConfigFiles?: 'YES' | 'NO'
+    UseResidualFields?: 'YES' | 'NO'
+    UseNonStandardFMU?: 'YES' | 'NO'
+  }
+  RunSettings: {
+    MaxFractionNotNormalised: number
+    ToleranceLimitProbability: number
+  }
+  TransformationSettings: 1 | 0,
+  LogSetting: DebugLevel
+}
+
+type FaciesContent = {
+  Code: number
+} & Attributes<{
+  name: string
+}>
+
+type MainFaciesTableContent = {
+  Facies: FaciesContent[]
+} & Attributes<{
+  blockedWell: string
+  blockedWellLog: string
+}>
+
+type MaybeFmuUpdatable = ({
+  '#text': number
+} & Attributes<{
+  kw: string
+}>) | number
+
+interface LinearTrend {
+  azimuth: MaybeFmuUpdatable
+  directionStacking: 1 | -1
+  stackAngle: MaybeFmuUpdatable
+}
+
+interface EllipticTrend  extends LinearTrend {
+    curvature: MaybeFmuUpdatable
+    origin_x: MaybeFmuUpdatable
+    origin_y: MaybeFmuUpdatable
+    origin_z_simbox: MaybeFmuUpdatable
+    origintype: 'Relative' | 'Absolute'
+}
+
+interface EllipticConeTrend  extends EllipticTrend {
+  migrationAngle: MaybeFmuUpdatable
+  relativeSize: MaybeFmuUpdatable
+}
+
+interface HyperbolicTrend extends EllipticConeTrend {
+}
+
+interface RMSParameterTrend {
+  TrendParamName: string
+}
+
+interface RMSTrendMapTrend {
+  TrendMapName: string
+  TrendMapZone: string
+}
+
+type ZoneModelGaussFieldContent = {
+  Vario: ({
+    MainRange: MaybeFmuUpdatable
+    PerpRange: MaybeFmuUpdatable
+    VertRange: MaybeFmuUpdatable
+    AzimuthAngle: MaybeFmuUpdatable
+    DipAngle: MaybeFmuUpdatable
+    Power?: MaybeFmuUpdatable
+  }) & Attributes<{
+    name:
+      | 'SPHERICAL'
+      | 'EXPONENTIAL'
+      | 'GAUSSIAN'
+      | 'GENERAL_EXPONENTIAL'
+      | 'MATERN32'
+      | 'MATERN52'
+      | 'MATERN72'
+      | 'CONSTANT'
+  }>
+  Trend: {
+    Linear3D: LinearTrend
+  } | {
+    Elliptic3D: EllipticTrend
+  } | {
+    EllipticCone3D: EllipticConeTrend
+  } | {
+    Hyperbolic3D: HyperbolicTrend
+  } | {
+    RMSParameter: RMSParameterTrend
+  } | {
+    RMSTrendMap: RMSTrendMapTrend
+  }
+  RelStdDev: MaybeFmuUpdatable
+  SeedForPreview: number
+} & Attributes<{
+  name: string
+}>
+
+interface TruncationRuleContentBayfill {
+  BackGroundModel: {
+    AlphaFields: string
+    // These are the (named) facies
+    Floodplain: string
+    Subbay: string
+    WBF: string
+    BHD: string
+    Lagoon: string
+
+    // These are the slant factors
+    SF: MaybeFmuUpdatable
+    YSF: MaybeFmuUpdatable
+    SBHD: MaybeFmuUpdatable
+  }
+}
+
+interface TruncationRuleOverlayModelGroupContent {
+  AlphaField: ({
+    TruncIntervalCenter: number
+    ProbFrac: ProbabilityFraction
+  } & Attributes<{
+    name: string
+  }>)[]
+  BackGround: string | string[]
+}
+
+interface TruncationRuleContentOverlayModel {
+  OverLayModel?: ({
+    Group: TruncationRuleOverlayModelGroupContent[]
+  } & Attributes<{
+    nGFields: string
+  }>)
+}
+
+interface TruncationRuleContentNonCubic extends TruncationRuleContentOverlayModel {
+  // That is, non-cubic truncation rule
+  BackGroundModel: {
+    AlphaFields: string  // That is Gaussian Random Fields
+    UseConstTruncParam: 1 | 0
+    Facies: ({
+      Angle: MaybeFmuUpdatable
+      ProbFrac: number
+    } & Attributes<{
+      name: string
+    }>)[]
+  }
+}
+
+type ProbabilityFraction = {
+  '#text': number
+} & Attributes<{
+  name: string
+}>
+
+type ProcessedProbabilityFraction = ProbabilityFraction & Attributes<{
+  // These where added by the preprocessor
+  order: string
+  parentId: ID
+}>
+
+interface ProbabilityFractions {
+  ProbFrac: ProcessedProbabilityFraction[]
+}
+
+interface TruncationRuleContentCubic extends TruncationRuleContentOverlayModel {
+  BackGroundModel: {
+    AlphaFields: string
+    L1: ProbabilityFractions & {
+      L2?: ProbabilityFractions & {
+        L3?: ProbabilityFractions
+      }
+    } & Attributes<{
+      direction: 'V' | 'H'
+      // These where added by the preprocessor
+      order: string
+      id: ID
+    }>
+  } & Attributes<{
+    nGFields: string
+  }>
+}
+
+type ZoneModelContentItem = {
+  UseConstProb: 1 | 0
+  SimBoxThickness: number
+  FaciesProbForModel: {
+    Facies: ({
+      ProbCube: number
+    } & Attributes<{
+      name: ProbabilityCube
+    }>)[]
+  }
+  GaussField: ZoneModelGaussFieldContent[]
+  TruncationRule: {
+    Trunc3D_Bayfill: TruncationRuleContentBayfill
+  } | {
+    Trunc2D_Angle: TruncationRuleContentNonCubic
+  } | {
+    Trunc2D_Cubic: TruncationRuleContentCubic
+  }
+  GridLayout?: 'Proportional' | 'BaseConform' | 'TopConform'
+} & Attributes<{
+    number: string
+    regionNumber: string
+  }>
+
+interface ZoneModelContent {
+  Zone: ZoneModelContentItem[]
+}
+
+type APSModelContent = Attributes<{
+  version: string
+}> & {
+  RMSProjectName: string
+  RMSWorkflowName?: string
+  GridModelName: string
+  ZoneParamName: string
+  RegionParamName?: string
+  ResultFaciesParamName: string
+  JobSettings?: JobSettingsContent
+  MainFaciesTable: MainFaciesTableContent
+  ZoneModels: ZoneModelContent
+}
+
+
+export interface ConvertedXMLContent {
+  '?xml': Attributes<{
+    version: string
+  }>
+  APSModel: APSModelContent
+}
+
+
 
 export const useModelFileLoaderStore = defineStore('model-file-loader', () => {
     /**
@@ -803,7 +1144,7 @@ export const useModelFileLoaderStore = defineStore('model-file-loader', () => {
       json: string,
       fileName: string,
     ): Promise<void> {
-      const apsModelContainer = getNodeValue(JSON.parse(json), 'APSModel')
+      const apsModelContainer = (JSON.parse(json) as ConvertedXMLContent)['APSModel']
       if (!apsModelContainer)
         throw new APSError('The model is missing the keyword "APSModel"')
 
@@ -813,14 +1154,19 @@ export const useModelFileLoaderStore = defineStore('model-file-loader', () => {
       const rootStore = useRootStore()
       rootStore.startLoading(`Loading the model file, "${fileName}"`)
 
-      const actions = [
+      const actions: {
+        action: (value: string) => Promise<void> | void
+        property: keyof APSModelContent
+        check: boolean
+      }[] = [
         {
           action: useParameterNameWorkflowStore().select,
           property: 'RMSWorkflowName',
           check: true,
         },
         {
-          action: useGridModelStore().select,
+          // fetching the simbox can take a long time, so we do not doe it during the initial loading / parsing
+          action: (name: string) => useGridModelStore().select(name, false),
           property: 'GridModelName',
           check: false,
         },
@@ -842,23 +1188,18 @@ export const useModelFileLoaderStore = defineStore('model-file-loader', () => {
       ]
       try {
         for (const { action, property, check } of actions) {
-          if (check ? hasElement(apsModelContainer, property) : true) {
-            await action(getTextValue(apsModelContainer, property)!)
+          if (check ? property in apsModelContainer : true) {
+            await action((apsModelContainer[property] as string).trim())
           }
         }
-        const { options } = useFmuOptionStore()
-        options.onlyUpdateFromFmu = json.includes('"kw":')
 
-        const apsModels = getNodeValues(
-          getMandatoryNodeValue(apsModelContainer, 'ZoneModels'),
-          'Zone',
-        )
+        const apsModels = ensureArray(apsModelContainer.ZoneModels.Zone)
 
-        await populateGlobalFaciesList(getNodeValue(apsModelContainer, 'MainFaciesTable'))
+        await populateGlobalFaciesList(apsModelContainer['MainFaciesTable'])
 
-        await populateJobSettings(apsModelContainer)
+        await populateJobSettings(apsModelContainer, json.includes('"@_kw":'))
 
-        const localActions = [
+        const localActions: ((apsModels: ZoneModelContentItem[]) => void | Promise<void>)[] = [
           populateGaussianRandomFields,
           populateFaciesProbabilities,
           populateTruncationRules,
@@ -873,16 +1214,17 @@ export const useModelFileLoaderStore = defineStore('model-file-loader', () => {
         panelStore.open('settings', 'truncationRule')
         panelStore.open('preview', 'truncationRuleMap')
       } catch (reason) {
-        displayMessage(reason as string, 'error')
+        displayMessage((reason as Error).message, 'error')
       } finally {
         rootStore.finishLoading()
       }
     }
 
     async function populateGridLayout (
-      apsModels: XMLElement[],
+      apsModels: ZoneModelContentItem[],
     ): Promise<void> {
       const { byCode, setConformity } = useZoneStore()
+
       for (const apsModel of apsModels) {
         const gridLayout = getTextValue(apsModel, 'GridLayout')
         if (gridLayout) {
@@ -892,7 +1234,7 @@ export const useModelFileLoaderStore = defineStore('model-file-loader', () => {
             setConformity(zone, gridLayout)
           } else {
             throw new Error(
-              `<Zone number="${zoneNumber}"><GridLayout> contains an invalid value (${gridLayout}). It must be one of 'top', 'bottom', 'proportional'`
+              `<Zone number="${zoneNumber}"><GridLayout> contains an invalid value (${gridLayout}). It must be one of 'TopConform', 'BaseConform', 'Proportional'`
             )
           }
         }
@@ -908,25 +1250,23 @@ export const useModelFileLoaderStore = defineStore('model-file-loader', () => {
      * @returns {Promise<void>}
      */
     async function populateGlobalFaciesList(
-      mainFaciesTableFromFile: XMLElement | null,
+      mainFaciesTableFromFile: MainFaciesTableContent | null,
     ): Promise<void> {
       if (mainFaciesTableFromFile === null) throw new Error('<MainFaciesTable> is missing or empty from the model file')
       await useParameterBlockedWellStore()
-        .select(mainFaciesTableFromFile.attributes.blockedWell)
+        .select(mainFaciesTableFromFile["@_blockedWell"])
       await useParameterBlockedWellLogStore()
-        .select(mainFaciesTableFromFile.attributes.blockedWellLog)
+        .select(mainFaciesTableFromFile["@_blockedWellLog"])
 
       const { available: globalFacies, create } = useFaciesGlobalStore()
-      for (const faciesContainer of getNodeValues(
-        mainFaciesTableFromFile,
-        'Facies',
-      )) {
+      for (const faciesContainer of mainFaciesTableFromFile.Facies) {
         // facies information from the file.
-        const name = getName(faciesContainer)
-        const code = getNumericValue(faciesContainer, 'Code')
+        const name = faciesContainer['@_name'].trim()
+        const code = Number(faciesContainer.Code)
         if (!isNumber(code)) {
-          // TODO: Check if positive
           throw new Error(`The global facies, '${name}' has an invalid number (${code})`)
+        } else if (code < 0) {
+          throw new APSError(`The global facies, '${name}' has a negative code (${code})`)
         }
 
         // corresponding facies from project
@@ -946,7 +1286,7 @@ export const useModelFileLoaderStore = defineStore('model-file-loader', () => {
      * @param zoneModelsFromFile
      */
     async function selectZonesAndRegions (
-      zoneModelsFromFile: XMLElement[],
+      zoneModelsFromFile: ZoneModelContentItem[],
     ): Promise<void> {
       // synthesizing zones and region info: Zones and regions could be specified in weird ways. For instance, we could
       // have zones regions defined in the input data as
@@ -961,7 +1301,7 @@ export const useModelFileLoaderStore = defineStore('model-file-loader', () => {
       const zoneRegionsMap = new Map()
       zoneModelsFromFile.forEach((zoneModel): void => {
         const zoneNumber = getZoneNumber(zoneModel)
-        const regionNumber = zoneModel.attributes.regionNumber
+        const regionNumber = zoneModel['@_regionNumber']
         if (!zoneRegionsMap.has(zoneNumber)) {
           zoneRegionsMap.set(zoneNumber, [])
         }
@@ -1065,23 +1405,20 @@ export const useModelFileLoaderStore = defineStore('model-file-loader', () => {
      * @returns {Promise<void>}
      */
     function populateGaussianRandomFields (
-      zoneModelsFromFile: XMLElement[],
+      zoneModelsFromFile: ZoneModelContentItem[],
     ): void {
       const { add } = useGaussianRandomFieldStore()
       for (const zoneModel of zoneModelsFromFile) {
         const parent = getParent(zoneModel)
 
-        for (const gaussFieldFromFile of getNodeValues(
-          zoneModel,
-          'GaussField',
-        )) {
+        for (const gaussFieldFromFile of zoneModel.GaussField) {
           add(
             new GaussianRandomField({
-              name: gaussFieldFromFile.attributes.name,
+              name: getName(gaussFieldFromFile),
               variogram: getVariogram(gaussFieldFromFile),
               trend: getTrend(gaussFieldFromFile),
               crossSection: getCrossSection(parent),
-              seed: hasElement(gaussFieldFromFile, 'SeedForPreview')
+              seed: 'SeedForPreview' in gaussFieldFromFile
                 ? getNumericValue(gaussFieldFromFile, 'SeedForPreview')
                 : null,
               ...parent,
@@ -1102,7 +1439,7 @@ export const useModelFileLoaderStore = defineStore('model-file-loader', () => {
      * @returns {Promise<void>}
      */
     async function populateFaciesProbabilities(
-      zoneModelsFromFile: XMLElement[],
+      zoneModelsFromFile: ZoneModelContentItem[],
     ): Promise<void> {
       const {
         add,
@@ -1113,11 +1450,7 @@ export const useModelFileLoaderStore = defineStore('model-file-loader', () => {
       for (const zoneModel of zoneModelsFromFile) {
         const useConstantProb = getBooleanValue(zoneModel, 'UseConstProb')
         const parent = getParent(zoneModel)
-        // TODO: handle SimBoxThickness (must await implementation from Sindre on this?)
-        for (const faciesModel of getNodeValues(
-          getMandatoryNodeValue(zoneModel, 'FaciesProbForModel'),
-          'Facies',
-        )) {
+        for (const faciesModel of getMandatoryNodeValue(zoneModel, 'FaciesProbForModel').Facies) {
           const facies = add(
               availableGlobalFacies.find((obj): boolean => obj.name === getName(faciesModel)) as GlobalFacies,
               parent,
@@ -1152,7 +1485,7 @@ export const useModelFileLoaderStore = defineStore('model-file-loader', () => {
      * @returns {Promise<void>}
      */
     async function populateTruncationRules(
-      zoneModelsFromFile: XMLElement[],
+      zoneModelsFromFile: ZoneModelContentItem[],
     ): Promise<void> {
       const { add } = useTruncationRuleStore()
       const { change: changePresetType } = useTruncationRulePresetStore()
@@ -1160,20 +1493,20 @@ export const useModelFileLoaderStore = defineStore('model-file-loader', () => {
       for (const zoneModel of zoneModelsFromFile) {
         const parent = getParent(zoneModel)
 
-        if (hasElement(zoneModel, 'TruncationRule')) {
+        if ('TruncationRule' in zoneModel) {
           const truncationRuleContainer = getMandatoryNodeValue(
             zoneModel,
             'TruncationRule',
           )
           let type = ''
           let rule = null
-          if (hasElement(truncationRuleContainer, 'Trunc3D_Bayfill')) {
+          if ('Trunc3D_Bayfill' in truncationRuleContainer) {
             type = 'Bayfill'
             rule = makeBayfillTruncationRule(
               getMandatoryNodeValue(truncationRuleContainer, 'Trunc3D_Bayfill'),
               parent,
             )
-          } else if (hasElement(truncationRuleContainer, 'Trunc2D_Angle')) {
+          } else if ('Trunc2D_Angle' in truncationRuleContainer) {
             type = 'Non-Cubic'
             rule = makeNonCubicTruncationRule(
               getMandatoryNodeValue(truncationRuleContainer, 'Trunc2D_Angle'),
@@ -1201,11 +1534,12 @@ export const useModelFileLoaderStore = defineStore('model-file-loader', () => {
     }
 
     async function populateJobSettings(
-      apsModelContainer: XMLElement,
+      apsModelContainer: APSModelContent,
+      modelFileContainsFmuSettings: boolean,
     ): Promise<void> {
       const { options: fmuOptions } = useFmuOptionStore()
       const { options } = useOptionStore()
-      const jobSettingsParam = jobSettings(apsModelContainer)
+      const jobSettingsParam = jobSettings(apsModelContainer, modelFileContainsFmuSettings)
       fmuOptions.runFmuWorkflows = jobSettingsParam.runFmuWorkflows
       fmuOptions.onlyUpdateFromFmu = jobSettingsParam.onlyUpdateFromFmu
       // Update JobSettings window for the three cases:
