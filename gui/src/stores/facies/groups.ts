@@ -12,6 +12,7 @@ import type { Identifiable } from '@/utils/domain/bases/interfaces'
 import { useFaciesStore } from '.'
 import type { FaciesGroupConfiguration, FaciesGroupSerialization } from '@/utils/domain/facies/group'
 import { resolveParentReference } from '@/stores/utils'
+import { APSError } from '@/utils/domain/errors'
 
 export type FaciesGroupStorePopulationData =
   IdentifiedStorePopulationData<FaciesGroup>
@@ -64,6 +65,9 @@ export const useFaciesGroupStore = defineStore('facies-groups', () => {
   }
 
   function get(facies: Facies[], parent: Parent) {
+    if (facies.length === 0) {
+      throw new APSError('Empty facies list')
+    }
     const group = byFacies.value(facies, parent)
     if (group) return group
 
