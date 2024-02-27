@@ -50,17 +50,25 @@ import { type RuleName, useTruncationRuleStore } from '@/stores/truncation-rules
 import { useTruncationRulePresetStore } from '@/stores/truncation-rules/presets'
 import type { TruncationRuleType } from '@/utils/domain/truncationRule/base'
 import { useOptionStore } from '@/stores/options'
+import type { ListItem } from '@/utils/typing'
 
 const ruleStore = useTruncationRuleStore()
 const rulePresetStore = useTruncationRulePresetStore()
 const optionStore = useOptionStore()
 
 const truncationRules = computed(() => ruleStore.ruleTypes)
-const templates = computed<RuleName[]>(() => ruleStore.ruleNames
+const templates = computed<ListItem<never, { overlay: boolean }>[]>(() => ruleStore.ruleNames
   // templates with overlay will only work as expected if facies selection is automatic
   .filter(template => template.overlay
     ? optionStore.options.automaticFaciesFill
     : true)
+  .map(({ title, overlay, disabled }) => ({
+    title,
+    props: {
+      overlay,
+      disabled,
+    }
+  }))
 )
 
 const preset = computed(() => {
