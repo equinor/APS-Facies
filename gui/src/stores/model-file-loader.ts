@@ -51,7 +51,7 @@ import { useParameterZoneStore } from '@/stores/parameters/zone'
 import { useParameterRegionStore } from '@/stores/parameters/region'
 import { useParameterRealizationStore } from '@/stores/parameters/realization'
 import type { FieldFormats, TrendExtrapolationMethod } from '@/stores/fmu/options'
-import { useFmuOptionStore } from '@/stores/fmu/options'
+import { defaultFmuOptions, useFmuOptionStore } from '@/stores/fmu/options'
 import { useFaciesGlobalStore } from '@/stores/facies/global'
 import { displayMessage } from '@/utils/helpers/storeInteraction'
 import type Zone from '@/utils/domain/zone'
@@ -779,17 +779,12 @@ function getMandatoryTextValue<T extends object>(element: T, keyword: keyof T): 
 }
 
 const jobSettings = (apsModelContainer: APSModelContent, modelFileContainsFmuSettings: boolean) => {
+  const options = defaultFmuOptions()
   const default_settings: JobSettingsParam = {
-    runFmuWorkflows: false,
+    ...options,
     onlyUpdateFromFmu: modelFileContainsFmuSettings,
-    simulationGrid: 'ERTBOX',
     importFields: false,
-    fieldFileFormat: 'roff',
-    customTrendExtrapolationMethod: 'extend_layer_mean',
     exportFmuConfigFiles: false,
-    onlyUpdateResidualFields: false,
-    useNonStandardFmu: false,
-    exportErtBoxGrid: true,
     maxAllowedFractionOfValuesOutsideTolerance: 0.1,
     toleranceOfProbabilityNormalisation: 0.2,
     transformType: 0,

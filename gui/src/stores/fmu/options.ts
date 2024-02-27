@@ -39,7 +39,7 @@ type FmuOptions = {
 
 export type FmuOptionStorePopulationData = Partial<FmuOptions>
 
-function defaultOptions(): FmuOptions {
+export function defaultFmuOptions(): FmuOptions {
   return {
     simulationGrid: DEFAULT_FMU_SIMULATION_GRID_NAME,
     customTrendExtrapolationMethod: DEFAULT_EXTRAPOLATION_METHOD,
@@ -55,7 +55,7 @@ function defaultOptions(): FmuOptions {
 }
 
 export const useFmuOptionStore = defineStore('fmu-options', () => {
-  const options = ref<FmuOptions>(defaultOptions())
+  const options = ref<FmuOptions>(defaultFmuOptions())
 
   const fmuUpdatable = computed(
     () => options.value.runFmuWorkflows || options.value.onlyUpdateFromFmu,
@@ -73,7 +73,7 @@ export const useFmuOptionStore = defineStore('fmu-options', () => {
   }
 
   function $reset() {
-    options.value = defaultOptions()
+    options.value = defaultFmuOptions()
   }
 
   return {
