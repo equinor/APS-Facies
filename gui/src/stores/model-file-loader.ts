@@ -1104,12 +1104,18 @@ interface ZoneModelContent {
   Zone: ZoneModelContentItem[]
 }
 
+type PreviewContent = Attributes<{
+  zoneNumber: string
+  regionNumber?: string
+}>
+
 type APSModelContent = Attributes<{
   version: string
 }> & {
   RMSProjectName: string
   RMSWorkflowName?: string
   GridModelName: string
+  Preview?: PreviewContent
   ZoneParamName: string
   RegionParamName?: string
   ResultFaciesParamName: string
@@ -1127,6 +1133,25 @@ export interface ConvertedXMLContent {
 }
 
 
+function populatePreviewSettings(apsModelContainer: APSModelContent) {
+  const previewSettings = apsModelContainer.Preview
+  if (!previewSettings) return
+
+  const zoneStore = useZoneStore()
+  const currentZoneNumber = parseInt(previewSettings['@_zoneNumber'], 10)
+  let currentRegionNumber = previewSettings['@_regionNumber'] ? parseInt(previewSettings['@_regionNumber'], 10) : null
+  if (currentRegionNumber === 0) {
+    currentRegionNumber = null
+  }
+  if (currentZoneNumber >= 0) {
+    const { zone, region } = zoneStore.byCode(currentZoneNumber, currentRegionNumber)
+    zoneStore.setCurrentId(zone.id)
+    if (region) {
+      useRegionStore()
+        .setCurrentId(region.id)
+    }
+  }
+}
 
 export const useModelFileLoaderStore = defineStore('model-file-loader', () => {
     /**
@@ -1205,6 +1230,7 @@ export const useModelFileLoaderStore = defineStore('model-file-loader', () => {
         for (const action of localActions) {
           await action(apsModels)
         }
+        populatePreviewSettings(apsModelContainer)
         const panelStore = usePanelStore()
         panelStore.open('settings', 'truncationRule')
         panelStore.open('preview', 'truncationRuleMap')
