@@ -61,7 +61,6 @@ export const useGridModelStore = defineStore('grid-models', () => {
         : isUUID(gridModel)
         ? identifiedAvailable.value[gridModel]
         : available.value.find((model) => model.name === gridModel)
-    console.log('grid model', _gridModel)
 
     if (!_gridModel)
       throw new APSTypeError(`The grid model, ${gridModel} does not exist`)
