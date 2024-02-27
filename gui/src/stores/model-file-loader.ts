@@ -23,7 +23,7 @@ import {
   OverlayPolygon
 } from '@/utils/domain'
 import FmuUpdatableValue from '@/utils/domain/bases/fmuUpdatable'
-import type CrossSection from '@/utils/domain/gaussianRandomField/crossSection'
+import type { CrossSection, CrossSectionType } from '@/utils/domain/gaussianRandomField/crossSection'
 import type {
   TrendConfiguration,
 } from '@/utils/domain/gaussianRandomField/trend'
@@ -1107,6 +1107,10 @@ interface ZoneModelContent {
 type PreviewContent = Attributes<{
   zoneNumber: string
   regionNumber?: string
+  crossSectionType?: CrossSectionType
+  // These two are not implemented in the GUI
+  crossSectionRelativePos?: string
+  scale?: string
 }>
 
 type APSModelContent = Attributes<{
@@ -1137,6 +1141,7 @@ function populatePreviewSettings(apsModelContainer: APSModelContent) {
   const previewSettings = apsModelContainer.Preview
   if (!previewSettings) return
 
+  // Sets the current zone / region
   const zoneStore = useZoneStore()
   const currentZoneNumber = parseInt(previewSettings['@_zoneNumber'], 10)
   let currentRegionNumber = previewSettings['@_regionNumber'] ? parseInt(previewSettings['@_regionNumber'], 10) : null
@@ -1150,6 +1155,16 @@ function populatePreviewSettings(apsModelContainer: APSModelContent) {
       useRegionStore()
         .setCurrentId(region.id)
     }
+  }
+
+  // Settings for the preview of Gaussian Random Fields
+  const crossSection = previewSettings['@_crossSectionType']
+  if (crossSection) {
+    useGaussianRandomFieldCrossSectionStore()
+      .changeType(crossSection)
+      .then(() => {
+        // Do not await the gaussian random field's simulation
+      })
   }
 }
 
