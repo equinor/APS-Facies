@@ -106,7 +106,6 @@ interface PathsState {
 
 type Invalid = Record<keyof PathsState, boolean>
 
-const modelFileExporterStore = useModelFileExporterStore()
 const fmuOptionStore = useFmuOptionStore()
 
 const dialog = ref(false)
@@ -138,17 +137,14 @@ onMounted(async () => {
 
 const _hasFmuUpdatableValues = ref(false)
 
-const model = computed(() => modelFileExporterStore.model)
 async function checkFmuUpdatableValues() {
-  _hasFmuUpdatableValues.value = !model.value
+  const { model } = useModelFileExporterStore()
+  _hasFmuUpdatableValues.value = !model
     ? false
-    : await rms.hasFmuUpdatableValues(model.value)
+    : await rms.hasFmuUpdatableValues(model)
 }
 
 watch(dialog, async (value: boolean) => {
-  if (value) await checkFmuUpdatableValues()
-})
-watch(model, async (value: string | null) => {
   if (value) await checkFmuUpdatableValues()
 })
 
