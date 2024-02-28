@@ -15,23 +15,25 @@
         @click="() => propagateCurrent(item)"
       >
         <td>
-          <floating-tooltip
-            :disabled="!selectDisabled"
-            :triggers="['hover']"
-            style="flex-shrink: 1"
-          >
-            <v-checkbox
-              :style="{ marginTop: 0 }"
-              :model-value="isSelected(item)"
-              :indeterminate="isIndeterminate(item)"
-              :disabled="selectDisabled"
-              :color="isCurrent(item) ? 'white' : undefined"
-              primary
-              hide-details
-              @click.passive.stop="toggleSelection(item)"
-            />
-            <template #popper>{{ selectError }}</template>
-          </floating-tooltip>
+          <hover-helper v-slot="{ isHovering }">
+            <floating-tooltip
+              :disabled="!selectDisabled"
+              :shown="isHovering"
+              style="flex-shrink: 1"
+            >
+              <v-checkbox
+                :style="{ marginTop: 0 }"
+                :model-value="isSelected(item)"
+                :indeterminate="isIndeterminate(item)"
+                :disabled="selectDisabled"
+                :color="isCurrent(item) ? 'white' : undefined"
+                primary
+                hide-details
+                @click.passive.stop="toggleSelection(item)"
+              />
+              <template #popper>{{ selectError }}</template>
+            </floating-tooltip>
+          </hover-helper>
         </td>
         <slot
           :item="item"
@@ -50,6 +52,7 @@
 <script setup lang="ts" generic="T extends Identifiable">
 import BaseTable from '@/components/baseComponents/BaseTable.vue'
 import SelectableItem from '@/utils/domain/bases/selectableItem'
+import HoverHelper from '@/components/selection/dropdown/HoverHelper.vue'
 import type { ID } from '@/utils/domain/types'
 import { computed } from 'vue'
 import { useTheme } from 'vuetify'
