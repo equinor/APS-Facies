@@ -54,7 +54,7 @@ export const useGridModelStore = defineStore('grid-models', () => {
 
   const names = computed(() => available.value.map((model) => model.name))
 
-  async function select(gridModel: GridModel | ID | string, fetchSimbox: boolean = true) {
+  async function select(gridModel: GridModel | ID | string, fetchSimbox: boolean | 'background' = true) {
     const _gridModel =
       gridModel instanceof GridModel
         ? gridModel
@@ -74,10 +74,17 @@ export const useGridModelStore = defineStore('grid-models', () => {
       const zoneStore = useZoneStore()
       await zoneStore.fetch()
 
+      if (fetchSimbox === 'background') {
+        useParameterGridSimulationBoxesStore().updateSimulationBox(_gridModel)
+          .then(() => {
+            // Explicitly let it run in the background, as it can take a while in some cases
+            // and / or we don't relly need this information yet.
+          })
+      }
       const parameterStoresDependentOnGrid = getParameterStoresDependentOnGrid()
       await Promise.all(
           [
-              fetchSimbox && useParameterGridSimulationBoxesStore().updateSimulationBox(_gridModel),
+              (fetchSimbox === true) && useParameterGridSimulationBoxesStore().updateSimulationBox(_gridModel),
               ...parameterStoresDependentOnGrid.map((store) => store.fetch()),
               ]
       )

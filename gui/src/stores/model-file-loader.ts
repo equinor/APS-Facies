@@ -1201,7 +1201,7 @@ export const useModelFileLoaderStore = defineStore('model-file-loader', () => {
         },
         {
           // fetching the simbox can take a long time, so we do not doe it during the initial loading / parsing
-          action: (name: string) => useGridModelStore().select(name, false),
+          action: (name: string) => useGridModelStore().select(name, 'background'),
           property: 'GridModelName',
           check: false,
         },
