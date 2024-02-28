@@ -27,7 +27,7 @@
       <v-card-text>
         <v-row>
           Paths are relative to the RMS project, which is currently located at
-          {{ projectPath }}.
+          <pre>{{ projectPath }}</pre>.
         </v-row>
         <v-row>
           <file-selection
