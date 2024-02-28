@@ -5,10 +5,10 @@ import { computed } from 'vue'
 export const useModelFileExporterStore = defineStore(
   'model-file-exporter',
   () => {
-    async function createModelFileFromStore(): Promise<string> {
+    async function createModelFileFromStore(includeAuxiliaryData = false): Promise<string> {
       return new Promise((resolve, reject) => {
         try {
-          const xmlString = createModel()
+          const xmlString = createModel(includeAuxiliaryData)
           resolve(xmlString)
         } catch (error) {
           reject(error)

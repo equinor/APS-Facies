@@ -50,6 +50,9 @@ import { useParameterGridSimulationBoxStore } from '@/stores/parameters/grid/sim
 import { useFaciesGroupStore } from '@/stores/facies/groups'
 import { useFaciesGlobalStore } from '@/stores/facies/global'
 import { type RootStoreSerialization, useStateSerialization } from '@/stores'
+import { useGaussianRandomFieldCrossSectionStore } from '@/stores/gaussian-random-fields/cross-sections'
+import { DEFAULT_CROSS_SECTION } from '@/config'
+import type { CrossSectionType } from '@/utils/domain/gaussianRandomField/crossSection'
 
 class APSExportError extends Error {
   public constructor(message: string) {
@@ -88,6 +91,46 @@ function createElement(
     elem.append(document.createTextNode(String(elemValue)))
   }
   return elem
+}
+
+function addPreview(doc: Document, parentElement: HTMLElement) {
+  const { current: currentZone } = useZoneStore()
+  const { current: currentRegion } = useRegionStore()
+  const crossSectionStore = useGaussianRandomFieldCrossSectionStore()
+
+  const parent: Parent | null = currentZone ? {
+    zone: currentZone,
+    region: currentRegion,
+  } : null
+  let crossSectionType = (DEFAULT_CROSS_SECTION.type as CrossSectionType)
+  if (parent) {
+    const type = crossSectionStore.byParent(parent)
+    if (type) {
+      crossSectionType = type.type
+    }
+  }
+  parentElement.appendChild(createElement(doc, 'Preview', null, [
+    {
+      name: 'zoneNumber',
+      value: currentZone ? currentZone.code.toString(10) : "0",
+    },
+    {
+      name: 'regionNumber',
+      value: currentRegion ? currentRegion.code.toString(10) : "0",
+    },
+    {
+      name: 'crossSectionType',
+      value: crossSectionType,
+    },
+    {
+      name: 'crossSectionRelativePos',
+      value: '0.5',  // This value is not editable from the GUI
+    },
+    {
+      name: 'scale',
+      value: '1', // This value is not editable from the GUI
+    }
+  ]))
 }
 
 function addRMSProjectName(doc: Document, parentElement: HTMLElement): void {
@@ -1095,7 +1138,10 @@ function addZoneModels(doc: Document, parentElement: HTMLElement): void {
   })
 }
 
-function addContent(doc: Document, rootElem: HTMLElement): void {
+function addContent(doc: Document, rootElem: HTMLElement, includeAuxiliaryData: boolean): void {
+  if (includeAuxiliaryData) {
+    addPreview(doc, rootElem)
+  }
   addRMSProjectName(doc, rootElem)
   addRMSWorkflowName(doc, rootElem)
   addGridModelName(doc, rootElem)
@@ -1107,13 +1153,13 @@ function addContent(doc: Document, rootElem: HTMLElement): void {
   addZoneModels(doc, rootElem)
 }
 
-export function createModel(): string {
+export function createModel(includeAuxiliaryData = false): string {
   const doc = document.implementation.createDocument('', '', null)
   const rootElem = createElement(doc, 'APSModel', null, [
     { name: 'version', value: '1.1' },
   ])
   doc.appendChild(rootElem)
-  addContent(doc, rootElem)
+  addContent(doc, rootElem, includeAuxiliaryData)
   const serializer = new XMLSerializer()
   return serializer.serializeToString(doc)
 }

@@ -258,7 +258,7 @@ async function refresh(): Promise<void> {
 async function exportModelFile(): Promise<void> {
   const modelFileExporterStore = useModelFileExporterStore()
   const exportedXMLString = await modelFileExporterStore
-    .createModelFileFromStore()
+    .createModelFileFromStore(true)
     .catch(async (error) => {
       displayError(error.message)
     })
