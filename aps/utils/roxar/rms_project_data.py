@@ -139,6 +139,9 @@ class RMSData:
     def get_project_dir(self) -> ProjectPath:
         return str(get_project_dir(self.project))
 
+    def get_rms_version(self) -> str:
+        return self.roxar.rms.get_version()
+
     def _get_project_location(self) -> Path:
         return Path(self.project.filename).parent
 

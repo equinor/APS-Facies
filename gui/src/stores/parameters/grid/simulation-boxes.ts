@@ -3,6 +3,7 @@ import { computed, ref } from 'vue'
 import rms from '@/api/rms'
 import type { SimulationBoxSize as RmsSimulationBoxSize } from '@/api/types'
 import type GridModel from '@/utils/domain/gridModel'
+import { displayWarning } from '@/utils/helpers/storeInteraction'
 
 type SimulationBoxes = Record<string, Record<'true' | 'false', RmsSimulationBoxSize | null>>
 
@@ -39,6 +40,14 @@ export const useParameterGridSimulationBoxesStore = defineStore(
         waiting.value = true
         try {
             if (!_simulationBoxes.value[gridModel.name][roughKey]) {
+              setTimeout(async () => {
+                if (waiting.value) {
+                  const rmsVersion = await rms.rmsVersion()
+                  if (rmsVersion < '14.1') {
+                    displayWarning(`It's taking a while to compute the simulation box thickness.\nConsider using RMS 14.1 or newer, as it includes functionality for fetching the thickness directly`)
+                  }
+                }
+              }, 5_000)
                 _simulationBoxes.value[gridModel.name][roughKey] = await rms.simulationBoxOrigin(gridModel.name, rough.value)
             }
         } finally {

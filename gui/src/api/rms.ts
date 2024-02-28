@@ -27,6 +27,7 @@ const api =
 export default {
   projectName: (): Promise<string> => api.call('get_project_name'),
   projectDirectory: (): Promise<string> => api.call('get_project_dir'),
+  rmsVersion: (): Promise<string> => api.call('get_rms_version'),
   fmuParameterList: (): Promise<string> =>
     api.call('get_fmu_parameter_list_dir'),
   currentWorkflowName: (): Promise<string> =>
