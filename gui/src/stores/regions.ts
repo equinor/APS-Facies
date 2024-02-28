@@ -2,17 +2,13 @@ import { acceptHMRUpdate, defineStore } from 'pinia'
 import type { Zone } from '@/utils/domain'
 import { Region } from '@/utils/domain'
 import rms from '@/api/rms'
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import type { ID } from '@/utils/domain/types'
 import { includes, notEmpty } from '@/utils'
 import { useZoneStore } from './zones'
 import { useFaciesStore } from './facies'
-import type { RegionConfiguration } from '@/utils/domain/zone'
 import { useGaussianRandomFieldCrossSectionStore } from './gaussian-random-fields/cross-sections'
 import type { CurrentIdentifiedStorePopulationData } from './utils/identified-items'
-import {
-  useCurrentIdentifiedItems,
-} from './utils/identified-items'
 import { useGridModelStore } from './grid-models'
 import { APSError } from '@/utils/domain/errors'
 import { useTruncationRuleStore } from './truncation-rules'
@@ -22,21 +18,23 @@ export type RegionStorePopulationData =
   CurrentIdentifiedStorePopulationData<Region> & { use?: boolean }
 
 export const useRegionStore = defineStore('regions', () => {
-  const store = useCurrentIdentifiedItems<Region>()
-  const {
-    available,
-    identifiedAvailable,
-    addAvailable,
-    removeAvailable,
-    currentId,
-    current,
-  } = store
-
   const use = ref(false)
   const loading = ref(false)
+  const currentId = ref<string | null>(null)
+
+  const current = computed<Region | null>(() => {
+    for (const zone of useZoneStore().available) {
+      for (const region of zone.regions) {
+        if (region.id === currentId.value) {
+          return region as Region
+        }
+      }
+    }
+    return null
+  })
 
   function $reset() {
-    store.$reset()
+    currentId.value = null
     use.value = false
     loading.value = false
   }
@@ -67,7 +65,6 @@ export const useRegionStore = defineStore('regions', () => {
           zone,
         })
         zone.regions = [...zone.regions, newRegion]
-        addAvailable(newRegion)
       }
     }
   }
@@ -142,12 +139,9 @@ export const useRegionStore = defineStore('regions', () => {
     if (doFetch) await fetch()
   }
 
-  function populate(configurations: RegionConfiguration[]) {
-    const regions = configurations.map(configuration => new Region(configuration))
-    available.value = regions
-
-    select(regions.filter((region) => region.selected))
-    return available
+  function populate(configurations: RegionStoreSerialization) {
+    use.value = configurations.use
+    currentId.value = configurations.current
   }
 
   function touch(region: Region) {
@@ -155,10 +149,6 @@ export const useRegionStore = defineStore('regions', () => {
   }
 
   return {
-    available,
-    identifiedAvailable,
-    add: addAvailable,
-    remove: removeAvailable,
     currentId,
     use,
     loading,

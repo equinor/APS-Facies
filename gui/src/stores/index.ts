@@ -185,18 +185,8 @@ export const useRootStore = defineStore('root', () => {
 
       if (data.regions) {
         updateProgressMessage('regions')
-        const { use, current } = data.regions
-        const regionStore = useRegionStore()
-        if (use !== undefined && use !== null) {
-          await regionStore.setUse(use, false)
-        }
-        // regionStore.populate(regionData.available)
-        if (
-          current &&
-          regionStore.available.find((z) => z.id === current)
-        ) {
-          regionStore.setCurrentId(current)
-        }
+        useRegionStore()
+          .populate(data.regions)
       }
 
     // Color Library
