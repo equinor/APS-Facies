@@ -788,7 +788,7 @@ const jobSettings = (apsModelContainer: APSModelContent, modelFileContainsFmuSet
     maxAllowedFractionOfValuesOutsideTolerance: 0.1,
     toleranceOfProbabilityNormalisation: 0.2,
     transformType: 0,
-    debugLevel: 1,
+    debugLevel: apsModelContainer.PrintInfo ?? 1,
   }
   const jobSettingsElement = apsModelContainer.JobSettings
   if (jobSettingsElement == null) {
@@ -1120,6 +1120,7 @@ type APSModelContent = Attributes<{
   RMSWorkflowName?: string
   GridModelName: string
   Preview?: PreviewContent
+  PrintInfo?: DebugLevel
   ZoneParamName: string
   RegionParamName?: string
   ResultFaciesParamName: string
