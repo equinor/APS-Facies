@@ -15,6 +15,7 @@ import { useGaussianRandomFieldStore } from '.'
 import { APSError } from '@/utils/domain/errors'
 import { useZoneRegionDependentStore } from '@/stores/utils/zone-region-dependent-items'
 import type { AvailableOptionSerialization } from '@/stores/parameters/serialization/helpers'
+import { resolveParentReference } from '@/stores/utils'
 
 export const useGaussianRandomFieldCrossSectionStore = defineStore(
   'gaussian-random-field-cross-sections',
@@ -92,14 +93,7 @@ export const useGaussianRandomFieldCrossSectionStore = defineStore(
     }
 
     function add(section: CrossSection | CrossSectionSerialization): CrossSection {
-      const zoneStore = useZoneStore()
-      const regionStore = useRegionStore()
-      const parent = {
-        zone: zoneStore.identifiedAvailable[getId(section.parent.zone)],
-        region: section.parent.region
-          ? regionStore.identifiedAvailable[getId(section.parent.region)]
-          : null,
-      }
+      const parent = resolveParentReference(section.parent)
       const existing = byParent.value(parent)
       if (!existing) {
         const newSection = new CrossSection({ ...section, parent })
