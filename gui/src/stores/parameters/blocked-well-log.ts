@@ -54,6 +54,11 @@ export const useParameterBlockedWellLogStore = defineStore(
     }
 
     async function select(blockedWellLog: string | null = null) {
+      if (blockedWellLog === '') {
+        console.warn('Setting blocked well log to an empty string; using null instead')
+        blockedWellLog = null
+      }
+
       selected.value = blockedWellLog
       _removeFaciesDependent()
 

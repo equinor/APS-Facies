@@ -13,6 +13,10 @@ export const useParameterBlockedWellStore = defineStore(
     const loading = ref(false)
 
     async function select(blockedWell: string | null = null) {
+      if (blockedWell === '') {
+        console.warn('Setting blocked well to an empty string; using null instead')
+        blockedWell = null
+      }
       selected.value = blockedWell
 
       const blockedWellLogStore = useParameterBlockedWellLogStore()
