@@ -29,7 +29,7 @@ import type OverlayPolygon from '@/utils/domain/polygon/overlay'
 import type OverlayTruncationRule from '@/utils/domain/truncationRule/overlay'
 
 import type { ListItem } from '@/utils/typing'
-import { computed, ref } from 'vue'
+import { computed } from 'vue'
 import { useFaciesGroupStore } from '@/stores/facies/groups'
 import { useFaciesStore } from '@/stores/facies'
 import { useTruncationRuleStore } from '@/stores/truncation-rules'
@@ -46,13 +46,12 @@ type Props = {
   rule: RULE
 }
 const props = defineProps<Props>()
-const groupId = ref(props.value.id)
 const faciesStore = useFaciesStore()
 const faciesGroupStore = useFaciesGroupStore()
 const truncationRuleStore = useTruncationRuleStore()
 
 const group = computed(
-  () => faciesGroupStore.identifiedAvailable[groupId.value],
+  () => faciesGroupStore.identifiedAvailable[props.value.id],
 )
 
 const selected = computed(() => group.value?.facies ?? [])
@@ -81,7 +80,6 @@ function update(facies: Facies[]): void {
     const group = faciesGroupStore.add(facies, props.rule.parent)
     // When first creating an overlay group, the ID for the _currently_ opened dropdown menu
     // does not have its group ID refreshed
-    groupId.value = group.id
     truncationRuleStore.addPolygon(props.rule, { group, overlay: true })
   } else {
     faciesGroupStore.update(group.value, facies)

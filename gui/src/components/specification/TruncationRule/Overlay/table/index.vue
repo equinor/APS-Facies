@@ -7,7 +7,7 @@
     @input.stop
   >
     <template #item="{ item }">
-      <tr>
+      <tr :key="item.index">
         <td>
           <background-group-facies-specification :value="item" :rule="value as RULE" />
         </td>
@@ -93,10 +93,10 @@ const groups = computed(() => {
   return overlay
 })
 
-type Item = {id: ID, polygons: Array<OverlayPolygon>}
+type Item = {id: ID, polygons: Array<OverlayPolygon>, index: number}
 
 const idGroups = computed((): Array<Item> =>
-  groups.value.map(({ group, polygons }) => ({ id: group, polygons })),
+  groups.value.map(({ group, polygons }, index) => ({ id: group, polygons, index })),
 )
 
 const headers: HeaderItems = [
