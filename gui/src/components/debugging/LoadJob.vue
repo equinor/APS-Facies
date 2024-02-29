@@ -1,5 +1,5 @@
 <template>
-  <v-select
+  <v-autocomplete
     v-model="selectedJob"
     label="RMS job"
     clearable
@@ -9,7 +9,7 @@
     variant="underlined"
   >
     <v-progress-linear indeterminate />
-  </v-select>
+  </v-autocomplete>
 </template>
 
 <script setup lang="ts">
