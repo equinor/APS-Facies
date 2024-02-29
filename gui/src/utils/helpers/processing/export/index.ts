@@ -954,7 +954,7 @@ function addTruncationRuleCubic(
           attributes,
         )
         element.append(child)
-        polygon.children.forEach((polygon): void => {
+        polygon.children.toSorted((a, b) => a.order - b.order).forEach((polygon): void => {
           addPolygon(child, polygon)
         })
       } else {
