@@ -82,7 +82,11 @@ function update(facies: Facies[]): void {
     // does not have its group ID refreshed
     truncationRuleStore.addPolygon(props.rule, { group, overlay: true })
   } else {
-    faciesGroupStore.update(group.value, facies)
+    if (facies.length === 0) {
+      truncationRuleStore.removePolygon(props.rule, props.rule.polygons.find(polygon => 'group' in polygon && polygon.group.id === group.value.id)!)
+    } else {
+      faciesGroupStore.update(group.value, facies)
+    }
   }
 }
 </script>
