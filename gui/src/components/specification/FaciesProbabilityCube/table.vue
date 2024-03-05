@@ -13,7 +13,7 @@
             :model-value="facies.probabilityCube"
             :items="probabilityCubes"
             clearable
-            @update:model-value="(cube: string) => changeProbabilityCube(facies, cube)"
+            @update:model-value="(cube: ProbabilityCube) => changeProbabilityCube(facies, cube)"
           />
         </td>
         <td v-if="useProbabilityCubes">
@@ -55,7 +55,7 @@ const facies = computed(() => faciesStore.selected)
 
 const probabilityCubes = computed<ListItem<ProbabilityCube>[]>(() =>
   [{ title: '', props: { disabled: false } }].concat(
-    useParameterProbabilityCubeStore().available.map((parameter: string) => {
+    useParameterProbabilityCubeStore().available.map(parameter => {
       return {
         title: parameter,
         props: {
@@ -89,7 +89,7 @@ const headers = computed<HeaderItem[]>(() => {
   }
 })
 
-function changeProbabilityCube(facies: Facies, probabilityCube: string): void {
+function changeProbabilityCube(facies: Facies, probabilityCube: ProbabilityCube): void {
   faciesStore.changeProbabilityCube(facies, probabilityCube)
 }
 

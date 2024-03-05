@@ -4,11 +4,12 @@ import { ref } from 'vue'
 import rms from '@/api/rms'
 import { useGridModelStore } from '@/stores/grid-models'
 import { APSError } from '@/utils/domain/errors'
+import type { ProbabilityCube } from '@/utils/domain/facies/local'
 
 export const useParameterProbabilityCubeStore = defineStore(
   'parameters-probability-cube',
   () => {
-    const available = ref([]) as Ref<string[]>
+    const available = ref([]) as Ref<ProbabilityCube[]>
 
     async function refresh() {
       const gridModelStore = useGridModelStore()

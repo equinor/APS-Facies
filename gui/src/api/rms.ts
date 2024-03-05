@@ -21,6 +21,7 @@ import type { Optional } from '@/utils/typing'
 
 import { rms as mock } from './roxar'
 import type { PolygonSpecification } from '@/utils/domain/polygon/base'
+import type { ProbabilityCube } from '@/utils/domain/facies/local'
 const api =
   (typeof rms !== 'undefined' ? rms.uipy : mock.uipy ) as { call: <T>(name: string, ...args: any[]) => Promise<T> }
 
@@ -89,7 +90,7 @@ export default {
     api.call('get_rms_trend_parameters', gridName),
   trendMapZones: (): Promise<Record<string, string[]>> =>
     api.call('get_rms_trend_map_zones'),
-  probabilityCubeParameters: (gridName: string): Promise<string[]> =>
+  probabilityCubeParameters: (gridName: string): Promise<ProbabilityCube[]> =>
     api.call('get_probability_cube_parameters', gridName),
   constants: (constantName: string, constantType: string): Promise<Constants> =>
     api.call('get_constant', constantName, constantType),

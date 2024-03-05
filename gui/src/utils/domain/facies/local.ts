@@ -5,10 +5,10 @@ import type {
 import ZoneRegionDependent from '@/utils/domain/bases/zoneRegionDependent'
 import type GlobalFacies from '@/utils/domain/facies/global'
 import type { ID, PROBABILITY } from '@/utils/domain/types'
+import type { Branded } from '@/utils/typing/simple'
 
 
-// TODO: Make ProbabilityCube into its own class
-export type ProbabilityCube = string
+export type ProbabilityCube = Branded<string, 'ProbabilityCube'>
 
 export type FaciesConfiguration = DependentConfiguration & {
   facies: GlobalFacies

@@ -1501,7 +1501,7 @@ export const useModelFileLoaderStore = defineStore('model-file-loader', () => {
             if (probability === null) throw new Error(`<UseConstProb> is set, but <ProbCube> is empty for Facies(name='${facies.name}', code=${facies.code})`)
             facies.previewProbability = probability
           } else {
-            const probabilityCube = getTextValue(faciesModel, 'ProbCube')
+            const probabilityCube = getTextValue(faciesModel, 'ProbCube') as ProbabilityCube | null
             if (probabilityCube === null) throw  new Error(`<ProbCube> is not set for Facies(name='${facies.name}', code=${facies.code})`)
             facies.probabilityCube = probabilityCube
           }
