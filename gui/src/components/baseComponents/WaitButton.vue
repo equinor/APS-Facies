@@ -47,7 +47,7 @@ withDefaults(defineProps<Props>(), {
   outline: false,
   text: '',
   dark: false,
-  color: '',
+  color: undefined,
   variant: 'text',
 })
 

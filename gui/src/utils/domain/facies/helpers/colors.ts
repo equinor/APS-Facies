@@ -1,4 +1,9 @@
-export type Color = string // TODO: Make into a proper type
+import type { Branded } from '@/utils/typing/simple'
+
+export type Color = Branded<string, "color">
+  | 'primary'
+  | 'black'
+  | 'white'
 
 export const apsColors: Color[] = [
   '#7cfc00', // lawngreen
@@ -13,7 +18,7 @@ export const apsColors: Color[] = [
   '#dc143c', // crimson
   '#ff8c00', // darkorange
   '#ff0000', // red
-]
+] as Color[]
 
 export const generalColors: Color[] = [
   'rgb(222, 47, 16)',
@@ -28,7 +33,7 @@ export const generalColors: Color[] = [
   'rgb(43, 71, 178)',
   'rgb(200, 43, 82)',
   'rgb(163, 36, 172)',
-]
+] as Color[]
 
 export const faciesColors: Color[] = [
   'rgb(241, 201, 46)',
@@ -48,7 +53,7 @@ export const faciesColors: Color[] = [
   'rgb(229, 165, 37)',
   'rgb(1, 1, 1)',
   'rgb(139, 139, 139)',
-]
+] as Color[]
 
 export const colorLibraries = {
   APS: apsColors,

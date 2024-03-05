@@ -86,7 +86,7 @@ function contrast(color: string, other: string): number {
   return Math.max(l1, l2) / Math.min(l1, l2)
 }
 
-function getTextColor(backgroundColor: string): string {
+function getTextColor(backgroundColor: string): Color {
   const textColors = [colors.grey.darken3, colors.grey.lighten4]
   return textColors.reduce(
     (bestContrast, textColor) => {
@@ -104,7 +104,7 @@ function getTextColor(backgroundColor: string): string {
       color: '',
       contrast: 0,
     },
-  ).color
+  ).color as Color
 }
 
 interface PolygonSpecification {
@@ -136,14 +136,14 @@ export interface PlotSpecification {
 
 type FaciesTable = {
   name: string
-  color: string
+  color: Color
   alias: string
 }[]
 
 export function plotify(
   polygons: PolygonDescription[],
   faciesTable: FaciesTable,
-  fillColor = '',
+  fillColor: Color = '' as Color,
 ): PlotSpecification {
   return polygons.reduce(
     (obj, { name, polygon }): PlotSpecification => {

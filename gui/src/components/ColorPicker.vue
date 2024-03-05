@@ -13,19 +13,20 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
+import type { Color } from '@/utils/domain/facies/helpers/colors'
 
 type Props = {
-  modelValue: string
-  colors: string[]
+  modelValue: Color
+  colors: Color[]
 }
 const props = defineProps<Props>()
 const emit = defineEmits<{
-  (event: 'update:modelValue', value: string): void
+  (event: 'update:modelValue', value: Color): void
 }>()
 
 const value = computed({
   get: () => props.modelValue,
-  set: (v: string) => emit('update:modelValue', v),
+  set: (v: Color) => emit('update:modelValue', v),
 })
 </script>
 

@@ -4,7 +4,7 @@
     :items="polygons"
     @input.stop
   >
-    <template #item="{ item: polygon }: { item: BayfillPolygon }">
+    <template #item="{ item: polygon }">
       <tr>
         <td class="text-left">
           {{ polygon.name }}

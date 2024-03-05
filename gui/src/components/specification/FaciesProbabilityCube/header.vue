@@ -16,7 +16,6 @@
         v-tooltip.bottom="'Calculate average probability (for previewer)'"
         :disabled="!canCalculateAverages"
         :waiting="calculatingAverages"
-        color=""
         @click.stop="average"
       >
         Average

@@ -12,7 +12,7 @@ export interface ColorLibrarySpecification extends BaseItemConfiguration {
 
 export interface ColorLibrarySerialization extends BaseItemSerialization {
   name: string
-  colors: string[]
+  colors: Color[]
 }
 
 export default class ColorLibrary extends BaseItem {

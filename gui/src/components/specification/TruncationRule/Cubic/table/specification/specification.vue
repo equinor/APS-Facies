@@ -29,6 +29,7 @@ import { plotify } from '@/utils/plotting'
 import { ref, computed } from 'vue'
 import { useTheme } from 'vuetify'
 import { asyncComputed } from '@vueuse/core'
+import type { Color } from '@/utils/domain/facies/helpers/colors'
 
 interface BoundingBox {
   minX: number
@@ -81,12 +82,12 @@ const __data = computed<PlotSpecification>(() =>
       return {
         name: polygon.id,
         color: has(polygon)
-          ? (theme.global.current.value.colors.primary as string)
-          : '#000',
+          ? (theme.global.current.value.colors.primary as Color)
+          : '#000' as Color,
         alias: polygon.level.filter((lvl) => lvl !== 0).join('.'),
       }
     }),
-    '#fff',
+    '#fff' as Color,
   ),
 )
 const boundingBoxes = computed<{ name: string; boundingBox: BoundingBox }[]>(
