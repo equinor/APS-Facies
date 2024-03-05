@@ -5,7 +5,7 @@ export interface SelectableSerialization<T = string, NULLABLE extends boolean = 
     selected: T | (NULLABLE extends true ? null : T);
 }
 
-export interface AvailableOptionSerialization<T = string> {
+export interface AvailableOptionSerialization<T> {
     available: T[]
 }
 

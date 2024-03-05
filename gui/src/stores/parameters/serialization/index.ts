@@ -20,6 +20,7 @@ import type { SimulationBoxesStoreSerialization } from '@/stores/parameters/grid
 import {
   useSimulationBoxesStoreSerialization
 } from '@/stores/parameters/grid/simulation-boxes'
+import type { ProbabilityCube } from '@/utils/domain/facies/local'
 
 export type ParameterStoreSerialization = {
     blockedWell: SelectableOptionSerialization
@@ -27,10 +28,10 @@ export type ParameterStoreSerialization = {
     maxAllowedFractionOfValuesOutsideTolerance: SelectableSerialization<number, false>
     debugLevel: SelectableSerialization<DebugLevel, false>
     names: ParameterNameStoreSerialization
-    probabilityCube: AvailableOptionSerialization
+    probabilityCube: AvailableOptionSerialization<ProbabilityCube>
     realization: SelectableOptionSerialization
     region: SelectableOptionSerialization
-    rmsTrend: AvailableOptionSerialization
+    rmsTrend: AvailableOptionSerialization<string>
     rmsTrendMapZones: AvailableOptionSerialization<TrendMap>
     toleranceOfProbabilityNormalisation: SelectableSerialization<number, false>
     transformType: SelectableSerialization<TransformType, false>
