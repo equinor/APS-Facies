@@ -22,7 +22,7 @@ import type {
   Region,
   Zone,
 } from '@/utils/domain'
-import { TruncationRuleTemplateType } from '@/stores/truncation-rules/templates/types'
+import type { TruncationRuleTemplateType } from '@/stores/truncation-rules/templates/types'
 import { isNumber, sample, times } from 'lodash'
 import { useGaussianRandomFieldStore } from '@/stores/gaussian-random-fields'
 import { APSError, APSTypeError } from '@/utils/domain/errors'
