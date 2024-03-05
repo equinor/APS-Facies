@@ -43,13 +43,6 @@ export const useFaciesGroupStore = defineStore('facies-groups', () => {
     }
   })
 
-  const getText = computed(() => {
-    return (group: FaciesGroup) => {
-      const faciesStore = useFaciesStore()
-      return group.facies.map((facies) => faciesStore.name(facies)).join(', ')
-    }
-  })
-
   function populate(groupConfigs: FaciesGroupSerialization[]) {
     const faciesStore = useFaciesStore()
     available.value = groupConfigs.map(
@@ -104,7 +97,6 @@ export const useFaciesGroupStore = defineStore('facies-groups', () => {
     byId,
     byFacies,
     isUsed,
-    getText,
     populate,
     get,
     add,
