@@ -78,6 +78,6 @@ async function deleteField(field: Field) {
     'Are you sure?',
     `This will delete the Gaussian random field '${field.name}'`,
   )
-  if (confirmed) fieldStore.deleteField(field)
+  if (confirmed) fieldStore.remove(field)
 }
 </script>

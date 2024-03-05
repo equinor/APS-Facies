@@ -186,12 +186,6 @@ export const useGaussianRandomFieldStore = defineStore(
 
       removeAvailable(field)
     }
-    // TODO: Consider removing, as it mostly duplicates the one above
-    function deleteField(field: GaussianRandomField) {
-      if (field.id in identifiedAvailable.value) {
-        remove(field)
-      }
-    }
 
     async function updateSimulation(field: GaussianRandomField) {
       if (field.waiting) {
@@ -268,7 +262,6 @@ export const useGaussianRandomFieldStore = defineStore(
       $reset,
       addEmptyField,
       remove,
-      deleteField,
       updateSimulation,
       updateSimulations,
       newSeed,
