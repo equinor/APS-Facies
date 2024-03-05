@@ -34,9 +34,7 @@ export function isCloseToUnity(val: number): boolean {
 }
 
 export function getDisabledOpacity(disabled: boolean): number {
-  // TODO weird to use this decimal value, even if it equals 66/255...?
-  // why not just use 0.25, surely noone can tell the difference?
-  return disabled ? 0.258823529 : 1
+  return disabled ? 0.38 : 1
 }
 
 export { isDevelopmentBuild }
