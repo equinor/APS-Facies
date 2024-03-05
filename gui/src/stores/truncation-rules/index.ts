@@ -458,7 +458,6 @@ export const useTruncationRuleStore = defineStore('truncation-rules', () => {
     P extends PolygonSpecification,
     RULE extends BaseTruncationRule<T, S, P>,
   >(rule: RULE) {
-    // TODO: should be moved to the state as an option for the user
     const proportional = false
     const facies = rule.polygons.reduce((obj, polygon) => {
       const id = getId(polygon.facies)

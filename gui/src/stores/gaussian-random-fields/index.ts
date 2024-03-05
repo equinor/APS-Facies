@@ -78,14 +78,11 @@ export const useGaussianRandomFieldStore = defineStore(
           : {
               gridAzimuth: grid.azimuth,
               gridSize: {
-                // TODO: Get Z (thickness) based on the zone name
                 ...(fieldSettings.gridModel?.use
                   ? fieldSettings.gridModel.size
                   : grid.size),
               },
               simulationBox: {
-                // TODO: Get Z (thickness) based on the zone name
-                // TODO: Add quality
                 ...simBoxParameterStore.size,
                 z: zone
                   ? simBoxParameterStore.size.z instanceof Object
@@ -233,7 +230,6 @@ export const useGaussianRandomFieldStore = defineStore(
       field.settings.seed = getNewSeed()
     }
 
-    // TODO: Fix this, this is awful typewise.
     function setProperty<
       VorTProp extends 'variogram' | 'trend',
       VorT extends VorTProp extends 'variogram' ? Variogram : Trend,

@@ -158,8 +158,11 @@ async function updateSimulation(renew = false): Promise<void> {
 }
 
 async function openVisualizationSettings(): Promise<void> {
-  if (!visualisationSettingsDialog.value) return /* TODO: or throw an exception */
-  const { save, settings } = await visualisationSettingsDialog.value?.open(
+  if (!visualisationSettingsDialog.value) {
+    console.error("Could not open Visualization Settings, as Dialog component was not mounted.")  
+    return
+  }
+  const { save, settings } = await visualisationSettingsDialog.value.open(
     cloneDeep(props.value.settings),
   )
   if (save) {

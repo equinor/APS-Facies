@@ -6,7 +6,7 @@
     :sort-by="[{ key: 'order', order: 'asc' }]"
     @input.stop
   >
-    <template #item="{ item }: { item: NonCubicPolygon }">
+    <template #item="{ item }">
       <tr>
         <td class="text-left">
           <numeric-field
@@ -51,13 +51,12 @@ import type { MaybeFmuUpdatable } from '@/utils/domain/bases/fmuUpdatable'
 
 const props = defineProps<{ value: NonCubic }>()
 
-// TODO: Include 'help' messages
 const polygons = computed(() => props.value?.backgroundPolygons ?? [])
 const hasMultipleFaciesSpecified = computed(() =>
   hasFaciesSpecifiedForMultiplePolygons(polygons.value),
 )
 
-const headers: HeaderItems = [
+const headers = computed<HeaderItems>(() => [
   {
     text: 'Angle',
     value: 'angle',
@@ -79,7 +78,7 @@ const headers: HeaderItems = [
     text: 'Order',
     value: 'order',
   },
-]
+])
 
 async function updateAngle(
   item: NonCubicPolygon,

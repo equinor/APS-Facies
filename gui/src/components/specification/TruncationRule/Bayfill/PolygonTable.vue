@@ -10,7 +10,6 @@
           <optional-help-item :value="polygon.name" />
         </td>
         <td class="text-left">
-          <!--TODO: Figure out why input happens twice-->
           <facies-specification
             :value="polygon"
             :rule="value"
