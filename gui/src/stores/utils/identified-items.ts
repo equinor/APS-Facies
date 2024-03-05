@@ -1,9 +1,8 @@
 import type { ComputedRef, Ref } from 'vue'
-import { computed, ref, watch } from 'vue'
+import { computed, ref } from 'vue'
 import { identify } from '@/utils'
 import type { Identifiable, Identified } from '@/utils/domain/bases/interfaces'
 import type { ID } from '@/utils/domain/types'
-import { ensureIdentifiable } from '@/utils/helpers'
 
 export type IdentifiedStorePopulationData<T> = {
   available: T[]
@@ -48,16 +47,6 @@ export function useIdentifiedItems<
   function $reset() {
     available.value = []
   }
-
-  watch(
-    available,
-    (value) => {
-      value
-        .filter((item) => !item.id)
-        .forEach((item) => ensureIdentifiable(item))
-    },
-    { deep: true },
-  )
 
   return {
     available,

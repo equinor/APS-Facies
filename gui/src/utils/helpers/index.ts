@@ -37,11 +37,6 @@ function identify<T extends Identifiable>(
   }, {} as Identified<T>)
 }
 
-// TODO: [sindre] Should this make a deepcopy, only mutate (no return) or return a mutated object?
-function ensureIdentifiable<T extends Identifiable>(item: T): void {
-  if (!item.id) item.id = uuidv4()
-}
-
 function includes<T extends Identifiable>(items: T[], item: T | ID): boolean {
   return items.map(getId).includes(getId(item))
 }
@@ -56,7 +51,6 @@ export {
   isUUID,
   getId,
   identify,
-  ensureIdentifiable,
   allSet,
   newSeed,
   getRandomInt,
