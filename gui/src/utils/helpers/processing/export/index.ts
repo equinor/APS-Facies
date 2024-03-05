@@ -378,7 +378,7 @@ function addFaciesProb(
 
   relevantFacies.forEach((facies): void => {
     // get the facies name from the referenced global facies
-    const faciesName = faciesStore.name(facies) as string // TODO: Do i need to do this?
+    const faciesName = facies.name
     const probFaciesElem = createElement(doc, 'Facies', null, [
       { name: 'name', value: faciesName },
     ])

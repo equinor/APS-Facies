@@ -78,21 +78,6 @@ export const useFaciesStore = defineStore('facies', () => {
       available.value.find((facies) => facies.name === name)
   })
 
-  // TODO: Simplify after simplifying byId.
-  const name = computed(() => {
-    return (item: ID | Identifiable): string | string[] => {
-      const id = getId(item)
-      const facies = byId.value(id)
-      if (facies === null) {
-        throw new Error(`Can't find facies with id ${id}`)
-      }
-      if (facies instanceof Array) {
-        return facies.map((id) => name.value(id) as string)
-      }
-      return facies.name || facies.facies.name
-    }
-  })
-
   const constantProbability = computed(() => {
     return (parent: Parent) =>
       _constantProbability.value[parentId(parent)] ?? true
@@ -396,7 +381,6 @@ export const useFaciesStore = defineStore('facies', () => {
     identifiedAvailable,
     byId,
     byName,
-    name,
     constantProbability,
     selected,
     cumulative,
