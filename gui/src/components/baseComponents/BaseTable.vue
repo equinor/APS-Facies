@@ -18,7 +18,11 @@
     <template #headers="{ columns }">
       <tr>
         <th v-for="column in columns" :key="column.title">
-          <optional-help-item :value="column.title" />
+          <span
+            v-tooltip.botton="column.headerProps?.help"
+          >
+            {{ column.title }}
+          </span>
         </th>
       </tr>
     </template>
@@ -33,8 +37,6 @@
 </template>
 
 <script setup lang="ts" generic="T extends Identifiable">
-import OptionalHelpItem from '@/components/table/OptionalHelpItem.vue'
-
 import type { ID } from '@/utils/domain/types'
 import type { HeaderItem, VuetifyColumns } from '@/utils/typing'
 import { computed } from 'vue'

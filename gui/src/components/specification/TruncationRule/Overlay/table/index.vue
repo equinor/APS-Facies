@@ -104,12 +104,16 @@ const headers: HeaderItems = [
     text: 'Background',
     value: 'group',
     class: 'text-wrap-newline',
-    help: 'Which facies this overlay polygon should cover',
+    headerProps: {
+      help: 'Which facies this overlay polygon should cover',
+    },
   },
   {
     text: 'Polygons',
     value: 'polygon',
-    help: 'Specification of the polygons',
+    headerProps: {
+      help: 'Specification of the polygons',
+    },
   },
 ]
 

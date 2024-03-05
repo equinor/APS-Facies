@@ -8,7 +8,9 @@ export interface HeaderItem {
   text: string
   value?: string
   class?: string
-  help?: string
+  headerProps?: {
+    help?: string
+  }
   sortable?: boolean
 }
 

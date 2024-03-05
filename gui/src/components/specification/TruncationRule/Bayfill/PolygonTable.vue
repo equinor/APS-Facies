@@ -7,7 +7,7 @@
     <template #item="{ item: polygon }: { item: BayfillPolygon }">
       <tr>
         <td class="text-left">
-          <optional-help-item :value="polygon.name" />
+          {{ polygon.name }}
         </td>
         <td class="text-left">
           <facies-specification
@@ -33,7 +33,6 @@
 
 <script setup lang="ts">
 import FractionField from '@/components/selection/FractionField.vue'
-import OptionalHelpItem from '@/components/table/OptionalHelpItem.vue'
 import FaciesSpecification from '@/components/specification/Facies/index.vue'
 import BaseTable from '@/components/baseComponents/BaseTable.vue'
 

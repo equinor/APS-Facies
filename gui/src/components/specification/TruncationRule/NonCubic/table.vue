@@ -70,7 +70,9 @@ const headers = computed<HeaderItems>(() => [
         {
           text: 'Probability Fraction',
           value: 'fraction',
-          help: 'The fraction of the facies probability assigned to the individual polygon',
+          headerProps: {
+            help: 'The fraction of the facies probability assigned to the individual polygon',
+          },
         },
       ]
     : []),
