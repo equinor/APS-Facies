@@ -52,7 +52,7 @@ import { useParameterRegionStore } from '@/stores/parameters/region'
 import { useParameterRealizationStore } from '@/stores/parameters/realization'
 import type { FieldFormats, TrendExtrapolationMethod } from '@/stores/fmu/options'
 import { defaultFmuOptions, useFmuOptionStore } from '@/stores/fmu/options'
-import { useFaciesGlobalStore } from '@/stores/facies/global'
+import { useGlobalFaciesStore } from '@/stores/facies/global'
 import { displayMessage } from '@/utils/helpers/storeInteraction'
 import type Zone from '@/utils/domain/zone'
 import { isValidConformity, type Region } from '@/utils/domain/zone'
@@ -1295,7 +1295,7 @@ export const useModelFileLoaderStore = defineStore('model-file-loader', () => {
       await useParameterBlockedWellLogStore()
         .select(mainFaciesTableFromFile["@_blockedWellLog"])
 
-      const { available: globalFacies, create } = useFaciesGlobalStore()
+      const { available: globalFacies, create } = useGlobalFaciesStore()
       for (const faciesContainer of mainFaciesTableFromFile.Facies) {
         // facies information from the file.
         const name = faciesContainer['@_name'].trim()
@@ -1483,7 +1483,7 @@ export const useModelFileLoaderStore = defineStore('model-file-loader', () => {
         setConstantProbability,
         averageProbabilityCubes,
       } = useFaciesStore()
-      const { available: availableGlobalFacies } = useFaciesGlobalStore()
+      const { available: availableGlobalFacies } = useGlobalFaciesStore()
       for (const zoneModel of zoneModelsFromFile) {
         const useConstantProb = getBooleanValue(zoneModel, 'UseConstProb')
         const parent = getParent(zoneModel)

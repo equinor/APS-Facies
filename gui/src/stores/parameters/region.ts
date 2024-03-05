@@ -4,7 +4,7 @@ import { useRegionStore } from '@/stores/regions'
 import rms from '@/api/rms'
 import { useGridModelStore } from '@/stores/grid-models'
 import { APSError } from '@/utils/domain/errors'
-import { useFaciesGlobalStore } from '@/stores/facies/global'
+import { useGlobalFaciesStore } from '@/stores/facies/global'
 import { ref } from 'vue'
 
 export const useParameterRegionStore = defineStore('parameter-region', () => {
@@ -26,7 +26,7 @@ export const useParameterRegionStore = defineStore('parameter-region', () => {
     await useRegionStore()
       .setUse(!!regionParameter)
 
-    await useFaciesGlobalStore()
+    await useGlobalFaciesStore()
       .refresh()
   }
 

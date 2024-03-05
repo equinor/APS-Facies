@@ -48,7 +48,7 @@ import { useTruncationRuleStore } from '@/stores/truncation-rules'
 import { useZoneStore } from '@/stores/zones'
 import { useParameterGridSimulationBoxStore } from '@/stores/parameters/grid/simulation-box'
 import { useFaciesGroupStore } from '@/stores/facies/groups'
-import { useFaciesGlobalStore } from '@/stores/facies/global'
+import { useGlobalFaciesStore } from '@/stores/facies/global'
 import { type RootStoreSerialization, useStateSerialization } from '@/stores'
 import { useGaussianRandomFieldCrossSectionStore } from '@/stores/gaussian-random-fields/cross-sections'
 import { DEFAULT_CROSS_SECTION } from '@/config'
@@ -343,7 +343,7 @@ function addMainFaciesTable(doc: Document, parentElement: HTMLElement): void {
   ])
   parentElement.appendChild(mainFaciesElement)
   // finding all available facies
-  const faciesGlobalStore = useFaciesGlobalStore()
+  const faciesGlobalStore = useGlobalFaciesStore()
   const allFacies = faciesGlobalStore.available.sort((a, b) => a.code - b.code)
   allFacies.forEach((facies): void => {
     const faciesElem = createElement(doc, 'Facies', null, [

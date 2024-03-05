@@ -30,7 +30,7 @@ import { ref, watch } from 'vue'
 import type { TruncationRule } from '@/utils/domain/truncationRule'
 import type { Polygon } from '@/utils/domain'
 import type { PolygonSerialization, PolygonSpecification } from '@/utils/domain/polygon/base'
-import { useFaciesGlobalStore } from '@/stores/facies/global'
+import { useGlobalFaciesStore } from '@/stores/facies/global'
 import { useTruncationRuleStore } from '@/stores/truncation-rules'
 
 type Props = {
@@ -38,7 +38,7 @@ type Props = {
   expand?: boolean
 }
 const props = withDefaults(defineProps<Props>(), { expand: false })
-const faciesGlobalStore = useFaciesGlobalStore()
+const faciesGlobalStore = useGlobalFaciesStore()
 const ruleStore = useTruncationRuleStore()
 
 const data = ref<PlotSpecification>({

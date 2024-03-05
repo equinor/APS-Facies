@@ -7,7 +7,7 @@ import { useZoneStore } from '@/stores/zones'
 import { useFaciesStore } from '@/stores/facies'
 import { useTruncationRuleStore } from '@/stores/truncation-rules'
 import { useFaciesGroupStore } from '@/stores/facies/groups'
-import { useFaciesGlobalStore } from '@/stores/facies/global'
+import { useGlobalFaciesStore } from '@/stores/facies/global'
 import { useParameterBlockedWellStore } from './blocked-well'
 import type { TruncationRule } from '@/utils/domain/truncationRule'
 import type { PolygonSerialization, PolygonSpecification } from '@/utils/domain/polygon/base'
@@ -62,7 +62,7 @@ export const useParameterBlockedWellLogStore = defineStore(
       selected.value = blockedWellLog
       _removeFaciesDependent()
 
-      const faciesGlobalStore = useFaciesGlobalStore()
+      const faciesGlobalStore = useGlobalFaciesStore()
       const faciesStore = useFaciesStore()
       if (blockedWellLog) {
         await faciesGlobalStore.fetch()

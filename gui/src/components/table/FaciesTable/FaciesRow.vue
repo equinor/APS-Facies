@@ -46,7 +46,7 @@ import InformationalIcons from '@/components/table/FaciesTable/InformationalIcon
 import { type GlobalFacies } from '@/utils/domain'
 
 import { computed } from 'vue'
-import { useFaciesGlobalStore } from '@/stores/facies/global'
+import { useGlobalFaciesStore } from '@/stores/facies/global'
 import { useFaciesStore } from '@/stores/facies'
 import type { ID } from '@/utils/domain/types'
 
@@ -66,7 +66,7 @@ const emit = defineEmits<{
 const facies = computed(() => props.modeValue)
 
 const faciesStore = useFaciesStore()
-const faciesGlobalStore = useFaciesGlobalStore()
+const faciesGlobalStore = useGlobalFaciesStore()
 
 
 const currentId = computed({

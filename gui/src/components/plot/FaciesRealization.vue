@@ -26,7 +26,7 @@ import StaticPlot from '@/components/plot/StaticPlot.vue'
 import { computed } from 'vue'
 import type { TruncationRule } from '@/utils/domain/truncationRule'
 import type { PolygonSerialization, PolygonSpecification } from '@/utils/domain/polygon/base'
-import { useFaciesGlobalStore } from '@/stores/facies/global'
+import { useGlobalFaciesStore } from '@/stores/facies/global'
 
 function filterOnCode(data: number[][] | null, code: number): (1 | null)[][] {
   if (!data) return []
@@ -42,7 +42,7 @@ const props = withDefaults(defineProps<Props>(), {
   expand: false,
   disabled: false,
 })
-const faciesGlobalStore = useFaciesGlobalStore()
+const faciesGlobalStore = useGlobalFaciesStore()
 
 const faciesTable = computed<GlobalFacies[]>(() => faciesGlobalStore.selected)
 

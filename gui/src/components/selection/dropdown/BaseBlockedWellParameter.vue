@@ -12,7 +12,7 @@
 <script setup lang="ts">
 import ChooseParameter from '@/components/selection/dropdown/ChooseParameter.vue'
 import { computed } from 'vue'
-import { useFaciesGlobalStore } from '@/stores/facies/global'
+import { useGlobalFaciesStore } from '@/stores/facies/global'
 import type { BlockedWellParameterType } from '@/utils/domain/types'
 
 type Props = {
@@ -22,6 +22,6 @@ type Props = {
 }
 defineProps<Props>()
 
-const faciesGlobalStore = useFaciesGlobalStore()
+const faciesGlobalStore = useGlobalFaciesStore()
 const hasFacies = computed(() => faciesGlobalStore.available.length > 0)
 </script>

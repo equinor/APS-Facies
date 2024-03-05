@@ -23,13 +23,13 @@ import IconButton from '@/components/selection/IconButton.vue'
 
 import { computed } from 'vue'
 import { useFaciesStore } from '@/stores/facies'
-import { useFaciesGlobalStore } from '@/stores/facies/global'
+import { useGlobalFaciesStore } from '@/stores/facies/global'
 import type { GlobalFacies } from '@/utils/domain'
 
 withDefaults(defineProps<{ hideAlias?: boolean }>(), { hideAlias: false })
 
 const faciesStore = useFaciesStore()
-const faciesGlobalStore = useFaciesGlobalStore()
+const faciesGlobalStore = useGlobalFaciesStore()
 
 const current = computed(() => faciesGlobalStore.current)
 const canRemove = computed(() =>

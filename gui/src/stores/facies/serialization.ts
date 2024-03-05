@@ -1,5 +1,5 @@
 import { useFaciesStore } from '@/stores/facies/index'
-import { useFaciesGlobalStore } from '@/stores/facies/global'
+import { useGlobalFaciesStore } from '@/stores/facies/global'
 import { useFaciesGroupStore } from '@/stores/facies/groups'
 import type { FaciesSerialization } from '@/utils/domain/facies/local'
 import type { Identified } from '@/utils/domain/bases/interfaces'
@@ -40,7 +40,7 @@ export interface FaciesStoreSerialization {
 
 export function useFaciesStoreSerialization(): FaciesStoreSerialization {
     const localFaciesStore = useFaciesStore()
-    const globalFaciesStore = useFaciesGlobalStore()
+    const globalFaciesStore = useGlobalFaciesStore()
     const faciesGroupStore = useFaciesGroupStore()
 
     return {

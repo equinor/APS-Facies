@@ -26,8 +26,7 @@ interface FaciesSpecification extends RmsFacies {
   color?: Color
 }
 
-// TODO: [sindre] Rename to useGlobalFaciesStore ?
-export const useFaciesGlobalStore = defineStore('facies-global', () => {
+export const useGlobalFaciesStore = defineStore('facies-global', () => {
   const store = useCurrentIdentifiedItems<GlobalFacies>()
   const { identifiedAvailable, available, addAvailable, currentId, current, removeAvailable } = store
 
@@ -213,5 +212,5 @@ export const useFaciesGlobalStore = defineStore('facies-global', () => {
 })
 
 if (import.meta.hot) {
-  import.meta.hot.accept(acceptHMRUpdate(useFaciesGlobalStore, import.meta.hot))
+  import.meta.hot.accept(acceptHMRUpdate(useGlobalFaciesStore, import.meta.hot))
 }

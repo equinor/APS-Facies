@@ -27,7 +27,7 @@ import { useParameterBlockedWellStore } from '@/stores/parameters/blocked-well'
 import { useParameterBlockedWellLogStore } from '@/stores/parameters/blocked-well-log'
 import { useOptionStore } from '@/stores/options'
 import { resolveParentReference } from '@/stores/utils'
-import { useFaciesGlobalStore } from './global'
+import { useGlobalFaciesStore } from './global'
 import { useFaciesGroupStore } from './groups'
 import { useTruncationRuleStore } from '@/stores/truncation-rules'
 import type { PolygonSerialization, PolygonSpecification } from "@/utils/domain/polygon/base";
@@ -55,7 +55,7 @@ export const useFaciesStore = defineStore('facies', () => {
 
   const byId = computed(() => {
     return (item: ID | Identifiable): Facies | Facies[] | null => {
-      const globalStore = useFaciesGlobalStore()
+      const globalStore = useGlobalFaciesStore()
       const groupsStore = useFaciesGroupStore()
       const id = getId(item)
       // TODO: Make this always return single Facies, and add seperate functions
@@ -131,7 +131,7 @@ export const useFaciesStore = defineStore('facies', () => {
   })
 
   const isFromRMS = computed(() => {
-    const globalStore = useFaciesGlobalStore()
+    const globalStore = useGlobalFaciesStore()
     return (facies: GlobalFacies | null): boolean =>
       (facies &&
       !!globalStore.rmsFacies.find(
@@ -207,7 +207,7 @@ export const useFaciesStore = defineStore('facies', () => {
     const rootStore = useRootStore()
     const zoneStore = useZoneStore()
     const regionStore = useRegionStore()
-    const globalStore = useFaciesGlobalStore()
+    const globalStore = useGlobalFaciesStore()
     const optionStore = useOptionStore()
 
     if (rootStore.loading) return
@@ -234,7 +234,7 @@ export const useFaciesStore = defineStore('facies', () => {
   }
 
   function populate(faciesSerializations: FaciesSerialization[]) {
-    const globalStore = useFaciesGlobalStore()
+    const globalStore = useGlobalFaciesStore()
     available.value = faciesSerializations.map(
       (serialization) => {
         const globalFacies = globalStore.byId(getId(serialization.facies))
@@ -378,13 +378,13 @@ export const useFaciesStore = defineStore('facies', () => {
   }
 
   async function fetch() {
-    const globalStore = useFaciesGlobalStore()
+    const globalStore = useGlobalFaciesStore()
     await globalStore.fetch()
   }
 
   function $reset() {
     store.$reset()
-    useFaciesGlobalStore()
+    useGlobalFaciesStore()
       .$reset()
     useFaciesGroupStore()
       .$reset()

@@ -13,7 +13,7 @@ import {
 import { useParameterStore } from './parameters'
 import { useFmuOptionStore } from './fmu/options'
 import {
-  useFaciesGlobalStore,
+  useGlobalFaciesStore,
 } from './facies/global'
 import migrate from './utils/migration'
 import { type CopyPasteStoreSerialization, useCopyPaseSerialization, useCopyPasteStore } from './copy-paste'
@@ -122,7 +122,7 @@ export const useRootStore = defineStore('root', () => {
 
     await Promise.all([
       useGridModelStore().refresh(),
-      useFaciesGlobalStore().refresh(),
+      useGlobalFaciesStore().refresh(),
     ])
 
     _loading.value = wasLoading
@@ -201,7 +201,7 @@ export const useRootStore = defineStore('root', () => {
     if (data.facies) {
         updateProgressMessage('Facies')
       const faciesStore = useFaciesStore()
-      useFaciesGlobalStore()
+      useGlobalFaciesStore()
           .populate(data.facies.global.available)
       faciesStore
           .populate(data.facies.available)

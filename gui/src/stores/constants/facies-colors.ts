@@ -8,7 +8,7 @@ import { APSError } from '@/utils/domain/errors'
 import type { ListItem } from '@/utils/typing'
 import { useCurrentIdentifiedItems } from '@/stores/utils/identified-items'
 import { identify } from '@/utils'
-import { useFaciesGlobalStore } from '@/stores/facies/global'
+import { useGlobalFaciesStore } from '@/stores/facies/global'
 
 type AvailableState = Record<string, ColorLibrary>
 
@@ -110,7 +110,7 @@ export const useConstantsFaciesColorsStore = defineStore(
       const previous = store.current.value!
       store.currentId.value = colorLibrary.id
 
-      const faciesGlobalStore = useFaciesGlobalStore()
+      const faciesGlobalStore = useGlobalFaciesStore()
       faciesGlobalStore.changeColorPalette(makeMapping(previous, colorLibrary))
     }
 

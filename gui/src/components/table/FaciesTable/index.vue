@@ -44,7 +44,7 @@ import { hasCurrentParents } from '@/utils'
 import { ref, computed } from 'vue'
 import { useRegionStore } from '@/stores/regions'
 import { useRootStore } from '@/stores'
-import { useFaciesGlobalStore } from '@/stores/facies/global'
+import { useGlobalFaciesStore } from '@/stores/facies/global'
 import { useFaciesStore } from '@/stores/facies'
 import { useConstantsFaciesColorsStore } from '@/stores/constants/facies-colors'
 import type { ID } from '@/utils/domain/types'
@@ -58,7 +58,7 @@ const expanded = ref<GlobalFacies[]>([])
 const regionStore = useRegionStore()
 const rootStore = useRootStore()
 const faciesStore = useFaciesStore()
-const faciesGlobalStore = useFaciesGlobalStore()
+const faciesGlobalStore = useGlobalFaciesStore()
 const colorStore = useConstantsFaciesColorsStore()
 
 const canSelect = computed<boolean>(() => rootStore.canSpecifyModelSettings)
