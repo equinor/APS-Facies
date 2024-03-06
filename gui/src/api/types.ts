@@ -1,4 +1,4 @@
-import { ID } from '@/utils/domain/types'
+import type { ID } from '@/utils/domain/types'
 
 export interface CodeName {
   code: number
@@ -23,7 +23,7 @@ export interface MinMax {
   max: number
 }
 
-export interface Constants extends MinMax{
+export interface Constants extends MinMax {
   tolerance: number
 }
 

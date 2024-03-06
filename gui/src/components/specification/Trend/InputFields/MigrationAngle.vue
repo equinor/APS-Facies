@@ -7,28 +7,16 @@
     value-type="migration"
     unit="°"
     trend
-    @update:error="e => propagateError(e)"
+    @update:error="(e: boolean) => emit('update:error', e)"
   />
 </template>
 
-<script lang="ts">
-import { Component, Prop, Vue } from 'vue-property-decorator'
-
-import { GaussianRandomField } from '@/utils/domain'
-
+<script setup lang="ts">
+import type { GaussianRandomField } from '@/utils/domain'
 import StorableNumericField from '@/components/specification/StorableNumericField.vue'
 
-@Component({
-  components: {
-    StorableNumericField,
-  },
-})
-export default class MigrationAngle extends Vue {
-  @Prop({ required: true })
-  readonly value!: GaussianRandomField
-
-  propagateError (value: boolean): void {
-    this.$emit('update:error', value)
-  }
-}
+defineProps<{ value: GaussianRandomField }>()
+const emit = defineEmits<{
+  (event: 'update:error', error: boolean): void
+}>()
 </script>

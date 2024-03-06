@@ -1,63 +1,54 @@
 <template>
   <v-select
-    :value="value"
+    :model-value="props.modelValue"
     :items="items"
     :label="label"
     :error-messages="errors"
-    @blur="$v.value.$touch()"
-    @input.capture="e => $emit('input', e)"
+    variant="underlined"
+    @blur="v.$touch()"
+    @update:model-value="(e) => $emit('update:model-value', e as T)"
   />
 </template>
 
-<script lang="ts">
-/* eslint-disable no-use-before-define */
-import { Component, Prop, Vue, Watch } from 'vue-property-decorator'
-import { required } from 'vuelidate/lib/validators'
+<script setup lang="ts" generic="T">
+import { computed, watch } from 'vue'
+import { useVuelidate } from '@vuelidate/core'
+import { requiredIf } from '@vuelidate/validators'
+import { useInvalidation } from '@/utils/invalidation'
 
-/* TODO: Remove // @ts-ignore when vuelidate OFFICIALLY  supports TypeScript */
-
-@Component({
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-ignore
-  validations<T> () {
-    return {
-      value: {
-        required: (this as ItemSelection<T>).constraints.required ? required : true,
-        legalChoice: (this as ItemSelection<T>).items.includes((this as ItemSelection<T>).value)
-      },
-    }
-  },
-})
-export default class ItemSelection<T> extends Vue {
-  @Prop({ required: true })
-  value: T
-
-  @Prop({ required: true })
+type Props = {
+  modelValue: T
   items: T[]
-
-  @Prop({ default: '' })
-  label: string
-
-  @Prop()
-  constraints: {
-    required: boolean
-    legalChoice: boolean
-    [_: string]: any
-  }
-
-  get errors (): string[] {
-    if (!this.$v.value) return []
-
-    const errors: string[] = []
-    if (!this.$v.value.$dirty) return errors
-    !this.$v.value.required && errors.push('Is required')
-    !this.$v.value.legalChoice && errors.push('Illegal choice')
-    return errors
-  }
-
-  @Watch('$v.$invalid')
-  onInvalidChanged (value: boolean): void {
-    this.$emit('update:error', value)
-  }
+  constraints: { required: boolean }
+  label?: string
 }
+const props = withDefaults(defineProps<Props>(), { label: '' })
+
+const emit = defineEmits<{
+  (event: 'update:model-value', value: T): void
+  (event: 'update:error', error: boolean): void
+}>()
+
+const vuelidateRules = computed(() => ({
+  modelValue: {
+    required: requiredIf(props.constraints.required),
+    legalChoice: (value: T) => props.items.includes(value),
+  },
+}))
+const v = useVuelidate(vuelidateRules, props)
+useInvalidation(v)
+
+const errors = computed(() => {
+  if (!v.value) return []
+
+  const errors: string[] = []
+  if (!v.value.$dirty) return errors
+  !v.value.modelValue.required && errors.push('Is required')
+  !v.value.modelValue.legalChoice && errors.push('Illegal choice')
+  return errors
+})
+
+watch(v, () => {
+  emit('update:error', v.value.$invalid)
+})
 </script>

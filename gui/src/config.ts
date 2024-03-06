@@ -1,5 +1,5 @@
-export function isDevelopmentBuild (): boolean {
-  return process.env.NODE_ENV === 'development'
+export function isDevelopmentBuild(): boolean {
+  return import.meta.env.NODE_ENV === 'development'
 }
 
 export const DEFAULT_SIZE = {
@@ -50,7 +50,9 @@ export const COLOR_SCALES = [
   'Viridis',
   'YlGnBu',
   'YlOrRd',
-]
+] as const
+
+export type AllowedColorScales = (typeof COLOR_SCALES)[number]
 
 export const DEFAULT_CROSS_SECTION = {
   type: 'IJ',
@@ -73,11 +75,15 @@ export const DEFAULT_TRUNCATION_RULE_TEMPLATE_PREVIEW_SIZE = {
   height: 100,
 }
 
-export const TREND_NOT_IMPLEMENTED_PREVIEW_VISUALIZATION: ('RMS_PARAM' | 'RMS_TRENDMAP' | 'NONE' | 'LINEAR' | 'ELLIPTIC' | 'ELLIPTIC_CONE' | 'HYPERBOLIC')[] = [
-  'RMS_PARAM',
-  'RMS_TRENDMAP',
-  'NONE',
-]
+export const TREND_NOT_IMPLEMENTED_PREVIEW_VISUALIZATION: (
+  | 'RMS_PARAM'
+  | 'RMS_TRENDMAP'
+  | 'NONE'
+  | 'LINEAR'
+  | 'ELLIPTIC'
+  | 'ELLIPTIC_CONE'
+  | 'HYPERBOLIC'
+)[] = ['RMS_PARAM', 'RMS_TRENDMAP', 'NONE']
 
 export const DEFAULT_MODEL_FILE_NAMES = {
   model: 'myApsExport.xml',

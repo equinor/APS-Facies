@@ -1,28 +1,11 @@
 <template>
-  <truncation-rule-specification
-    :value="value"
-    :table="table"
-  />
+  <truncation-rule-specification :value="value" :table="PolygonTable" />
 </template>
 
-<script lang="ts">
-import { Component, Prop, Vue } from 'vue-property-decorator'
-
-import TruncationRuleSpecification from '../main.vue'
+<script setup lang="ts">
+import TruncationRuleSpecification from '@/components/specification/TruncationRule/main.vue'
 import PolygonTable from './PolygonTable.vue'
+import type { Bayfill } from '@/utils/domain'
 
-import { Bayfill } from '@/utils/domain'
-import { Newable } from '@/utils/domain/bases/interfaces'
-
-@Component({
-  components: {
-    TruncationRuleSpecification,
-  },
-})
-export default class BayfillTruncationRule extends Vue {
-  @Prop({ required: true })
-  readonly value!: Bayfill
-
-  get table (): Newable<Vue> { return PolygonTable }
-}
+defineProps<{ value: Bayfill }>()
 </script>

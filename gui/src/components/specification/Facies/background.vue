@@ -1,35 +1,37 @@
 <template>
   <facies-specification
     :value="value"
-    :rule="rule"
-    :disable="facies => overlayFacies(facies)"
+    :rule="rule as InstantiatedTruncationRule"
+    :disable="(facies) => overlayFacies(facies)"
   />
 </template>
 
-<script lang="ts">
+<script
+  setup
+  lang="ts"
+  generic="T extends Polygon,
+    S extends PolygonSerialization,
+    P extends PolygonSpecification,
+    RULE extends TruncationRule<T, S, P>
+"
+>
 import FaciesSpecification from '@/components/specification/Facies/index.vue'
 
-import { Bayfill, Facies, Polygon, TruncationRule } from '@/utils/domain'
-import { Component, Prop, Vue } from 'vue-property-decorator'
+import type { Facies, InstantiatedTruncationRule, Polygon } from '@/utils/domain'
+import type { TruncationRule } from '@/utils/domain/truncationRule'
+import type { PolygonSerialization, PolygonSpecification } from '@/utils/domain/polygon/base'
+import { isOverlayTruncationRule } from '@/utils/domain/truncationRule/helpers'
 
-@Component({
-  components: {
-    FaciesSpecification,
+type Props = {
+  value: Polygon
+  rule: RULE
+}
+const props = defineProps<Props>()
+
+function overlayFacies(facies: Facies): boolean {
+  if (isOverlayTruncationRule(props.rule)) {
+    return props.rule.isUsedInOverlay(facies)
   }
-})
-export default class BackgroundFaciesSpecification extends Vue {
-  @Prop({ required: true })
-  readonly value!: Polygon
-
-  @Prop({ required: true })
-  readonly rule!: TruncationRule
-
-  overlayFacies (facies: Facies): boolean {
-    if (this.rule instanceof Bayfill) {
-      return false
-    } else {
-      return this.rule.isUsedInOverlay(facies)
-    }
-  }
+  return false
 }
 </script>

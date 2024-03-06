@@ -9,39 +9,34 @@
   />
 </template>
 
-<script lang="ts">
-import { Component, Vue } from 'vue-property-decorator'
+<script setup lang="ts">
 import BaseDropdown from '@/components/selection/dropdown/BaseDropdown.vue'
 
-import { Store } from '@/store/typing'
-import { ListItem } from '@/utils/typing'
-import GridModel from '@/utils/domain/gridModel'
+import type { ListItem } from '@/utils/typing'
+import type GridModel from '@/utils/domain/gridModel'
+import { computed } from 'vue'
+import { useGridModelStore } from '@/stores/grid-models'
 
-@Component({
-  components: {
-    BaseDropdown,
-  }
+const gridModelStore = useGridModelStore()
+
+const available = computed<ListItem<GridModel>[]>(() =>
+  (gridModelStore.available as GridModel[]).map((grid) => ({
+    title: grid.name,
+    value: grid,
+    props: {
+      disabled: !grid.exists,
+      help: grid.hasDualIndexSystem
+        ? 'Grid models with reverse staircase faults, <br/> are not yet supported in ERT mode'
+        : '',
+    }
+  })),
+)
+
+const gridModel = computed({
+  get: () => gridModelStore.current as GridModel | null,
+  set: (value: GridModel | null) => {
+    if (!value) return
+    gridModelStore.select(value)
+  },
 })
-export default class ChooseGridModel extends Vue {
-  get available (): ListItem<GridModel>[] {
-    return Object.values((this.$store as Store).state.gridModels.available)
-      .map(grid => {
-        return {
-          text: grid.name,
-          value: grid,
-          disabled: !grid.exists,
-          help: grid.hasDualIndexSystem ? 'Grid models with reverse staircase faults, <br/> are not yet supported in ERT mode' : '',
-        }
-      })
-  }
-
-  get gridModel (): GridModel | undefined {
-    const id = (this.$store as Store).state.gridModels.current
-    return (this.$store as Store).state.gridModels.available[`${id}`]
-  }
-
-  set gridModel (value: GridModel | undefined) {
-    this.$store.dispatch('gridModels/select', value)
-  }
-}
 </script>

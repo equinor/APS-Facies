@@ -1,10 +1,16 @@
 import APSError from '@/utils/domain/errors/base'
-import GaussianRandomField from '@/utils/domain/gaussianRandomField'
-import FaciesGroup from '@/utils/domain/facies/group'
-import { ID } from '@/utils/domain/types'
-import Polygon, { PolygonArgs, PolygonSerialization, PolygonSpecification } from './base'
+import type GaussianRandomField from '@/utils/domain/gaussianRandomField'
+import type FaciesGroup from '@/utils/domain/facies/group'
+import type { ID } from '@/utils/domain/types'
+import type {
+  PolygonArgs,
+  PolygonSerialization,
+  PolygonSpecification,
+} from './base'
+import Polygon from './base'
+import type { MaybeFmuUpdatable } from '@/utils/domain/bases/fmuUpdatable'
 
-export type CENTER = number
+export type CENTER = MaybeFmuUpdatable
 
 export interface OverlayPolygonArgs extends PolygonArgs {
   group: FaciesGroup
@@ -13,14 +19,14 @@ export interface OverlayPolygonArgs extends PolygonArgs {
 }
 
 export interface OverlayPolygonSpecification extends PolygonSpecification {
-  center: number
+  center: CENTER
   field: string
   over: string[]
 }
 
 export interface OverlayPolygonSerialization extends PolygonSerialization {
   group: ID
-  center: number
+  center: CENTER
   field: ID | null
 }
 
@@ -29,7 +35,12 @@ export default class OverlayPolygon extends Polygon {
   public field: GaussianRandomField | null
   public readonly group: FaciesGroup
 
-  public constructor ({ group, center = 0, field = null, ...rest }: OverlayPolygonArgs) {
+  public constructor({
+    group,
+    center = 0,
+    field = null,
+    ...rest
+  }: OverlayPolygonArgs) {
     super(rest)
     if (!group) throw new APSError('No group was given')
     this.group = group
@@ -37,9 +48,11 @@ export default class OverlayPolygon extends Polygon {
     this.field = field
   }
 
-  public get overlay (): boolean { return true }
+  public get overlay(): boolean {
+    return true
+  }
 
-  public get specification (): OverlayPolygonSpecification {
+  public get specification(): OverlayPolygonSpecification {
     return {
       ...super.specification,
       center: this.center,
@@ -48,12 +61,16 @@ export default class OverlayPolygon extends Polygon {
     }
   }
 
-  public toJSON (): OverlayPolygonSerialization {
+  public toJSON(): OverlayPolygonSerialization {
     return {
       ...super.toJSON(),
       group: this.group.id,
       center: this.center,
       field: this.field ? this.field.id : null,
-    }
+    } as OverlayPolygonSerialization
   }
+}
+
+export function isOverlayPolygonSerialization(polygon: PolygonSerialization): polygon is OverlayPolygonSerialization {
+  return polygon.overlay
 }

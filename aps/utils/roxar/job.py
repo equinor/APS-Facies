@@ -18,10 +18,12 @@ from aps.utils.aps_config import APSConfig
 from aps.utils.roxar.progress_bar import APSProgressBar
 from aps.utils.check_rms_interactive_or_batch import check_rms_execution_mode
 
+
 def excepthook(type, value, traceback):
     print(f"ERROR:")
     print(f"Type:  {type.__name__}")
     print(f"{value}")
+
 
 class JobConfig:
     def __init__(self, roxar, project, config: Dict):
@@ -134,15 +136,15 @@ class JobConfig:
     @property
     def export_ertbox_grid(self):
         rms_mode_is_batch = check_rms_execution_mode(self.debug_level)
-        return self._config['fmu']['exportErtBoxGrid']['value'] and not rms_mode_is_batch
+        return self._config['fmu']['exportErtBoxGrid'] and not rms_mode_is_batch
 
     @property
     def fmu_grid_name(self):
-        return self._config['fmu']['simulationGrid']['current']
+        return self._config['fmu']['simulationGrid']
 
     @property
     def fmu_mode(self):
-        return self._config['fmu']['runFmuWorkflows']['value']
+        return self._config['fmu']['runFmuWorkflows']
 
     @property
     def run_fmu_workflows(self):
@@ -150,11 +152,11 @@ class JobConfig:
 
     @property
     def _only_run_fmu_variables_update(self):
-        return self._config['fmu']['onlyUpdateFromFmu']['value']
+        return self._config['fmu']['onlyUpdateFromFmu']
 
     @property
     def field_file_format(self):
-        return self._config['fmu']['fieldFileFormat']['value']
+        return self._config['fmu']['fieldFileFormat']
 
     @property
     def update_model_with_fmu_variables(self):
@@ -180,7 +182,7 @@ class JobConfig:
 
         if self.fmu_mode:
             # Check if simulate/export  or import
-            if self._config['options']['importFields']['value']:
+            if self._config['options']['importFields']:
                 # Automatic detect
                 if is_initial_iteration(self.debug_level):
                     # Simulate and export
@@ -227,7 +229,7 @@ class JobConfig:
     @property
     def use_customized_fmu_config(self):
         try:
-            use_non_standard_fmu = self._config['fmu']['useNonStandardFmu']['value']
+            use_non_standard_fmu = self._config['fmu']['useNonStandardFmu']
             return use_non_standard_fmu
         except KeyError:
             # Some, older jobs may not be updated, and this "config.fmu.useNonStandardFmu"
@@ -263,7 +265,7 @@ class JobConfig:
             return False
         try:
             if self.fmu_mode or self._only_run_fmu_variables_update:
-                return self._config['options']['exportFmuConfigFiles']['value']
+                return self._config['options']['exportFmuConfigFiles']
             else:
                 return False
         except KeyError:
@@ -274,7 +276,7 @@ class JobConfig:
     @property
     def fmu_use_residual_fields(self):
         try:
-            use_residual = self._config['fmu']['onlyUpdateResidualFields']['value']
+            use_residual = self._config['fmu']['onlyUpdateResidualFields']
             return use_residual
         except KeyError:
             # Some, older jobs may not be updated,
@@ -298,8 +300,7 @@ class JobConfig:
 
     @property
     def rms_param_trend_extrapolation_method(self): 
-        return ExtrapolationMethod(self._config['fmu']['customTrendExtrapolationMethod']['value'])
-
+        return ExtrapolationMethod(self._config['fmu']['customTrendExtrapolationMethod'])
 
     def to_json(self):
         return json.dumps(self._config)

@@ -1,28 +1,11 @@
 <template>
-  <truncation-rule-specification
-    :value="value"
-    :table="table"
-  />
+  <truncation-rule-specification :value="value" :table="PolygonTable" />
 </template>
 
-<script lang="ts">
-import { Component, Prop, Vue } from 'vue-property-decorator'
-
-import TruncationRuleSpecification from '../main.vue'
+<script setup lang="ts">
+import type { NonCubic } from '@/utils/domain'
+import TruncationRuleSpecification from '@/components/specification/TruncationRule/main.vue'
 import PolygonTable from './table.vue'
 
-import { NonCubic } from '@/utils/domain'
-import { Newable } from '@/utils/domain/bases/interfaces'
-
-@Component({
-  components: {
-    TruncationRuleSpecification,
-  },
-})
-export default class NonCubicTruncationRule extends Vue {
-  @Prop({ required: true })
-  readonly value!: NonCubic
-
-  get table (): Newable<Vue> { return PolygonTable }
-}
+defineProps<{ value: NonCubic }>()
 </script>

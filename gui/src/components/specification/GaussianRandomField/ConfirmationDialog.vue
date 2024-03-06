@@ -5,11 +5,7 @@
     @keydown.esc="cancel()"
     @keydown.enter="agree()"
   >
-    <v-toolbar
-      :color="options.color"
-      dark
-      dense
-    >
+    <v-toolbar :color="options.color" dark dense>
       <v-toolbar-title class="white--text">
         {{ title }}
       </v-toolbar-title>
@@ -20,18 +16,10 @@
       </v-card-text>
       <v-card-actions>
         <v-spacer />
-        <v-btn
-          color="warning darken-1"
-          text
-          @click.native="agree()"
-        >
+        <v-btn color="warning darken-1" variant="text" @click.native="agree()">
           Yes
         </v-btn>
-        <v-btn
-          color="grey"
-          text
-          @click.native="cancel()"
-        >
+        <v-btn color="grey" variant="text" @click.native="cancel()">
           Cancel
         </v-btn>
       </v-card-actions>
@@ -39,7 +27,7 @@
   </v-dialog>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 /**
  * Vuetify Confirm Dialog component
  * Borrowed from: https://gist.github.com/eolant/ba0f8a5c9135d1a146e1db575276177d
@@ -62,47 +50,54 @@
  *   this.$root.$confirm = this.$refs.confirm.open;
  * }
  */
-import { Component, Vue } from 'vue-property-decorator'
 
 import { APSError } from '@/utils/domain/errors'
-import { DialogOptions } from '@/utils/domain/bases/interfaces'
-import { Color } from '@/utils/domain/facies/helpers/colors'
+import type { DialogOptions } from '@/utils/domain/bases/interfaces'
+import type { Color } from '@/utils/domain/facies/helpers/colors'
+import { ref } from 'vue'
+import { useTheme } from 'vuetify'
 
-@Component
-export default class ConfirmationDialog extends Vue {
-  dialog = false
-  resolve: ((answer: boolean) => void) | null = null
-  reject: ((answer: boolean) => void) | null = null
-  message: string | null = null
-  title: string | null = null
-  options: DialogOptions = {
-    color: (this.$vuetify.theme.themes.light.warning as Color),
-    width: 290,
-  }
+const dialog = ref(false)
+const resolve = ref<((answer: boolean) => void) | null>(null)
+const reject = ref<((answer: boolean) => void) | null>(null)
+const message = ref<string | null>(null)
+const title = ref<string | null>(null)
 
-  open (title: string, message: string, options: DialogOptions = {}): Promise<boolean> {
-    this.dialog = true
-    this.title = title
-    this.message = message
-    this.options = Object.assign(this.options, options)
-    return new Promise((resolve: (answer: boolean) => void, reject: (answer: boolean) => void) => {
-      this.resolve = resolve
-      this.reject = reject
-    })
-  }
+const theme = useTheme()
+const options = ref<DialogOptions>({
+  color: theme.global.current.value.colors.warning as Color,
+  width: 290,
+})
 
-  agree (): void {
-    if (!this.resolve) throw new APSError('resolve has not been set')
+function open(
+  newTitle: string,
+  newMessage: string,
+  newOptions: DialogOptions = {},
+): Promise<boolean> {
+  dialog.value = true
+  title.value = newTitle
+  message.value = newMessage
+  options.value = { ...options.value, ...newOptions }
+  return new Promise(
+    (res: (answer: boolean) => void, rej: (answer: boolean) => void) => {
+      resolve.value = res
+      reject.value = rej
+    },
+  )
+}
+defineExpose({ open })
 
-    this.resolve(true)
-    this.dialog = false
-  }
+function agree(): void {
+  if (!resolve.value) throw new APSError('resolve has not been set')
 
-  cancel (): void {
-    if (!this.resolve) throw new APSError('resolve has not been set')
+  resolve.value(true)
+  dialog.value = false
+}
 
-    this.resolve(false)
-    this.dialog = false
-  }
+function cancel(): void {
+  if (!resolve.value) throw new APSError('resolve has not been set')
+
+  resolve.value(false)
+  dialog.value = false
 }
 </script>

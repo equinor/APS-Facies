@@ -1,26 +1,21 @@
 <template>
-  <v-popover
-    trigger="hover"
-  >
-    <v-icon
-      :color="color"
-    >
-      {{ $vuetify.icons.values.help }}
+  <floating-tooltip trigger="hover">
+    <v-icon :color="color">
+      {{ vuetify.icons.aliases.help }}
     </v-icon>
-    <span slot="popover">
+    <template #popper>
       <slot />
-    </span>
-  </v-popover>
+    </template>
+  </floating-tooltip>
 </template>
 
-<script lang="ts">
-import { Component, Prop, Vue } from 'vue-property-decorator'
-
-import { Color } from '@/utils/domain/facies/helpers/colors'
-
-@Component
-export default class HelpIcon extends Vue {
-  @Prop({ default: 'black' })
-  readonly color: Color
+<script setup lang="ts">
+import type { Color } from '@/utils/domain/facies/helpers/colors'
+import vuetify from '@/plugins/vuetify'
+type Props = {
+  color?: Color
 }
+withDefaults(defineProps<Props>(), {
+  color: 'black',
+})
 </script>

@@ -1,143 +1,119 @@
 <template>
-  <v-row
-    no-gutters
-  >
-    <truncation-header />
-    <div v-if="rule">
-      <v-row
-        no-gutters
-      >
-        <v-col
-          v-if="notBayfill"
-          cols="12"
-        >
-          <v-popover
-            :disabled="canUseOverlay"
-            trigger="hover"
-          >
-            <v-checkbox
-              v-model="useOverlay"
-              :disabled="!canUseOverlay"
-              class="tooltip-target"
-              label="Include Overlay Facies"
-            />
-            <span
-              slot="popover"
-            >
-              {{ useOverlayTooltip }}
-            </span>
-          </v-popover>
-        </v-col>
-      </v-row>
-      <v-row
-        no-gutters
-      >
-        <v-col cols="12">
-          <component
-            :is="truncationRuleComponent"
-            v-if="truncationRuleComponent && rule"
-            :value="rule"
+  <truncation-header />
+  <div v-if="rule">
+    <v-row no-gutters>
+      <v-col v-if="notBayfill" cols="12">
+        <floating-tooltip :disabled="canUseOverlay" trigger="hover">
+          <v-checkbox
+            v-model="useOverlay"
+            :disabled="!canUseOverlay"
+            class="tooltip-target"
+            label="Include Overlay Facies"
           />
-        </v-col>
-      </v-row>
-      <v-row
-        v-if="useOverlay"
-        no-gutters
-      >
-        <v-col
-          cols="12"
-        >
-          <overlay-facies
-            :value="rule"
-          />
-        </v-col>
-      </v-row>
-    </div>
-  </v-row>
+          <template #popper>{{ useOverlayTooltip }}</template>
+        </floating-tooltip>
+      </v-col>
+    </v-row>
+    <v-row no-gutters>
+      <v-col cols="12">
+        <component
+          :is="truncationRuleComponent"
+          v-if="truncationRuleComponent && rule"
+          :value="rule"
+        />
+      </v-col>
+    </v-row>
+    <v-row v-if="useOverlay" no-gutters>
+      <v-col cols="12">
+        <overlay-facies :value="rule as InstantiatedOverlayTruncationRule" />
+      </v-col>
+    </v-row>
+  </div>
 </template>
 
-<script lang="ts">
-import { Component, Vue } from 'vue-property-decorator'
-
+<script setup lang="ts">
 import BayfillSpecification from '@/components/specification/TruncationRule/Bayfill/index.vue'
 import NonCubicSpecification from '@/components/specification/TruncationRule/NonCubic/index.vue'
 import CubicSpecification from '@/components/specification/TruncationRule/Cubic/index.vue'
 import TruncationHeader from '@/components/specification/TruncationRule/header.vue'
 import OverlayFacies from '@/components/specification/TruncationRule/Overlay/index.vue'
-import SectionTitle from '@/components/baseComponents/headings/SectionTitle.vue'
 
-import { isUUID } from '@/utils/helpers'
-import { Bayfill } from '@/utils/domain'
-import Polygon from '@/utils/domain/polygon/base'
-import TruncationRuleType from '@/utils/domain/truncationRule/base'
-import { Optional } from '@/utils/typing'
-import { Identified } from '@/utils/domain/bases/interfaces'
-import { TruncationRuleTemplate } from '@/store/modules/truncationRules/typing'
+import { Bayfill, type InstantiatedOverlayTruncationRule } from '@/utils/domain'
+import type { Optional } from '@/utils/typing'
+import type { TruncationRuleType } from '@/utils/domain/truncationRule/base'
+import { computed } from 'vue'
+import type { Component } from 'vue'
+import { useTruncationRuleStore } from '@/stores/truncation-rules'
+import { useTruncationRulePresetStore } from '@/stores/truncation-rules/presets'
+import OverlayTruncationRule from '@/utils/domain/truncationRule/overlay'
+import { APSError } from '@/utils/domain/errors'
+import { useFaciesStore } from '@/stores/facies'
 
-@Component({
-  components: {
-    SectionTitle,
-    TruncationHeader,
-    OverlayFacies,
+const ruleStore = useTruncationRuleStore()
+const rulePresetStore = useTruncationRulePresetStore()
+const faciesStore = useFaciesStore()
+
+const rule = computed(() => ruleStore.current)
+
+const truncationRuleType = computed<Optional<TruncationRuleType>>(() => {
+  return rulePresetStore.type
+})
+
+const truncationRuleComponent = computed<Optional<Component>>(() => {
+  const mapping: Record<TruncationRuleType, Component> = {
+    cubic: CubicSpecification,
+    'non-cubic': NonCubicSpecification,
+    bayfill: BayfillSpecification,
+  }
+  return truncationRuleType.value && rule.value
+    ? mapping[truncationRuleType.value]
+    : null
+})
+
+const useOverlay = computed({
+  get: () => {
+    return rule.value instanceof OverlayTruncationRule && rule.value.useOverlay
+  },
+  set: (value: boolean) => {
+    if (!(rule.value instanceof OverlayTruncationRule)) {
+      throw new APSError('useOverlay changes require OverlayTruncationRule')
+    }
+    ruleStore.toggleOverlay(rule.value, value)
   },
 })
-export default class TruncationRule extends Vue {
-  get truncationRuleType (): Optional<TruncationRuleTemplate> {
-    const available: Identified<TruncationRuleTemplate> = this.$store.state.truncationRules.templates.types.available
-    const type = this.$store.state.truncationRules.preset.type
-    if (type && isUUID(type)) {
-      return available[`${type}`]
-    } else {
-      return this.rule
-        ? Object.values(available).find((item) => !!this.rule && item.type === this.rule.type) || null
-        : null
-    }
-  }
 
-  get truncationRuleComponent (): Optional<CubicSpecification | NonCubicSpecification | BayfillSpecification> {
-    const mapping = {
-      Cubic: CubicSpecification,
-      'Non-Cubic': NonCubicSpecification,
-      Bayfill: BayfillSpecification,
-    }
-    return this.truncationRuleType && this.rule
-      ? mapping[this.truncationRuleType.name]
-      : null
-  }
+const notBayfill = computed(() => !(rule.value instanceof Bayfill))
 
-  get rule (): Optional<TruncationRuleType> { return this.$store.getters.truncationRule }
+const hasEnoughFacies = computed(() => {
+  if (!rule.value) return true
+  const numFacies = faciesStore.selected.length
+  const numFaciesInBackground = new Set(
+    (rule.value!).backgroundPolygons
+      .map((polygon) => polygon.facies)
+      .filter((facies) => !!facies),
+  ).size
+  return numFacies > numFaciesInBackground
+})
 
-  get useOverlay (): boolean { return this.rule ? this.rule.useOverlay : false }
-  set useOverlay (val) { this.$store.dispatch('truncationRules/toggleOverlay', { rule: this.rule, value: val }) }
+const overlayErrors = computed<{ check: boolean; errorMessage: string }[]>(
+  () => [
+    {
+      check: notBayfill.value,
+      errorMessage: 'Bayfill cannot have user defined overlay facies',
+    },
+    {
+      check: hasEnoughFacies.value,
+      errorMessage: 'Too few facies has been selected for this truncation rule',
+    },
+  ],
+)
 
-  get hasEnoughFacies (): boolean {
-    if (!this.rule) return true
-    const numFacies = Object.values(this.$store.getters['facies/selected']).length
-    const numFaciesInBackground = [...new Set((this.rule.backgroundPolygons as Polygon[])
-      .map(polygon => polygon.facies)
-      .filter(name => !!name)
-    )].length
-    return numFacies > numFaciesInBackground
-  }
+const canUseOverlay = computed(
+  () =>
+    overlayErrors.value.every(({ check }) => check) || !!rule.value?.useOverlay,
+)
 
-  get notBayfill (): boolean { return !(this.rule instanceof Bayfill) }
-
-  get overlayErrors (): { check: boolean, errorMessage: string }[] {
-    return [
-      { check: this.notBayfill, errorMessage: 'Bayfill cannot have user defined overlay facies' },
-      { check: this.hasEnoughFacies, errorMessage: 'Too few facies has been selected for this truncation rule' },
-    ]
-  }
-
-  get canUseOverlay (): boolean {
-    return this.overlayErrors.every(({ check }) => check) || (!!this.rule && this.rule.useOverlay)
-  }
-
-  get useOverlayTooltip (): Optional<string> {
-    for (const { check, errorMessage } of this.overlayErrors) {
-      if (!check) return errorMessage
-    }
-    return null
-  }
-}
+const useOverlayTooltip = computed(
+  () => overlayErrors.value.find(({ check }) => check)?.errorMessage,
+)
 </script>

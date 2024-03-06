@@ -1,12 +1,7 @@
 <template>
-  <v-row
-    no-gutters
-  >
+  <v-row no-gutters>
     <v-col cols="6">
-      <gaussian-plot
-        :value="value"
-        expand
-      />
+      <gaussian-plot :value="value" expand />
     </v-col>
     <v-col cols="1" />
     <v-col cols="5">
@@ -28,29 +23,20 @@
         icon="refresh"
         @click="() => updateSimulation(false)"
       />
-      <icon-button
-        icon="settings"
-        @click="openVisualizationSettings"
-      />
-      <visualization-settings-dialog
-        ref="visualisationSettings"
-      />
+      <icon-button icon="settings" @click="openVisualizationSettings" />
+      <visualization-settings-dialog ref="visualisationSettingsDialog" />
     </v-col>
     <!--New line-->
-    <v-col
-      class="column"
-      align-self="start"
-      cols="6"
-    >
+    <v-col class="column" align-self="start" cols="6">
       <h4>Anisotropy direction</h4>
       <anisotropy-direction
         :value="value"
-        @update:error="e => update('anisotropyDirection', e)"
+        @update:error="(e: boolean) => updateInvalid('anisotropyDirection', e)"
       />
       <power-specification
         v-if="isGeneralExponential"
         :value="value"
-        @update:error="e => update('power', e)"
+        @update:error="(e: boolean) => updateInvalid('power', e)"
       />
     </v-col>
     <v-col cols="1" />
@@ -58,28 +44,25 @@
       <h4>Ranges</h4>
       <range-specification
         :value="value"
-        @update:error="e => update('range', e)"
+        @update:error="(e: boolean) => updateInvalid('range', e)"
       />
     </v-col>
     <!--New line-->
     <v-row>
       <trend-specification
         :value="value"
-        @update:error="e => update('trend', e)"
+        @update:error="(e: boolean) => updateInvalid('trend', e)"
       />
     </v-row>
   </v-row>
 </template>
 
-<script lang="ts">
-import { Component, Prop, Vue, Watch } from 'vue-property-decorator'
-
+<script setup lang="ts">
 import cloneDeep from 'lodash/cloneDeep'
 
-import rms from '@/api/rms'
-import { TREND_NOT_IMPLEMENTED_PREVIEW_VISUALIZATION } from '@/config'
+import { isDevelopmentBuild, TREND_NOT_IMPLEMENTED_PREVIEW_VISUALIZATION } from '@/config'
 
-import { invalidateChildren, notEmpty } from '@/utils'
+import { notEmpty } from '@/utils'
 
 import ItemSelection from '@/components/selection/dropdown/ItemSelection.vue'
 import GaussianPlot from '@/components/plot/GaussianPlot/index.vue'
@@ -90,7 +73,11 @@ import PowerSpecification from '@/components/specification/GaussianRandomField/P
 import VisualizationSettingsDialog from '@/components/specification/GaussianRandomField/VisualizationSettingsDialog.vue'
 import IconButton from '@/components/selection/IconButton.vue'
 
-import Field, { Trend, Variogram } from '@/utils/domain/gaussianRandomField'
+import type Field from '@/utils/domain/gaussianRandomField'
+import { ref, computed, onBeforeMount, watch } from 'vue'
+import { useConstantsOptionsVariogramsStore } from '@/stores/constants/options'
+import { useGaussianRandomFieldStore } from '@/stores/gaussian-random-fields'
+import { provideInvalidation } from '@/utils/invalidation'
 
 interface Invalid {
   anisotropyDirection: boolean
@@ -99,109 +86,96 @@ interface Invalid {
   trend: boolean
 }
 
-@Component({
-  components: {
-    ItemSelection,
-    IconButton,
-    PowerSpecification,
-    AnisotropyDirection,
-    RangeSpecification,
-    GaussianPlot,
-    TrendSpecification,
-    VisualizationSettingsDialog,
-  },
+type Props = { value: Field }
+const props = defineProps<Props>()
+
+const fieldStore = useGaussianRandomFieldStore()
+const { invalidate } = provideInvalidation()
+
+const waitingForSimulation = ref(false)
+const visualisationSettingsDialog = ref<InstanceType<
+  typeof VisualizationSettingsDialog
+> | null>(null)
+const invalid = ref<Invalid>({
+  anisotropyDirection: false,
+  power: false,
+  range: false,
+  trend: false,
 })
-export default class GaussianRandomField extends Vue {
-  @Prop({ required: true })
-  readonly value!: Field
 
-  waitingForSimulation = false
-  invalid: Invalid = {
-    anisotropyDirection: false,
-    power: false,
-    range: false,
-    trend: false,
+const availableVariograms = computed(
+  () => useConstantsOptionsVariogramsStore().available,
+)
+
+const isGeneralExponential = computed(
+  () => variogramType.value === 'GENERAL_EXPONENTIAL',
+)
+
+const variogram = computed(() => props.value.variogram)
+const variogramType = computed({
+  get: () => variogram.value.type,
+  set: (value: string) => (props.value.variogram.type = value),
+})
+
+const trend = computed(() => props.value.trend)
+const isValid = computed(() =>
+  Object.values(invalid.value).every((invalid) => !invalid),
+)
+
+const canSimulate = computed(
+  () =>
+    notEmpty(variogramType.value) &&
+    (trend.value.use
+      ? TREND_NOT_IMPLEMENTED_PREVIEW_VISUALIZATION.indexOf(
+          trend.value.type,
+        ) === -1
+      : true) &&
+    isValid.value &&
+    !waitingForSimulation.value,
+)
+
+onBeforeMount(() => {
+  if (!props.value.isRepresentative) {
+    updateSimulation()
   }
+})
 
-  get availableVariograms (): string[] { return this.$store.state.constants.options.variograms.available }
+async function simulation(renew = false): Promise<void> {
+  if (renew) fieldStore.newSeed(props.value)
+  await fieldStore.updateSimulation(props.value)
+}
 
-  get isGeneralExponential (): boolean { return this.variogramType === 'GENERAL_EXPONENTIAL' }
-
-  get variogram (): Variogram { return this.value.variogram }
-
-  get trend (): Trend { return this.value.trend }
-
-  get fieldName (): string { return this.value.name }
-
-  get canSimulate (): boolean {
-    return (
-      notEmpty(this.variogramType)
-      && (this.trend.use ? TREND_NOT_IMPLEMENTED_PREVIEW_VISUALIZATION.indexOf(this.trend.type) === -1 : true)
-      && this.isValid
-      && !this.waitingForSimulation
-    )
-  }
-
-  get isValid (): boolean {
-    return Object.values(this.invalid).every(invalid => !invalid)
-  }
-
-  get variogramType (): string { return this.variogram.type }
-  set variogramType (value) { this.$store.dispatch('gaussianRandomFields/variogramType', { field: this.value, value }) }
-
-  beforeMount (): void {
-    if (!this.value.isRepresentative) {
-      this.updateSimulation()
-    }
-  }
-
-  async simulation (renew = false): Promise<void> {
-    if (renew) {
-      await this.$store.dispatch('gaussianRandomFields/newSeed', { field: this.value })
-    }
-    await this.$store.dispatch('gaussianRandomFields/updateSimulationData', {
-      field: this.value,
-      data: await rms.simulateGaussianField({
-        name: this.value.name,
-        variogram: this.variogram,
-        trend: this.trend,
-        settings: this.$store.getters.simulationSettings({ field: this.value }),
-      })
-    })
-  }
-
-  async updateSimulation (renew = false): Promise<void> {
-    this.waitingForSimulation = true
-    try {
-      await this.simulation(renew)
-    } catch (reason) {
-      invalidateChildren(this)
-    } finally {
-      this.waitingForSimulation = false
-    }
-  }
-
-  async openVisualizationSettings (): Promise<void> {
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    // eslint-disable-next-line security/detect-non-literal-fs-filename
-    const { save, settings } = await (this.$refs.visualisationSettings as VisualizationSettingsDialog).open(cloneDeep(this.value.settings))
-    if (save) {
-      await this.$store.dispatch('gaussianRandomFields/changeSettings', {
-        field: this.value,
-        settings
-      })
-      await this.updateSimulation()
-    }
-  }
-
-  update (type: string, value: boolean): void {
-    Vue.set(this.invalid, type, value)
-  }
-
-  @Watch('isValid')
-  async changeValidity (value: boolean): Promise<void> {
-    await this.$store.dispatch('gaussianRandomFields/changeValidity', { field: this.value, value })
+async function updateSimulation(renew = false): Promise<void> {
+  waitingForSimulation.value = true
+  try {
+    await simulation(renew)
+  } catch (reason) {
+    if (isDevelopmentBuild()) console.error(reason)
+    invalidate()
+  } finally {
+    waitingForSimulation.value = false
   }
 }
+
+async function openVisualizationSettings(): Promise<void> {
+  if (!visualisationSettingsDialog.value) {
+    console.error("Could not open Visualization Settings, as Dialog component was not mounted.")  
+    return
+  }
+  const { save, settings } = await visualisationSettingsDialog.value.open(
+    cloneDeep(props.value.settings),
+  )
+  if (save) {
+    props.value.settings = settings
+    await updateSimulation()
+  }
+}
+
+function updateInvalid(type: keyof Invalid, value: boolean): void {
+  invalid.value[type] = value
+}
+
+watch(isValid, async (value: boolean) => {
+  props.value.valid = value
+})
 </script>

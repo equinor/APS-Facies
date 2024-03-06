@@ -2,37 +2,39 @@ import _ from 'lodash'
 
 import { ERROR_TOLERANCE, isDevelopmentBuild } from '@/config'
 
-export function isEmpty<T> (property: T): boolean { return _.isEmpty(property) && !_.isNumber(property) }
-export function notEmpty<T> (property: T): boolean { return !isEmpty(property) }
+export function isEmpty<T>(
+  property: T | null | undefined,
+): property is null | undefined {
+  return _.isEmpty(property) && !_.isNumber(property)
+}
+export function notEmpty<T>(property: T | null | undefined): property is T {
+  return !isEmpty(property)
+}
 
-export function getRandomInt (max: number): number {
+export function getRandomInt(max: number): number {
   return Math.floor(Math.random() * max)
 }
 
-export function newSeed (): number {
+export function newSeed(): number {
   return getRandomInt(Math.pow(2, 64) - 1)
 }
 
-export function allSet<T> (items: T[], prop: string): boolean {
-  return items
-    ? Object.values(items).every((item): boolean => !!item[`${prop}`])
-    : false
+export function allSet<T, K extends keyof T>(items: T[], prop: K): boolean {
+  return items?.every((item): boolean => !!item[prop]) ?? false
 }
 
-export function isCloseTo (val: number, target: number): boolean {
+export function isCloseTo(val: number, target: number): boolean {
   // Since JavaScript uses floats, there are times when comparing against 1 (or another number) will fail
   // because of a rounding error
   return Math.abs(val - target) <= ERROR_TOLERANCE
 }
 
-export function isCloseToUnity (val: number): boolean {
+export function isCloseToUnity(val: number): boolean {
   return isCloseTo(val, 1)
 }
 
-export function getDisabledOpacity (disabled: boolean): number {
-  return disabled ? 0.258823529 : 1
+export function getDisabledOpacity(disabled: boolean): number {
+  return disabled ? 0.38 : 1
 }
 
-export {
-  isDevelopmentBuild,
-}
+export { isDevelopmentBuild }

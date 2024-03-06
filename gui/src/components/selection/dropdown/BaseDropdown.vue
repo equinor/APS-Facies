@@ -1,114 +1,82 @@
 <template>
   <div>
-    <confirmation-dialog
-      v-if="warn"
-      ref="confirm"
-    />
+    <confirmation-dialog v-if="warn" ref="confirmationDialog" />
     <v-select
       ref="selection"
       v-model.lazy="selected"
       :items="items"
       :disabled="disabled"
       :label="label"
+      :loading="loading"
+      variant="underlined"
     >
-      <template #item="{ item, on }">
-        <v-list-item
-          v-on="on"
-        >
-          <v-hover
-            v-slot="{ hover }"
-            class="pa-0 ma-0"
+      <template #item="{ item, props }">
+        <hover-helper v-slot="{ isHovering }">
+          <v-list-item
+            v-bind="props"
+            :value="item.props.value"
+            :disabled="item.props.disabled"
           >
             <base-tooltip
-              v-if="item.help"
-              :message="item.help"
-              :open="hover"
-              :disabled="!item.disabled && !item.help"
+              :message="item.props.help"
+              :open="isHovering && !!item.props.help"
+              :disabled="!item.props.disabled && !item.props.help"
               trigger="manual"
-            >
-              <span
-                :style="itemStyle(item)"
-              >
-                {{ item.text }}
-              </span>
-            </base-tooltip>
-            <span
-              v-else
-              :style="itemStyle(item)"
-            >
-              {{ item.text }}
-            </span>
-          </v-hover>
-        </v-list-item>
+              class="pa-0 ma-0"
+            />
+          </v-list-item>
+        </hover-helper>
       </template>
     </v-select>
   </div>
 </template>
 
-<script lang="ts">
-/* eslint-disable @typescript-eslint/ban-ts-comment */
-import { Component, Prop, Vue } from 'vue-property-decorator'
-
+<script setup lang="ts" generic="T">
 import ConfirmationDialog from '@/components/specification/GaussianRandomField/ConfirmationDialog.vue'
+import HoverHelper from '@/components/selection/dropdown/HoverHelper.vue'
 import BaseTooltip from '@/components/baseComponents/BaseTooltip.vue'
+import { VSelect } from 'vuetify/components'
+import type { ListItem } from '@/utils/typing'
+import { computed, ref } from 'vue'
 
-import { ListItem } from '@/utils/typing'
-
-@Component({
-  components: {
-    BaseTooltip,
-    ConfirmationDialog,
-  },
+type Props = {
+  modelValue: T
+  label: string
+  items: ListItem<T>[]
+  disabled?: boolean
+  loading?: boolean
+  warn?: boolean
+  warnMessage?: string
+  warnEvenWhenEmpty?: boolean
+}
+const props = withDefaults(defineProps<Props>(), {
+  disabled: false,
+  loading: false,
+  warn: false,
+  warnMessage: '',
+  warnEvenWhenEmpty: false,
 })
-export default class BaseDropdown<T> extends Vue {
-  @Prop({ required: true })
-  readonly value!: T
+const emit = defineEmits<{
+  (event: 'update:model-value', value: T): void
+}>()
 
-  @Prop({ required: true })
-  readonly label!: string
+const confirmationDialog = ref<InstanceType<typeof ConfirmationDialog> | null>(
+  null,
+)
 
-  @Prop({ required: true })
-  readonly items!: ListItem<T>[]
-
-  @Prop({ default: false })
-  readonly disabled!: boolean
-
-  @Prop({ default: false, type: Boolean })
-  readonly warn!: boolean
-
-  @Prop({ default: '' })
-  readonly warnMessage!: string
-
-  @Prop({ default: false, type: Boolean })
-  readonly warnEvenWhenEmpty: boolean
-
-  get selected (): T { return this.value }
-  set selected (value: T) {
-    const changeValue = (): void => { this.$emit('input', value) }
-
-    if (this.warn && (!!this.selected || this.warnEvenWhenEmpty)) {
-      // @ts-ignore
-      (this.$refs.confirm as ConfirmationDialog).open('Are you sure?', this.warnMessage)
+const selected = computed({
+  get: () => props.modelValue,
+  set: (value: T) => {
+    if (props.warn && (!!selected.value || props.warnEvenWhenEmpty)) {
+      confirmationDialog.value
+        ?.open('Are you sure?', props.warnMessage)
         .then((confirmed: boolean) => {
-          if (confirmed) changeValue()
-          else {
-            // The component must be made aware that its value was not updated
-            // @ts-ignore
-            this.$refs.selection.lazyValue = this.selected
-          }
+          if (confirmed) emit('update:model-value', value)
+          else emit('update:model-value', selected.value)
         })
     } else {
-      changeValue()
+      emit('update:model-value', value)
     }
-  }
-
-  itemStyle (item: ListItem<T>): Partial<CSSStyleDeclaration> {
-    if (item.disabled) {
-      return {
-        color: 'rgba(0, 0, 0, 0.38)',
-      }
-    }
-    return {}
-  }
-}
+  },
+})
 </script>

@@ -14,7 +14,7 @@ jobs:
   on-push:
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
@@ -24,9 +24,9 @@ jobs:
           python-version: 3.8
 
       - name: Use Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
-          node-version: 16
+          node-version: 20
 
       - name: Set up dependencies
         run: |
@@ -40,10 +40,11 @@ jobs:
       - name: Build GUI
         run: |
           source .venv/bin/activate
+          export NODE_OPTIONS=--max_old_space_size=4096
           make --directory=${{ github.workspace }} build-gui
 
       - name: Store GUI artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: gui
           path: |

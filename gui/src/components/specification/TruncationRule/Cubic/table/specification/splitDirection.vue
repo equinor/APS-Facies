@@ -1,35 +1,20 @@
 <template>
-  <v-radio-group
-    v-model="splitDirection"
-    label="Split direction"
-  >
-    <v-radio
-      v-for="n in 2"
-      :key="n"
-      :label="labels[n - 1]"
-      :value="n - 1"
-    />
+  <v-radio-group v-model="splitDirection" label="Split direction">
+    <v-radio :label="'Vertical'" value="V" />
+    <v-radio :label="'Horizontal'" value="H" />
   </v-radio-group>
 </template>
 
-<script lang="ts">
-import { Component, Prop, Vue } from 'vue-property-decorator'
+<script setup lang="ts">
+import { type Cubic, Direction } from '@/utils/domain'
+import { computed } from 'vue'
+import type { OrientationString } from '@/utils/domain/truncationRule/cubic/direction'
 
-import { Cubic } from '@/utils/domain'
+const props = defineProps<{ value: Cubic }>()
 
-@Component
-export default class SplitDirection extends Vue {
-  @Prop({ required: true })
-  readonly value!: Cubic
-
-  get splitDirection (): 1 | 0 { return this.value.direction.toInteger() }
-  set splitDirection (value) { this.$store.dispatch('truncationRules/changeDirection', { rule: this.value, value }) }
-
-  get labels (): { [_: number]: string } {
-    return {
-      0: 'Vertical',
-      1: 'Horizontal',
-    }
-  }
-}
+const splitDirection = computed<OrientationString>({
+  get: () => props.value.direction.specification,
+  set: (value: OrientationString) =>
+    (props.value.direction = new Direction(value)),
+})
 </script>

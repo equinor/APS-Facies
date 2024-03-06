@@ -1,8 +1,5 @@
 <template>
-  <v-toolbar
-    flat
-    :color="'#ffffff'"
-  >
+  <v-toolbar color="#ffffff">
     <!--
       NOTE: the attribute 'flat' has been replaced with 'color=""', as to avoid  mutating a prop directly
       This is *exactly* the same as what's done in the source code for the upload button
@@ -14,67 +11,36 @@
       icon="import"
       @click="importModelFile"
     />
-
     <icon-button
       v-tooltip.bottom="'Export the current specification as a model file'"
       icon="export"
       @click="exportModelFile"
     />
-
-    <export-dialog
-      ref="exportDialog"
-    />
-
+    <export-dialog ref="exportDialog" />
     <v-spacer />
-
-    <v-row
-      v-if="isDevelop"
-    >
+    <v-row v-if="isDevelop">
       <load-job />
-
       <run-job />
-
       <export-state />
     </v-row>
-
     <job-settings />
-
-    <v-btn
-      v-if="false"
-      disabled
-      outlined
+    <v-btn v-if="false" disabled variant="outlined" color="primary"> Run Settings </v-btn>
+    <icon-button
+      icon="changelog"
       color="primary"
-    >
-      Run Settings
-    </v-btn>
-    <v-popover
-      trigger="hover"
-    >
-      <icon-button
-        icon="changelog"
-        color="primary"
-        @click="() => openChangelog()"
-      />
-      <span slot="popover">
-        What's new?
-      </span>
-    </v-popover>
+      v-tooltip.bottom="`What's new?`"
+      @click="() => openChangelog()"
+    />
     <changelog-dialog ref="changelogDialog" />
-    <v-popover
-      trigger="hover"
-    >
-      <icon-button
-        icon="help"
-        color="primary"
-        @click="() => goToHelp()"
-      />
-      <span slot="popover">
-        Documentation of the APS methodology and user guide for this plug-in.
-      </span>
-    </v-popover>
-    <span
-      v-if="betaBuild"
-    >
+    <icon-button
+      icon="help"
+      color="primary"
+      @click="() => goToHelp()"
+      v-tooltip="
+        'Documentation of the APS methodology and user guide for this plug-in.'
+      "
+    />
+    <span v-if="betaBuild">
       {{ `${versionInformation}` }}
     </span>
     <icon-button
@@ -86,13 +52,8 @@
   </v-toolbar>
 </template>
 
-<script lang="ts">
-import { Component, Vue } from 'vue-property-decorator'
-import { Store } from '@/store/typing'
+<script setup lang="ts">
 import { displayError, displaySuccess } from '@/utils/helpers/storeInteraction'
-
-import { xml2json } from 'xml-js'
-
 import ExportDialog from '@/components/dialogs/ExportDialog.vue'
 import ChangelogDialog from '@/components/dialogs/ChangelogDialog.vue'
 import JobSettings from '@/components/dialogs/JobSettings/index.vue'
@@ -100,145 +61,233 @@ import IconButton from '@/components/selection/IconButton.vue'
 import ExportState from '@/components/debugging/exportState.vue'
 import LoadJob from '@/components/debugging/LoadJob.vue'
 import RunJob from '@/components/debugging/RunJob.vue'
-
-import { Optional } from '@/utils/typing'
-
+import type { Optional } from '@/utils/typing'
 import rms from '@/api/rms'
-import { resetState } from '@/store'
 import { isDevelopmentBuild } from '@/utils/helpers/simple'
+import { ref } from 'vue'
+import { XMLParser } from 'fast-xml-parser'
+import { useModelFileExporterStore } from '@/stores/model-file-exporter'
+import { useRootStore } from '@/stores'
+import { useModelFileLoaderStore } from '@/stores/model-file-loader'
+import { APSError } from '@/utils/domain/errors'
+import type { ID } from '@/utils/domain/types'
+import { v4 as uuidv4 } from 'uuid'
 
-async function loadModelFile (store: Store, fileName: string, fileContent: string | null = null): Promise<void> {
+const betaBuild: boolean = import.meta.env.VUE_APP_BUILD_MODE !== 'stable'
+const versionNumber: Optional<string> =
+  import.meta.env.VUE_APP_APS_VERSION || null
+const buildNumber: Optional<string> =
+  import.meta.env.VUE_APP_BUILD_NUMBER || null
+const commitHash: Optional<string> = import.meta.env.VUE_APP_HASH || null
+const versionInformation: string =
+  versionNumber && buildNumber && commitHash
+    ? `${versionNumber}.${buildNumber}-${commitHash} (beta)`
+    : 'live'
+const isDevelop = isDevelopmentBuild()
+const rootStore = useRootStore()
+
+async function loadModelFile(
+  fileName: string,
+  fileContent: string | null = null,
+): Promise<void> {
   let json: string | null = null
 
-  store.commit('LOADING', { loading: true, message: `Checking the model file, "${fileName}", for consistency` }, { root: true })
+  rootStore.startLoading(`Checking the model file, "${fileName}", for consistency`)
   if (!fileContent) fileContent = await rms.loadFile(fileName)
 
   if (!fileContent) {
-    await displayError('The file is empty, or it does not exist')
+    displayError('The file is empty, or it does not exist')
   } else {
     try {
-      json = xml2json(fileContent, { compact: false, ignoreComment: true })
-    } catch (err) {
-      await displayError(
-        'The file you tried to open is not valid XML and cannot be used\n'
-        + 'Fix the following error before opening again:\n\n'
-        + err.message
+      let polygonOrder = 0
+      let previousPath: string | null = null
+
+      class Node {
+        public id: ID
+        public parent: Node | null
+        public children: Node[]
+        constructor(root: null | Node) {
+          this.id = uuidv4()
+          this.parent = root
+          this.children = []
+          if (root) {
+            root.add(this)
+          }
+
+        }
+        public add(child: Node): void {
+          child.parent = this
+          this.children.push(child)
+        }
+      }
+
+      let node: Node | null = null
+      const xmlParser = new XMLParser({
+        ignoreAttributes: false,
+        trimValues: true,
+        updateTag(tagName, jPath, attrs) {
+          if (jPath.includes('Trunc2D_Cubic.BackGroundModel')) {
+            if (/\.L\d+(\.ProbFrac)?$/.test(jPath)) {
+              const previousLevel: number = previousPath?.replace('.ProbFrac', '').split('.').length ?? 0
+              const currentLevel = jPath.replace('.ProbFrac', '').split('.').length
+              if (previousLevel === 0 || previousPath === null) {
+                // New cubic truncation rule
+                node = new Node(null)
+              } else if (currentLevel > previousLevel) {
+                // We go down one level
+                node = new Node(node)
+              } else if (currentLevel < previousLevel) {
+                // We go up one level
+                node = node!.parent
+                if (/^L\d+$/.test(tagName)) {
+                  // That is, is a new level, adjacent to the previous
+                  node = new Node(node!.parent)
+                }
+              } else if (previousPath?.endsWith('ProbFrac') && /L\d+$/.test(tagName)) {
+                // That is, we go up one level from a leaf / ProgFrac to a new 'empy' node
+                node = new Node(node!.parent)
+              } else if (/L\d+$/.test(previousPath ?? '') && tagName === 'ProbFrac') {
+                // That is, we go from a 'node' down to a new level
+              }
+
+              if (/L\d+/.test(tagName)) {
+                if (!node) throw new APSError('Uninitialized tree')
+
+                attrs['@_id'] = node.id
+                attrs['@_parentId'] = node.parent?.id ?? ''
+                attrs['@_order'] = polygonOrder.toString(10)
+                polygonOrder += 1
+              }
+
+              if (tagName === 'ProbFrac') {
+                if (node === null) throw new APSError('<L1> is Missing from <Trunc2D_Cubic><BackGroundModel>')
+                attrs['@_order'] = polygonOrder.toString(10)
+                attrs['@_parentId'] = node.id
+
+                polygonOrder += 1
+              }
+
+              previousPath = jPath
+            }
+          }
+          if (tagName === 'TruncationRule') {
+            // Reset order for each truncation rule
+            polygonOrder = 0
+            previousPath = null
+            node = null
+          }
+          return tagName
+        },
+      })
+      const jsObject = xmlParser.parse(fileContent)
+      json = JSON.stringify(jsObject)
+    } catch (err: any) {
+      displayError(
+        'The file you tried to open is not valid XML and cannot be used\n' +
+          'Fix the following error before opening again:\n\n' +
+          err.message,
       )
     }
     if (json) {
       const { valid, error } = await rms.isApsModelValid(btoa(fileContent))
       if (valid) {
-        resetState()
-        store.commit('LOADING', { loading: true, message: 'Resetting the state...' }, { root: true })
-        await store.dispatch('fetch')
-        await store.dispatch('modelFileLoader/populateGUI', { json, fileName })
+        rootStore.$reset()
+        rootStore.loadingMessage = 'Resetting the state...'
+        await rootStore.fetch()
+        await useModelFileLoaderStore()
+          .populateGUI(json, fileName)
+
       } else {
-        await displayError(
-          'The file you tried to open is not a valid APS model file and cannot be used\n'
-          + 'Fix the following error before opening again:\n\n'
-          + error
+        displayError(
+          'The file you tried to open is not a valid APS model file and cannot be used\n' +
+            'Fix the following error before opening again:\n\n' +
+            error,
         )
       }
     }
   }
 
-  store.commit('LOADING', { loading: false }, { root: true })
+  rootStore.finishLoading()
 }
 
-@Component({
-  components: {
-    ExportState,
-    ExportDialog,
-    JobSettings,
-    IconButton,
-    ChangelogDialog,
-    LoadJob,
-    RunJob,
-  },
-})
-export default class TheToolBar extends Vue {
-  refreshing = false
+const refreshing = ref(false)
+const lastMSelectedModelFile = ref('')
+const changelogDialog = ref<InstanceType<typeof ChangelogDialog> | null>(null)
+const exportDialog = ref<InstanceType<typeof ExportDialog> | null>(null)
 
-  lastMSelectedModelFile = ''
+function goToHelp(): void {
+  rms.openWikiHelp()
+}
 
-  get betaBuild (): boolean { return process.env.VUE_APP_BUILD_MODE !== 'stable' }
+function openChangelog(): void {
+  changelogDialog.value?.open()
+}
 
-  get versionNumber (): Optional<string> { return process.env.VUE_APP_APS_VERSION || null }
-
-  get buildNumber (): Optional<string> { return process.env.VUE_APP_BUILD_NUMBER || null }
-
-  get commitHash (): Optional<string> { return process.env.VUE_APP_HASH || null }
-
-  get versionInformation (): string {
-    return this.versionNumber && this.buildNumber && this.commitHash
-      ? `${this.versionNumber}.${this.buildNumber}-${this.commitHash} (beta)`
-      : 'live'
-  }
-
-  get isDevelop (): boolean { return isDevelopmentBuild() }
-
-  goToHelp (): void {
-    rms.openWikiHelp()
-  }
-
-  openChangelog (): void {
-    (this.$refs.changelogDialog as ChangelogDialog).open()
-  }
-
-  async importModelFile (): Promise<void> {
-    if (isDevelopmentBuild()) {
-      const input = document.createElement('input')
-      input.type = 'file'
-      input.onchange = (event: Event): void => {
-        const { files } = (event.target as HTMLInputElement)
-        if (files) {
-          const file = files[0]
-          file.text().then(content => loadModelFile(this.$store, file.name, content))
-        }
+async function importModelFile(): Promise<void> {
+  if (isDevelop) {
+    const input = document.createElement('input')
+    input.type = 'file'
+    input.onchange = (event: Event): void => {
+      const { files } = event.target as HTMLInputElement
+      if (files) {
+        const file = files[0]
+        file.text().then((content) => loadModelFile(file.name, content))
       }
-      input.click()
-      document.removeChild(input)
-    } else {
-      const fileName = await rms.chooseFile('load', 'APS model files (*.xml)', this.lastMSelectedModelFile)
-      if (fileName) {
-        this.lastMSelectedModelFile = fileName
-        await loadModelFile(this.$store, fileName)
-      }
+      input.remove()
+    }
+    input.click()
+  } else {
+    const fileName = await rms.chooseFile(
+      'load',
+      'APS model files (*.xml)',
+      lastMSelectedModelFile.value,
+    )
+    if (fileName) {
+      lastMSelectedModelFile.value = fileName
+      await loadModelFile(fileName)
     }
   }
+}
 
-  async refresh (): Promise<void> {
-    this.refreshing = true
-    await this.$store.dispatch('refresh', 'Fetching data from RMS')
-    this.refreshing = false
-  }
+async function refresh(): Promise<void> {
+  refreshing.value = true
+  await rootStore.refresh('Fetching data from RMS')
+  refreshing.value = false
+}
 
-  async exportModelFile (): Promise<void> {
-    const exportedXMLString = await this.$store.dispatch('modelFileExporter/createModelFileFromStore', {})
-      .catch(async error => {
-        await displayError(error.message)
-      })
-    if (exportedXMLString) {
-      const result = await rms.isApsModelValid(btoa(exportedXMLString))
-      if (result.valid) {
-        (this.$refs.exportDialog as ExportDialog).open()
-          .then(({ paths }) => {
-            if (paths) {
-              const resultPromise = rms.saveModel(btoa(exportedXMLString), paths)
-              resultPromise.then(async (success: boolean): Promise<void> => {
-                if (success) {
-                  await displaySuccess(`The model file was saved to ${paths.model}`)
-                }
-              })
-            }
-          })
-      } else {
-        await displayError(
-          'The model you have defined is not valid and cannot be exported\n'
-            + 'Fix the following error before exporting again:\n\n'
-            + result.error
+async function exportModelFile(): Promise<void> {
+  const modelFileExporterStore = useModelFileExporterStore()
+  const exportedXMLString = await modelFileExporterStore
+    .createModelFileFromStore(true)
+    .catch(async (error) => {
+      displayError(error.message)
+    })
+  if (exportedXMLString) {
+    const result = await rms.isApsModelValid(btoa(exportedXMLString))
+    if (result.valid) {
+      const response = await exportDialog.value?.open()
+      if (response?.paths) {
+        const resultPromise = rms.saveModel(
+          btoa(exportedXMLString),
+          response.paths,
         )
+        resultPromise.then(async (success: boolean): Promise<void> => {
+          if (success) {
+            displaySuccess(
+              `The model file was saved to ${response.paths?.model ?? '-'}`,
+            )
+          }
+        })
+          .catch(err => {
+            displayError(err)
+          })
       }
+    } else {
+      displayError(
+        'The model you have defined is not valid and cannot be exported\n' +
+          'Fix the following error before exporting again:\n\n' +
+          result.error,
+      )
     }
   }
 }

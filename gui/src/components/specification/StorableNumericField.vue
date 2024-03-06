@@ -10,90 +10,102 @@
     :ranges="ranges"
     :arrow-step="arrowStep"
     :use-modulus="useModulus"
-    @update:error="e => propagateError(e)"
+    :enforce-ranges="enforceRanges"
+    @update:error="(e: boolean) => emit('update:error', e)"
   />
 </template>
 
-<script lang="ts">
-import { Component, Prop, Vue } from 'vue-property-decorator'
-
-import { MinMax } from '@/api/types'
-import { Optional } from '@/utils/typing'
-import { GaussianRandomField } from '@/utils/domain'
-import Trend from '@/utils/domain/gaussianRandomField/trend'
-import Variogram from '@/utils/domain/gaussianRandomField/variogram'
+<script setup lang="ts">
+import type { MinMax } from '@/api/types'
+import type { Optional } from '@/utils/typing'
+import type { GaussianRandomField } from '@/utils/domain'
+import type Trend from '@/utils/domain/gaussianRandomField/trend'
+import type Variogram from '@/utils/domain/gaussianRandomField/variogram'
 
 import NumericField from '@/components/selection/NumericField.vue'
 
 import { hasOwnProperty } from '@/utils/helpers'
+import { computed } from 'vue'
+import { useGaussianRandomFieldStore } from '@/stores/gaussian-random-fields'
 
-function getValue (field: Variogram | Trend, property: string, subProperty: string): any {
-  return hasOwnProperty(field[`${property}`], subProperty)
-    ? field[`${property}`][`${subProperty}`]
-    : field[`${property}`]
+function getValue<T extends Trend | Variogram>(
+  field: T,
+  property: keyof T,
+  subProperty: (keyof T[keyof T] & string) | undefined,
+): any {
+  return !!subProperty && hasOwnProperty(field[property], subProperty)
+    ? field[property][subProperty]
+    : field[property]
 }
 
-@Component({
-  components: {
-    NumericField,
-  },
+type TrendProps<T extends Trend = Trend> = {
+  trend: true
+  propertyType: keyof T
+  subPropertyType?: keyof T[keyof T] | string
+}
+type VariogramProps<T extends Variogram = Variogram> = {
+  trend: false
+  propertyType: keyof T
+  subPropertyType?: keyof T[keyof T]
+}
+
+type Props = (TrendProps | VariogramProps) & {
+  value: GaussianRandomField
+  trend?: boolean
+  label?: string
+  valueType?: string
+  unit?: string
+  strictlyGreater?: boolean
+  allowNegative?: boolean
+  useModulus?: boolean
+  arrowStep?: number
+  ranges?: Optional<MinMax>
+  enforceRanges?: boolean
+}
+const props = withDefaults(defineProps<Props>(), {
+  subPropertyType: undefined,
+  label: '',
+  valueType: '',
+  unit: '',
+  strictlyGreater: false,
+  allowNegative: false,
+  useModulus: false,
+  trend: false,
+  arrowStep: 1,
+  ranges: null,
+  enforceRanges: false,
 })
-export default class StorableNumericField extends Vue {
-  @Prop({ required: true })
-  readonly value!: GaussianRandomField
+const emit = defineEmits<{
+  (event: 'update:error', error: boolean): void
+}>()
 
-  @Prop({ required: true })
-  readonly propertyType!: string
+const fieldStore = useGaussianRandomFieldStore()
 
-  @Prop({ default: '' })
-  readonly subPropertyType!: string
+const variogramOrTrend = computed(() => (props.trend ? 'trend' : 'variogram'))
+const field = computed(() => props.value[variogramOrTrend.value])
 
-  @Prop({ default: '' })
-  readonly label!: string
+// #257: Move all this logic outside this form input component.
+// This belongs in gui/src/components/specification/GaussianRandomField/index.vue
+const propertyValue = computed({
+  get: () =>
+    getValue(
+      field.value,
+      props.propertyType as keyof typeof field.value,
+      // @ts-ignore
+      props.subPropertyType,
+    ),
+  set: (value: any) =>
+    fieldStore.setProperty(
+      props.value,
+      variogramOrTrend.value,
+      props.propertyType as keyof typeof field.value,
+      // @ts-ignore
+      props.subPropertyType,
+      value,
+    ),
+})
 
-  @Prop({ default: '' })
-  readonly valueType!: string
-
-  @Prop({ default: '' })
-  readonly unit!: string
-
-  @Prop({ default: false, type: Boolean })
-  readonly strictlyGreater!: boolean
-
-  @Prop({ default: false, type: Boolean })
-  readonly allowNegative!: boolean
-
-  @Prop({ default: false, type: Boolean })
-  readonly useModulus!: boolean
-
-  @Prop({ default: false, type: Boolean })
-  readonly trend!: boolean
-
-  @Prop({ default: 1 })
-  readonly arrowStep!: number
-
-  @Prop()
-  readonly ranges!: Optional<MinMax>
-
-  get field (): Trend | Variogram { return this.value[this.variogramOrTrend] }
-
-  get propertyValue (): any { return this.getValue() }
-  set propertyValue (value) { this.dispatchChange(value) }
-
-  get fmuUpdatable (): boolean { return hasOwnProperty(this.propertyValue, 'updatable') }
-
-  get variogramOrTrend (): 'trend' | 'variogram' { return this.trend ? 'trend' : 'variogram' }
-
-  dispatchChange (value: number): void {
-    this.$store.dispatch(`gaussianRandomFields/${this.propertyType}`, { field: this.value, variogramOrTrend: this.variogramOrTrend, type: this.subPropertyType, value })
-  }
-
-  getValue (): any {
-    return getValue(this.field, this.propertyType, this.subPropertyType)
-  }
-
-  propagateError (value: boolean): void {
-    this.$emit('update:error', value)
-  }
-}
+const fmuUpdatable = computed(() =>
+  hasOwnProperty(propertyValue.value, 'updatable'),
+)
 </script>

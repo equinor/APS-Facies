@@ -462,8 +462,10 @@ prog/
 *.bak
 aps/api/VERSION
 aps/api/COMMIT
+aps/api/STUB_VERSION
 COMMIT
 VERSION
+STUB_VERSION
 
 # Unit testing
 aps/unit_test/fmu_attributes.txt
@@ -498,10 +500,10 @@ monkeytype.sqlite3
 # Word temporary files
 doc/~$*.docx
 
-truncation-rules
 aps_workflows
 gui/public/truncation-rules
-gui/src/store/templates/truncationRules.json
+!gui/src/stores/truncation-rules
+gui/src/stores/truncation-rules/templates/truncationRules.json
 
 # Track build number
 aps/utils/track-build-number

@@ -4,105 +4,84 @@
     :can-decrease="canDecrease"
     :can-remove="canRemove"
     :can-add="canAdd"
-    @input="direction => changeOrder(direction)"
+    @input="(direction: number) => changeOrder(direction)"
     @add="addPolygon"
     @delete="deletePolygon"
   />
 </template>
 
-<script lang="ts">
-import { Component, Prop, Vue } from 'vue-property-decorator'
-
-import Polygon, { PolygonSerialization, PolygonSpecification } from '@/utils/domain/polygon/base'
-import TruncationRule from '@/utils/domain/truncationRule/base'
+<script
+  setup
+  lang="ts"
+  generic="T extends Polygon,
+  S extends PolygonSerialization,
+  P extends PolygonSpecification,
+  RULE extends OverlayTruncationRule<T, S, P>
+"
+>
+import type {
+  Polygon,
+  PolygonSerialization,
+  PolygonSpecification,
+} from '@/utils/domain/polygon/base'
 import OverlayTruncationRule from '@/utils/domain/truncationRule/overlay'
 
-import {
-  OverlayPolygon,
-} from '@/utils/domain'
+import { OverlayPolygon } from '@/utils/domain'
 
 import BasePolygonOrder from '@/components/specification/PolygonOrder.vue'
+import { computed } from 'vue'
+import { useTruncationRuleStore } from '@/stores/truncation-rules'
 
-@Component({
-  components: {
-    BasePolygonOrder,
-  },
+const props = withDefaults(defineProps<{
+  value: T
+  rule: RULE
+  overlay?: boolean
+  minPolygons?: number
+}>(), {
+  overlay: false,
+  minPolygons: 0,
 })
-export default class PolygonOrder<
-  T extends Polygon = Polygon,
-  S extends PolygonSerialization = PolygonSerialization,
-  P extends PolygonSpecification = PolygonSpecification,
-> extends Vue {
-  @Prop({ required: true })
-  readonly value!: T
+const ruleStore = useTruncationRuleStore()
 
-  @Prop({ required: true })
-  readonly rule!: TruncationRule<T, S, P>
+const polygons = computed(() =>
+  props.rule.polygons.filter((polygon) => polygon.overlay === props.overlay),
+)
 
-  @Prop({ default: false, type: Boolean })
-  readonly overlay: boolean
+const orders = computed(() => polygons.value.map(({ order }) => order))
+const max = computed(() => Math.max(...orders.value))
+const min = computed(() => Math.min(...orders.value))
 
-  @Prop({ default: 0 })
-  readonly minPolygons: number
+const hasMultiplePolygons = computed(() => polygons.value.length > 1)
+const canIncrease = computed(
+  () => hasMultiplePolygons.value && props.value.order < max.value,
+)
+const canDecrease = computed(
+  () => hasMultiplePolygons.value && props.value.order > min.value,
+)
 
-  get hasMultiplePolygons (): boolean { return this.polygons.length > 1 }
+const canAdd = computed(() => true)
+const canRemove = computed(
+  () =>
+    (props.overlay && props.rule instanceof OverlayTruncationRule
+      ? props.rule.overlayPolygons
+      : props.rule.backgroundPolygons
+    ).length > props.minPolygons,
+)
 
-  get orders (): number[] { return this.polygons.map(({ order }) => order) }
+function addPolygon(): void {
+  ruleStore.addPolygon(props.rule, {
+    order: props.value.order + 1,
+    overlay: props.value.overlay,
+    group:
+      props.value instanceof OverlayPolygon ? props.value.group : undefined,
+  })
+}
 
-  get polygons (): Polygon[] {
-    return this.rule.polygons
-      .filter(polygon => polygon.overlay === this.overlay)
-  }
+function deletePolygon(): void {
+  ruleStore.removePolygon(props.rule, props.value)
+}
 
-  get max (): number {
-    return Math.max(...this.orders)
-  }
-
-  get min (): number {
-    return Math.min(...this.orders)
-  }
-
-  get canIncrease (): boolean {
-    return (
-      this.hasMultiplePolygons
-      && this.value.order < this.max
-    )
-  }
-
-  get canDecrease (): boolean {
-    return (
-      this.hasMultiplePolygons
-      && this.value.order > this.min
-    )
-  }
-
-  get canRemove (): boolean {
-    return (
-      (this.overlay && this.rule instanceof OverlayTruncationRule)
-        ? this.rule.overlayPolygons
-        : this.rule.backgroundPolygons
-    ).length > this.minPolygons
-  }
-
-  get canAdd (): boolean {
-    return true
-  }
-
-  async addPolygon (): Promise<void> {
-    await this.$store.dispatch('truncationRules/addPolygon', {
-      rule: this.rule,
-      order: this.value.order + 1,
-      overlay: this.value.overlay,
-      group: this.value instanceof OverlayPolygon ? this.value.group : null,
-    })
-  }
-
-  async deletePolygon (): Promise<void> {
-    await this.$store.dispatch('truncationRules/removePolygon', { rule: this.rule, polygon: this.value })
-  }
-
-  async changeOrder (direction: number): Promise<void> {
-    await this.$store.dispatch('truncationRules/changeOrder', { rule: this.rule, polygon: this.value, direction })
-  }
+function changeOrder(direction: number): void {
+  ruleStore.changeOrder(props.rule, props.value, direction)
 }
 </script>

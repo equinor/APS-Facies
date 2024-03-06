@@ -22,5 +22,10 @@ server {
 
         proxy_pass http://api:5000/api/ui.call;
         proxy_redirect off;
+        # Some calls can take a while, especially if there are multiple requests simulatneously
+        proxy_read_timeout 180;
+        proxy_connect_timeout 180;
+        proxy_send_timeout 180;
+        send_timeout 180;
     }
 }

@@ -1,123 +1,91 @@
 <template>
   <v-data-table
-    :value="value"
     :headers="_headers"
     :loading="loading"
     :loading-text="loadingText"
+    :expanded="_expanded"
     :items="items"
     :no-data-text="noDataText"
-    :expanded="expanded"
-    :custom-sort="customSort"
+    :sort-by="sortBy"
     :dense="dense"
     must-sort
     item-key="id"
     :class="`elevation-${elevation}`"
-    :items-per-page="Infinity"
+    :items-per-page="-1"
     hide-default-footer
     hide-default-header
   >
-    <template
-      #header="{ props: { headers } }"
-    >
-      <thead>
-        <tr>
-          <th
-            v-for="header in headers"
-            :key="header.name"
+    <template #headers="{ columns }">
+      <tr>
+        <th v-for="column in columns" :key="column.title">
+          <span
+            v-tooltip.botton="column.headerProps?.help"
           >
-            <optional-help-item
-              :value="header"
-            />
-          </th>
-        </tr>
-      </thead>
+            {{ column.title }}
+          </span>
+        </th>
+      </tr>
     </template>
-    <template
-      #item="{ item, isSelected, on }"
-    >
-      <slot
-        :item="item"
-        :isSelected="isSelected"
-        :on="on"
-        name="item"
-      />
+    <template #item="{ item, props }">
+      <slot v-bind="props" :item="item" name="item" />
     </template>
-    <template
-      #expanded-item="{ item, headers }"
-    >
-      <slot
-        :item="item"
-        :headers="headers"
-        name="expanded-item"
-      />
+    <template #expanded-row="{ item, columns }">
+      <slot :item="item" :columns="columns" name="expanded-item" />
     </template>
+    <template #bottom> </template>
   </v-data-table>
 </template>
 
-<script lang="ts">
-import { Component, Prop, Vue } from 'vue-property-decorator'
+<script setup lang="ts" generic="T extends Identifiable">
+import type { ID } from '@/utils/domain/types'
+import type { HeaderItem, VuetifyColumns } from '@/utils/typing'
+import { computed } from 'vue'
+import type { Identifiable } from '@/utils/domain/bases/interfaces'
+import type { VDataTable } from 'vuetify/components'
 
-import OptionalHelpItem from '@/components/table/OptionalHelpItem.vue'
-
-import BaseItem from '@/utils/domain/bases/baseItem'
-import { ID } from '@/utils/domain/types'
-import { DataTableCompareFunction } from 'vuetify/types'
-import { HeaderItems } from '@/utils/typing'
-
-@Component({
-  components: {
-    OptionalHelpItem,
-  },
-})
-export default class SelectionTable<T extends BaseItem> extends Vue {
-  @Prop({ required: false, default: () => [] })
-  readonly value!: T[]
-
-  @Prop({ required: true })
-  readonly headers!: HeaderItems
-
-  @Prop({ required: true })
-  readonly items!: T[]
-
-  @Prop({ default: undefined })
-  readonly current!: ID | undefined
-
-  @Prop({ default: () => [] })
-  readonly expanded: number[]
-
-  @Prop({ default: false, type: Boolean })
-  readonly loading!: boolean
-
-  @Prop({ default: '$vuetify.dataIterator.loadingText' })
-  readonly loadingText!: string
-
-  @Prop({ default: '$vuetify.noDataText' })
-  readonly noDataText!: string
-
-  @Prop({ default: false, type: Boolean })
-  readonly selectDisabled!: boolean
-
-  @Prop({ default: undefined })
-  readonly selectError!: string | undefined
-
-  @Prop({ default: '1' })
-  readonly elevation: string
-
-  @Prop({ default: undefined })
-  readonly customSort!: ((items: T[], sortBy: string[], sortDesc: boolean[], locale: string, customSorters?: Record<string, DataTableCompareFunction>) => T[]) | undefined
-
-  @Prop({ default: false, type: Boolean })
-  readonly dense!: boolean
-
-  get _headers (): HeaderItems {
-    return this.headers
-      .map(header => {
-        return {
-          align: 'left',
-          sortable: false,
-          ...header,
-        }
-      })
-  }
+type Props = {
+  headers: HeaderItem[]
+  items: T[]
+  current?: ID
+  expanded?: T[]
+  loading?: boolean
+  loadingText?: string
+  noDataText?: string
+  selectDisabled?: boolean
+  selectError?: string
+  elevation?: string
+  sortBy?: VDataTable['sortBy']
+  dense?: boolean
 }
+
+const props = withDefaults(defineProps<Props>(), {
+  current: undefined,
+  expanded: () => [],
+  loading: false,
+  loadingText: '$vuetify.dataIterator.loadingText',
+  noDataText: '$vuetify.noDataText',
+  selectDisabled: false,
+  type: Boolean,
+  selectError: undefined,
+  elevation: '1',
+  sortBy: undefined,
+  dense: false,
+})
+
+defineSlots<{
+  item(args: { item: T, props?: Props }): void
+  'expanded-item'(args: { item: T, columns: VuetifyColumns }): void
+}>()
+
+const _headers = computed(() =>
+  props.headers.map((header) => ({
+    align: 'start' as 'start' | 'end' | 'center',
+    sortable: false,
+    title: header.text,
+    value: header.value,
+    ...header,
+  })),
+)
+
+const _expanded = computed<ID[]>(() => props.expanded.map((item) => item.id))
 </script>

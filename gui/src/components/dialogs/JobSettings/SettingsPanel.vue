@@ -1,9 +1,7 @@
 <template>
-  <v-card outlined>
+  <v-card variant="elevated">
     <v-list-item>
-      <v-list-item-title
-        class="text-h5"
-      >
+      <v-list-item-title class="text-h5">
         {{ title }}
       </v-list-item-title>
     </v-list-item>
@@ -11,12 +9,6 @@
   </v-card>
 </template>
 
-<script lang="ts">
-import { Component, Prop, Vue } from 'vue-property-decorator'
-
-@Component
-export default class SettingsPanel extends Vue {
-  @Prop({ required: true })
-  readonly title: string
-}
+<script setup lang="ts">
+defineProps<{ title: string }>()
 </script>

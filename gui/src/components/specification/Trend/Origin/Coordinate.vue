@@ -7,51 +7,37 @@
     :label="shownLabel"
     :arrow-step="arrowStep"
     allow-negative
+    enforce-ranges
     trend
-    @update:error="e => propagateError(e)"
+    @update:error="(e: boolean) => emit('update:error', e)"
   />
 </template>
 
-<script lang="ts">
-import { Component, Prop, Vue } from 'vue-property-decorator'
-
-import { GaussianRandomField } from '@/utils/domain'
-import { MinMax } from '@/api/types'
-
+<script setup lang="ts">
+import type { GaussianRandomField } from '@/utils/domain'
 import StorableNumericField from '@/components/specification/StorableNumericField.vue'
-
 import { notEmpty } from '@/utils'
+import { computed } from 'vue'
 
-@Component({
-  components: {
-    StorableNumericField,
-  },
-})
-export default class CoordinateSpecification extends Vue {
-  @Prop({ required: true })
-  readonly value!: GaussianRandomField
-
-  @Prop({ required: true })
-  readonly originType: string
-
-  @Prop({ required: true })
-  readonly coordinateAxis!: string
-
-  @Prop({ default: '' })
-  readonly label!: string
-
-  get propertyType (): string { return 'origin' }
-
-  get isRelative (): boolean { return this.originType === 'RELATIVE' }
-
-  get ranges (): MinMax { return this.isRelative ? { min: 0, max: 1 } : { min: -Infinity, max: Infinity } }
-
-  get shownLabel (): string { return notEmpty(this.label) ? this.label : this.coordinateAxis.toUpperCase() }
-
-  get arrowStep (): number { return this.isRelative ? 0.001 : 1 }
-
-  propagateError (value: boolean): void {
-    this.$emit('update:error', value)
-  }
+type Props = {
+  value: GaussianRandomField
+  originType: string
+  coordinateAxis: string
+  label?: string
 }
+const props = withDefaults(defineProps<Props>(), { label: '' })
+const emit = defineEmits<{
+  (event: 'update:error', error: boolean): void
+}>()
+
+const propertyType = 'origin'
+
+const isRelative = computed(() => props.originType === 'RELATIVE')
+const ranges = computed(() =>
+  isRelative.value ? { min: 0, max: 1 } : { min: -Infinity, max: Infinity },
+)
+const shownLabel = computed(() =>
+  notEmpty(props.label) ? props.label : props.coordinateAxis.toUpperCase(),
+)
+const arrowStep = computed(() => (isRelative.value ? 0.001 : 1))
 </script>

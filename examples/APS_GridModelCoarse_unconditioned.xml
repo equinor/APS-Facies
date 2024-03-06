@@ -74,7 +74,7 @@
                     <ProbCube>0.1</ProbCube>
                 </Facies>
                 <Facies name="F3">
-                    <ProbCube>0.3</ProbCube>ß
+                    <ProbCube>0.3</ProbCube>
                 </Facies>
                 <Facies name="F4">
                     <ProbCube>0.15</ProbCube>
@@ -279,7 +279,6 @@
                             <BackGround>F1</BackGround>
                         </Group>
                     </OverLayModel>
-                    @
                 </Trunc2D_Angle>
             </TruncationRule>
         </Zone>

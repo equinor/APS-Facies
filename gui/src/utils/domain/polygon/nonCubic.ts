@@ -1,5 +1,13 @@
-import FmuUpdatableValue, { FmuUpdatable } from '@/utils/domain/bases/fmuUpdatable'
-import Polygon, { PolygonArgs, PolygonSerialization, PolygonSpecification } from '@/utils/domain/polygon/base'
+import type {
+  FmuUpdatable,
+} from '@/utils/domain/bases/fmuUpdatable'
+import FmuUpdatableValue from '@/utils/domain/bases/fmuUpdatable'
+import type {
+  PolygonArgs,
+  PolygonSerialization,
+  PolygonSpecification,
+} from '@/utils/domain/polygon/base'
+import Polygon from '@/utils/domain/polygon/base'
 
 export type NonCubicPolygonArgs = PolygonArgs & {
   angle?: FmuUpdatable | number
@@ -17,16 +25,16 @@ export interface NonCubicPolygonSerialization extends PolygonSerialization {
 export default class NonCubicPolygon extends Polygon {
   public angle: FmuUpdatable
 
-  public constructor ({ angle = 0, ...rest }: NonCubicPolygonArgs) {
+  public constructor({ angle = 0, ...rest }: NonCubicPolygonArgs) {
     super(rest)
     this.angle = new FmuUpdatableValue(angle)
   }
 
-  public get isFmuUpdatable (): boolean {
+  public get isFmuUpdatable(): boolean {
     return super.isFmuUpdatable || this.angle.updatable
   }
 
-  public get specification (): NonCubicPolygonSpecification {
+  public get specification(): NonCubicPolygonSpecification {
     return {
       ...super.specification,
       angle: this.angle,
@@ -34,7 +42,7 @@ export default class NonCubicPolygon extends Polygon {
     }
   }
 
-  public toJSON (): NonCubicPolygonSerialization {
+  public toJSON(): NonCubicPolygonSerialization {
     return {
       ...super.toJSON(),
       angle: this.angle,

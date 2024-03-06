@@ -1,64 +1,58 @@
 <template>
-  <v-select
+  <v-autocomplete
+    v-model="selectedJob"
     label="RMS job"
-    :value="selectedJob"
+    clearable
     :items="jobs"
-    :append-outer-icon="clearIcon"
     :disabled="loading"
     :loading="loading"
-    @change="job => selectJob(job)"
-    @click:append-outer="clear"
+    variant="underlined"
   >
-    <v-progress-linear
-      indeterminate
-    />
-  </v-select>
+    <v-progress-linear indeterminate />
+  </v-autocomplete>
 </template>
 
-<script lang="ts">
-import { Component, Vue } from 'vue-property-decorator'
-import { resetState } from '@/store'
+<script setup lang="ts">
 import { getJobs } from '@/components/debugging/utils'
+import { onMounted, computed, ref } from 'vue'
+import type { RootStoreSerialization } from '@/stores'
+import { useRootStore } from '@/stores'
 
-@Component
-export default class LoadJob extends Vue {
-  private jobMapping: Record<string, JSON> = {}
-  private selectedJob: string | null = null
+const rootStore = useRootStore()
 
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-ignore
-  private loading = false // TypeScript complains it is not read, even though it is used in the template
+type Jobs = Record<string, RootStoreSerialization>
 
-  get jobs (): string[] {
-    return Object.keys(this.jobMapping)
-  }
+const jobMapping = ref<Jobs>({})
+const loading = ref(false)
 
-  get clearIcon (): string { return this.selectedJob ? '$vuetify.icons.values.clear' : '' }
+const _selectedJob = ref<string | null>(null)
+const selectedJob = computed({
+  get: () => _selectedJob.value,
+  set: (job: keyof Jobs | null) => {
+    _selectedJob.value = job
+    if (!job) {
+      rootStore.$reset()
+    } else {
+      rootStore.populate(jobMapping.value[job])
+    }
+  },
+})
 
-  selectJob (job: string): void {
-    this.selectedJob = job
-    const state = this.jobMapping[job]
-    this.$store.dispatch('populate', state)
-  }
+const jobs = computed(() => {
+  return Object.keys(jobMapping.value)
+})
 
-  clear (): void {
-    this.selectedJob = null
-    resetState()
-  }
-
-  mounted (): void {
-    this.loading = true
-    getJobs()
-      .then(jobs => {
-        this.jobMapping = jobs
-          .reduce((jobs, job) => {
-            jobs[job.instance_name] = JSON.parse(job.jobinputjson)
-            return jobs
-          }, ({} as Record<string, JSON>))
-      })
-      .finally(() => {
-        this.loading = false
-      })
-  }
-}
+onMounted(() => {
+  loading.value = true
+  getJobs()
+    .then((receivedJobs) => {
+      jobMapping.value = receivedJobs.reduce((jobDict, job) => {
+        jobDict[job.instance_name] = JSON.parse(job.jobinputjson)
+        return jobDict
+      }, {} as Jobs)
+    })
+    .finally(() => {
+      loading.value = false
+    })
+})
 </script>

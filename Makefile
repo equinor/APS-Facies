@@ -97,12 +97,12 @@ AUXILLARY := $(CODE_DIR)/auxillary
 # Paths local to the compiled app
 REQUESTS_CA_BUNDLE ?= $(SSL_CERT_FILE)
 POETRY := $(shell which poetry)
-PYTHON ?= $(POETRY) run python3
 ifneq ($(POETRY),)
 RUN := PYTHONPATH=$(PYTHONPATH) $(POETRY) run
 else
 RUN := PYTHONPATH=$(PYTHONPATH)
 endif
+PYTHON ?= $(RUN) python3
 PIP ?= $(PYTHON) -m pip
 PY.TEST := $(RUN) python -m pytest
 PIPROT := $(RUN) piprot
@@ -124,7 +124,6 @@ VUE_APP_API_URL := $(VUE_APP_APS_PROTOCOL)://$(VUE_APP_APS_SERVER):$(VUE_APP_APS
 VUE_APP_GUI_URL := $(VUE_APP_APS_PROTOCOL)://$(VUE_APP_APS_SERVER):$(VUE_APP_APS_GUI_PORT)
 endif
 
-# TODO?: SETUP.PY := PYTHONPATH=$(PYTHONPATH) $(PYTHON) setup.py ?
 PYTHON_PREFIX = $(shell dirname $(PYTHON))/..
 
 UI.PY := $(PYTHON_API_DIR)/ui.py
@@ -181,7 +180,7 @@ export MATPLOTLIBRC
 
 COLOR = \033[32;01m
 NO_COLOR = \033[0m
-.PHONY: help run package.json matplotlibrc dotenv VERSION COMMIT
+.PHONY: help run package.json matplotlibrc dotenv VERSION COMMIT STUB_VERSION
 
 # Build / clean / run
 build: clean-all init
@@ -245,6 +244,8 @@ _build-front-end:
 	VUE_APP_HASH="$(LATEST_COMMIT_HASH)" \
 	$(YARN) build && \
 	mv $(WEB_DIR)/dist $(PLUGIN_DIR)
+	mkdir -p $(PLUGIN_DIR)/public
+	mv $(PLUGIN_DIR)/truncation-rules $(PLUGIN_DIR)/public
 
 copy-changelog.md:
 	cp $(WEB_DIR)/public/CHANGELOG.md $(PLUGIN_DIR)/CHANGELOG.md
@@ -255,10 +256,10 @@ truncation-rule-vislualization-dir: relink-matplotlibrc
 
 clean-generated-truncation-rules:
 	rm -rf $(TRUNCATION_RULE_VISUALIZATIONS)
-	rm -f  $(WEB_DIR)/src/store/templates/truncationRules.json
+	rm -f  $(WEB_DIR)/src/stores/truncation-rules/templates/truncationRules.json
 
 generate-truncation-rules: generate-truncation-rule-images
-	$(RUN) python3 $(CODE_DIR)/bin/parse-truncation-rule-templates.py $(WEB_DIR)/src/store/templates/truncationRules.json
+	$(RUN) python3 $(CODE_DIR)/bin/parse-truncation-rule-templates.py $(WEB_DIR)/src/stores/truncation-rules/templates/truncationRules.json
 
 generate-truncation-rule-images: clean-generated-truncation-rules truncation-rule-vislualization-dir
 	cd $(TRUNCATION_RULE_VISUALIZATIONS) && \
@@ -296,6 +297,10 @@ mock-VERSION:
 mock-COMMIT:
 	echo $(LATEST_COMMIT_HASH_LONG) > $(SOURCE_DIR)/api/COMMIT
 	ln -sf $(SOURCE_DIR)/api/COMMIT $(CODE_DIR)/COMMIT
+
+mock-STUB_VERSION:
+	cat $(CODE_DIR)/bin/STUB_VERSION > $(SOURCE_DIR)/api/STUB_VERSION
+	ln -sf $(SOURCE_DIR)/api/STUB_VERSION $(CODE_DIR)/STUB_VERSION
 
 init: dependencies init-workflow package.json local.settings.json dotenv generate-truncation-rules
 

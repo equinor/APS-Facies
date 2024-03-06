@@ -6,37 +6,20 @@
     :loading-text="loadingText"
     :items="items"
     :no-data-text="_noDataText"
-    :current.sync="current"
+    v-model:current="currentId"
   >
-    <template
-      #item="{ item, isCurrent }"
-    >
-      <td
-        v-if="showName"
-        class="text-start"
-      >
+    <template #item="{ item, isCurrent }: { item: T, isCurrent: boolean }">
+      <td v-if="showName" class="text-start">
         {{ item.name }}
       </td>
-      <td
-        v-if="showCode"
-        class="text-start"
-      >
+      <td v-if="showCode" class="text-start">
         {{ item.code }}
       </td>
-      <td
-        v-if="showConformity"
-        class="text-start"
-      >
-        <conform-selection
-          :value="item"
-          :dark="isCurrent"
-        />
+      <td v-if="showConformity" class="text-start">
+        <conform-selection :value="item as Zone" :dark="isCurrent" />
       </td>
       <td>
-        <v-row
-          justify="center"
-          align="center"
-        >
+        <v-row justify="center" align="center">
           <icon-button
             icon="copy"
             :color="isCurrent ? 'white' : undefined"
@@ -56,144 +39,129 @@
   </base-selection-table>
 </template>
 
-<script lang="ts">
-import { Component, Prop, Vue } from 'vue-property-decorator'
-
+<script
+  setup
+  lang="ts"
+  generic="ItemType extends 'zone' | 'region', T extends ItemType extends 'zone' ? Zone : Region"
+>
 import BaseSelectionTable from '@/components/baseComponents/BaseSelectionTable.vue'
 import IconButton from '@/components/selection/IconButton.vue'
 import ConformSelection from '@/components/selection/dropdown/ConformSelection.vue'
 
-import SelectableItem from '@/utils/domain/bases/selectableItem'
+import { computed } from 'vue'
+import type { HeaderItem } from '@/utils/typing'
+import type { ID } from '@/utils/domain/types'
+import { useZoneStore } from '@/stores/zones'
+import { useRegionStore } from '@/stores/regions'
+import type { Region, Zone } from '@/utils/domain'
+import { useCopyPasteStore } from '@/stores/copy-paste'
+import { useFmuOptionStore } from '@/stores/fmu/options'
 
-import { getId } from '@/utils'
+type Props = {
+  headerName: string
+  itemType: 'zone' | 'region'
+  noDataText?: string
+  loadingText?: string
+  showName?: boolean
+  showCode?: boolean
+}
+const props = withDefaults(defineProps<Props>(), {
+  noDataText: '$vuetify.noDataText',
+  loadingText: '$vuetify.dataIterator.loadingText',
+  showName: false,
+  showCode: false,
+})
+const zoneStore = useZoneStore()
+const regionStore = useRegionStore()
 
-import { HeaderItems } from '@/utils/typing'
+type GenericStore = {
+  loading: boolean
+  currentId: ID | null
+  setCurrentId: (id: ID) => void
+  select: (values: T[]) => void
+}
 
-@Component({
-  components: {
-    ConformSelection,
-    BaseSelectionTable,
-    IconButton,
+const store = computed(
+  () =>
+    (props.itemType === 'zone'
+      ? zoneStore
+      : regionStore) as unknown as GenericStore,
+)
+
+const loading = computed<boolean>(() => store.value.loading)
+const _noDataText = computed(() =>
+  loading.value ? `Loading ${props.itemType}s` : props.noDataText,
+)
+
+const headers = computed<HeaderItem[]>(() => [
+  { text: 'Use', value: 'selected' },
+  ...(props.showName ? [{ text: props.headerName, value: 'name' }] : []),
+  ...(props.showCode ? [{ text: 'Code', sortable: true, value: 'code' }] : []),
+  ...(showConformity.value
+    ? [{ text: 'Conformity', value: 'conformity' }]
+    : []),
+  { text: 'Copy/Paste' },
+])
+
+const items = computed<T[]>(() => {
+  let items: T[] = []
+  switch (props.itemType) {
+    case 'zone':
+      items = zoneStore.available as T[]
+      break
+    case 'region':
+      items = (zoneStore.current?.regions as T[]) ?? []
+      break
+    default:
+      throw new Error(`Invalid item-type; expected 'zone' or 'region', received '${props.itemType}'`)
+  }
+  return items.sort((a, b) => a.code - b.code)
+})
+
+const currentId = computed({
+  get: () => store.value.currentId ?? undefined,
+  set: (value: ID | undefined) =>
+    value ? store.value.setCurrentId(value) : null,
+})
+
+const selected = computed<T[]>({
+  get: () => items.value.filter((item) => !!item.selected),
+  set: (values: T[]) => {
+    const filteredValues = items.value.filter((item) =>
+      values.map(({ id }) => id).includes(item.id),
+    )
+
+    store.value.select(filteredValues)
   },
 })
-export default class SelectionTable<T extends SelectableItem> extends Vue {
-  @Prop({ required: true })
-  readonly headerName!: string
 
-  @Prop({ required: true })
-  readonly itemType!: 'zone' | 'region'
+const copyPasteStore = useCopyPasteStore()
+const fmuOptionStore = useFmuOptionStore()
 
-  @Prop({ default: '$vuetify.noDataText' })
-  readonly noDataText!: string
+const source = computed(() => copyPasteStore.source)
+const showConformity = computed(
+  () => fmuOptionStore.fmuMode && props.itemType === 'zone',
+)
 
-  @Prop({ default: false, type: Boolean })
-  readonly showName!: boolean
+function canPaste(item: T): boolean {
+  return source.value?.id !== item.id
+}
 
-  @Prop({ default: false, type: Boolean })
-  readonly showCode!: boolean
+function isPasting(item: T): boolean {
+  return !!copyPasteStore.isPasting(item)
+}
 
-  @Prop({ default: '$vuetify.dataIterator.loadingText' })
-  readonly loadingText!: string
+function copy(item: T): void {
+  copyPasteStore.copy(item)
+}
 
-  get _noDataText (): string {
-    return this.loading
-      ? `Loading ${this.itemType}s`
-      : this.noDataText
-  }
-
-  get loading (): boolean { return this.$store.state[`${this.itemType}s`]._loading }
-
-  get headers (): HeaderItems {
-    return [
-      {
-        text: 'Use',
-        value: 'selected',
-      },
-      ...(this.showName
-        ? [{
-          text: this.headerName,
-          value: 'name',
-        }]
-        : []
-      ),
-      ...(this.showCode
-        ? [{
-          text: 'Code',
-          sortable: true,
-          value: 'code',
-        }]
-        : []
-      ),
-      ...(this.showConformity
-        ? [{
-          text: 'Conformity',
-          value: 'conformity',
-        }]
-        : []
-      ),
-      {
-        text: 'Copy/Paste',
-      },
-    ]
-  }
-
-  get items (): T[] {
-    return this.$store.getters[`${this.itemType}s`]
-      .sort((a: T, b: T) => a.code - b.code)
-  }
-
-  get current (): T { return this.$store.state[`${this.itemType}s`].current }
-  set current (item: T) { this.$store.dispatch(`${this.itemType}s/current`, item) }
-
-  get selected (): T[] { return this.items.filter(item => !!item.selected) }
-  set selected (values) {
-    values = this.items.filter(item => values.map(({ id }) => id).includes(item.id))
-    this.$store.dispatch(`${this.itemType}s/select`, values)
-  }
-
-  get source (): T {
-    return this.$store.state.copyPaste.source
-  }
-
-  get showConformity (): boolean { return this.$store.getters.fmuMode && this.itemType === 'zone' }
-
-  getItem (item: T): T | undefined { return this.items.find(({ id }) => id === item.id) }
-
-  getColor (item: T): 'accent' | undefined {
-    return getId(this.source) === item.id
-      ? 'accent'
-      : undefined
-  }
-
-  canPaste (item: T): boolean {
-    const source = this.source
-    return !!source && source.id !== item.id
-  }
-
-  isPasting (item: T): boolean {
-    return !!this.$store.getters['copyPaste/isPasting'](this.getItem(item))
-  }
-
-  async copy (item: T): Promise<void> {
-    await this.$store.dispatch('copyPaste/copy', this.getItem(item))
-  }
-
-  async paste (item: T): Promise<void> {
-    await this.$store.dispatch('copyPaste/paste', this.getItem(item))
-  }
-
-  updateSelection (item: T, value: boolean): void {
-    if (value) {
-      this.selected = [...this.selected, item]
-    } else {
-      this.selected = this.selected.filter(el => el.id !== item.id)
-    }
-  }
+function paste(item: T): void {
+  copyPasteStore.paste(item)
 }
 </script>
 
 <style lang="scss" scoped>
-  div {
-    flex-wrap: nowrap;
-  }
+div {
+  flex-wrap: nowrap;
+}
 </style>

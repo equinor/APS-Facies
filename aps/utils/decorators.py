@@ -32,24 +32,34 @@ def loggable(func):
     return wrapper
 
 
-def output_version_information(func):
+def _root_path() -> Path:
     plugin_root = Path(__file__).parent.parent.parent
+    if Path('/.dockerenv').exists():
+        return plugin_root / 'aps' / 'api' / 'pydist'
+    return plugin_root
+
+
+def output_version_information(func):
+    plugin_root = _root_path()
     if plugin_root.name != "pydist":
-        raise FileNotFoundError(f"Can not find plugin root 'pydist'. Found {plugin_root.name} ")
+        raise FileNotFoundError(f"Can not find plugin root 'pydist'. Found {plugin_root.name}")
 
     def get_content(file_name: str) -> str:
         try:
             with open(plugin_root.parent / file_name) as f:
                 return f.read().strip()
         except (FileNotFoundError, NotADirectoryError):
+            plugin_file = str(plugin_root.parent.parent.absolute())
             try:
-                plugin_file = str(plugin_root.parent.parent.absolute())
                 archive = ZipFile(plugin_file, 'r')
                 return archive.read(f'aps_gui/{file_name}').decode().strip()
-            except:
+            except Exception:
                 raise FileNotFoundError(f"Can not unzip and read plugin file with path {plugin_file}")
             finally:
-                archive.close()
+                try:
+                    archive.close()
+                except UnboundLocalError:
+                    pass
 
     @wraps(func)
     def decorator(config):

@@ -3,8 +3,8 @@ const LodashModuleReplacementPlugin = require('lodash-webpack-plugin')
 
 // Vue configurations
 const isProduction = process.env.NODE_ENV === 'production'
-const canParallelize = require('os').cpus().length > 1
-const isDocker = require('fs').existsSync('/.dockerenv')
+const canParallelize = require('node:os').cpus().length > 1
+const isDocker = require('node:fs').existsSync('/.dockerenv')
 
 const assetsDir = 'static'
 
@@ -28,17 +28,13 @@ module.exports = {
     sourceMap: !isProduction,
   },
 
-  chainWebpack: config => {
-    config.module
-      .rule('plot.ly')
-      .test(/\.js$/)
-      .use('IFY')
-      .loader('ify-loader')
+  chainWebpack: (config) => {
+    config.module.rule('plot.ly').test(/\.js$/).use('IFY').loader('ify-loader')
 
     config.module
       .rule('ts')
       .use('ts-loader')
-      .tap(options => {
+      .tap((options) => {
         options.appendTsSuffixTo = [/\.vue$/]
         return options
       })
@@ -56,7 +52,9 @@ module.exports = {
         }),
     // The port in Codespaces is the one used by NginX, and not the dev server
     // The reason, is that it is that URL that the browser sees.
-    host: CODESPACE_NAME ? `${CODESPACE_NAME}-8888.preview.app.github.dev` : 'localhost:8080',
+    host: CODESPACE_NAME
+      ? `${CODESPACE_NAME}-8888.preview.app.github.dev`
+      : 'localhost:8080',
     port: 8080,
     // disableHostCheck: true,
   },

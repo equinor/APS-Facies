@@ -1,4 +1,4 @@
-''' This module is used in FMU workflows to import gaussian field values from 
+''' This module is used in FMU workflows to import gaussian field values from
     disk into APS. Here we can assume that the project.current_realisation = 0 
     always since FMU ONLY run with one realization in the RMS project and 
     should have shared grid and shared parameters only. The grid model to be
@@ -79,7 +79,7 @@ def create_ertbox_grid_model(project, geo_grid_model_name: str,
 
     rotation_anticlockwise_degrees = -attributes.azimuth_angle
 
-    # Origo is upper left if flip is UPPER_LEFT_CORNER 
+    # Origo is upper left if flip is UPPER_LEFT_CORNER
     # and lower left if flip = LOWER_LEFT_CORNER
 
     flip = FlipDirectionXtgeo.LOWER_LEFT_CORNER
@@ -90,7 +90,7 @@ def create_ertbox_grid_model(project, geo_grid_model_name: str,
     z0 = 0.0
     if debug_level >= Debug.VERY_VERBOSE:
       print(f'--- Simbox rotation origo: ({x0}, {y0})')
-   
+
     dimension = (simbox_nx, simbox_ny, simbox_nz)
     origin =(x0, y0, z0)
 

@@ -1,95 +1,97 @@
 <template>
-  <v-popover
-    bottom
-    :disabled="canSimulate"
-    trigger="hover"
+  <floating-tooltip
+    placement="bottom"
+    :triggers="_explanation ? ['hover'] : []"
+    :disabled="!!_explanation"
+    v-tooltip="_explanation"
   >
     <icon-button
-      :disabled="!canSimulate"
+      :disabled="!!_explanation"
       :waiting="waitingForSimulation"
       icon="refresh"
       @click="refresh"
     />
-    <template slot="popover">
-      {{ _explanation }}
-    </template>
-  </v-popover>
+  </floating-tooltip>
 </template>
 
-<script lang="ts">
-import { Component, Prop, Vue } from 'vue-property-decorator'
-
+<script
+  setup
+  lang="ts"
+  generic="T extends Polygon,
+  S extends PolygonSerialization,
+  P extends PolygonSpecification,
+  RULE extends TruncationRule<T, S, P>
+"
+>
 import IconButton from '@/components/selection/IconButton.vue'
 
-import Polygon, { PolygonSerialization, PolygonSpecification } from '@/utils/domain/polygon/base'
-import TruncationRule from '@/utils/domain/truncationRule/base'
+import type {
+  Polygon,
+  PolygonSerialization,
+  PolygonSpecification,
+} from '@/utils/domain/polygon/base'
+import type TruncationRule from '@/utils/domain/truncationRule/base'
 
 import { TREND_NOT_IMPLEMENTED_PREVIEW_VISUALIZATION } from '@/config'
-import { usesAllFacies } from '@/store/utils/helpers'
 
 import { displayError } from '@/utils/helpers/storeInteraction'
+import { ref, computed, watch } from 'vue'
+import { usesAllFacies } from '@/stores/truncation-rules/utils'
+import { useFaciesStore } from '@/stores/facies'
+import { useTruncationRuleStore } from '@/stores/truncation-rules'
+import { useParameterGridSimulationBoxStore } from '@/stores/parameters/grid/simulation-box'
+import { storeToRefs } from 'pinia'
 
-@Component({
-  components: {
-    IconButton,
-  },
-})
-export default class PreviewHeader<
-  T extends Polygon = Polygon,
-  S extends PolygonSerialization = PolygonSerialization,
-  P extends PolygonSpecification = PolygonSpecification,
-> extends Vue {
-  waitingForSimulation = false
+const props = defineProps<{ value: RULE }>()
+const faciesStore = useFaciesStore()
+const ruleStore = useTruncationRuleStore()
+const parameterSimboxStore = storeToRefs(useParameterGridSimulationBoxStore())
 
-  @Prop({ required: true })
-  readonly value: TruncationRule<T, S, P>
+const waitingForSimulation = ref(false)
 
-  get _allFaciesUsed (): boolean { return usesAllFacies({ rootGetters: this.$store.getters }, this.value) }
+const _explanation = ref<string | undefined>(undefined)
 
-  get _canSimulateAllTrends (): boolean {
-    return (
-      this.value
-      && !this.value.fields
-        .some(field => (
-          field.trend
-          && field.trend.use
-          && TREND_NOT_IMPLEMENTED_PREVIEW_VISUALIZATION.includes(field.trend.type))
-        )
-    )
-  }
+const _canSimulateAllTrends = computed(
+  () =>
+    props.value &&
+    !props.value.fields.some(
+      (field) =>
+        field.trend &&
+        field.trend.use &&
+        TREND_NOT_IMPLEMENTED_PREVIEW_VISUALIZATION.includes(field.trend.type),
+    ),
+)
 
-  get canSimulate (): boolean {
-    return (
-      this.value
-      && this.value.ready
-      && this._allFaciesUsed
-      && this._canSimulateAllTrends
-    )
-  }
-
-  get _explanation (): string | undefined {
-    if (!this.value) return 'No truncation rule has been specified'
-    if (!this._allFaciesUsed) return 'More facies are selected, than are used'
-    if (!this._canSimulateAllTrends) {
-      return `Some Gaussian Random Field uses a trend that cannot be simulated in the previewer (${
-        TREND_NOT_IMPLEMENTED_PREVIEW_VISUALIZATION
-          .reduce((prev, curr: string) => `${prev}${prev ? ', ' : ''}'${curr}'`, '')
-      })`
+watch([
+  props.value,
+  parameterSimboxStore.waiting,
+], () => {
+  _explanation.value = (() => {
+    // Ensure `ready`, and `errorMessage` are executed every time there is a change in props.value
+    // otherwise vue / pinia seem to have problems detecting that the result will change
+    if (!props.value) return 'No truncation rule has been specified'
+    if (!usesAllFacies(props.value)) return 'More facies are selected, than are used'
+    if (parameterSimboxStore.waiting.value) return 'Computing simulation box size'
+    if (!_canSimulateAllTrends.value) {
+      return `Some Gaussian Random Field uses a trend that cannot be simulated in the previewer (${TREND_NOT_IMPLEMENTED_PREVIEW_VISUALIZATION.reduce(
+        (prev, curr: string) => `${prev}${prev ? ', ' : ''}'${curr}'`,
+        '',
+      )})`
     }
-    if (!this.value.ready) return this.value.errorMessage
+    if (!props.value.ready) return props.value.errorMessage
     return undefined
-  }
+  })()
+})
 
-  async refresh (): Promise<void> {
-    await this.$store.dispatch('facies/normalize')
-    this.waitingForSimulation = true
-    try {
-      await this.$store.dispatch('truncationRules/updateRealization', this.value)
-    } catch (e) {
-      await displayError(e)
-    } finally {
-      this.waitingForSimulation = false
-    }
+async function refresh(): Promise<void> {
+  faciesStore.normalize()
+  waitingForSimulation.value = true
+  try {
+    await ruleStore.updateRealization(props.value)
+  } catch (e) {
+    displayError(String(e))
+  } finally {
+    waitingForSimulation.value = false
   }
 }
 </script>

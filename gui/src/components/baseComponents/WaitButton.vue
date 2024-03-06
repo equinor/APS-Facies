@@ -1,19 +1,15 @@
 <template>
-  <v-popover
-    :disabled="!tooltipText"
-    trigger="hover"
-  >
+  <floating-tooltip :disabled="!tooltipText" trigger="hover">
     <v-btn
       :disabled="waiting || disabled"
       :dark="dark"
       :text="text"
       :color="color"
       :outlined="outlined"
-      @click="e => $emit('click', e)"
+      :variant="variant"
+      @click="(e: MouseEvent) => emit('click', e)"
     >
-      <slot
-        v-if="!title && !waiting"
-      />
+      <slot v-if="!title && !waiting" />
       <span v-if="!waiting">
         {{ title }}
       </span>
@@ -21,42 +17,41 @@
         <v-progress-circular indeterminate />
       </span>
     </v-btn>
-    <span
-      slot="popover"
-    >
+    <template #popper>
       {{ tooltipText }}
-    </span>
-  </v-popover>
+    </template>
+  </floating-tooltip>
 </template>
 
-<script lang="ts">
-import { Color } from '@/utils/domain/facies/helpers/colors'
-import { Component, Prop, Vue } from 'vue-property-decorator'
+<script setup lang="ts">
+import type { Color } from '@/utils/domain/facies/helpers/colors'
+import type { VBtn } from 'vuetify/components'
 
-@Component
-export default class WaitButton extends Vue {
-  @Prop({ default: '' })
-  readonly title!: string
-
-  @Prop({ default: '' })
-  readonly tooltipText: string
-
-  @Prop({ default: false, type: Boolean })
-  readonly waiting: boolean
-
-  @Prop({ default: false, type: Boolean })
-  readonly disabled: boolean
-
-  @Prop({ default: false, type: Boolean })
-  readonly outlined: boolean
-
-  @Prop({ default: false, type: Boolean })
-  readonly text: boolean
-
-  @Prop({ default: false, type: Boolean })
-  readonly dark: boolean
-
-  @Prop({ default: '' })
-  readonly color: Color
+type Props = {
+  title?: string
+  tooltipText?: string
+  waiting?: boolean
+  disabled?: boolean
+  outlined?: boolean
+  text?: string
+  dark?: boolean
+  color?: Color
+  variant?: VBtn['variant']
 }
+
+withDefaults(defineProps<Props>(), {
+  title: '',
+  tooltipText: '',
+  waiting: false,
+  disabled: false,
+  outline: false,
+  text: '',
+  dark: false,
+  color: undefined,
+  variant: 'text',
+})
+
+const emit = defineEmits<{
+  (event: 'click', value: MouseEvent): void
+}>()
 </script>

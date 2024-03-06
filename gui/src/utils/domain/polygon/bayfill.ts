@@ -1,66 +1,92 @@
-import FmuUpdatableValue, { FmuUpdatable } from '@/utils/domain/bases/fmuUpdatable'
+import type {
+  FmuUpdatable,
+} from '@/utils/domain/bases/fmuUpdatable'
+import FmuUpdatableValue from '@/utils/domain/bases/fmuUpdatable'
 import APSError from '@/utils/domain/errors/base'
 import APSTypeError from '@/utils/domain/errors/type'
-import Polygon, { PolygonArgs, PolygonSerialization, PolygonSpecification } from '@/utils/domain/polygon/base'
+import type {
+  PolygonArgs,
+  PolygonSerialization,
+  PolygonSpecification,
+} from '@/utils/domain/polygon/base'
+import Polygon from '@/utils/domain/polygon/base'
 
-enum SlantFactorFacies {
-  Floodplain = 'Floodplain',
-  Subbay = 'Subbay',
-  BayheadDelta = 'Bayhead Delta',
+export const SlantFactorFaciesValues = ['Floodplain', 'Subbay', 'Bayhead Delta'] as const
+export const NonSlantFactorFaciesValues = ['Wave influenced Bayfill', 'Lagoon'] as const
+
+export type SlantFactorFacies = typeof SlantFactorFaciesValues[number]
+
+export type NonSlantFactorFacies = typeof NonSlantFactorFaciesValues[number]
+
+export type BayfillFacies = SlantFactorFacies | NonSlantFactorFacies
+
+export function hasBayfillName(name: string): name is BayfillFacies {
+  return ([...SlantFactorFaciesValues, ...NonSlantFactorFaciesValues] as const).includes(name as BayfillFacies)
 }
 
-const enum NonSlantFactorFacies {
-  WaveInfluencedBayfill = 'Wave influenced Bayfill',
-  Lagoon = 'Lagoon',
-}
+export type SlantFactorArgs = ({
+  name: SlantFactorFacies
+  slantFactor: FmuUpdatable | number
+} | {
+  name: NonSlantFactorFacies
+  slantFactor?: null
+})
 
-type BayfillFacies = SlantFactorFacies | NonSlantFactorFacies
+export type BayfillPolygonArgs = PolygonArgs & SlantFactorArgs
 
-export interface BayfillPolygonArgs extends PolygonArgs {
-  name: BayfillFacies | string
-  slantFactor: FmuUpdatable | number | null
-}
+type BayfillNameSpecification = 'SBHD' | 'SF' | 'YSF'
 
 export interface BayfillPolygonSpecification extends PolygonSpecification {
-  name: string
+  name: BayfillNameSpecification
   polygon: string
   factor: FmuUpdatable
 }
 
-export interface BayfillPolygonSerialization extends PolygonSerialization {
-  name: BayfillFacies | string
-  slantFactor?: FmuUpdatable
+export type BayfillPolygonSerialization = PolygonSerialization & SlantFactorArgs
+
+export function requireSlantFactor(name: BayfillFacies): name is SlantFactorFacies {
+  return (SlantFactorFaciesValues).includes(name as SlantFactorFacies)
 }
 
 export default class BayfillPolygon extends Polygon {
-  public name: BayfillFacies | string
+  public name: BayfillFacies
   public slantFactor: FmuUpdatable | null
 
-  public constructor ({ name, slantFactor = null, ...rest }: BayfillPolygonArgs) {
+  public constructor({
+    name,
+    slantFactor = null,
+    ...rest
+  }: BayfillPolygonArgs) {
     super(rest)
     this.name = name
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    if (Object.values(SlantFactorFacies).includes(name)) {
+    if (requireSlantFactor(name)) {
       if (slantFactor) {
         this.slantFactor = new FmuUpdatableValue(slantFactor)
       } else {
-        throw new APSTypeError(`The Bayfill polygon, ${name} MUST have a slant factor`)
+        throw new APSTypeError(
+          `The Bayfill polygon, ${name} MUST have a slant factor`,
+        )
       }
     }
   }
 
-  public get isFmuUpdatable (): boolean {
-    return super.isFmuUpdatable || (this.slantFactor !== null && this.slantFactor.updatable)
+  public get isFmuUpdatable(): boolean {
+    return (
+      super.isFmuUpdatable ||
+      (this.slantFactor !== null && this.slantFactor.updatable)
+    )
   }
 
-  public get specification (): BayfillPolygonSpecification {
-    const _mapping: Record<string, string> = {
+  public get specification(): BayfillPolygonSpecification {
+    const _mapping: Record<string, BayfillNameSpecification> = {
       'Bayhead Delta': 'SBHD',
       Floodplain: 'SF',
       Subbay: 'YSF',
     }
-    if (!Object.keys(_mapping).includes(this.name) || !this.slantFactor) throw new APSError('A Bayfill polygon without a slant factor, CANNOT be used in a specification')
+    if (!Object.keys(_mapping).includes(this.name) || !this.slantFactor)
+      throw new APSError(
+        'A Bayfill polygon without a slant factor, CANNOT be used in a specification',
+      )
     return {
       ...super.specification,
       name: _mapping[this.name],
@@ -69,11 +95,13 @@ export default class BayfillPolygon extends Polygon {
     }
   }
 
-  public toJSON (): BayfillPolygonSerialization {
+  public toJSON(): BayfillPolygonSerialization {
     return {
       ...super.toJSON(),
-      name: this.name,
-      ...(this.slantFactor ? { slantFactor: this.slantFactor } : {})
+      ...({
+        name: this.name,
+        ...(this.slantFactor ? { slantFactor: this.slantFactor } : {}),
+      } as SlantFactorArgs)
     }
   }
 }

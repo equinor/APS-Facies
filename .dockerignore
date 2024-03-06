@@ -16,8 +16,12 @@
 
 !aps/*.py
 !aps/api/**/*.py
+!aps/api/VERSION
+!aps/api/COMMIT
+!aps/api/STUB_VERSION
 !aps/utils/**/*.py
 !aps/rms_jobs/**/*.py
+!aps/toolbox/**/*.py
 !aps/algorithms/**/*.py
 !libraries/rms-mock/roxar/**/*.py
 !libraries/rms-mock/_roxar/**/*.py
@@ -25,8 +29,9 @@
 !gui/tsconfig.json
 !gui/.eslintrc.js
 !gui/.postcssrc.js
-!gui/babel.config.js
 !gui/vue.config.js
+!gui/vite.config.ts
+!gui/index.html
 !gui/public/CHANGELOG.md
 !gui/public/favicon.ico
 !gui/public/index.html

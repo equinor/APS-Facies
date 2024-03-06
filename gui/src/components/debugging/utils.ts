@@ -1,5 +1,5 @@
 import rms from '@/api/rms'
-import { Job } from '@/api/types'
+import type { Job } from '@/api/types'
 
 export const getJobs = async (): Promise<Job[]> => {
   const master = await rms.loadPluginDotMaster()

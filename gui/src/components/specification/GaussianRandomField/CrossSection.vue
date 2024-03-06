@@ -1,7 +1,5 @@
 <template>
-  <v-row
-    class="ma-2"
-  >
+  <v-row class="ma-2">
     <!--Cross section-->
     <v-col>
       <v-select
@@ -9,32 +7,26 @@
         :items="['IJ', 'IK', 'JK']"
         label="Cross section type"
         required
+        variant="underlined"
       />
     </v-col>
   </v-row>
 </template>
 
-<script lang="ts">
-import { Component, Vue } from 'vue-property-decorator'
+<script setup lang="ts">
+import type {
+  CrossSectionType,
+} from '@/utils/domain/gaussianRandomField/crossSection'
 
-import { Store } from '@/store/typing'
-import { Optional } from '@/utils/typing'
-import CrossSectionType from '@/utils/domain/gaussianRandomField/crossSection'
+import { computed } from 'vue'
+import { useGaussianRandomFieldCrossSectionStore } from '@/stores/gaussian-random-fields/cross-sections'
 
-import FractionField from '@/components/selection/FractionField.vue'
+const crossSectionStore = useGaussianRandomFieldCrossSectionStore()
 
-@Component({
-  components: {
-    FractionField,
+const type = computed({
+  get: () => crossSectionStore.current.type,
+  set: (value: CrossSectionType) => {
+    crossSectionStore.changeType(value)
   },
 })
-export default class CrossSection extends Vue {
-  get crossSection (): Optional<CrossSectionType> { return (this.$store as Store).getters['gaussianRandomFields/crossSections/current'] }
-
-  public get type (): string { return this.crossSection ? this.crossSection.type : 'IJ' }
-  public set type (value: string) {
-    if (!this.crossSection) return
-    this.$store.dispatch('gaussianRandomFields/crossSections/changeType', { id: this.crossSection.id, type: value })
-  }
-}
 </script>

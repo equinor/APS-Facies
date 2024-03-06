@@ -188,6 +188,90 @@ class Migration:
         }
         return state
 
+    @staticmethod
+    def migrate_from_vuex_to_pinia(state: dict):
+        for location in [
+            'constants.faciesColors', 'facies', 'facies.global', 'facies.groups', 'gaussianRandomFields',
+            'gaussianRandomFields.crossSections', 'gridModels', 'truncationRules', 'truncationRules.templates',
+            'truncationRules.templates.types', 'zones',
+        ]:
+            # FIXME: update regions as well
+            # `available` is now a list of items, rather than an object
+            # we update the dict / serialization in place
+            data = state
+            for level in location.split('.'):
+                data = data[level]
+            data['available'] = list(data['available'].values())
+
+        # The 'options' now just stores the values
+        if 'options' in state:
+            data = state['options']
+            for key in data.keys():
+                if key == 'showNameOrNumber':
+                    data[key] = {
+                        zone_region: data[key][zone_region]['value'] for zone_region in ['zone', 'region']
+                    }
+                else:
+                    data[key] = data[key]['value']
+        # Likewise with FMU
+        if 'fmu' in state:
+            data = state['fmu']
+            for key in data.keys():
+                if key == 'maxDepth':
+                    # This has format {'value': int, 'minimum': int }, and should therefore keep itr structure
+                    continue
+                if key == 'simulationGrid':
+                    data[key] = data[key]['current']
+                else:
+                    data[key] = data[key]['value']
+
+        # Simulation box sizes are calculated on demand per grid model, and cached now
+        # We restore the existing cache
+        if 'parameters' in state and 'grid' in state['parameters']:
+            data = state['parameters']['grid']
+            current = state['gridModels']['current']
+            current_grid_model_name = None
+            for grid_model in state['gridModels']['available']:
+                if grid_model['id'] == current:
+                    current_grid_model_name = grid_model['name']
+            data['simulationBox'] = {
+                'rough': False,
+                'simulationBoxes': {}
+            }
+            # previously, we didn't store information on the estimation was rough or fine,
+            # so we assume it is the default (rough)
+            if current_grid_model_name:
+                data['simBox']['rotation'] = data['azimuth']
+                data['simulationBox']['simulationBoxes'][current_grid_model_name] = {
+                    'false': data['simBox'],
+                }
+                del data['simBox']
+
+        # We store the truncation type directly, without going through an identifier
+        if 'truncationRules' in state:
+            data = state['truncationRules']
+            selected_type_id = data['preset']['type']
+            selected_type = None
+            if selected_type_id:
+                for truncation_rule_type in data['templates']['types']['available']:
+                    if truncation_rule_type['id'] == selected_type_id:
+                        selected_type = truncation_rule_type['type']
+            if selected_type:
+                data['preset']['type'] = selected_type
+
+        # Now, the opened gaussian random field panels are named
+        if 'panels' in state:
+            data = state['panels']['settings']
+            opened = data['gaussianRandomFields']
+            if isinstance(opened, int):
+                opened = [opened]
+            elif opened is None:
+                opened = []
+
+            data['individualGaussianRandomFields'] = opened
+            data['gaussianRandomFields'] = len(opened) > 0
+        return state
+
     def attempt_upgrading_legacy_state(self, state: dict):
         return _attempt_upgrading_legacy_state(self, state)
 
@@ -312,6 +396,11 @@ class Migration:
                 'to': '1.13.0',
                 'up': self.add_check_export_ertbox_grid,
             },
+            {
+                'from': '1.13.0',
+                'to': '1.14.0',
+                'up': self.migrate_from_vuex_to_pinia,
+            },
 
         ]
 
@@ -378,7 +467,7 @@ def _attempt_upgrading_legacy_state(self: Migration, state: dict):
     if isinstance(state['gridModels']['available'], list):
         _migrate_list_of_grids_to_identified_grids(self, state)
 
-    _ensure_state_has_key(state, 'debugLevel')
+    _ensure_state_has_key(state['parameters'], 'debugLevel')
 
     _ensure_state_has_key(state, 'fmu')
 

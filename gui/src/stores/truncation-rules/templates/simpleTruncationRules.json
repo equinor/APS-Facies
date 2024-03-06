@@ -1,0 +1,30 @@
+{
+  "templates": [
+    {
+      "name": "Simple",
+      "type": "cubic",
+      "minFields": 2,
+      "polygons": [],
+      "settings": {
+        "direction": "V",
+        "polygons": []
+      },
+      "fields": [
+        {
+          "channel": 1,
+          "field": {
+            "name": "GRF01",
+            "index": 0
+          }
+        },
+        {
+          "channel": 2,
+          "field": {
+            "name": "GRF02",
+            "index": 1
+          }
+        }
+      ]
+    }
+  ]
+}

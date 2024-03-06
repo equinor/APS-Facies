@@ -9,20 +9,14 @@
   />
 </template>
 
-<script lang="ts">
-import { Component, Vue } from 'vue-property-decorator'
+<script setup lang="ts">
 import SelectionTable from '@/components/table/SelectionTable.vue'
 
-import { Region } from '@/utils/domain'
+import { computed } from 'vue'
+import { useZoneStore } from '@/stores/zones'
 
-@Component({
-  components: {
-    SelectionTable,
-  },
-})
-export default class RegionSelection extends Vue {
-  get regions (): Region[] { return this.$store.getters.regions }
+const zoneStore = useZoneStore()
 
-  get showName (): boolean { return this.regions.some(region => !!region.name) }
-}
+const regions = computed(() => zoneStore.current?.regions ?? [])
+const showName = computed(() => regions.value.some((region) => !!region.name))
 </script>

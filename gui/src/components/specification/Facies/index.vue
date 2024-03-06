@@ -1,52 +1,45 @@
 <template>
   <facies-specification-base
-    :value="value.facies"
+    v-model="facies"
     :disable="disable"
     :clearable="clearable"
-    @input.capture="facies => updateFacies(facies)"
   />
 </template>
 
-<script lang="ts">
-import { Vue, Component, Prop } from 'vue-property-decorator'
-
-import { Store } from '@/store/typing'
-import { ID } from '@/utils/domain/types'
-import Facies from '@/utils/domain/facies/local'
-import Polygon, { PolygonSerialization, PolygonSpecification } from '@/utils/domain/polygon/base'
-import TruncationRule from '@/utils/domain/truncationRule/base'
+<script
+  setup
+  lang="ts"
+  generic="T extends Polygon,
+  RULE extends InstantiatedTruncationRule
+"
+>
+import type Facies from '@/utils/domain/facies/local'
+import type Polygon from '@/utils/domain/polygon/base'
+import type { InstantiatedTruncationRule } from '@/utils/domain'
 
 import FaciesSpecificationBase from './base.vue'
+import { computed } from 'vue'
+import { useTruncationRuleStore } from '@/stores/truncation-rules'
 
-@Component({
-  components: {
-    FaciesSpecificationBase,
-  }
+type Props = {
+  value: T
+  rule: RULE
+  clearable?: boolean
+  disable?: boolean | ((facies: Facies) => boolean)
+}
+const props = withDefaults(defineProps<Props>(), {
+  clearable: false,
+  disable: false,
 })
-export default class FaciesSpecification<
-  T extends Polygon = Polygon,
-  S extends PolygonSerialization = PolygonSerialization,
-  P extends PolygonSpecification = PolygonSpecification,
-> extends Vue {
-  @Prop({ required: true })
-  readonly value: Polygon
 
-  @Prop({ required: true })
-  readonly rule: TruncationRule<T, S, P>
+const ruleStore = useTruncationRuleStore()
 
-  @Prop({ default: false, type: Boolean })
-  readonly clearable!: boolean
+const facies = computed({
+  get: () => props.value.facies,
+  set: (value: Facies | null) => (value ? updateFacies(value) : undefined),
+})
 
-  @Prop({ default: false })
-  readonly disable: ((facies: Facies) => boolean) | boolean
-
-  async updateFacies (faciesId: ID | undefined): Promise<void> {
-    const facies = (this.$store as Store).getters['facies/byId'](faciesId)
-    await this.$store.dispatch('truncationRules/updateFacies', {
-      rule: this.rule,
-      polygon: this.value,
-      facies,
-    })
-  }
+function updateFacies(facies: Facies): void {
+  ruleStore.updateFacies(props.rule, props.value, facies)
 }
 </script>

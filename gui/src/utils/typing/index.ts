@@ -1,26 +1,26 @@
-import { Optional, Maybe } from '@/utils/typing/simple'
+import type { VDataTable } from 'vuetify/components'
 
-interface HeaderItem {
+export type { Optional, Maybe } from '@/utils/typing/simple'
+
+export type VuetifyColumns = Parameters<VDataTable['$slots']['default']>[0]['columns']
+
+export interface HeaderItem {
   text: string
   value?: string
   class?: string
-  help?: string
+  headerProps?: {
+    help?: string
+  }
   sortable?: boolean
 }
 
-interface ListItem<T> {
+export interface ListItem<T, AdditionalProps extends object = Record<string, unknown>> {
   value?: T
-  text: string
-  disabled?: boolean
-  help?: string
+  title: string
+  props?: Partial<{
+    disabled: boolean
+    help: string
+  }> & AdditionalProps
 }
 
-type HeaderItems = HeaderItem[]
-
-export {
-  Optional,
-  Maybe,
-  HeaderItem,
-  HeaderItems,
-  ListItem,
-}
+export type HeaderItems = HeaderItem[]

@@ -1,26 +1,19 @@
-declare module '*.vue' {
-  import Vue from 'vue'
-  export default Vue
-}
+import type { Tooltip } from 'floating-vue'
+import 'vite/client'
 
 declare module '*.json' {
   const value: any
   export default value
 }
 
-// FIXME: Workaround for Vuetify's 'types' module being "undefined"
-declare module 'types' {
-  type TouchHandlers = any
-  type TouchValue = any
-  type TouchWrapper = any
-  type DataTableCompareFunction<T> = any
-  type SelectItemKey = any
-
-  export {
-    TouchHandlers,
-    TouchValue,
-    TouchWrapper,
-    DataTableCompareFunction,
-    SelectItemKey,
+declare module '@vue/runtime-core' {
+  interface GlobalComponents {
+    FloatingTooltip: typeof Tooltip
   }
+}
+
+declare module '*.vue' {
+  import type { DefineComponent } from 'vue'
+  const component: DefineComponent<{}, {}, any>
+  export default component
 }

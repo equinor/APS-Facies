@@ -1,9 +1,5 @@
-import { create, all, MathJsStatic } from 'mathjs'
+import { create, all } from 'mathjs'
 
-const config = {
-  number: 'BigNumber',
-}
-
-const math = (create(all, config) as MathJsStatic)
+const math = create(all, { number: 'BigNumber' })
 
 export default math

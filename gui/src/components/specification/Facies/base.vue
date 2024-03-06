@@ -1,50 +1,46 @@
 <template>
   <v-select
     :items="faciesOptions"
-    :value="selected"
+    v-model="selected"
     :clearable="clearable"
-    @input.capture="facies => $emit('input', facies)"
+    variant="underlined"
   />
 </template>
 
-<script lang="ts">
-import { Component, Prop, Vue } from 'vue-property-decorator'
-import { getId } from '@/utils/helpers'
+<script setup lang="ts">
+import type Facies from '@/utils/domain/facies/local'
+import type { ListItem } from '@/utils/typing'
+import { computed } from 'vue'
+import { useFaciesStore } from '@/stores/facies'
 
-import { Store } from '@/store/typing'
-import { ID } from '@/utils/domain/types'
-import Facies from '@/utils/domain/facies/local'
-import { ListItem } from '@/utils/typing'
-
-@Component
-export default class FaciesSpecificationBase extends Vue {
-  @Prop({ required: true })
-  readonly value: Facies | ID | Facies[] | ID[]
-
-  @Prop({ default: false })
-  readonly disable: ((facies: Facies) => boolean) | boolean
-
-  @Prop({ default: false, type: Boolean })
-  readonly clearable!: boolean
-
-  get selectedFacies (): Facies[] {
-    return (this.$store as Store).getters['facies/selected']
-  }
-
-  get selected (): ID | ID[] {
-    if (Array.isArray(this.value)) return (this.value as ID[]).map(getId)
-    return getId(this.value)
-  }
-
-  get faciesOptions (): ListItem<string>[] {
-    return this.selectedFacies
-      .map(facies => {
-        return {
-          text: facies.alias,
-          value: facies.id,
-          disabled: this.disable instanceof Function ? this.disable(facies) : this.disable,
-        }
-      })
-  }
+type Props = {
+  modelValue: Facies | null
+  disable?: boolean | ((facies: Facies) => boolean)
+  clearable?: boolean
 }
+const props = withDefaults(defineProps<Props>(), {
+  disable: false,
+  clearable: false,
+})
+const emit = defineEmits<{
+  (event: 'update:model-value', value: Facies | null): void
+}>()
+
+const faciesStore = useFaciesStore()
+
+const selected = computed({
+  get: () => props.modelValue,
+  set: (facies: Facies | null) => emit('update:model-value', facies),
+})
+
+const faciesOptions = computed<ListItem<Facies>[]>(() => {
+  return faciesStore.selected.map((facies) => ({
+    title: facies.alias,
+    value: facies,
+    props: {
+      disabled:
+        props.disable instanceof Function ? props.disable(facies) : props.disable,
+    }
+  }) as ListItem<Facies>)
+})
 </script>

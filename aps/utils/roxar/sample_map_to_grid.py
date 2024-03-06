@@ -10,7 +10,7 @@ def check_existence_of_map(project, zone_name, map_name):
     exists = False
     if zone_name in project.zones:
         if map_name in project.zones[zone_name]:
-            surface = project.zones[zone_name][map_name] 
+            surface = project.zones[zone_name][map_name]
             if surface:
                 if not surface.is_empty():
                     exists = True

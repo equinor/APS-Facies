@@ -1,6 +1,6 @@
 <template>
   <numeric-field
-    :value="value"
+    :model-value="modelValue"
     :arrow-step="0.01"
     :ranges="ranges"
     :fmu-updatable="fmuUpdatable"
@@ -10,52 +10,36 @@
     :dense="dense"
     optional
     enforce-ranges
-    @input="e => propagate(e, 'input')"
-    @click:append="e => propagate(e, 'click:append')"
+    @update:model-value="(newValue) => emit('update:model-value', newValue)"
+    @click:append="(e: MouseEvent) => emit('click:append', e)"
   />
 </template>
 
-<script lang="ts">
-import { Component, Prop, Vue } from 'vue-property-decorator'
-import { FmuUpdatable } from '@/utils/domain/bases/fmuUpdatable'
+<script setup lang="ts">
+import type { FmuUpdatable } from '@/utils/domain/bases/fmuUpdatable'
 
-import { Optional } from '@/utils/typing'
-import { MinMax } from '@/api/types'
+import type { MinMax } from '@/api/types'
 import NumericField from '@/components/selection/NumericField.vue'
+import type { PROBABILITY } from '@/utils/domain/types'
 
-@Component({
-  components: {
-    NumericField,
-  },
-})
-export default class FractionField extends Vue {
-  @Prop({ required: true })
-  readonly value!: Optional<number> | FmuUpdatable
-
-  @Prop({ required: false, default: false, type: Boolean })
-  readonly fmuUpdatable!: boolean
-
-  @Prop({ required: false, default: false, type: Boolean })
-  readonly disabled!: boolean
-
-  @Prop({ required: false, default: '' })
-  readonly label!: string
-
-  @Prop({ required: false, default: '' })
-  readonly appendIcon!: string
-
-  @Prop({ default: false, type: Boolean })
-  readonly dense!: boolean
-
-  get ranges (): MinMax {
-    return {
-      min: 0,
-      max: 1,
-    }
-  }
-
-  propagate (value: any, event: string): void {
-    this.$emit(event, value)
-  }
+const ranges: MinMax = { min: 0, max: 1 }
+type Props = {
+  modelValue: number | FmuUpdatable | null
+  fmuUpdatable?: boolean
+  disabled?: boolean
+  label?: string
+  appendIcon?: string
+  dense?: boolean
 }
+withDefaults(defineProps<Props>(), {
+  fmuUpdatable: false,
+  disabled: false,
+  label: '',
+  appendIcon: '',
+  dense: false,
+})
+const emit = defineEmits<{
+  (event: 'click:append', value: MouseEvent): void
+  (event: 'update:model-value', value: PROBABILITY | FmuUpdatable<PROBABILITY> | null): void
+}>()
 </script>

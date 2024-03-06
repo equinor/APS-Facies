@@ -1,10 +1,13 @@
-import { Color } from '@/utils/domain/facies/helpers/colors'
+import type { Color } from '@/utils/domain/facies/helpers/colors'
 
-export type ColorScale = string | { value: number, color: Color}[]
+export type ColorScale = string | {
+  value: number
+  color: Color
+}[]
 
 export type ColorMapping = [number, Color][] | string
 
-export function colorMapping (colorScale: ColorScale): ColorMapping {
+export function colorMapping(colorScale: ColorScale): ColorMapping {
   if (Array.isArray(colorScale)) {
     const colors: [number, Color][] = []
     for (const item of colorScale) {

@@ -1,35 +1,31 @@
 <template>
   <wait-btn
     :title="title"
-    :outline="outline"
+    :outlined="outline"
     :disabled="disabled"
     :tooltip-text="tooltipText"
     color="primary"
-    @click="e => $emit('click', e)"
+    @click="(e: MouseEvent) => emit('click', e)"
   />
 </template>
 
-<script lang="ts">
-import { Component, Prop, Vue } from 'vue-property-decorator'
-
+<script setup lang="ts">
 import WaitBtn from '@/components/baseComponents/WaitButton.vue'
 
-@Component({
-  components: {
-    WaitBtn,
-  }
-})
-export default class BoldButton extends Vue {
-  @Prop({ required: true })
-  readonly title!: string
-
-  @Prop({ default: false, type: Boolean })
-  readonly outline!: boolean
-
-  @Prop({ default: false, type: Boolean })
-  readonly disabled!: boolean
-
-  @Prop({ default: '' })
-  readonly tooltipText!: string
+type Props = {
+  title: string
+  outline?: boolean
+  disabled?: boolean
+  tooltipText?: string
 }
+
+withDefaults(defineProps<Props>(), {
+  outline: false,
+  disabled: false,
+  tooltipText: '',
+})
+
+const emit = defineEmits<{
+  (event: 'click', value: MouseEvent): void
+}>()
 </script>

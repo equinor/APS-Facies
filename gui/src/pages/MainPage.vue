@@ -1,86 +1,48 @@
 <template>
-  <v-container
-    class="fill-height"
-    fluid
-  >
-    <v-row
-      v-if="loading"
-    >
-      <v-col cols="12">
-        <v-row
-          justify="center"
-          align="center"
-        >
-          <v-progress-circular
-            :size="70"
-            indeterminate
-          />
-        </v-row>
-        <v-row
-          justify="center"
-          align="center"
-        >
-          <span>{{ loadingMessage }}</span>
-        </v-row>
-      </v-col>
+  <v-container fluid>
+    <v-row v-if="loading" class="d-flex align-content-center flex-column align-center">
+      <v-progress-circular :size="70" indeterminate/>
+      <span>{{ loadingMessage }}</span>
     </v-row>
-    <v-row
-      v-else
-    >
-      <v-col cols="4">
+    <v-row v-else>
+      <v-col cols="4" class="pa-0">
         <scrollable-area>
-          <vue-horizontal>
-            <selection />
-          </vue-horizontal>
+          <selection />
         </scrollable-area>
       </v-col>
       <v-col cols="4">
         <scrollable-area>
-          <vue-horizontal>
-            <preview v-if="hasSimulations" />
-          </vue-horizontal>
+          <preview v-if="hasSimulations" />
         </scrollable-area>
       </v-col>
       <v-col cols="4">
         <scrollable-area>
-          <vue-horizontal>
-            <settings
-              v-if="canSpecifyModelSettings"
-            />
-          </vue-horizontal>
+          <settings v-if="canSpecifyModelSettings" />
         </scrollable-area>
       </v-col>
     </v-row>
   </v-container>
 </template>
 
-<script lang="ts">
-import { Component, Vue } from 'vue-property-decorator'
-
+<script setup lang="ts">
 import Selection from '@/components/ElementSelection.vue'
 import Settings from '@/components/ElementSettings.vue'
 import Preview from '@/components/ElementPreview.vue'
 import ScrollableArea from '@/components/baseComponents/ScrollableArea.vue'
 
-import { GaussianRandomField } from '@/utils/domain'
+import type { GaussianRandomField } from '@/utils/domain'
+import { computed } from 'vue'
+import { useRootStore } from '@/stores'
+import { useGaussianRandomFieldStore } from '@/stores/gaussian-random-fields'
 
-@Component({
-  components: {
-    ScrollableArea,
-    Selection,
-    Settings,
-    Preview,
-  },
-})
-export default class MainPage extends Vue {
-  get canSpecifyModelSettings (): boolean { return this.$store.getters.canSpecifyModelSettings }
+const rootStore = useRootStore()
+const fieldStore = useGaussianRandomFieldStore()
 
-  get loading (): boolean { return this.$store.state._loading.value }
-
-  get loadingMessage (): string { return this.$store.state._loading.message }
-
-  get fields (): GaussianRandomField[] { return Object.values(this.$store.getters.fields) }
-
-  get hasSimulations (): boolean { return this.fields.length > 0 }
-}
+const canSpecifyModelSettings = computed<boolean>(
+  () => rootStore.canSpecifyModelSettings,
+)
+const loading = computed<boolean>(() => rootStore.loading)
+const loadingMessage = computed<string>(() => rootStore.loadingMessage)
+const fields = computed<GaussianRandomField[]>(() => fieldStore.selected)
+const hasSimulations = computed<boolean>(() => fields.value.length > 0)
 </script>

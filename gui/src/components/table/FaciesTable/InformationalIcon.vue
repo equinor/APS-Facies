@@ -1,56 +1,47 @@
 <template>
-  <base-tooltip
-    :message="active ? message : inactiveMessage"
-  >
+  <base-tooltip :message="active ? message : inactiveMessage">
     <v-icon
+      v-if="hasIcon"
       :color="color"
-    >
-      {{ __icon }}
-    </v-icon>
+      :icon="__icon"
+    />
   </base-tooltip>
 </template>
 
-<script lang="ts">
-import { Component, Prop, Vue } from 'vue-property-decorator'
-
+<script setup lang="ts">
 import BaseTooltip from '@/components/baseComponents/BaseTooltip.vue'
-import { GlobalFacies } from '@/utils/domain'
-import { ID } from '@/utils/domain/types'
-import { VuetifyIcon } from 'vuetify/types/services/icons'
+import type { GlobalFacies } from '@/utils/domain'
+import type { ID } from '@/utils/domain/types'
+import { computed } from 'vue'
+import vuetify from '@/plugins/vuetify'
 
-@Component({
-  components: {
-    BaseTooltip,
-  },
+const props = withDefaults(defineProps<{
+  value: GlobalFacies
+  icon: string
+  current?: ID | null
+  active?: boolean
+  message?: string
+  inactiveMessage?: string
+}>(), {
+  active: false,
+  current: null,
+  message: undefined,
+  inactiveMessage: undefined,
 })
-export default class InformationalIcon extends Vue {
-  @Prop({ required: true })
-  readonly value!: GlobalFacies
 
-  @Prop({ required: true })
-  readonly icon!: string
+const __icon = computed(() => `$${props.icon}${!props.active ? 'Negated' : ''}`)
 
-  @Prop({ default: undefined })
-  readonly current?: ID
+const isCurrent = computed(() => props.current === props.value.id)
 
-  @Prop({ default: false, type: Boolean })
-  readonly active!: boolean
+const color = computed(() => (isCurrent.value ? 'white' : undefined))
 
-  @Prop({ default: undefined })
-  readonly message?: string
-
-  @Prop({ default: undefined })
-  readonly inactiveMessage?: string
-
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  get __icon (): VuetifyIcon | undefined {
-    const icons = this.$vuetify.icons.values
-    const iconName = `${this.icon}${!this.active ? 'Negated' : ''}`
-    return icons[`${iconName}`]
+const hasIcon = computed<boolean>(() => {
+  // Vuetify 3 will throw an error if the icon does not exist, rather than not showing anything as was the case in 2
+  const name = __icon.value.replace('$', '')
+  const exists = !!vuetify.icons.aliases[name]
+  if (!exists) {
+    console.warn(`Tried to use icon ${name}, but it does not exist`)
   }
-
-  get isCurrent (): boolean { return this.current === this.value.id }
-
-  get color (): string | undefined { return this.isCurrent ? 'white' : undefined }
-}
+  return exists
+})
 </script>

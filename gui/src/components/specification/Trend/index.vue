@@ -3,53 +3,41 @@
     <h4>Trend</h4>
     <v-row>
       <v-col cols="6">
-        <v-checkbox
-          v-model="useTrend"
-          label="Apply trend to field"
-        />
+        <v-checkbox v-model="useTrend" label="Apply trend to field" />
       </v-col>
       <v-spacer />
       <v-col cols="6">
         <relative-standard-deviation
           v-if="useTrend"
           :value="value"
-          @update:error="e => update('relativeStdDev', e)"
+          @update:error="(e: boolean) => invalid.relativeStdDev=e"
         />
       </v-col>
     </v-row>
-    <v-col
-      v-if="useTrend"
-    >
-      <v-row
-        class="fill-height"
-        align="center"
-        justify="center"
-        no-gutters
-      >
+    <v-col v-if="useTrend">
+      <v-row class="fill-height" align="center" justify="center" no-gutters>
         <v-col cols="6">
           <item-selection
             v-model="trendType"
             :items="availableTrends"
             :constraints="{ required: true }"
             label="Trend type"
-            @update:error="e => update('type', e)"
+            @update:error="(e: boolean) => invalid.type=e"
           />
-          <div
-            v-if="hasLinearProperties"
-          >
+          <div v-if="hasLinearProperties">
             <depositional-azimuth-angle
               :value="value"
-              @update:error="e => update('azimuth', e)"
+              @update:error="(e: boolean) => invalid.azimuth=e"
             />
             <stacking-angle-specification
               :value="value"
-              @update:error="e => update('stacking', e)"
+              @update:error="(e: boolean) => invalid.stacking=e"
             />
           </div>
           <migration-angle
             v-if="hasHyperbolicProperties"
             :value="value"
-            @update:error="e => update('migration', e)"
+            @update:error="(e: boolean) => invalid.migration=e"
           />
         </v-col>
         <v-spacer />
@@ -59,6 +47,7 @@
             v-model="trendParameter"
             :items="availableRmsTrendParameters"
             label="Trend parameter"
+            variant="underlined"
           />
           <v-select
             v-if="isRmsTrendMap"
@@ -66,32 +55,34 @@
             v-tooltip="'Select zone name from Zones folder for maps'"
             :items="availableRmsTrendZones"
             label="Zone name"
+            variant="underlined"
           />
           <v-select
             v-if="isRmsTrendMap"
             v-model="trendMapName"
-            v-tooltip="'Select surface with 2D trend corresponding to selected zone'"
+            v-tooltip="
+              'Select surface with 2D trend corresponding to selected zone'
+            "
             :items="availableRmsTrendMaps"
             :disabled="!hasDefinedRmsTrendZone"
             label="Trend map"
+            variant="underlined"
           />
-          <div
-            v-if="hasEllipticProperties"
-          >
+          <div v-if="hasEllipticProperties">
             <curvature-specification
               :value="value"
-              @update:error="e => update('curvature', e)"
+              @update:error="(e: boolean) => invalid.curvature=e"
             />
             <origin-specification
               :value="value"
-              @update:error="e => update('origin', e)"
+              @update:error="(e: boolean) => invalid.origin=e"
             />
           </div>
           <v-col>
             <relative-size-of-ellipse
               v-if="hasEllipticConeProperties"
               :value="value"
-              @update:error="e => update('relativeEllipseSize', e)"
+              @update:error="(e: boolean) => invalid.relativeEllipseSize=e"
             />
           </v-col>
         </v-col>
@@ -100,13 +91,9 @@
   </v-col>
 </template>
 
-<script lang="ts">
-import { Component, Prop, Vue, Watch } from 'vue-property-decorator'
-
-import { GaussianRandomField } from '@/utils/domain'
-import Trend, { TrendType } from '@/utils/domain/gaussianRandomField/trend'
-import { Store } from '@/store/typing'
-import { ListItem } from '@/utils/typing'
+<script setup lang="ts">
+import type { GaussianRandomField } from '@/utils/domain'
+import type { TrendType } from '@/utils/domain/gaussianRandomField/trend'
 
 import { notEmpty } from '@/utils'
 
@@ -122,7 +109,10 @@ import {
 } from '@/components/specification/Trend/InputFields'
 
 import { TREND_NOT_IMPLEMENTED_PREVIEW_VISUALIZATION } from '@/config'
-import type { TrendMap } from '@/store/modules/parameters/rmsTrendMapZones'
+import { useParameterRmsTrendStore } from '@/stores/parameters/rms-trend'
+import { type TrendMap, useParameterRmsTrendMapZoneStore } from '@/stores/parameters/rms-trend-map-zones'
+import { ref, computed, watch } from 'vue'
+import { useConstantsOptionsTrendsStore } from '@/stores/constants/options'
 
 interface Invalid {
   relativeStdDev: boolean
@@ -135,125 +125,109 @@ interface Invalid {
   relativeEllipseSize: boolean
 }
 
-@Component({
-  components: {
-    ItemSelection,
-    StackingAngleSpecification,
-    OriginSpecification,
-    RelativeStandardDeviation,
-    RelativeSizeOfEllipse,
-    CurvatureSpecification,
-    DepositionalAzimuthAngle,
-    MigrationAngle,
+const invalid = ref<Invalid>({
+  relativeStdDev: false,
+  type: false,
+  azimuth: false,
+  stacking: false,
+  migration: false,
+  curvature: false,
+  origin: false,
+  relativeEllipseSize: false,
+})
+
+const props = defineProps<{ value: GaussianRandomField }>()
+const emit = defineEmits<{
+  (event: 'update:error', error: boolean): void
+}>()
+
+const trend = computed(() => props.value.trend)
+
+function notOneOf(types: TrendType[]): boolean {
+  return types.indexOf(trend.value.type) === -1
+}
+
+const availableRmsTrendParameters = computed<string[]>(
+  () => useParameterRmsTrendStore().available,
+)
+const rmsTrendMapZones = computed<TrendMap[]>(
+  () => useParameterRmsTrendMapZoneStore().available,
+)
+const availableRmsTrendZones = computed(() =>
+  rmsTrendMapZones.value
+    .filter((zone) => zone.representations.length > 0)
+    .map(({ name }) => name),
+)
+
+const trendMapZoneLookup = computed<Record<string, string[]>>(() => {
+  return rmsTrendMapZones.value.reduce((mapping, trendMap) => {
+    mapping[trendMap.name] = trendMap.representations
+    return mapping
+  }, {} as Record<string, string[]>)
+})
+
+const availableRmsTrendMaps = computed(() =>
+  trendMapZone.value ? trendMapZoneLookup.value[trendMapZone.value] : [],
+)
+
+const availableTrends = computed<string[]>(
+  () => useConstantsOptionsTrendsStore().available,
+)
+
+const hasLinearProperties = computed(
+  () =>
+    notEmpty(trendType.value) &&
+    notOneOf(TREND_NOT_IMPLEMENTED_PREVIEW_VISUALIZATION),
+)
+
+const hasEllipticProperties = computed(
+  () => hasLinearProperties.value && notOneOf(['LINEAR']),
+)
+const hasHyperbolicProperties = computed(
+  () => hasEllipticProperties.value && notOneOf(['ELLIPTIC']),
+)
+const hasEllipticConeProperties = computed(
+  () => hasHyperbolicProperties.value && notOneOf(['HYPERBOLIC']),
+)
+
+const isRmsParameter = computed(() => trend.value.type === 'RMS_PARAM')
+const isRmsTrendMap = computed(() => trend.value.type === 'RMS_TRENDMAP')
+
+const trendType = computed({
+  get: () => props.value.trend.type,
+  set: (value: TrendType) => {
+    if (value === 'HYPERBOLIC' && props.value.trend.curvature.value <= 1) {
+      // Curvature for hyperbolic trends must be strictly greater than 1
+      props.value.trend.curvature.value = 1.01
+    }
+    props.value.trend.type = value
   },
 })
-export default class TrendSpecification extends Vue {
-  @Prop({ required: true })
-  readonly value!: GaussianRandomField
+const trendParameter = computed({
+  get: () => props.value.trend.parameter,
+  set: (value: string | null) => (props.value.trend.parameter = value),
+})
+const trendMapName = computed({
+  get: () => props.value.trend.trendMapName,
+  set: (value: string | null) => (props.value.trend.trendMapName = value),
+})
+const trendMapZone = computed({
+  get: () => props.value.trend.trendMapZone,
+  set: (value: string | null) => (props.value.trend.trendMapZone = value),
+})
+const useTrend = computed({
+  get: () => props.value.trend.use,
+  set: (value: boolean) => (props.value.trend.use = value),
+})
 
-  invalid: Invalid = {
-    relativeStdDev: false,
-    type: false,
-    azimuth: false,
-    stacking: false,
-    migration: false,
-    curvature: false,
-    origin: false,
-    relativeEllipseSize: false,
-  }
+const hasDefinedRmsTrendZone = computed(() => trendMapZone.value != null)
 
-  get availableRmsTrendParameters (): string[] { return this.$store.state.parameters.rmsTrend.available }
-  private get rmsTrendMapZones (): TrendMap[] { return this.$store.state.parameters.rmsTrendMapZones.available }
-  get availableRmsTrendZones (): string[] {
-    return this.rmsTrendMapZones
-      .filter(zone => zone.representations.length > 0)
-      .map(({ name }) => name)
-  }
-
-  private get trendMapZoneLookup (): Record<string, string[]> {
-    return this.rmsTrendMapZones
-      .reduce((mapping, trendMap) => {
-        mapping[trendMap.name] = trendMap.representations
-        return mapping
-      }, ({}))
-  }
-
-  get availableRmsTrendMaps (): string[] {
-    if (!this.trendMapZone) return []
-    return this.trendMapZoneLookup[this.trendMapZone]
-  }
-
-  get availableTrends (): ListItem<string>[] {
-    return (this.$store as Store).state.constants.options.trends.available
-      .map(name => {
-        return {
-          text: name,
-        }
-      })
-  }
-
-  get trend (): Trend { return this.value.trend }
-
-  get hasLinearProperties (): boolean {
-    return (
-      notEmpty(this.trendType)
-      && this.notOneOf(TREND_NOT_IMPLEMENTED_PREVIEW_VISUALIZATION)
-    )
-  }
-
-  get hasEllipticProperties (): boolean {
-    return (
-      this.hasLinearProperties
-      && this.notOneOf(['LINEAR'])
-    )
-  }
-
-  get hasHyperbolicProperties (): boolean {
-    return (
-      this.hasEllipticProperties
-      && this.notOneOf(['ELLIPTIC'])
-    )
-  }
-
-  get hasEllipticConeProperties (): boolean {
-    return (
-      this.hasHyperbolicProperties
-      && this.notOneOf(['HYPERBOLIC'])
-    )
-  }
-
-  get isRmsParameter (): boolean { return this.trend.type === 'RMS_PARAM' }
-  get isRmsTrendMap (): boolean { return this.trend.type === 'RMS_TRENDMAP' }
-
-  get trendType (): TrendType { return this.value.trend.type }
-  set trendType (value) { this.$store.dispatch('gaussianRandomFields/trendType', { field: this.value, value }) }
-
-  get trendParameter (): string | null { return this.trend.parameter }
-  set trendParameter (value) { this.$store.dispatch('gaussianRandomFields/trendParameter', { field: this.value, value }) }
-
-  get trendMapName (): string | null { return this.trend.trendMapName }
-  set trendMapName (value) { this.$store.dispatch('gaussianRandomFields/trendMapName', { field: this.value, value }) }
-
-  get trendMapZone (): string | null { return this.trend.trendMapZone }
-  set trendMapZone (value) { this.$store.dispatch('gaussianRandomFields/trendMapZone', { field: this.value, value }) }
-
-  get useTrend (): boolean { return this.trend.use }
-  set useTrend (value) { this.$store.dispatch('gaussianRandomFields/useTrend', { field: this.value, value }) }
-
-  get hasDefinedRmsTrendZone (): boolean { return (this.trendMapZone != null) }
-
-  notOneOf (types: TrendType[]): boolean {
-    return types.indexOf(this.trend.type) === -1
-  }
-
-  @Watch('invalid', { deep: true })
-  onInvalidChanged (value: Invalid): void {
-    const invalid = Object.values(value).some(invalid => invalid)
-    this.$emit('update:error', this.useTrend && invalid)
-  }
-
-  update (type: string, value: boolean): void {
-    Vue.set(this.invalid, type, value)
-  }
-}
+watch(
+  invalid,
+  (value: Invalid) => {
+    const someInvalid = Object.values(value).some((invalid) => invalid)
+    emit('update:error', useTrend.value && someInvalid)
+  },
+  { deep: true },
+)
 </script>

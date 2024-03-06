@@ -6,17 +6,17 @@ module.exports = {
   root: true,
 
   env: {
-    node: true
+    node: true,
   },
 
   extends: [
     // https://github.com/vuejs/eslint-plugin-vue#priority-a-essential-error-prevention
     // consider switching to `plugin:vue/strongly-recommended` or `plugin:vue/recommended` for stricter rules.
-    'plugin:vue/recommended',
+    'plugin:vue/vue3-recommended',
+    'plugin:vuetify/recommended',
     // https://github.com/standard/standard/blob/master/docs/RULES-en.md
     '@vue/standard',
     'plugin:security/recommended',
-    'plugin:vue/recommended',
     '@vue/typescript',
     'plugin:@typescript-eslint/recommended',
   ],
@@ -25,7 +25,7 @@ module.exports = {
     'import/resolver': {
       node: {
         extensions: ['.js', '.ts'],
-      }
+      },
     },
   },
 
@@ -58,9 +58,13 @@ module.exports = {
     'vue/attribute-hyphenation': ['error', 'always'],
     'vue/attributes-order': 'error',
     'vue/html-quotes': ['error', 'double'],
-    'vue/component-name-in-template-casing': ['error', 'kebab-case', {
-      ignores: []
-    }],
+    'vue/component-name-in-template-casing': [
+      'error',
+      'kebab-case',
+      {
+        ignores: [],
+      },
+    ],
     'vuetify/no-deprecated-classes': 'error',
     // To be added when the documentation for v-col / v-row has been improved (made available)
     'vuetify/grid-unknown-attributes': 'error',
@@ -76,14 +80,17 @@ module.exports = {
         selector: 'memberLike',
         format: ['camelCase', 'PascalCase', 'UPPER_CASE'],
         leadingUnderscore: 'allow',
-      }
+      },
     ],
   },
   overrides: [
     {
       files: ['*.js'],
       rules: {
-        '@typescript-eslint/no-use-before-define': ['error', { functions: false, classes: false, variables: false }],
+        '@typescript-eslint/no-use-before-define': [
+          'error',
+          { functions: false, classes: false, variables: false },
+        ],
         '@typescript-eslint/no-var-requires': 'off',
       },
     },
@@ -91,18 +98,22 @@ module.exports = {
       files: ['*.ts', '*.vue'],
       rules: {
         'no-useless-constructor': 1 /* warning */,
-        '@typescript-eslint/member-delimiter-style': ['error', {
-          multiline: {
-            delimiter: 'none'
+        '@typescript-eslint/member-delimiter-style': [
+          'error',
+          {
+            multiline: {
+              delimiter: 'none',
+            },
+            singleline: {
+              delimiter: 'comma',
+            },
           },
-          singleline: {
-            delimiter: 'comma'
-          },
-        }],
+        ],
       },
+      parser: 'vue-eslint-parser',
       parserOptions: {
         parser: '@typescript-eslint/parser',
-      }
+      },
     },
   ],
   parser: 'vue-eslint-parser',
@@ -110,8 +121,5 @@ module.exports = {
     parser: '@typescript-eslint/parser',
     ecmaVersion: 2020,
     sourceType: 'module',
-    ecmaFeatures: { // See https://github.com/babel/babel-eslint/issues/662
-      legacyDecorators: true,
-    },
   },
 }

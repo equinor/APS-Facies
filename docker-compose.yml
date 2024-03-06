@@ -33,6 +33,9 @@ services:
       - '8080:8080'
     volumes:
     - './nginx/local.nginx:/opt/bitnami/nginx/conf/server_blocks/local.conf:ro'
+    depends_on:
+      - web
+      - api
 
 volumes:
   yarn-cache:

@@ -1,174 +1,179 @@
 <template>
-  <vue-plot
+  <plotly-plot
+    ref="plot"
     :data="__content"
     :layout="__layout"
     :options="__options"
     auto-resize
-    @click.native="e => $emit('click', e)"
+    @click="(e: MouseEvent) => $emit('click', e)"
     @resize="resize"
   />
 </template>
 
-<script lang="ts">
-/* eslint-disable @typescript-eslint/ban-ts-comment */
+<script setup lang="ts">
 import { getDisabledOpacity } from '@/utils/helpers/simple'
-import { Component, Prop, Vue } from 'vue-property-decorator'
-
-// @ts-ignore
-import VuePlot from '@statnett/vue-plotly'
-
 import { notEmpty } from '@/utils'
-
 import { DEFAULT_SIZE } from '@/config'
+import type { Optional } from '@/utils/typing'
+import type { Annotations, Config, Layout, LayoutAxis, PlotData, Shape } from 'plotly.js-dist-min'
+import { ref, computed, onBeforeUnmount, onMounted, onBeforeMount } from 'vue'
+import PlotlyPlot from './PlotlyPlot.vue'
 
-import { Optional } from '@/utils/typing'
-import { Config, Layout, LayoutAxis, PlotData, Shape } from 'plotly.js'
+type Size = {
+  width: number
+  height: number
+}
 
-@Component({
-  components: {
-    VuePlot,
-  },
+type Props = {
+  dataDefinition: Partial<PlotData | Shape>[]
+  annotations?: Array<Partial<Annotations>>
+  width?: number
+  height?: number
+  maxWidth?: number
+  maxHeight?: number
+  staticSize?: boolean
+  svg?: boolean
+  expand?: boolean
+  disabled?: boolean
+  axisNames?: Record<'x' | 'y', Optional<string>>
+}
+const props = withDefaults(defineProps<Props>(), {
+  annotations: () => [],
+  width: DEFAULT_SIZE.width,
+  height: DEFAULT_SIZE.height,
+  maxWidth: DEFAULT_SIZE.max.width,
+  maxHeight: DEFAULT_SIZE.max.height,
+  staticSize: false,
+  svg: false,
+  expand: false,
+  disabled: false,
+  axisNames: () => ({ x: null, y: null }),
 })
-export default class StaticPlot extends Vue {
-  @Prop({ required: true })
-  readonly dataDefinition!: Partial<PlotData | Shape>[]
 
-  @Prop({ default: () => [] })
-  readonly annotations!: Record<string, unknown>[]
+const size = ref<Size>({ height: 0, width: 0 })
+const plot = ref<InstanceType<typeof PlotlyPlot> | null>(null)
 
-  @Prop({ default: DEFAULT_SIZE.width })
-  readonly width!: number
-
-  @Prop({ default: DEFAULT_SIZE.height })
-  readonly height!: number
-
-  @Prop({ default: DEFAULT_SIZE.max.width })
-  readonly maxWidth!: number
-
-  @Prop({ default: DEFAULT_SIZE.max.height })
-  readonly maxHeight!: number
-
-  @Prop({ default: false, type: Boolean })
-  readonly staticSize!: boolean
-
-  @Prop({ default: false, type: Boolean })
-  readonly svg!: boolean
-
-  @Prop({ default: false, type: Boolean })
-  readonly expand!: boolean
-
-  @Prop({ default: false, type: Boolean })
-  readonly disabled: boolean
-
-  @Prop({ default: () => { return { x: null, y: null } } })
-  readonly axisNames!: { x: Optional<string>, y: Optional<string> }
-
-  size: { height: number, width: number } = {
-    height: 0,
-    width: 0,
-  }
-
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  get __content (): Partial<PlotData>[] {
-    if (!this.svg) {
-      return (this.dataDefinition as Partial<PlotData>[])
-        .map(obj => {
-          // @ts-ignore
-          obj.opacity = getDisabledOpacity(this.disabled)
-          return obj
-        })
-    } else {
-      return [{
+const __content = computed<Partial<PlotData>[]>(() => {
+  if (!props.svg) {
+    return (props.dataDefinition as Partial<PlotData>[]).map((obj) => {
+      const opacity = getDisabledOpacity(props.disabled)
+      return {
+        ...obj,
+        height: props.height,
+        width: props.width,
+        opacity,
+      }
+    })
+  } else {
+    return [
+      {
         type: 'scatter',
         x: [],
         y: [],
-      }]
-    }
-  }
-
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  get __layout (): Partial<Layout> {
-    const scaleRatio = notEmpty(this.__content) && this.__content.length > 0
-      // @ts-ignore
-      ? this.__content.length / this.__content[0].length
-      : 1
-
-    const _axis: Partial<LayoutAxis> = {
-      ticks: '',
-      visible: false,
-      zeroline: false,
-      showgrid: false,
-      showline: false,
-      scaleratio: scaleRatio,
-      autorange: true,
-      titlefont: {
-        family: 'Roboto'
       },
-    }
-    const xaxis: Partial<LayoutAxis> = this.axisNames.x ? { ..._axis, visible: true, title: this.axisNames.x } : _axis
-    const yaxis: Partial<LayoutAxis> = {
-      ..._axis,
-      scaleanchor: 'x',
-      ...(this.axisNames.y && {
-        title: this.axisNames.y,
-        visible: true,
-      }),
-    }
-
-    return {
-      ...this.size,
-      showlegend: false,
-      autosize: true,
-      margin: {
-        l: 0, r: 0, t: 0, b: 0,
-      },
-      xaxis,
-      yaxis,
-      /* eslint-disable-next-line @typescript-eslint/naming-convention */
-      paper_bgcolor: 'rgba(0,0,0,0)',
-      /* eslint-disable-next-line @typescript-eslint/naming-convention */
-      plot_bgcolor: 'rgba(0,0,0,0)',
-      ...(this.svg && { shapes: (this.dataDefinition as Partial<Shape>[]) }),
-      ...(this.annotations && { annotations: this.annotations }),
-    }
+    ]
   }
+})
 
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  get __options (): Partial<Config> {
-    return {
-      staticPlot: true,
-      responsive: true,
-    }
-  }
-
-  beforeDestroy (): void {
-    window.removeEventListener('resize', this.resize)
-  }
-
-  beforeMount (): void {
-    this.size.width = this.width
-    this.size.height = this.height
-  }
-
-  mounted (): void {
-    window.addEventListener('resize', this.resize)
-
-    this.$watch('$el', this.resize)
-  }
-
-  resize (): void {
-    const parent = this.$el
-      ? this.$el.getElementsByClassName('svg-container')[0]
-      : {
-        clientWidth: this.width,
-        clientHeight: this.height,
-      }
-    const size = this.staticSize
-      ? { width: this.width, height: this.height }
-      : { width: parent.clientWidth || this.width, height: parent.clientHeight || this.height }
-    const val = Math.max(...Object.values(size))
-    this.size.width = this.expand ? Math.min(val, this.maxWidth) : this.width
-    this.size.height = this.expand ? Math.min(val, this.maxHeight) : this.height
-  }
+function getScaleRatio(data: Partial<PlotData>[]): number {
+  if (!notEmpty(data) || data.length === 0) return 1
+  const { x, y } = data[0]
+  if (!x || !y) return 1
+  if (x?.length === 0 || y?.length === 0) return 1
+  return x.length / y.length
 }
+
+const __layout = computed<Partial<Layout>>(() => {
+  const scaleRatio = getScaleRatio(__content.value)
+
+  const _axis: Partial<LayoutAxis> = {
+    ticks: '',
+    visible: false,
+    zeroline: false,
+    showgrid: false,
+    showline: false,
+    scaleratio: scaleRatio,
+    autorange: true,
+    titlefont: {
+      family: 'Roboto',
+    },
+  }
+  const xaxis: Partial<LayoutAxis> = props.axisNames.x
+    ? { ..._axis, visible: true, title: props.axisNames.x }
+    : _axis
+  const yaxis: Partial<LayoutAxis> = {
+    ..._axis,
+    scaleanchor: 'x',
+    ...(props.axisNames.y && {
+      title: props.axisNames.y,
+      visible: true,
+    }),
+  }
+  const opacity = getDisabledOpacity(props.disabled)
+
+  return {
+    ...size.value,
+    showlegend: false,
+    autosize: true,
+    margin: {
+      l: 0,
+      r: 0,
+      t: 0,
+      b: 0,
+    },
+    xaxis,
+    yaxis,
+    /* eslint-disable-next-line @typescript-eslint/naming-convention */
+    paper_bgcolor: 'rgba(0,0,0,0)',
+    /* eslint-disable-next-line @typescript-eslint/naming-convention */
+    plot_bgcolor: 'rgba(0,0,0,0)',
+    ...(props.svg && {
+      shapes: (props.dataDefinition as Partial<Shape>[])
+        .map(shape => {
+          return {
+            ...shape,
+            opacity,
+          } as Partial<Shape>
+        })
+    }),
+    annotations: props.annotations,
+  }
+})
+
+const __options = computed<Partial<Config>>(() => ({
+  staticPlot: true,
+  responsive: true,
+}))
+
+function resize(): void {
+  const parent = plot.value?.$el.getElementsByClassName(
+    'svg-container',
+  )?.[0] ?? {
+    clientWidth: props.width,
+    clientHeight: props.height,
+  }
+  const newSize = props.staticSize
+    ? { width: props.width, height: props.height }
+    : {
+        width: parent.clientWidth ?? props.width,
+        height: parent.clientHeight ?? props.height,
+      }
+  const val = Math.max(...Object.values(newSize))
+  size.value.width = props.expand ? Math.min(val, props.maxWidth) : props.width
+  size.value.height = props.expand
+    ? Math.min(val, props.maxHeight)
+    : props.height
+}
+
+onBeforeMount(() => {
+  size.value.width = props.width
+  size.value.height = props.height
+})
+onMounted(() => {
+  window.addEventListener('resize', resize)
+  resize()
+})
+onBeforeUnmount(() => {
+  window.removeEventListener('resize', resize)
+})
 </script>

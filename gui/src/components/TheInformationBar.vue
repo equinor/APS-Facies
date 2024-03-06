@@ -1,73 +1,73 @@
 <template>
-  <div id="information-bar">
+  <div id="information-bar" v-if="shown">
     <v-alert
       :value="shown"
       :type="type"
-      dismissible
+      closable
       transition="slide-y-transition"
       @input="shown = false"
-    >{{ message }}</v-alert><!-- eslint-disable-line vue/multiline-html-element-content-newline -->
+    >
+      {{ message }}
+    </v-alert>
   </div>
 </template>
 
-<script lang="ts">
-import { Component, Vue, Watch } from 'vue-property-decorator'
+<script setup lang="ts">
 import { isDevelopmentBuild } from '@/config'
-
 import { delay } from 'lodash'
+import type { MessageType } from '@/utils/domain/messages/base'
+import type { Optional } from '@/utils/typing'
+import { computed, ref, watch } from 'vue'
+import { useMessageStore } from '@/stores/messages'
 
-import BaseMessage from '@/utils/domain/messages/base'
+const messageStore = useMessageStore()
+const shown = ref(false)
 
-import { Optional } from '@/utils/typing'
-
-type MessageType = 'info' | 'error' | 'success' | 'warning'
-
-@Component
-export default class InformationBar extends Vue {
-  shown = false
-
-  get _message (): { value: Optional<string | Error>, kind: MessageType } {
-    return this.$store.state.message.value || {
-      value: null,
-      kind: 'info',
-    }
-  }
-
-  get message (): Optional<string> {
-    let message = this._message.value
-    if (message instanceof Error) {
-      if (isDevelopmentBuild()) {
-        throw message
-      } else {
-        message = message.message
-      }
-    }
-    if (message) message = message.trim()
-    return message
-  }
-
-  get type (): MessageType { return this._message.kind }
-
-  @Watch('_message')
-  onUpdate (message: BaseMessage): void {
-    if (message.value) {
-      this.shown = true
-      const { use, wait } = this.$store.state.message.autoDismiss
-      if (use) {
-        delay(() => { this.shown = false }, wait)
-      }
-    }
-  }
+type Message = {
+  value: string | Error | null
+  readonly kind: MessageType
 }
+const _message = computed<Message>(
+  () => messageStore.message ?? { value: null, kind: 'info' },
+)
+
+const message = computed<Optional<string>>(() => {
+  let text = _message.value.value
+  if (text === null) return text
+
+  if (text instanceof Error) {
+    if (isDevelopmentBuild()) {
+      throw message
+    } else {
+      text = text.message
+    }
+  }
+  return text.trim()
+})
+
+const type = computed<MessageType>(() => _message.value.kind)
+
+watch(
+  _message,
+  (message: { value: string | Error | null; kind: MessageType }) => {
+    if (message.value) {
+      shown.value = true
+      const { use, wait } = messageStore.autoDismiss
+      if (use) {
+        delay(() => (shown.value = false), wait)
+      }
+    }
+  },
+)
 </script>
 
 <style lang="scss" scoped>
-  #information-bar {
-    .v-alert {
-      margin: 0 auto;
-      border-width: 0 0 0;
-      white-space: pre-line;
-      line-height: 1.0;
-    }
+#information-bar {
+  .v-alert {
+    margin: 0 auto;
+    border-width: 0 0 0;
+    white-space: pre-line;
+    line-height: 1;
   }
+}
 </style>

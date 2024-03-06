@@ -1,63 +1,62 @@
 <template>
-  <v-row
-    align="center"
-    justify="center"
-    no-gutters
-  >
-    <v-col
-      cols="6"
-    >
-      <v-col class="pa-0">
-        <v-icon
+  <v-row align="center" justify="center">
+    <v-col cols="auto">
+      <v-row>
+        <polygon-order-button
           :disabled="!canDecrease"
-          small
-          @click="() => $emit('input', -1)"
-          v-text="'$vuetify.icons.values.up'"
+          help="Move polygon up"
+          icon="$up"
+          @click="() => emit('input', -1)"
         />
-      </v-col>
-      <v-col class="pa-0">
-        <v-icon
+      </v-row>
+      <v-row>
+        <polygon-order-button
           :disabled="!canIncrease"
-          small
-          @click="() => $emit('input', +1)"
-          v-text="'$vuetify.icons.values.down'"
+          help="Move polygon down"
+          icon="$down"
+          @click="() => emit('input', +1)"
         />
-      </v-col>
+      </v-row>
     </v-col>
-    <v-col
-      cols="6"
-    >
-      <v-icon
-        :disabled="!canRemove"
-        small
-        @click="() => $emit('delete')"
-        v-text="'$vuetify.icons.values.remove'"
-      />
-      <v-icon
-        :disabled="!canAdd"
-        small
-        @click="() => $emit('add')"
-        v-text="'$vuetify.icons.values.add'"
-      />
+    <v-col cols="auto">
+      <v-row>
+        <polygon-order-button
+          :disabled="!canRemove"
+          help="Remove this polygon"
+          icon="$remove"
+          @click="() => emit('delete')"
+        />
+      </v-row>
+      <v-row>
+        <polygon-order-button
+          :disabled="!canAdd"
+          help="Add a new polygon below this polygon"
+          icon="$add"
+          @click="() => emit('add')"
+        />
+      </v-row>
     </v-col>
   </v-row>
 </template>
 
-<script lang="ts">
-import { Component, Prop, Vue } from 'vue-property-decorator'
-
-@Component
-export default class BasePolygonOrder extends Vue {
-  @Prop({ default: true, type: Boolean })
-  readonly canIncrease: boolean
-
-  @Prop({ default: true, type: Boolean })
-  readonly canDecrease: boolean
-
-  @Prop({ default: true, type: Boolean })
-  readonly canRemove: boolean
-
-  @Prop({ default: true, type: Boolean })
-  readonly canAdd: boolean
+<script setup lang="ts">
+import PolygonOrderButton from './PolygonOrderButton.vue'
+type Props = {
+  canIncrease?: boolean
+  canDecrease?: boolean
+  canRemove?: boolean
+  canAdd?: boolean
 }
+withDefaults(defineProps<Props>(), {
+  canIncrease: false,
+  canDecrease: false,
+  canRemove: false,
+  canAdd: false,
+})
+
+const emit = defineEmits<{
+  (event: 'input', value: 1 | -1): void
+  (event: 'add'): void
+  (event: 'delete'): void
+}>()
 </script>
