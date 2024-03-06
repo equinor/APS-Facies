@@ -72,10 +72,11 @@ export const useFaciesGroupStore = defineStore('facies-groups', () => {
     parent: Parent,
     id?: ID,
   ) {
-    // TODO: Deal with missing parents
-    // TODO: Ensure that none of the given facies are used
     if (facies.some((f): boolean => isUsed.value(f))) {
       throw new Error(`The facies, ${facies}, has already been specified`)
+    }
+    if (!parent || !parent.zone) {
+      throw new Error(`The facies, ${facies}, does not belong to a given zone / region`)
     }
 
     const group = new FaciesGroup({
