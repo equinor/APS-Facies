@@ -114,7 +114,6 @@ export const useFaciesStore = defineStore('facies', () => {
       )) ?? false
   })
 
-  // TODO: rename to "are" or "have been"
   const isFaciesFetchedFromRMS = computed(() => {
     const parameterBlockedWellStore = useParameterBlockedWellStore()
     const parameterBlockedWellLogStore = useParameterBlockedWellLogStore()
