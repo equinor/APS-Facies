@@ -18,7 +18,6 @@ import type {
 } from '@/utils/domain/polygon/base'
 import type { ID } from '@/utils/domain/types'
 import type { TruncationRuleTemplateFromJson } from './templates'
-import { isArray } from 'lodash'
 import { useGaussianRandomFieldStore } from '@/stores/gaussian-random-fields'
 import type {
   OverlayPolygonArgs,
@@ -236,7 +235,6 @@ export function deserializePolygons<S extends PolygonSerialization | OverlayPoly
   const faciesGroupStore = useFaciesGroupStore()
   const partiallyDefinedPolygons: PartiallySpecifiedPolygonSpecification[] = polygons.map((polygon) => {
       const facies = polygon.facies ? faciesStore.byId(polygon.facies) : null
-      if (isArray(facies)) throw new Error('')
       if (isOverlayPolygonSerialization(polygon)) {
         return ({
           ...polygon,

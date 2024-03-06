@@ -54,22 +54,12 @@ export const useFaciesStore = defineStore('facies', () => {
   const _constantProbability = ref<Identified<boolean>>({})
 
   const byId = computed(() => {
-    return (item: ID | Identifiable): Facies | Facies[] | null => {
+    return (item: ID | Identifiable): Facies | null => {
       const globalStore = useGlobalFaciesStore()
-      const groupsStore = useFaciesGroupStore()
       const id = getId(item)
-      // TODO: Make this always return single Facies, and add seperate functions
-      // for GlobalFacies and FaciesGroup.
       const facies =
         identifiedAvailable.value[id] ?? globalStore.identifiedAvailable[id]
-      if (!facies) {
-        const group = groupsStore.byId(id)
-        return group?.facies.map(
-          (groupFacies) => byId.value(groupFacies) as Facies,
-        )
-      } else {
-        return facies || null
-      }
+      return facies ?? null
     }
   })
 
