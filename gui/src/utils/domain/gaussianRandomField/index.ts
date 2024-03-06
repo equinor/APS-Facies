@@ -1,7 +1,6 @@
 import CrossSection, {
   type CrossSectionSerialization,
 } from '@/utils/domain/gaussianRandomField/crossSection'
-import cloneDeep from 'lodash/cloneDeep'
 
 import { newSeed } from '@/utils/helpers'
 import type { Named } from '@/utils/domain/bases/interfaces'
@@ -135,23 +134,6 @@ export default class GaussianRandomField extends Simulation implements Named {
       this.variogram.isFmuUpdatable ||
       (this.trend.use && this.trend.isFmuUpdatable)
     )
-  }
-
-  /** @deprecated Moved into gaussianRandomFieldStore */
-  public specification({
-    rootGetters,
-  }: {
-    rootGetters?: { simulationSettings: () => Record<string, unknown> }
-  } = {}): GaussianRandomFieldSpecification {
-    return {
-      name: this.name,
-      variogram: this.variogram,
-      trend: this.trend,
-      settings: {
-        ...(rootGetters ? cloneDeep(rootGetters.simulationSettings()) : {}),
-        ...this.settings,
-      },
-    }
   }
 
   public toJSON(): GaussianRandomFieldSerialization {
