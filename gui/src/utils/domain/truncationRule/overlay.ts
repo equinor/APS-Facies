@@ -22,9 +22,6 @@ import type { TruncationRule as BaseTruncationRule } from '@/utils/domain/trunca
 
 export type OverlayTruncationRuleArgs<T extends Polygon> =
   TruncationRuleConfiguration<T> & {
-    overlay?: {
-      use: boolean
-    }
     _useOverlay?: boolean
   }
 
@@ -58,18 +55,11 @@ export default abstract class OverlayTruncationRule<
   protected _useOverlay: boolean
 
   protected constructor({
-    overlay,
     _useOverlay,
     ...rest
   }: OverlayTruncationRuleArgs<T>) {
-    /* TODO: deprecate / combine overlay / _useOverlay */
     super(rest)
-    this._useOverlay =
-      _useOverlay === undefined
-        ? overlay
-          ? overlay.use
-          : false
-        : _useOverlay
+    this._useOverlay = _useOverlay ?? false
 
     const additionalConstraints: [() => boolean, string][] = [
       [
