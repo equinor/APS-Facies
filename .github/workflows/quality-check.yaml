@@ -1,14 +1,10 @@
-name: "Push to develop/master branch"
-# This workflow should only build artifacts to be used,
-# it does not concern itself with checking if the code works.
-# `on-push-other-branches.yaml` does that.
+name: "Build and test the GUI"
+# This workflow should only test that the pushed code works well.
+# Consider it a quality check workflow.
 
 on:
   workflow_dispatch:
   push:
-    branches:
-      - develop
-      - master
 
 jobs:
   on-push:
@@ -49,4 +45,4 @@ jobs:
           name: gui
           path: |
             *.plugin
-          retention-days: 400
+          retention-days: ${{ github.ref == 'refs/head/main' && '400' || '30' }}
