@@ -162,6 +162,8 @@ function resize(): void {
         height: parent.clientHeight ?? props.height,
       }
   const val = Math.max(...Object.values(newSize))
+  // Do not set the size if it would become 0
+  if (props.expand && val === 0) return
   size.value.width = props.expand ? Math.min(val, props.maxWidth) : props.width
   size.value.height = props.expand
     ? Math.min(val, props.maxHeight)
