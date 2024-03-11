@@ -1,6 +1,7 @@
 <template>
   <plotly-plot
     ref="plot"
+    :id="id"
     :data="__content"
     :layout="__layout"
     :options="__options"
@@ -36,6 +37,7 @@ type Props = {
   expand?: boolean
   disabled?: boolean
   axisNames?: Record<'x' | 'y', Optional<string>>
+  id?: string
 }
 const props = withDefaults(defineProps<Props>(), {
   annotations: () => [],
@@ -47,6 +49,7 @@ const props = withDefaults(defineProps<Props>(), {
   svg: false,
   expand: false,
   disabled: false,
+  id: undefined,
   axisNames: () => ({ x: null, y: null }),
 })
 
