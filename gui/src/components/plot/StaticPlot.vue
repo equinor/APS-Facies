@@ -1,6 +1,7 @@
 <template>
   <plotly-plot
     ref="plot"
+    :id="id"
     :data="__content"
     :layout="__layout"
     :options="__options"
@@ -36,6 +37,7 @@ type Props = {
   expand?: boolean
   disabled?: boolean
   axisNames?: Record<'x' | 'y', Optional<string>>
+  id?: string
 }
 const props = withDefaults(defineProps<Props>(), {
   annotations: () => [],
@@ -47,6 +49,7 @@ const props = withDefaults(defineProps<Props>(), {
   svg: false,
   expand: false,
   disabled: false,
+  id: undefined,
   axisNames: () => ({ x: null, y: null }),
 })
 
@@ -159,6 +162,8 @@ function resize(): void {
         height: parent.clientHeight ?? props.height,
       }
   const val = Math.max(...Object.values(newSize))
+  // Do not set the size if it would become 0
+  if (props.expand && val === 0) return
   size.value.width = props.expand ? Math.min(val, props.maxWidth) : props.width
   size.value.height = props.expand
     ? Math.min(val, props.maxHeight)

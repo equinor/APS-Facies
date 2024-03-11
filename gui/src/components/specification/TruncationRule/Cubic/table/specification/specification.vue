@@ -1,5 +1,6 @@
 <template>
   <static-plot
+    :id="`truncation-rule/cubic/${rule.parentId}`"
     :data-definition="__data.polygons"
     :annotations="__data.annotations"
     :width="300"
