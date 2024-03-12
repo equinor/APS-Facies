@@ -1,0 +1,36 @@
+# Model file specifying input to the script plot_prob_curves.py in aps/toolbox
+PlotProbLogs:
+  DebugLevel: 1
+  PlotEstimatedVPC: False
+  WellList:
+    [
+      '55_33-1',
+      '55_33-2',
+      '55_33-3',
+      '55_33-A-1',
+      '55_33-A-2',
+      '55_33-A-3',
+      '55_33-A-4',
+      '55_33-A-5',
+      '55_33-A-6',
+    ]
+
+  ProbLogNames:
+    - 'ProbNew_Floodplain'
+    - 'ProbNew_Channel'
+    - 'ProbNew_Crevasse'
+    - 'ProbNew_Coal'
+
+  ZoneLogName: 'Zone'
+  MaxZoneNumber: 1
+  GridModelName: 'Geogrid_Valysar'
+  BlockedWellSetName: 'BW'
+
+  AverageProbLogPrefix: vpc_ProbNew
+  AverageProbLogFilePath: .
+  ZoneName: Valysar
+  Facies:
+    - 'Floodplain'
+    - 'Channel'
+    - 'Crevasse'
+    - 'Coal'

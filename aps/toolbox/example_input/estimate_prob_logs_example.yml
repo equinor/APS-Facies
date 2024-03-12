@@ -1,0 +1,98 @@
+# prob_logs_model_example.yml  Valysar
+
+EstimateBlockedWellProbLogs:
+  OutputPrefix: ProbNew
+  DebugLevel: 2
+
+  # Specify which facies to be used in modelling for each zone.
+  # Probability logs for these facies will be made and if other facies exists
+  # in the facies log within the zone, the probability logs will be set to undefined for them.
+  ModellingFaciesPerZone:
+    1: Floodplain Channel Crevasse Coal
+
+  SimBoxThicknessPerZone:
+    1: 16.9
+
+  ProbFromOriginalFaciesLog:
+    # List of well names to include when calculating probability logs.
+    # Wildcard notation is possible. The same Trajectory name and
+    # log run name will be used for all selected wells.
+    Wells:
+      [
+        '55_33-1',
+        '55_33-2',
+        '55_33-3',
+        '55_33-A-1',
+        '55_33-A-2',
+        '55_33-A-3',
+        '55_33-A-4',
+        '55_33-A-5',
+        '55_33-A-6',
+      ]
+    TrajectoryName: 'Drilled trajectory'
+    LogRun: log
+    FaciesLogName: Facies
+    ZoneLogName: Zone
+    # Optional keyword MergeFacies. Specified facies names must exist in facies log.
+    # For each facies code in the facies log a facies name is specified. If one wants to merge
+    # some facies together with other facies, specify the same facies name for multiple facies codes.
+    # The merging will not create any new facies log, but will be used when calculating probability logs.
+    #MergeFacies:
+    # 0: Floodplain
+    # 1: Channel
+    # 2: Crevasse
+    # 5: Coal
+
+    # Optional keyword ProbCondMatrix. Specified facies names must exist in facies log.
+    # The conditional probability for modelled facies given zone and intepreted facies.
+    # P(modelled_facles | zone, interpreted_facies) is
+    # specified by (zone, modelled_facies, interpreted_facies): prob
+    # The zone number can be replaced by a * if all zones have the
+    # same facies and the same conditional probability can be used.
+    # If the ProbCondMatrix is not used, the probability logs will contain 1 or 0 or undefined value.
+    ProbCondMatrix:
+      (1, Floodplain, Floodplain): 1.0
+      (1, Channel, Floodplain): 0.0
+      (1, Coal, Floodplain): 0.0
+      (1, Crevasse, Floodplain): 0.0
+
+      (1, Floodplain, Channel): 0.0
+      (1, Channel, Channel): 1.0
+      (1, Coal, Channel): 0.0
+      (1, Crevasse, Channel): 0.0
+
+      (1, Floodplain, Coal): 0.0
+      (1, Channel, Coal): 0.0
+      (1, Coal, Coal): 1.0
+      (1, Crevasse, Coal): 0.0
+
+      (1, Floodplain, Crevasse): 0.0
+      (1, Channel, Crevasse): 0.0
+      (1, Coal, Crevasse): 0.0
+      (1, Crevasse, Crevasse): 1.0
+
+  BlockedWellProbLogs:
+    GridModelName: Geogrid_Valysar
+    ZoneParamName: Zone
+    AverageProbLogPrefix: vpc
+    BlockedWellZoneLogName: Zone
+
+    # If blocked well zone log does not match the grid zones perfectly,
+    # choose to extract a blocked well zone log from a zone parameter and use that instead to avoid
+    # blocked well grid cells with undefined values for the probability logs near the zone boundaries.
+    # The specified blocked well jobs to use to block the probability logs.
+    # The probability logs based on original facies log will be created or updated.
+    # There is no need to specify any well blocking for the probability logs. This script
+    # will both calculate probability logs on the same scale as the original facies logs,
+    # add the probability logs for the selected logs to be blocked and use the arithmetic average
+    # method for well blocking of the probability logs. The blocked well jobs will be
+    # automatically updated
+    BlockedWellJobNames: [bw_valysar_vertical, bw_valysar_horizontal]
+
+    BiasWeighting:
+      Floodplain: 1.0
+      Channel: 1.0
+      Crevasse: 1.0
+      Coal: 1.0
+
+    UseOnlyMaxProb: False
