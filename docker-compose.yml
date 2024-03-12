@@ -7,7 +7,7 @@ services:
     environment:
       FLASK_DEBUG: '1'
     volumes:
-    - './aps:/app/aps'
+    - './aps:/code/aps'
     - './fmu.model/private:/private'
     - './fmu.model/project:/project'
 
