@@ -1,6 +1,11 @@
-see [gitlab wiki](https://git.equinor.com/APS/GUI/wikis/)
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0) 
 
-(there's a [github mirror](https://github.com/equinor/aps-gui))
+# Adaptive Pluri-Gaussian Simulation
+
+The current implementation of Adaptive PluriGaussian Simulation of facies in reservoir modeling is based on code developed by Equinor.
+It is implemented as a plugin module to RMS 3D reservoir modeling software from Aspentech and can only be used together with this software.
+It is based on the method published by B. Sebacher et.al. ([Journal of Petroleum Science and Engineering, Vol. 158, September 2017, p. 494-508](https://www.sciencedirect.com/science/article/pii/S0920410517300505)) and is extended to handle trends in Gaussian Random Fields and multiple overlay facies.
+The implementation is adapted also to the FMU workflow and use of ERT (Ensemble Reservoir Tool) system for orchestration of reservoir simulations and assisted history matching.
 
 ## Getting started
 
