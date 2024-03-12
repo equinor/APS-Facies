@@ -23,8 +23,6 @@
 !aps/rms_jobs/**/*.py
 !aps/toolbox/**/*.py
 !aps/algorithms/**/*.py
-!libraries/rms-mock/roxar/**/*.py
-!libraries/rms-mock/_roxar/**/*.py
 
 !gui/tsconfig.json
 !gui/.eslintrc.js

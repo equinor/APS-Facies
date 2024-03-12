@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from os import environ, urandom
 from flask import Flask, jsonify, request
+from flask.cli import main
 from flask_cors import CORS, cross_origin
 
 from aps.utils.parsing import parse_signature
@@ -14,15 +15,6 @@ def _get_environ(variable_name, default, divider=':'):
     if isinstance(value, str) and divider in value:
         value = value.split(divider)
     return value
-
-
-def _get_client_url():
-    protocols = _get_environ('VUE_APP_APS_PROTOCOL', 'http:https')
-    servers = _get_environ('VUE_APP_APS_SERVER', 'localhost:127.0.0.1')
-    ports = (
-        _get_environ('VUE_APP_APS_GUI_PORT', '8080')
-    )
-    return _get_environ('VUE_APP_GUI_URL', 'http://127.0.0.1:8080')
 
 
 app = Flask(__name__)
@@ -46,8 +38,4 @@ def favicon():
 
 
 if __name__ == '__main__':
-    app.run(
-        host=_get_environ('VUE_APP_APS_SERVER', '127.0.0.1'),
-        port=_get_environ('VUE_APP_APS_API_PORT', 5000),
-        debug=True,
-    )
+    main()

@@ -152,10 +152,10 @@ RGS_UPDATE_APS := git pull \
            workflow/.master \
            aps_workflows
 
-DUMMY_FMU_PROJECT_LOCATION ?= $(CODE_DIR)/fmu.model
+PROJECT_LOCATION_ROOT ?= $(CODE_DIR)/models
 define LOCAL_SETTINGS_JSON
 {
-  "projectRootLocation": "$(DUMMY_FMU_PROJECT_LOCATION)"
+  "projectRootLocation": "$(PROJECT_LOCATION_ROOT)"
 }
 endef
 export LOCAL_SETTINGS_JSON
@@ -164,10 +164,9 @@ export LOCAL_SETTINGS_JSON
 YARN := yarn --cwd $(WEB_DIR)
 
 define STANDARD_DOTENV
-STANDARD_RMS_DATA=synthetic-Neslen
-
-#VUE_APP_APP_USE_CORS=yes
-VUE_APP_API_URL="$(VUE_APP_API_URL)"
+# This path should be relative to the models directory
+# **BEGINNING WITH** / (it is mounted in the api container at the root)
+RMS_PROJECT_PATH=""
 endef
 export STANDARD_DOTENV
 
@@ -308,13 +307,16 @@ init-workflow: links generate-workflow-files
 
 init-local-develop: local.settings.json dotenv docker-compose
 
-docker-compose: generate-truncation-rules
+docker-compose: generate-truncation-rules dotenv
 
-local.settings.json: dummy-fmu-location
+local.settings.json: local-project-location
 	echo "$$LOCAL_SETTINGS_JSON" > $(CODE_DIR)/local.settings.json
 
-dummy-fmu-location:
-	mkdir -p $(DUMMY_FMU_PROJECT_LOCATION)
+local-project-location:
+	mkdir -p \
+		$(PROJECT_LOCATION_ROOT) \
+		$(PROJECT_LOCATION_ROOT)/project \
+		$(PROJECT_LOCATION_ROOT)/private
 
 dotenv:
 	[ -f "$(CODE_DIR)/.env" ] \
