@@ -392,3 +392,22 @@ def get_cond_prob_dict(input_cond_table: dict, active_zone_list: list, common_fa
         raise ValueError(f"Errors found in specification of conditional probabilities.")
 
     return conditional_prob_facies
+
+def expand_wildcards(patterns, list_of_words):
+    all_matches = []
+    errors = []
+    for pattern in patterns:
+        matches = [
+            words for words in list_of_words if Path(words).match(pattern)
+        ]
+        if len(matches) > 0:
+            all_matches.extend(matches)
+        else:
+            errors.append(f"No match for: {pattern}")
+    all_matches = set(all_matches)
+    if len(errors) > 0:
+        raise ValueError(
+            " These specifications does not match any wells in RMS project\n"
+            f"     {errors}, available: {list_of_words}"
+        )
+    return all_matches
