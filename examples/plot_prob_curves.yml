@@ -1,0 +1,31 @@
+# Model file specifying input to the script plot_prob_curves.py in aps/toolbox
+PlotProbLogs:
+  DebugLevel: 1
+  PlotEstimatedVPC: True
+  WellList:
+    - "W1"
+    - "W2"
+    - "W3"
+
+  ProbLogNames:
+    - "Prob_F1"
+    - "Prob_F2"
+    - "Prob_F3"
+    - "Prob_F4"
+
+  ZoneLogName: "zonelog"
+  MaxZoneNumber: 4
+  GridModelName: "grid_model"
+  BlockedWellSetName: "BW"
+
+  AverageProbLogPrefix: vpc_Prob
+  AverageProbLogFilePath: .
+  ZoneName: All
+  Facies:
+    - "F1"
+    - "F2"
+    - "F3"
+    - "F4"
+
+  
+  
