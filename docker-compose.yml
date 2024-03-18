@@ -3,13 +3,27 @@ services:
     build:
       context: .
       target: aps
+      args:
+        - RMS_IMAGE
 #      target: truncation-rules
+    command:
+      - "roxenv"
+      - "poetry"
+      - "run"
+      - "python"
+      - "aps/api/app.py"
+      - "run"
+      - "--host"
+      - "0.0.0.0"
     environment:
       FLASK_DEBUG: '1'
+      RMS_PROJECT_PATH: "${RMS_PROJECT_PATH}"
     volumes:
-    - './aps:/app/aps'
-    - './fmu.model/private:/private'
-    - './fmu.model/project:/project'
+    - './aps:/code/aps'
+    - './models/private:/private'
+    - './models/project:/project'
+    env_file:
+      - .env
 
   web:
     build:

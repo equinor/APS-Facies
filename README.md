@@ -9,56 +9,23 @@ The implementation is adapted also to the FMU workflow and use of ERT (Ensemble 
 
 ## Getting started
 
+Pre-built plugins are [available in releases](https://github.com/equinor/APS-Facies/releases).
+If you want to build from source, some prerequisites are necessary;
+* [Python](https://www.python.org/downloads/)[^1]
+* [Node.js](https://nodejs.org/en/download/)[^2] (with [yarn 1 / classic](https://classic.yarnpkg.com/en/docs/install#mac-stable))
 
-Install [asdf](https://asdf-vm.com/guide/getting-started.html#_3-install-asdf), if not already installed.
-
-On macOS, you may have to set
-```bash
-export PYTHON_CONFIGURE_OPTS="--enable-framework"
-export SYSTEM_VERSION_COMPAT=1 
-```
-first, in order to make user Python is compiled / installed as a Framework, which is highly recommended to make matplotlib behave.
-
+The repo is also set up to use [asdf](https://asdf-vm.com/guide/getting-started.html#_3-install-asdf) to manage the necessary tools
 ```bash
 asdf install
-poetry install  # Installed via asdf
 ```
+
+Then, execute
 
 ```bash
-make init
+make build-gui
 ```
 
-### Starting
-
-```bash
-docker-compose up -d --build
-```
-
-##### API
-In one terminal execute
-
-```bash
-make api-start
-```
-
-then open a new terminal / tab and execute
-
-```bash
-make web-start
-```
-
-#### CodeSpaces
-
-When using CodeSpaces, the API, and front-end are served by NginX as a reverse proxy on port 8888.
-To access the "site", go to "ports". There should be one called "main (8888)". If not, please create one.
-Under "Local Address", hover over the URL for port 8888, and click "Open in browser" (icon of the globe / earth / internet).
-This should open a new tab with the app running.
-
-The server should be started, but if you are unable to access the URL above, try executing
-
-```bash
-sudo service nginx restart
-```
+This should create a new `.plugin` file at the root of the repository.
 
 ### Update truncation rule templates
 Change [examples/truncation_settings.dat](examples/truncation_settings.dat) as desired.
@@ -115,3 +82,7 @@ The GUI will automatically get these rules, when it is built.
 6. Push the commit and tag (`git push origin "$(git branch --show-current)"` and `git push --tags`)
 
    This will trigger the workflow in `.github/workflows/release.yml`, which will make a new release in GitHub, and build a production version of the plugin
+
+
+[^1]: Version 3.8 or greater
+[^2]: Version 20.11 or greater

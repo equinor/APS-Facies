@@ -14,9 +14,9 @@ matplotlib = "^3.6.0"
 numpy = "^1.19.5"
 Pillow = "^9.0.0"
 scipy = "^1.5.4"
-xtgeo = "^2.5.0"
+xtgeo = "^3.8.0"
 PyYAML = "^6.0"
-gaussianfft = "^1.1.0"
+gaussianfft = "^1.1.1"
 
 [tool.poetry.dev-dependencies]
 pytest = "^6.2.5"

@@ -509,3 +509,6 @@ gui/src/stores/truncation-rules/templates/truncationRules.json
 aps/utils/track-build-number
 local.settings.json
 /integration_test/
+
+# Local projects
+models/
