@@ -37,5 +37,22 @@ def favicon():
     return ''
 
 
+if __name__ == 'app':
+    # That is on when flask loads the app
+    try:
+        project
+    except NameError:
+        if 'RMS_PROJECT_PATH' in environ:
+            # Ensure "project" is available as a global variable
+            # similar to what ui.py expects
+            import roxar
+
+            __builtins__ = globals()['__builtins__']  # load the module
+            if 'project' not in __builtins__:
+                __builtins__['project'] = roxar.Project.open(environ['RMS_PROJECT_PATH'])
+        else:
+            raise RuntimeError('No project available, and RMS_PROJECT_PATH is not set')
+
+
 if __name__ == '__main__':
     main()
