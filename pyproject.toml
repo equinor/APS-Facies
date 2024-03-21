@@ -16,7 +16,7 @@ Pillow = "^10.2.0"
 scipy = "^1.5.4"
 xtgeo = "^3.8.0"
 PyYAML = "^6.0"
-gaussianfft = "^1.1.1"
+gaussianfft = "^1.1.2"
 
 [tool.poetry.dev-dependencies]
 pytest = "^6.2.5"
