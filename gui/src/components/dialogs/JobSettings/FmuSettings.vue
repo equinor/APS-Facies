@@ -26,7 +26,7 @@
         <v-col cols="6">
           <hover-helper v-slot="{ isHovering }">
             <floating-tooltip :shown="isHovering" :disabled="hasGrid">
-              <v-autocomplete
+              <v-combobox
                 v-model="_fmuGrid"
                 label="ERT/FMU simulation box grid"
                 :disabled="!hasGrid"
