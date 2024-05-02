@@ -27,7 +27,7 @@
     "mathjs": "^12.1.0",
     "object-hash": "^2.0.1",
     "pinia": "^2.1.7",
-    "plotly.js-dist-min": "^2.29.1",
+    "plotly.js-dist-min": "^2.31.0",
     "roboto-fontface": "*",
     "uuid": "^8.1.0",
     "vite-plugin-vuetify": "^2.0.1",
