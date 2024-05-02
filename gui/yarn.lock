@@ -3378,7 +3378,21 @@ eslint-plugin-security@^2.1.0:
   dependencies:
     safe-regex "^2.1.1"
 
-eslint-plugin-vue@^9.21.1, eslint-plugin-vue@^9.6.0:
+eslint-plugin-vue@^9.24.1:
+  version "9.25.0"
+  resolved "https://registry.yarnpkg.com/eslint-plugin-vue/-/eslint-plugin-vue-9.25.0.tgz#615cb7bb6d0e2140d21840b9aa51dce69e803e7a"
+  integrity sha512-tDWlx14bVe6Bs+Nnh3IGrD+hb11kf2nukfm6jLsmJIhmiRQ1SUaksvwY9U5MvPB0pcrg0QK0xapQkfITs3RKOA==
+  dependencies:
+    "@eslint-community/eslint-utils" "^4.4.0"
+    globals "^13.24.0"
+    natural-compare "^1.4.0"
+    nth-check "^2.1.1"
+    postcss-selector-parser "^6.0.15"
+    semver "^7.6.0"
+    vue-eslint-parser "^9.4.2"
+    xml-name-validator "^4.0.0"
+
+eslint-plugin-vue@^9.6.0:
   version "9.21.1"
   resolved "https://registry.yarnpkg.com/eslint-plugin-vue/-/eslint-plugin-vue-9.21.1.tgz#da5629efa48527cec98278dca0daa90fada4caf7"
   integrity sha512-XVtI7z39yOVBFJyi8Ljbn7kY9yHzznKXL02qQYn+ta63Iy4A9JFBw6o4OSB9hyD2++tVT+su9kQqetUyCCwhjw==
@@ -3836,7 +3850,7 @@ globals@^11.1.0:
   resolved "https://registry.yarnpkg.com/globals/-/globals-11.12.0.tgz#ab8795338868a0babd8525758018c2a7eb95c42e"
   integrity sha512-WOBp/EEGUiIsJSp7wcv/y6MO+lV9UoncWqxuFfm8eBwzWNgyfBd6Gz+IeKQ9jCmyhoH99g15M3T+QaVHFjizVA==
 
-globals@^13.19.0:
+globals@^13.19.0, globals@^13.24.0:
   version "13.24.0"
   resolved "https://registry.yarnpkg.com/globals/-/globals-13.24.0.tgz#8432a19d78ce0c1e833949c36adb345400bb1171"
   integrity sha512-AhO5QUcj8llrbG09iWhPU2B204J1xnPeL8kQmVorSsy+Sjj1sk8gIyh6cUocGmH4L0UuhAJy+hJMRA4mgA4mFQ==
@@ -5297,6 +5311,14 @@ postcss-selector-parser@^6.0.13:
   version "6.0.15"
   resolved "https://registry.yarnpkg.com/postcss-selector-parser/-/postcss-selector-parser-6.0.15.tgz#11cc2b21eebc0b99ea374ffb9887174855a01535"
   integrity sha512-rEYkQOMUCEMhsKbK66tbEU9QVIxbhN18YiniAwA7XQYTVBqrBy+P2p5JcdqsHgKM2zWylp8d7J6eszocfds5Sw==
+  dependencies:
+    cssesc "^3.0.0"
+    util-deprecate "^1.0.2"
+
+postcss-selector-parser@^6.0.15:
+  version "6.0.16"
+  resolved "https://registry.yarnpkg.com/postcss-selector-parser/-/postcss-selector-parser-6.0.16.tgz#3b88b9f5c5abd989ef4e2fc9ec8eedd34b20fb04"
+  integrity sha512-A0RVJrX+IUkVZbW3ClroRWurercFhieevHB38sr2+l9eUClMqome3LmEmnhlNy+5Mr2EYN6B2Kaw9wYdd+VHiw==
   dependencies:
     cssesc "^3.0.0"
     util-deprecate "^1.0.2"
