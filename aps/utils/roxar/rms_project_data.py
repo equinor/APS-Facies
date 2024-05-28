@@ -625,7 +625,7 @@ class RMSData:
     @staticmethod
     def open_wiki_help() -> None:
         import webbrowser
-        webbrowser.open('https://github.com/equinor/APS-Facies/wiki')
+        webbrowser.open('https://equinor.github.io/APS-Facies')
 
     @staticmethod
     def exists(path: str, has_parent: bool = False) -> bool:
