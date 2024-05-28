@@ -2,16 +2,40 @@
 
 This document described the changes between versions of the APS GUI.
 
+## 1.5.0
+
+### What's new
+
+- Compatability changes: APS v1.5.0 is compatible with RMS versions 13.1.2, 14.1.x and 14.2.x. It may also work with RMS version 12.1.4.
+- Large rewrite of UI, related to updating major versions of the UI framework. Only minor visual changes, and users' workflow should not be affected.
+- A 3D discrete parameter is now created with 0 or 1 depending on whether the grid cell in the
+  ERTBOX grid corresponds to a grid cell in the geomodel or not. This parameter can be used to filter out
+  grid cells that are not used in the geomodel when calculating statistical properties of realizations in
+  ERTBOX and is available also for ERT if ERT need that information. This change is only relevant when
+  using APS in a workflow with ERT.
+
+### Fixes
+
+- Facies names with blank space first or trailing blank space created mismatch between facies
+  table and specification of facies probabilities. This is fixed.
+
+### Miscellaneous
+
+- Replace frontend build system, `webpack` &rarr; `vite`.
+- Replace frontend state management system, `vuex` &rarr; `pinia`.
+- Update all other dependencies to newer versions.
+
 ## 1.4.4
 
 ### What's new
-* Added releases to GitHub
+
+- Added releases to GitHub
 
   New versions of the plugin should be available to download
 
 ### Fixes
-* New releases should no longer be marked as beta
 
+- New releases should no longer be marked as beta
 
 ## 1.4.3
 
