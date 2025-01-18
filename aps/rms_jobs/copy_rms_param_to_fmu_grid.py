@@ -30,7 +30,7 @@ def run(project, **kwargs):
         'debug_level': Debug.VERBOSE,
     }
 
-    run_copy_rms_param_to_ertbox(params)
+    run_copy_rms_param_to_ertbox(params, seed=project.seed)
 
 
 if __name__ == "__main__":

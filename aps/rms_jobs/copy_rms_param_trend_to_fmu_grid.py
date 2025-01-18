@@ -7,6 +7,7 @@
 import numpy as np
 import numpy.ma as ma
 import roxar
+import math
 
 from roxar import Direction
 from aps.algorithms.APSModel import APSModel
@@ -299,8 +300,10 @@ def copy_from_geo_to_ertbox_grid(
         discrete_param_names: list = [],
         debug_level: Debug = Debug.OFF,
         save_active_param: bool = False,
+        add_noise_to_inactive: bool = False,
         normalize_trend: bool = False,
         not_aps_workflow: bool = False,
+        seed: int = 12345,
 ):
     """
     zone_dict[zone_name] = (zone_number, region_number, conformity, param_name_list)
@@ -439,6 +442,8 @@ def copy_from_geo_to_ertbox_grid(
                 extrapolation_method,
                 nx, ny, nz_ertbox,
                 debug_level,
+                seed=seed,
+                add_noise_to_inactive=add_noise_to_inactive,
             )
 
             # Normalize values to be between 0 and 1 within this zone
@@ -521,6 +526,8 @@ def extrapolate_values_for_zone(
     extrapolation_method,
     nx, ny, nz_ertbox,
     debug_level,
+    seed=12345,
+    add_noise_to_inactive=False,
     ):
     """
     Description:
@@ -530,8 +537,13 @@ def extrapolate_values_for_zone(
 
     if debug_level >= Debug.VERBOSE:
         if extrapolation_method is not None:
-            print(f"-- Extrapolate parameter using option: {extrapolation_method}")
+            print(f"-- Extrapolate parameter using option for undefined grid cells in ERTBOX: {extrapolation_method}")
+        if add_noise_to_inactive:
+            print(f"-- Add random noise to undefined grid cells in ERTBOX on top of the extrapolated values")
 
+    if add_noise_to_inactive:
+        # The undefined grid cells before any of them are filled
+        undefined_grid_cells = np.copy(ertbox_values_3d_masked.mask)
 
     vertical_methods = \
         (ExtrapolationMethod.EXTEND, ExtrapolationMethod.REPEAT)
@@ -562,9 +574,28 @@ def extrapolate_values_for_zone(
         raise ValueError(
             f"Extrapolation method:{extrapolation_method} is not implemented."
         )
+
+    # Add random noise with low std dev to all values for undefined
+    # grid cells that have been filled in the above extrapolation
+    # This is to avoid creating ensemble of realizations where undefined grid cells
+    # that are filled with extrapolated values get 0 standard deviation since
+    # 0 standard deviation per today trigger errors in ERT with adaptive localisation.
+    if add_noise_to_inactive:
+        ertbox_values_3d = add_noise_to_undefined_grid_cell_values(ertbox_values_3d, undefined_grid_cells, seed)
+
     ertbox_values = np.reshape(ertbox_values_3d, nx*ny*nz_ertbox)
     return ertbox_values
 
+def add_noise_to_undefined_grid_cell_values(ertbox_values_3d_masked, undefined_grid_cells, seed, max_relative_noise=0.05):
+    mean = np.mean(ertbox_values_3d_masked)
+    low = 0.0
+    high = math.fabs(mean) * max_relative_noise
+    # To avoid making negative values for positive random numbers (e.g. from lognormal distribution),
+    # add a small positive noise
+    rng = np.random.default_rng(seed)
+    noise = rng.uniform(low, high, size=ertbox_values_3d_masked.shape)
+    ertbox_values_3d_masked[undefined_grid_cells] = ertbox_values_3d_masked[undefined_grid_cells] + noise[undefined_grid_cells]
+    return ertbox_values_3d_masked
 
 def copy_parameters_for_zone(
         zone_name,
@@ -761,7 +792,7 @@ def ertbox_active_param_to_rms(prefix, real_number, zone_name, ertbox_grid_model
 
 
 
-def run(*, project, 
+def run(*, project,
     save_active_param_to_ertbox=True,
     save_region_param_to_ertbox=False,
     normalize_trend=True, 

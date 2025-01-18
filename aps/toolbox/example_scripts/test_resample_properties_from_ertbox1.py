@@ -39,5 +39,5 @@ params ={
     "ZoneParam": "Zone",
     "ERTBoxGridName": "ERTBOX",
 }
-copy_rms_param_to_ertbox_grid.run(params)
+copy_rms_param_to_ertbox_grid.run(params,project.seed)
 

@@ -10,5 +10,5 @@ params ={
     "model_file_name": "examples/resample_properties_from_ertbox.yml",
     "debug_level": Debug.VERBOSE,
 }
-copy_rms_param_to_ertbox_grid.run(params)
+copy_rms_param_to_ertbox_grid.run(params, project.seed)
 
