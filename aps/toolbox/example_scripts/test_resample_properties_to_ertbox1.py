@@ -33,6 +33,7 @@ params ={
     "ERTBoxGridName": "ERTBOX",
     "ExtrapolationMethod": "repeat",
     "SaveActiveParam": True,
+    "AddNoiseToInactive": True,
 }
-copy_rms_param_to_ertbox_grid.run(params)
+copy_rms_param_to_ertbox_grid.run(params, project.seed)
 

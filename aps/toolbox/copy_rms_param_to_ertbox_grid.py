@@ -21,7 +21,7 @@ from aps.utils.methods import check_missing_keywords_list
 from aps.utils.roxar.grid_model import get_zone_layer_numbering
 from aps.utils.roxar.generalFunctionsUsingRoxAPI import  set_continuous_3d_parameter_values_in_zone_region
 
-def run(params):
+def run(params, seed=12345):
     """
         Copy 3D RMS parameters from geogrid to ERTBOX grid and optionally extrapolate and fill all ERTBOX grid cells.
         Usage alternatives:
@@ -97,6 +97,7 @@ params ={
     "ERTBoxGridName": "ERTBOX",
     "ExtrapolationMethod": "repeat",
     "SaveActiveParam": True,
+    "AddNoiseToInactive": True,
 }
 copy_rms_param_to_ertbox_grid.run(params)
 
@@ -124,7 +125,7 @@ copy_rms_param_to_ertbox_grid.run(params)
         required_kw_list.append("ExtrapolationMethod")
         required_kw_list.append("GeoGridParameters")
         check_missing_keywords_list(params, required_kw_list)
-        from_geogrid_to_ertbox(project, params)
+        from_geogrid_to_ertbox(project, params, seed=seed)
     elif mode == 'from_ertbox_to_geo':
         # The name both in ertbox and in geogrid is required
         # here since no standard naming convention is required here.
@@ -134,7 +135,7 @@ copy_rms_param_to_ertbox_grid.run(params)
         from_ertbox_to_geogrid(project, params)
 
 
-def from_geogrid_to_ertbox(project, params):
+def from_geogrid_to_ertbox(project, params, seed=12345):
     # Assign user specified parameters
     grid_model_name = params['GridModelName']
     zone_param_name = params['ZoneParam']
@@ -147,6 +148,8 @@ def from_geogrid_to_ertbox(project, params):
 
     # Optional parameter
     save_active_param = params.get('SaveActiveParam', False)
+    # Optional parameter, Default is to add noise to inactive grid cell values
+    add_noise_to_inactive = params.get('AddNoiseToInactive', True)
 
     # Check type and existence of geogrid parameters
     (continuous_type_param_dict, discrete_type_param_list) = \
@@ -216,8 +219,10 @@ def from_geogrid_to_ertbox(project, params):
             discrete_param_names=discrete_type_param_list,
             debug_level=debug_level,
             save_active_param=save_active_param,
+            add_noise_to_inactive=add_noise_to_inactive,
             normalize_trend=False,
-            not_aps_workflow=True)
+            not_aps_workflow=True,
+            seed=seed)
 
     if debug_level >= Debug.ON:
         print(f"- Finished copy rms parameters from {grid_model_name} to {ertbox_grid_model_name} ")
@@ -373,6 +378,7 @@ def _read_model_file_yml(model_file_name, debug_level=Debug.OFF):
         "Mode", "GridModelName", "ERTBoxGridName",
         "ZoneParam", "GeoGridParameters", "ErtboxParameters",
         "Conformity", "SaveActiveParam", "ExtrapolationMethod",
+        "AddNoiseToInactive"
         ]
     unknown_keys = []
     for key in list(spec.keys()):
@@ -442,6 +448,7 @@ def _read_model_file_yml(model_file_name, debug_level=Debug.OFF):
 
 
     save_active_param = get_bool_value(spec, 'SaveActiveParam', True)
+    add_noise_to_inactive = get_bool_value(spec, 'AddNoiseToInactive', True)
 
     param_dict ={
         'Mode': mode,
@@ -453,6 +460,7 @@ def _read_model_file_yml(model_file_name, debug_level=Debug.OFF):
         'ErtboxParameters':  param_names_ertbox_per_zone,
         'Conformity':    conformity_per_zone,
         'SaveActiveParam': save_active_param,
+        'AddNoiseToInactive': add_noise_to_inactive,
         'debug_level': debug_level,
     }
     return param_dict
