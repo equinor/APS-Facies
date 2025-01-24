@@ -12,12 +12,15 @@ FROM ${RMS_IMAGE} AS python
 # RMS 12.0 and earlier uses Python 3.6.1, but it is so old that I was unable to update the CA certificates,
 # and thus unable to download poetry
 
-ENV POETRY_VERSION=1.6.1
-
 WORKDIR /code
 ENV PATH="/root/.local/bin:$PATH"
 
-RUN roxenv pip install --user "poetry==$POETRY_VERSION"
+COPY .tool-versions ./
+RUN <<EOF
+#!/usr/bin/env bash
+POETRY_VERSION="$(cat .tool-versions|grep poetry | grep -o -E '([0-9]+\.?)+')"
+roxenv pip install --user "poetry==$POETRY_VERSION"
+EOF
 
 # This will overwrite RMS' installed packages in favor of those specified by us
 RUN roxenv poetry config virtualenvs.create false --local

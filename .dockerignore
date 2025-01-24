@@ -1,5 +1,6 @@
 *
 # Dependencies
+!.tool-versions
 # Python
 !poetry.lock
 !pyproject.toml

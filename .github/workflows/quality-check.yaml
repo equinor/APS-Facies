@@ -38,7 +38,7 @@ jobs:
           python3.8 -m venv .venv
           source .venv/bin/activate
           pip install --upgrade pip
-          pip install "poetry==1.4.0"
+          pip install "poetry==$(cat .tool-versions|grep poetry | grep -o -E '([0-9]+\.?)+')"
           poetry install
           make --directory=${{ github.workspace }} init
 
