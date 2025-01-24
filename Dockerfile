@@ -1,12 +1,12 @@
 # syntax = docker/dockerfile:1
 ARG RMS_IMAGE
-FROM node:20.11.0-alpine3.18 AS node
+FROM node:20.18.1-alpine3.21 AS node
 
 ENV CODE=/code
 ENV NODE_MODULES=$CODE/node_modules
 ENV TRUNCATION_RULES=src/stores/truncation-rules/templates/truncationRules.json
 
-FROM bitnami/nginx:1.25.2-debian-11-r46 AS nginx
+FROM bitnami/nginx:1.27.3-debian-12-r5 AS nginx
 
 FROM ${RMS_IMAGE} AS python
 # RMS 12.0 and earlier uses Python 3.6.1, but it is so old that I was unable to update the CA certificates,
