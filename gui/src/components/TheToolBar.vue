@@ -192,8 +192,7 @@ async function loadModelFile(
       const { valid, error } = await rms.isApsModelValid(btoa(fileContent))
       if (valid) {
         rootStore.$reset()
-        rootStore.loadingMessage = 'Resetting the state...'
-        await rootStore.fetch()
+        await rootStore.fetch('Resetting the state...')
         await useModelFileLoaderStore()
           .populateGUI(json, fileName)
 
