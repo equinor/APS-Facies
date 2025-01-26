@@ -1,15 +1,17 @@
 #!/bin/env python
 # -*- coding: utf-8 -*-
+
 """This module is used in FMU workflows to copy a continuous 3D parameter
 from geomodel grid to ERTBOX grid and extrapolate values that are undefined
 in ERTBOX grid. This functionality is used when the user wants to
 use FIELD keywords for petrophysical properties in ERT in Assisted History Matching.
 """
 
-from aps.toolbox.copy_rms_param_to_ertbox_grid import (
-    run as run_copy_rms_param_to_ertbox,
-)
-from aps.utils.constants.simple import Debug, ModelFileFormat
+# TODO: When the stubs are removed from the APS repository (deprecated), then this function here can be removed
+# It will be replaced by fmu.tools.rms function copy_rms_param
+
+from aps.toolbox import copy_rms_param_to_ertbox_grid
+from aps.utils.constants.simple import ModelFileFormat
 from aps.utils.methods import get_specification_file, SpecificationType
 
 
@@ -23,7 +25,7 @@ def run(project, **kwargs):
     """
     if project.current_realisation > 0:
         raise ValueError(
-            f'In RMS models to be used with a FMU loop in ERT,'
+            'In RMS models to be used with a FMU loop in ERT,'
             'the grid and parameters should be shared and realisation = 1'
         )
     params = {
@@ -31,11 +33,7 @@ def run(project, **kwargs):
         'model_file_name': get_specification_file(
             _type=SpecificationType.RESAMPLE, _format=ModelFileFormat.YML, **kwargs
         ),
-        'debug_level': Debug.VERBOSE,
+        'debug_level': 2,
     }
 
-    run_copy_rms_param_to_ertbox(params, seed=project.seed)
-
-
-if __name__ == '__main__':
-    run(project)
+    copy_rms_param_to_ertbox_grid.run(params)
