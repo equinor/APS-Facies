@@ -18,7 +18,7 @@
     "@vuelidate/core": "^2.0.3",
     "@vuelidate/validators": "^2.0.4",
     "@vueuse/core": "^10.9.0",
-    "fast-xml-parser": "^4.3.4",
+    "fast-xml-parser": "^4.4.1",
     "floating-vue": "^5.2.2",
     "hex-rgb": "^5.0.0",
     "lodash": "^4.17.11",
