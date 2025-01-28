@@ -2,3 +2,4 @@ nodejs 20.11.0
 python 3.8.17
 poetry 1.6.1
 yarn 1.22.19
+pre-commit 4.1.0
