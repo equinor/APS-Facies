@@ -12,12 +12,12 @@ def find_polygon_references(polygons, item):
     references = []
     for polygon in polygons:
         if polygon['facies'] == item[0]:
-            if "name" in polygon:
+            if 'name' in polygon:
                 references.append(polygon['name'])
-            elif "order" in polygon:
+            elif 'order' in polygon:
                 references.append(polygon['order'])
             else:
-                raise KeyError(f"No name or order in polygon {polygon}")
+                raise KeyError(f'No name or order in polygon {polygon}')
 
     if len(references) == 0:
         return -1
@@ -30,10 +30,10 @@ def find_polygon_references(polygons, item):
 def make_empty_fields(num):
     return [
         {
-          "channel": i,
-          "field": {
-            "name": f"GRF0{i}",
-          }
+            'channel': i,
+            'field': {
+                'name': f'GRF0{i}',
+            },
         }
         for i in range(1, num + 1)
     ]
@@ -45,11 +45,11 @@ def get_array(content, key):
 
 def make_overlay_polygon(elem):
     return {
-            'field': {'name': elem[0]},
-            'facies': {'name': elem[1]},
-            'probability': elem[2],
-            'interval': elem[3],
-        }
+        'field': {'name': elem[0]},
+        'facies': {'name': elem[1]},
+        'probability': elem[2],
+        'interval': elem[3],
+    }
 
 
 def _get_overlays(rule, content):
@@ -96,7 +96,7 @@ class Parser:
 
     @staticmethod
     def _copy_rules(rules):
-        """ Helper method to ensure NO dicts are duplicated by Python, to "optimize" memory usage """
+        """Helper method to ensure NO dicts are duplicated by Python, to "optimize" memory usage"""
         _rules = []
         for rule in rules:
             _rules.append(deepcopy(rule))
@@ -134,7 +134,7 @@ class Parser:
                     facies_name = polygon['facies']
                     polygon['facies'] = {
                         'name': facies_name,
-                        'index': indices['facies'][facies_name]
+                        'index': indices['facies'][facies_name],
                     }
             for item in rule['fields']:
                 field_name = item['field']['name']
@@ -174,7 +174,9 @@ class Parser:
 
         @classmethod
         def parse(cls, line):
-            match = re.match(r"Bayfill +(?P<name>\w+) +(?P<num_facies>\d+) +(?P<rule>\[.*\])", line).groupdict()
+            match = re.match(
+                r'Bayfill +(?P<name>\w+) +(?P<num_facies>\d+) +(?P<rule>\[.*\])', line
+            ).groupdict()
             rule = json.loads(match['rule'].replace("'", '"'))
             polygons = cls.polygons(rule)
             return {
@@ -197,7 +199,9 @@ class Parser:
         @classmethod
         def polygons(cls, rule):
             if len(rule) != len(cls.names):
-                raise ValueError(f'Incorrect number of polygons. Expected {len(cls.names)}, but got {len(rule)}.')
+                raise ValueError(
+                    f'Incorrect number of polygons. Expected {len(cls.names)}, but got {len(rule)}.'
+                )
             return [
                 {
                     'name': cls.names[index],
@@ -213,21 +217,22 @@ class Parser:
         @classmethod
         def settings(cls, rule, polygons):
             mapping = {
-                polygon['facies']['name']: polygon['name']
-                for polygon in polygons
+                polygon['facies']['name']: polygon['name'] for polygon in polygons
             }
             settings = []
             for polygon in rule:
                 if len(polygon) == 3:
                     facies_name, slant_factor, value = polygon
-                    settings.append({
-                        'name': slant_factor,
-                        'polygon': mapping[facies_name],
-                        'slantFactor': {
-                            'value': value,
-                            'updatable': False,
-                        },
-                    })
+                    settings.append(
+                        {
+                            'name': slant_factor,
+                            'polygon': mapping[facies_name],
+                            'slantFactor': {
+                                'value': value,
+                                'updatable': False,
+                            },
+                        }
+                    )
             return settings
 
     class Combination:
@@ -236,7 +241,9 @@ class Parser:
             _mapping = {
                 'NonCubicAndOverlay': 'NonCubicAndOverlay',
             }
-            return re.match(r"(?P<type>\w+) +(?P<name>\w+) +(?P<rule>\w+) +(?P<overlay>\w+)", line).groupdict()
+            return re.match(
+                r'(?P<type>\w+) +(?P<name>\w+) +(?P<rule>\w+) +(?P<overlay>\w+)', line
+            ).groupdict()
 
     class Cubic:
         min_fields = 2
@@ -244,7 +251,10 @@ class Parser:
         @classmethod
         def parse(cls, line):
             # TODO: Implement
-            content = re.match(r"(?P<type>\w+) +(?P<name>\w+) +(?P<num_polygons>\d+) +(?P<rule>\[.*\])", line).groupdict()
+            content = re.match(
+                r'(?P<type>\w+) +(?P<name>\w+) +(?P<num_polygons>\d+) +(?P<rule>\[.*\])',
+                line,
+            ).groupdict()
             polygons = cls.polygons(content)
             return {
                 'name': content['name'],
@@ -252,32 +262,30 @@ class Parser:
                 'minFields': cls.min_fields,
                 'polygons': polygons,
                 'settings': cls.settings(content, polygons),
-                'fields': make_empty_fields(cls.min_fields)
+                'fields': make_empty_fields(cls.min_fields),
             }
 
         @staticmethod
         def polygons(content):
             items = get_array(content, 'rule')[1:]
-            return [{
-                'name': i + 1,
-                'facies': item[0],
-                'proportion': 1 / len(items)
-            } for i, item in enumerate(items)]
+            return [
+                {'name': i + 1, 'facies': item[0], 'proportion': 1 / len(items)}
+                for i, item in enumerate(items)
+            ]
 
         @staticmethod
         def settings(content, polygons):
             cubic_specification = get_array(content, 'rule')
 
-            settings = {
-                'direction': cubic_specification[0],
-                'polygons': []
-            }
+            settings = {'direction': cubic_specification[0], 'polygons': []}
             for polygon in cubic_specification[1:]:
-                settings['polygons'].append({
-                    'polygon': find_polygon_references(polygons, polygon),
-                    'fraction': polygon[1],
-                    'level': tuple(polygon[2:])
-                })
+                settings['polygons'].append(
+                    {
+                        'polygon': find_polygon_references(polygons, polygon),
+                        'fraction': polygon[1],
+                        'level': tuple(polygon[2:]),
+                    }
+                )
             return settings
 
     class NonCubic:
@@ -285,7 +293,10 @@ class Parser:
 
         @classmethod
         def parse(cls, line: str):
-            content = re.match(r"NonCubic (?P<name>\w+) (?P<num_groups>\d+) +(?P<settings>(\[.*\],?)+)", line).groupdict()
+            content = re.match(
+                r'NonCubic (?P<name>\w+) (?P<num_groups>\d+) +(?P<settings>(\[.*\],?)+)',
+                line,
+            ).groupdict()
             polygons = cls.polygons(content)
             return {
                 'name': content['name'],
@@ -293,7 +304,7 @@ class Parser:
                 'minFields': cls.min_fields,  # TODO calculate?
                 'polygons': polygons,
                 'settings': cls.settings(content, polygons),
-                'fields': make_empty_fields(cls.min_fields)
+                'fields': make_empty_fields(cls.min_fields),
             }
 
         @staticmethod
@@ -304,14 +315,16 @@ class Parser:
                     updatable = item[3]
                 except IndexError:
                     updatable = False
-                settings.append({
-                    'polygon': find_polygon_references(polygons, item),
-                    'angle': {
-                        'value': item[1],
-                        'updatable': updatable,
-                    },
-                    'fraction': item[2],
-                })
+                settings.append(
+                    {
+                        'polygon': find_polygon_references(polygons, item),
+                        'angle': {
+                            'value': item[1],
+                            'updatable': updatable,
+                        },
+                        'fraction': item[2],
+                    }
+                )
             counter = {}
             for setting in settings:
                 polygon = setting['polygon']
@@ -325,22 +338,28 @@ class Parser:
         @staticmethod
         def polygons(content):
             items = get_array(content, 'settings')
-            return [{
-                # Polygons are 1 indexed
-                'order': i + 1,
-                'facies': item[0],
-                'proportion': 1 / len(items)
-            } for i, item in enumerate(items)]
+            return [
+                {
+                    # Polygons are 1 indexed
+                    'order': i + 1,
+                    'facies': item[0],
+                    'proportion': 1 / len(items),
+                }
+                for i, item in enumerate(items)
+            ]
 
     class Overlay:
         @classmethod
         def parse(cls, line: str):
-            content = re.match(r"Overlay +(?P<name>\w+) +(?P<num_groups>\d+) +(?P<polygon_settings>[\d+ ]+) +(?P<settings>\[.+\])", line).groupdict()
+            content = re.match(
+                r'Overlay +(?P<name>\w+) +(?P<num_groups>\d+) +(?P<polygon_settings>[\d+ ]+) +(?P<settings>\[.+\])',
+                line,
+            ).groupdict()
             # Overlay A01 1  1 1 [[[['GRF03', 'F03', 1.0, 0.0]], ['F01']]]
             return {
                 'name': content['name'],
                 'type': 'overlay',
-                'settings': cls.settings(content)
+                'settings': cls.settings(content),
             }
 
         @staticmethod
@@ -348,16 +367,12 @@ class Parser:
             settings = get_array(content, 'settings')
             overlay = []
             for item in settings:
-                overlay.append({
-                    'polygons': [
-                        make_overlay_polygon(elem) for elem in item[0]
-                    ],
-                    'background': [
-                        {
-                            'name': name
-                        } for name in item[1]
-                    ]
-                })
+                overlay.append(
+                    {
+                        'polygons': [make_overlay_polygon(elem) for elem in item[0]],
+                        'background': [{'name': name} for name in item[1]],
+                    }
+                )
             return overlay
 
 
@@ -385,10 +400,7 @@ def _get_all_fields_indices(rule):
 
 
 def _is_indexed(facies):
-    return (
-            isinstance(facies, dict)
-            and set(facies.keys()) == {'name', 'index'}
-    )
+    return isinstance(facies, dict) and set(facies.keys()) == {'name', 'index'}
 
 
 def _get_all_facies_indices(rule):
@@ -412,29 +424,19 @@ def parse(data: str):
 
 
 def run(dump_site: Path):
-    truncation_rules_path = Path(__file__).parent / '..' / 'examples/truncation_settings.dat'
+    truncation_rules_path = (
+        Path(__file__).parent / '..' / 'examples/truncation_settings.dat'
+    )
     with open(truncation_rules_path, 'r', encoding='utf-8') as f:
         data = f.readlines()
 
     rules = {
-        "types": [
-            {
-                "name": "Bayfill",
-                "type": "bayfill",
-                "order": 1
-            },
-            {
-                "name": "Non-Cubic",
-                "type": "non-cubic",
-                "order": 2
-            },
-            {
-                "name": "Cubic",
-                "type": "cubic",
-                "order": 3
-            }
+        'types': [
+            {'name': 'Bayfill', 'type': 'bayfill', 'order': 1},
+            {'name': 'Non-Cubic', 'type': 'non-cubic', 'order': 2},
+            {'name': 'Cubic', 'type': 'cubic', 'order': 3},
         ],
-        "templates": parse(data),
+        'templates': parse(data),
     }
     with open(dump_site, 'w') as f:
         json.dump(rules, f)

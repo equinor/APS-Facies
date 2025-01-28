@@ -1,22 +1,29 @@
 from aps.utils.constants.simple import Debug
 from aps.utils.grid import update_rms_parameter
-from aps.utils.roxar.grid_model import find_defined_cells, create_zone_parameter, getDiscrete3DParameterValues
+from aps.utils.roxar.grid_model import (
+    find_defined_cells,
+    create_zone_parameter,
+    getDiscrete3DParameterValues,
+)
 from aps.utils.roxar.progress_bar import APSProgressBar
 from aps.utils.simulation import initialize_rms_parameters
 
 
 def add_trend_to_gauss_field(
-        project, aps_model,
-        zone_number, region_number, use_regions,
-        gauss_field_name,
-        gauss_field_values,
-        cell_index_defined,
-        gauss_field_trend_values=None,
-        gauss_field_residual_values=None,
-        fmu_mode=False,
-        debug_level=Debug.OFF,
+    project,
+    aps_model,
+    zone_number,
+    region_number,
+    use_regions,
+    gauss_field_name,
+    gauss_field_values,
+    cell_index_defined,
+    gauss_field_trend_values=None,
+    gauss_field_residual_values=None,
+    fmu_mode=False,
+    debug_level=Debug.OFF,
 ):
-    '''
+    """
     Calculate trend and add trend to simulated gaussian residual field to get the
     gaussian field with trend. Standard deviation for residual field is calculated
     by using the specified relative standard deviation and the
@@ -26,7 +33,7 @@ def add_trend_to_gauss_field(
     active grid cells in the grid model. Returns also trend values in a separate
     array, but this array has length equal to cell_index_defined and does only
     contain the values for the grid cells that are selected by cell_index_defined.
-    '''
+    """
     grid_model_name = aps_model.grid_model_name
     realization_number = project.current_realisation
     grid_model = project.grid_models[grid_model_name]
@@ -39,11 +46,15 @@ def add_trend_to_gauss_field(
     if debug_level >= Debug.VERY_VERBOSE:
         trend_type = trend_model.type.name
         if use_regions:
-            print(f'--- Calculate trend for: {gauss_field_name} for (zone,region)=({zone_number}, {region_number})')
+            print(
+                f'--- Calculate trend for: {gauss_field_name} for (zone,region)=({zone_number}, {region_number})'
+            )
             print(f'--- Trend type: {trend_type}')
 
         else:
-            print(f'--- Calculate trend for: {gauss_field_name} for zone: {zone_number}')
+            print(
+                f'--- Calculate trend for: {gauss_field_name} for zone: {zone_number}'
+            )
             print(f'--- Trend type: {trend_type}')
 
     sim_box_thickness = zone_model.sim_box_thickness
@@ -74,15 +85,18 @@ def add_trend_to_gauss_field(
 
     gauss_field_values[cell_index_defined] = val
 
-
     if debug_level >= Debug.VERY_VERBOSE:
         print(f'--- Number of active cells:{len(cell_index_defined)} ')
         print(f'--- Trend minmax_difference = {minmax_difference}')
         print(f'--- SimBoxThickness = {sim_box_thickness}')
         print(f'--- RelStdDev = {rel_std_dev}')
         print(f'--- Sigma = {sigma}')
-        print(f'--- Min trend, max trend    :  {trend_values.min()}  {trend_values.max()}')
-        print(f'--- Residual min,max        :  {sigma * residual_values.min()}  {sigma * residual_values.max()}')
+        print(
+            f'--- Min trend, max trend    :  {trend_values.min()}  {trend_values.max()}'
+        )
+        print(
+            f'--- Residual min,max        :  {sigma * residual_values.min()}  {sigma * residual_values.max()}'
+        )
         print(f'--- Trend + residual min,max:  {val.min()}  {val.max()}')
 
     # Updated versions of these are returned
@@ -90,16 +104,16 @@ def add_trend_to_gauss_field(
 
 
 def add_trends(
-        project,
-        aps_model,
-        zone_number,
-        region_number=0,
-        write_rms_parameters_for_qc_purpose=False,
-        debug_level=Debug.OFF,
-        fmu_mode=False,
-        is_shared=False,
-        fmu_with_residual_grf=False,
-        fmu_add_trend_if_use_residual=False,
+    project,
+    aps_model,
+    zone_number,
+    region_number=0,
+    write_rms_parameters_for_qc_purpose=False,
+    debug_level=Debug.OFF,
+    fmu_mode=False,
+    is_shared=False,
+    fmu_with_residual_grf=False,
+    fmu_add_trend_if_use_residual=False,
 ):
     grid_model = project.grid_models[aps_model.grid_model_name]
     zone_model = aps_model.getZoneModel(zone_number, region_number)
@@ -108,13 +122,25 @@ def add_trends(
     realization_number = project.current_realisation
 
     # Initialize dictionaries keeping gauss field values and trends for all used gauss fields
-    gf_all_values, _, gf_all_trend_values, gf_all_residual_values = initialize_rms_parameters(
-        project, aps_model, [1, 0, 1, 1], write_rms_parameters_for_qc_purpose,
-        is_shared=is_shared, debug_level=debug_level,
-        fmu_with_residual_grf=fmu_with_residual_grf,
+    gf_all_values, _, gf_all_trend_values, gf_all_residual_values = (
+        initialize_rms_parameters(
+            project,
+            aps_model,
+            [1, 0, 1, 1],
+            write_rms_parameters_for_qc_purpose,
+            is_shared=is_shared,
+            debug_level=debug_level,
+            fmu_with_residual_grf=fmu_with_residual_grf,
+        )
     )
     cell_index_defined = get_defined_cells(
-        project, aps_model, grid_model, region_number, zone_number, debug_level, fmu_mode,
+        project,
+        aps_model,
+        grid_model,
+        region_number,
+        zone_number,
+        debug_level,
+        fmu_mode,
     )
 
     for gf_name in gf_names_for_zone:
@@ -146,14 +172,15 @@ def add_trends(
                 )
                 APSProgressBar.increment()
 
+
 def get_defined_cells(
-        project,
-        aps_model,
-        grid_model,
-        region_number,
-        zone_number,
-        debug_level=Debug.OFF,
-        fmu_mode=False,
+    project,
+    aps_model,
+    grid_model,
+    region_number,
+    zone_number,
+    debug_level=Debug.OFF,
+    fmu_mode=False,
 ):
     realization_number = project.current_realisation
     use_regions = aps_model.use_regions
@@ -170,38 +197,49 @@ def get_defined_cells(
     )
     region_values = None
     if use_regions:
-        region_values, _ = getDiscrete3DParameterValues(grid_model, aps_model.region_parameter, realization_number)
+        region_values, _ = getDiscrete3DParameterValues(
+            grid_model, aps_model.region_parameter, realization_number
+        )
     zone_values = zone_param.get_values(realization_number)
     return find_defined_cells(
-        zone_values, zone_number, region_values, region_number, debug_level=Debug.OFF,
+        zone_values,
+        zone_number,
+        region_values,
+        region_number,
+        debug_level=Debug.OFF,
     )
 
 
 def add_trends_to_field(
-        project,
-        aps_model,
-        grid_model,
-        cell_index_defined,
+    project,
+    aps_model,
+    grid_model,
+    cell_index_defined,
+    gauss_field_values_all,
+    gauss_field_trend_values_all,
+    gauss_field_residual_values_all,
+    gf_name,
+    realization_number,
+    region_number,
+    zone_number,
+    debug_level=Debug.OFF,
+    fmu_mode=False,
+    is_shared=False,
+    fmu_with_residual_grf=False,
+    fmu_add_trend_if_use_residual=True,
+    write_rms_parameters_for_qc_purpose=False,
+):
+    use_regions = aps_model.use_regions
+    (
         gauss_field_values_all,
         gauss_field_trend_values_all,
         gauss_field_residual_values_all,
-        gf_name,
-        realization_number,
-        region_number,
+    ) = add_trend_to_gauss_field(
+        project,
+        aps_model,
         zone_number,
-        debug_level=Debug.OFF,
-        fmu_mode=False,
-        is_shared=False,
-        fmu_with_residual_grf=False,
-        fmu_add_trend_if_use_residual=True,
-        write_rms_parameters_for_qc_purpose=False,
-):
-    use_regions = aps_model.use_regions
-    (gauss_field_values_all,
-    gauss_field_trend_values_all,
-    gauss_field_residual_values_all) = add_trend_to_gauss_field(
-        project, aps_model,
-        zone_number, region_number, use_regions,
+        region_number,
+        use_regions,
         gf_name,
         gauss_field_values_all,
         cell_index_defined,

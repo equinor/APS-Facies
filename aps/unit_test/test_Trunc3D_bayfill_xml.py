@@ -6,19 +6,33 @@ import xml.etree.ElementTree as ET
 from aps.algorithms.APSMainFaciesTable import APSMainFaciesTable
 from aps.algorithms.truncation_rules import Trunc3D_bayfill
 from aps.unit_test.constants import (
-    BAYFILL_GAUSS_FIELD_FILES, FACIES_OUTPUT_FILE, NO_VERBOSE_DEBUG,
-    OUTPUT_MODEL_FILE_NAME1, OUTPUT_MODEL_FILE_NAME2, OUT_POLY_FILE1, OUT_POLY_FILE2, FACIES_OUTPUT_FILE_VECTORIZED
+    BAYFILL_GAUSS_FIELD_FILES,
+    FACIES_OUTPUT_FILE,
+    NO_VERBOSE_DEBUG,
+    OUTPUT_MODEL_FILE_NAME1,
+    OUTPUT_MODEL_FILE_NAME2,
+    OUT_POLY_FILE1,
+    OUT_POLY_FILE2,
+    FACIES_OUTPUT_FILE_VECTORIZED,
 )
 from aps.unit_test.helpers import (
-    apply_truncations,  apply_truncations_vectorized,
-    getFaciesInTruncRule, truncMapPolygons, writePolygons,
+    apply_truncations,
+    apply_truncations_vectorized,
+    getFaciesInTruncRule,
+    truncMapPolygons,
+    writePolygons,
 )
 from aps.utils.constants.simple import Debug
 from aps.utils.xmlUtils import prettify
 
 
 def interpretXMLModelFileAndWrite(
-        modelFileName, outputModelFileName, fTable, faciesInZone, gaussFieldsInZone, debug_level=Debug.OFF
+    modelFileName,
+    outputModelFileName,
+    fTable,
+    faciesInZone,
+    gaussFieldsInZone,
+    debug_level=Debug.OFF,
 ):
     # Read test model file with truncation rule into xml tree
     ET_Tree = ET.parse(modelFileName)
@@ -27,7 +41,7 @@ def interpretXMLModelFileAndWrite(
     trRule = root.find('TruncationRule')
 
     # Get name of truncation rule
-    #truncRuleName = trRule.get('name')
+    # truncRuleName = trRule.get('name')
     truncRuleName = trRule[0].tag
     print('Truncation rule: ' + truncRuleName)
 
@@ -45,7 +59,7 @@ def interpretXMLModelFileAndWrite(
         faciesInZone=faciesInZone,
         gaussFieldsInZone=gaussFieldsInZone,
         modelFileName=modelFileName,
-        debug_level=debug_level
+        debug_level=debug_level,
     )
     # Create and write XML tree
     createXMLTreeAndWriteFile(truncRuleOut, outputModelFileName)
@@ -67,9 +81,21 @@ def createXMLTreeAndWriteFile(truncRuleInput, outputModelFileName):
 
 
 def createTrunc(
-        outputModelFileName, fTable, faciesInZone, faciesInTruncRule,
-        gaussFieldsInZone, gaussFieldsForBGFacies,
-        sf_value, sf_name, sf_fmu_updatable, ysf, ysf_fmu_updatable, sbhd, sbhd_fmu_updatable, useConstTruncParam, debug_level
+    outputModelFileName,
+    fTable,
+    faciesInZone,
+    faciesInTruncRule,
+    gaussFieldsInZone,
+    gaussFieldsForBGFacies,
+    sf_value,
+    sf_name,
+    sf_fmu_updatable,
+    ysf,
+    ysf_fmu_updatable,
+    sbhd,
+    sbhd_fmu_updatable,
+    useConstTruncParam,
+    debug_level,
 ):
     mainFaciesTable = APSMainFaciesTable(facies_table=fTable)
 
@@ -78,9 +104,20 @@ def createTrunc(
     # debug_level
     truncRuleOut = Trunc3D_bayfill()
     truncRuleOut.initialize(
-        mainFaciesTable, faciesInZone, faciesInTruncRule,
-        gaussFieldsInZone, gaussFieldsForBGFacies,
-        sf_value, sf_name, sf_fmu_updatable, ysf, ysf_fmu_updatable, sbhd, sbhd_fmu_updatable, useConstTruncParam, debug_level
+        mainFaciesTable,
+        faciesInZone,
+        faciesInTruncRule,
+        gaussFieldsInZone,
+        gaussFieldsForBGFacies,
+        sf_value,
+        sf_name,
+        sf_fmu_updatable,
+        ysf,
+        ysf_fmu_updatable,
+        sbhd,
+        sbhd_fmu_updatable,
+        useConstTruncParam,
+        debug_level,
     )
 
     # Build an xml tree with the data and write it to file
@@ -89,17 +126,43 @@ def createTrunc(
 
 
 def initialize_write_read(
-        outputModelFileName1, outputModelFileName2, fTable, faciesInZone,
-        faciesInTruncRule, gaussFieldsInZone, gaussFieldsForBGFacies,
-        sf_value, sf_name, sf_fmu_updatable, ysf, ysf_fmu_updatable, sbhd, sbhd_fmu_updatable, useConstTruncParam, debug_level
+    outputModelFileName1,
+    outputModelFileName2,
+    fTable,
+    faciesInZone,
+    faciesInTruncRule,
+    gaussFieldsInZone,
+    gaussFieldsForBGFacies,
+    sf_value,
+    sf_name,
+    sf_fmu_updatable,
+    ysf,
+    ysf_fmu_updatable,
+    sbhd,
+    sbhd_fmu_updatable,
+    useConstTruncParam,
+    debug_level,
 ):
     file1 = outputModelFileName1
     file2 = outputModelFileName2
     # Create an object for truncation rule and write to file
     # Global variable truncRule
     truncRuleA = createTrunc(
-        file1, fTable, faciesInZone, faciesInTruncRule, gaussFieldsInZone, gaussFieldsForBGFacies,
-        sf_value, sf_name, sf_fmu_updatable, ysf, ysf_fmu_updatable, sbhd, sbhd_fmu_updatable, useConstTruncParam, debug_level
+        file1,
+        fTable,
+        faciesInZone,
+        faciesInTruncRule,
+        gaussFieldsInZone,
+        gaussFieldsForBGFacies,
+        sf_value,
+        sf_name,
+        sf_fmu_updatable,
+        ysf,
+        ysf_fmu_updatable,
+        sbhd,
+        sbhd_fmu_updatable,
+        useConstTruncParam,
+        debug_level,
     )
     inputFile = file1
 
@@ -107,7 +170,9 @@ def initialize_write_read(
     #    truncRule.writeContentsInDataStructure()
     # Read the previously written file as and XML file and write it out again to a new file
     # Global variable truncRule2
-    truncRuleB = interpretXMLModelFileAndWrite(inputFile, file2, fTable, faciesInZone, gaussFieldsInZone, debug_level)
+    truncRuleB = interpretXMLModelFileAndWrite(
+        inputFile, file2, fTable, faciesInZone, gaussFieldsInZone, debug_level
+    )
 
     # Compare the original xml file created in createTrunc and the xml file written by interpretXMLModelFileAndWrite
     check = filecmp.cmp(file1, file2)
@@ -126,7 +191,9 @@ def getClassName(truncRule):
     assert name == 'Trunc3D_bayfill'
 
 
-def truncMapsystemPolygons(truncRule, truncRule2, faciesProb, outPolyFile1, outPolyFile2):
+def truncMapsystemPolygons(
+    truncRule, truncRule2, faciesProb, outPolyFile1, outPolyFile2
+):
     assert faciesProb is not None
     assert truncRule is not None
     assert truncRule2 is not None
@@ -261,7 +328,7 @@ def test_case_5():
         faciesProb=[0.1, 0.1, 0.15, 0.75, 0.0],
         sf_value=0.1,
         sf_name='',
-        sf_fmu_updatable = True,
+        sf_fmu_updatable=True,
         ysf=1.0,
         ysf_fmu_updatable=True,
         sbhd=1.0,
@@ -278,8 +345,21 @@ def get_facies_reference_file_path(testCase):
 
 
 def run(
-        fTable, faciesInTruncRule, faciesInZone, faciesProb, faciesReferenceFile,
-        gaussFieldsInZone, gaussFieldsForBGFacies, sbhd, sbhd_fmu_updatable, sf_name, sf_value, sf_fmu_updatable, useConstTruncParam, ysf, ysf_fmu_updatable
+    fTable,
+    faciesInTruncRule,
+    faciesInZone,
+    faciesProb,
+    faciesReferenceFile,
+    gaussFieldsInZone,
+    gaussFieldsForBGFacies,
+    sbhd,
+    sbhd_fmu_updatable,
+    sf_name,
+    sf_value,
+    sf_fmu_updatable,
+    useConstTruncParam,
+    ysf,
+    ysf_fmu_updatable,
 ):
     truncRule, truncRule2 = initialize_write_read(
         outputModelFileName1=OUTPUT_MODEL_FILE_NAME1,
@@ -297,7 +377,7 @@ def run(
         sbhd=sbhd,
         sbhd_fmu_updatable=sbhd_fmu_updatable,
         useConstTruncParam=useConstTruncParam,
-        debug_level=NO_VERBOSE_DEBUG
+        debug_level=NO_VERBOSE_DEBUG,
     )
     nGaussFields = truncRule.getNGaussFieldsInModel()
     getClassName(truncRule)
@@ -307,7 +387,7 @@ def run(
         truncRule2=truncRule2,
         faciesProb=faciesProb,
         outPolyFile1=OUT_POLY_FILE1,
-        outPolyFile2=OUT_POLY_FILE2
+        outPolyFile2=OUT_POLY_FILE2,
     )
     apply_truncations(
         truncRule=truncRule,
@@ -315,7 +395,7 @@ def run(
         nGaussFields=nGaussFields,
         gaussFieldFiles=BAYFILL_GAUSS_FIELD_FILES,
         faciesOutputFile=FACIES_OUTPUT_FILE,
-        debug_level=NO_VERBOSE_DEBUG
+        debug_level=NO_VERBOSE_DEBUG,
     )
 
     apply_truncations_vectorized(
@@ -324,7 +404,7 @@ def run(
         nGaussFields=nGaussFields,
         gaussFieldFiles=BAYFILL_GAUSS_FIELD_FILES,
         faciesOutputFile=FACIES_OUTPUT_FILE_VECTORIZED,
-        debug_level=NO_VERBOSE_DEBUG
+        debug_level=NO_VERBOSE_DEBUG,
     )
 
 

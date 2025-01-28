@@ -49,7 +49,9 @@ if __name__ == 'app':
 
             __builtins__ = globals()['__builtins__']  # load the module
             if 'project' not in __builtins__:
-                __builtins__['project'] = roxar.Project.open(environ['RMS_PROJECT_PATH'])
+                __builtins__['project'] = roxar.Project.open(
+                    environ['RMS_PROJECT_PATH']
+                )
         else:
             raise RuntimeError('No project available, and RMS_PROJECT_PATH is not set')
 

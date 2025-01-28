@@ -4,9 +4,9 @@ from aps.utils.constants.simple import Debug, ExtrapolationMethod
 
 
 def test_copy_from_geo_to_ertbox_grid(project):
-    aps_model_name = "aps.xml"
+    aps_model_name = 'aps.xml'
     fmu_mode = True
-    ertbox_grid_model_name = "ERTBOX_coarse_grid"
+    ertbox_grid_model_name = 'ERTBOX_coarse_grid'
     debug_level = Debug.VERY_VERBOSE
     extrapolation_method = ExtrapolationMethod.EXTEND_LAYER_MEAN
 
@@ -19,11 +19,13 @@ def test_copy_from_geo_to_ertbox_grid(project):
         'debug_level': debug_level,
         'extrapolation_method': extrapolation_method,
     }
-    run(project=project,
+    run(
+        project=project,
         save_region_param_to_ertbox=True,
         normalize_trend=True,
-        **kwargs)
+        **kwargs,
+    )
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     test_copy_from_geo_to_ertbox_grid(project)

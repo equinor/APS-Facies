@@ -4,10 +4,7 @@ from enum import IntEnum, Enum, EnumMeta
 
 class BaseMeta(EnumMeta):
     def __contains__(cls, member):
-        return (
-                super().__contains__(member)
-                or member in cls.__members__
-        )
+        return super().__contains__(member) or member in cls.__members__
 
 
 class BaseEnum(Enum, metaclass=BaseMeta):
@@ -21,7 +18,6 @@ class Debug(IntEnum):
     VERBOSE = 2
     VERY_VERBOSE = 3
     VERY_VERY_VERBOSE = 4
-
 
 
 class VariogramType(Enum):
@@ -45,6 +41,7 @@ class OriginType(Enum):
     'RELATIVE' for relative coordinates
     'ABSOLUTE' for coordinates.
     """
+
     RELATIVE = 1
     ABSOLUTE = 2
 
@@ -71,7 +68,6 @@ class TrendParameter(Enum):
     RMS_PARAMETER = 'rms_parameter_name'
     RMS_TREND_MAP_NAME = 'rms_trendmap_name'
     RMS_TREND_MAP_ZONE = 'rms_trendmap_zone'
-
 
 
 class CrossSectionType(Enum):
@@ -191,6 +187,7 @@ class GridModelConstants:
 class SimBoxThicknessConstants:
     DEFAULT_VALUE = 30
 
+
 class Conform(Enum):
     Proportional = 'Proportional'
     TopConform = 'TopConform'
@@ -201,17 +198,20 @@ class TransformType(IntEnum):
     EMPIRIC = 0
     CUMNORM = 1
 
+
 class FlipDirectionXtgeo:
     UPPER_LEFT_CORNER = -1
     LOWER_LEFT_CORNER = 1
 
+
 class ExtrapolationMethod(Enum):
-    ZERO = "zero"
-    MEAN = "mean"
-    EXTEND_LAYER_MEAN = "extend_layer_mean"
-    REPEAT_LAYER_MEAN = "repeat_layer_mean"
-    EXTEND = "extend"
-    REPEAT = "repeat"
+    ZERO = 'zero'
+    MEAN = 'mean'
+    EXTEND_LAYER_MEAN = 'extend_layer_mean'
+    REPEAT_LAYER_MEAN = 'repeat_layer_mean'
+    EXTEND = 'extend'
+    REPEAT = 'repeat'
+
 
 class ModelFileFormat(Enum):
     YML = 'yml'

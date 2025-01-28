@@ -8,7 +8,11 @@ from warnings import warn
 
 from aps.utils.exceptions.general import raise_error
 from aps.utils.io import print_debug_information, print_error
-from aps.utils.roxar.grid_model import get3DParameter, modify_selected_grid_cells, update_code_names
+from aps.utils.roxar.grid_model import (
+    get3DParameter,
+    modify_selected_grid_cells,
+    update_code_names,
+)
 from aps.utils.constants.simple import Debug
 
 import roxar
@@ -38,8 +42,13 @@ def get_project_dir(project):
 
 
 def set_continuous_3d_parameter_values(
-        grid_model, parameter_name, input_values, zone_numbers=None,
-        realisation_number=0, is_shared=False, debug_level=Debug.OFF,
+    grid_model,
+    parameter_name,
+    input_values,
+    zone_numbers=None,
+    realisation_number=0,
+    is_shared=False,
+    debug_level=Debug.OFF,
 ):
     """Set 3D parameter with values for specified grid model.
     Input:
@@ -63,7 +72,9 @@ def set_continuous_3d_parameter_values(
     function_name = set_continuous_3d_parameter_values.__name__
     # Check if specified grid model exists and is not empty
     if grid_model.is_empty(realisation_number):
-        print(f'Specified grid model: {grid_model.name} is empty for realisation {realisation_number + 1}.')
+        print(
+            f'Specified grid model: {grid_model.name} is empty for realisation {realisation_number + 1}.'
+        )
         return False
 
     # Check if specified parameter name exists and create new parameter if it does not exist.
@@ -76,9 +87,15 @@ def set_continuous_3d_parameter_values(
             else:
                 print('--- Set parameter to non-shared.')
 
-        _create_property(grid_model, input_values, parameter_name, zone_numbers, is_shared, realisation_number)
+        _create_property(
+            grid_model,
+            input_values,
+            parameter_name,
+            zone_numbers,
+            is_shared,
+            realisation_number,
+        )
     else:
-
         if debug_level >= Debug.VERY_VERBOSE:
             print(f'--- Update specified RMS parameter: {parameter_name}')
 
@@ -93,18 +110,28 @@ def set_continuous_3d_parameter_values(
         # Get all active cell values
         p = get3DParameter(grid_model, parameter_name, realisation_number)
         if p.is_empty(realisation_number):
-            raise_error(function_name, f' Specified parameter: {parameter_name} is empty for realisation {realisation_number + 1}')
+            raise_error(
+                function_name,
+                f' Specified parameter: {parameter_name} is empty for realisation {realisation_number + 1}',
+            )
 
         current_values = p.get_values(realisation_number)
-        current_values = modify_selected_grid_cells(grid_model, zone_numbers, realisation_number, current_values, input_values)
+        current_values = modify_selected_grid_cells(
+            grid_model, zone_numbers, realisation_number, current_values, input_values
+        )
         p.set_values(current_values, realisation_number)
 
     return True
 
 
 def set_continuous_3d_parameter_values_in_zone(
-        grid_model, parameter_names, input_values_for_zones, zone_number,
-        realisation_number=0, is_shared=False, debug_level=Debug.OFF,
+    grid_model,
+    parameter_names,
+    input_values_for_zones,
+    zone_number,
+    realisation_number=0,
+    is_shared=False,
+    debug_level=Debug.OFF,
 ):
     """Set 3D parameter with values for specified grid model for specified zone (and region)
     Input:
@@ -128,7 +155,9 @@ def set_continuous_3d_parameter_values_in_zone(
 
     # Check if specified grid model exists and is not empty
     if grid_model.is_empty(realisation_number):
-        print(f'Specified grid model: {grid_model.name} is empty for realisation {realisation_number + 1}.')
+        print(
+            f'Specified grid model: {grid_model.name} is empty for realisation {realisation_number + 1}.'
+        )
         return False
 
     # Check if the parameter is defined and create new if not existing
@@ -147,10 +176,10 @@ def set_continuous_3d_parameter_values_in_zone(
                 start_layer = layer
             if end_layer < layer:
                 end_layer = layer
-    end_layer = end_layer+1
+    end_layer = end_layer + 1
     start = (0, 0, start_layer)
     end = (nx, ny, end_layer)
-    zone_cell_numbers = indexer.get_cell_numbers_in_range(start,end)
+    zone_cell_numbers = indexer.get_cell_numbers_in_range(start, end)
 
     num_layers = end_layer - start_layer
     # All input data vectors are from the same zone and has the same size
@@ -161,8 +190,7 @@ def set_continuous_3d_parameter_values_in_zone(
             f'Grid model nx: {nx}  Input array nx: {nx_in}\n'
             f'Grid model ny: {ny}  Input array ny: {ny_in}\n'
             f'Grid model nLayers for zone {zone_number} is: {num_layers}    Input array nz: {nz_in}'
-      )
-
+        )
 
     defined_cell_indices = indexer.get_indices(zone_cell_numbers)
     i_indices = defined_cell_indices[:, 0]
@@ -178,7 +206,9 @@ def set_continuous_3d_parameter_values_in_zone(
             property_param = grid_model.properties[parameter_name]
         else:
             # Create new parameter
-            property_param = grid_model.properties.create(parameter_name, roxar.GridPropertyType.continuous, np.float32)
+            property_param = grid_model.properties.create(
+                parameter_name, roxar.GridPropertyType.continuous, np.float32
+            )
             property_param.set_shared(is_shared, realisation_number)
             if debug_level >= Debug.VERY_VERBOSE:
                 print(f'--- Create specified RMS parameter: {parameter_name}')
@@ -217,7 +247,8 @@ def set_continuous_3d_parameter_values_in_zone(
     return True
 
 
-def define_active_cell_indices(indexer,
+def define_active_cell_indices(
+    indexer,
     cell_numbers,
     ijk_handedness,
     use_left_handed_grid_indexing,
@@ -232,9 +263,11 @@ def define_active_cell_indices(indexer,
         switch_handedness = True
     if switch_handedness:
         if debug_level >= Debug.VERY_VERBOSE:
-            print(f"-- Grid handedness for {grid_model_name} : {ijk_handedness}.  Switch handedness.")
+            print(
+                f'-- Grid handedness for {grid_model_name} : {ijk_handedness}.  Switch handedness.'
+            )
         i_indices = defined_cell_indices[:, 0]
-        j_indices = -defined_cell_indices[:, 1] + ny -1
+        j_indices = -defined_cell_indices[:, 1] + ny - 1
     else:
         i_indices = defined_cell_indices[:, 0]
         j_indices = defined_cell_indices[:, 1]
@@ -243,11 +276,18 @@ def define_active_cell_indices(indexer,
 
 
 def set_continuous_3d_parameter_values_in_zone_region(
-        grid_model, parameter_names, input_values_for_zones, zone_number,
-        region_number=0, region_parameter_name=None, realisation_number=0, is_shared=False,
-        debug_level=Debug.OFF, fmu_mode=False,
-        use_left_handed_grid_indexing=False,
-        switch_handedness=False,
+    grid_model,
+    parameter_names,
+    input_values_for_zones,
+    zone_number,
+    region_number=0,
+    region_parameter_name=None,
+    realisation_number=0,
+    is_shared=False,
+    debug_level=Debug.OFF,
+    fmu_mode=False,
+    use_left_handed_grid_indexing=False,
+    switch_handedness=False,
 ):
     """Set 3D parameter with values for specified grid model for specified zone (and region)
     Input:
@@ -275,7 +315,9 @@ def set_continuous_3d_parameter_values_in_zone_region(
     function_name = set_continuous_3d_parameter_values_in_zone_region.__name__
     # Check if specified grid model exists and is not empty
     if grid_model.is_empty(realisation_number):
-        print(f'Specified grid model: {grid_model.name} is empty for realisation {realisation_number + 1}')
+        print(
+            f'Specified grid model: {grid_model.name} is empty for realisation {realisation_number + 1}'
+        )
         return False
 
     # Check if the parameter is defined and create new if not existing
@@ -306,9 +348,15 @@ def set_continuous_3d_parameter_values_in_zone_region(
         )
     use_regions = False
     if region_parameter_name is None or len(region_parameter_name) == 0 or fmu_mode:
-        i_indices, j_indices, k_indices = define_active_cell_indices(indexer,
-            zone_cell_numbers, ijk_handedness,
-            use_left_handed_grid_indexing, grid_model.name,debug_level, switch_handedness)
+        i_indices, j_indices, k_indices = define_active_cell_indices(
+            indexer,
+            zone_cell_numbers,
+            ijk_handedness,
+            use_left_handed_grid_indexing,
+            grid_model.name,
+            debug_level,
+            switch_handedness,
+        )
 
     else:
         # Get region parameter values
@@ -319,12 +367,22 @@ def set_continuous_3d_parameter_values_in_zone_region(
             if not p.is_empty(realisation_number):
                 region_param_values = p.get_values(realisation_number)
         else:
-            raise ValueError(f"Parameter {region_parameter_name} does not exist or is empty in grid model {grid_model.name}.")
+            raise ValueError(
+                f'Parameter {region_parameter_name} does not exist or is empty in grid model {grid_model.name}.'
+            )
         region_param_values_in_zone = region_param_values[zone_cell_numbers]
-        zone_region_cell_numbers = zone_cell_numbers[region_param_values_in_zone == region_number]
-        i_indices, j_indices, k_indices = define_active_cell_indices(indexer,
-            zone_region_cell_numbers, ijk_handedness,
-            use_left_handed_grid_indexing, grid_model.name,debug_level, switch_handedness)
+        zone_region_cell_numbers = zone_cell_numbers[
+            region_param_values_in_zone == region_number
+        ]
+        i_indices, j_indices, k_indices = define_active_cell_indices(
+            indexer,
+            zone_region_cell_numbers,
+            ijk_handedness,
+            use_left_handed_grid_indexing,
+            grid_model.name,
+            debug_level,
+            switch_handedness,
+        )
         use_regions = True
 
     # Loop over all parameter names
@@ -335,7 +393,9 @@ def set_continuous_3d_parameter_values_in_zone_region(
             property_param = grid_model.properties[parameter_name]
         else:
             # Create new parameter
-            property_param = grid_model.properties.create(parameter_name, roxar.GridPropertyType.continuous, np.float32)
+            property_param = grid_model.properties.create(
+                parameter_name, roxar.GridPropertyType.continuous, np.float32
+            )
             property_param.set_shared(is_shared, realisation_number)
             if debug_level >= Debug.VERY_VERBOSE:
                 print(f'--- Create specified RMS parameter: {parameter_name}')
@@ -367,9 +427,13 @@ def set_continuous_3d_parameter_values_in_zone_region(
             new_values[:, :, k] = input_values_for_zone[:, :, k - start_layer]
 
         if use_regions:
-            current_values[zone_region_cell_numbers] = new_values[i_indices, j_indices, k_indices]
+            current_values[zone_region_cell_numbers] = new_values[
+                i_indices, j_indices, k_indices
+            ]
         else:
-            current_values[zone_cell_numbers] = new_values[i_indices, j_indices, k_indices]
+            current_values[zone_cell_numbers] = new_values[
+                i_indices, j_indices, k_indices
+            ]
 
         property_param.set_values(current_values, realisation_number)
 
@@ -382,9 +446,13 @@ def get_layer_range(indexer, zone_number, fmu_mode=False):
         if len(indexer.zonation) == 1:
             layer_ranges = indexer.zonation[0]
         else:
-            raise ValueError('While in FMU / ERT mode, the grid must have EXACTLY 1 zone')
+            raise ValueError(
+                'While in FMU / ERT mode, the grid must have EXACTLY 1 zone'
+            )
     else:
-        layer_ranges = indexer.zonation[zone_number - 1]  # Zonation is 0-indexed, while zone numbers are 1-indexed
+        layer_ranges = indexer.zonation[
+            zone_number - 1
+        ]  # Zonation is 0-indexed, while zone numbers are 1-indexed
     start_layer = nz
     end_layer = 0
     for layer_range in layer_ranges:
@@ -396,8 +464,14 @@ def get_layer_range(indexer, zone_number, fmu_mode=False):
 
 
 def update_continuous_3d_parameter_values(
-        grid_model, parameter_name, input_values, cell_index_defined=None,
-        realisation_number=0, is_shared=False, set_initial_values=False, debug_level=Debug.OFF,
+    grid_model,
+    parameter_name,
+    input_values,
+    cell_index_defined=None,
+    realisation_number=0,
+    is_shared=False,
+    set_initial_values=False,
+    debug_level=Debug.OFF,
 ):
     """
     Description:
@@ -443,27 +517,32 @@ def update_continuous_3d_parameter_values(
         raise ValueError(
             f'Mismatch in number of active cells={num_active_cells} '
             f'and length of input array with values = {len(input_values)}'
-         )
-
+        )
 
     # Check if specified parameter name exists and create new parameter if it does not exist.
     if parameter_name not in grid_model.properties:
         if debug_level >= Debug.VERY_VERBOSE:
-            print(f'--- Create specified RMS parameter: {parameter_name} in {grid_model.name}')
+            print(
+                f'--- Create specified RMS parameter: {parameter_name} in {grid_model.name}'
+            )
             if is_shared:
                 print('--- Set parameter to shared.')
             else:
                 print('--- Set parameter to non-shared.')
 
         # Create a new 3D parameter with the specified name of type float32
-        p = grid_model.properties.create(parameter_name, roxar.GridPropertyType.continuous, np.float32)
+        p = grid_model.properties.create(
+            parameter_name, roxar.GridPropertyType.continuous, np.float32
+        )
         p.set_shared(is_shared, realisation_number)
         # Initialize the values to 0 for this new 3D parameter
         current_values = np.zeros(num_active_cells, np.float32)
 
     else:
         if debug_level >= Debug.VERY_VERBOSE:
-            print(f'--- Update specified RMS parameter: {parameter_name} in {grid_model.name}')
+            print(
+                f'--- Update specified RMS parameter: {parameter_name} in {grid_model.name}'
+            )
 
         # Parameter exist, but check if it is empty or not
         current_values = np.zeros(num_active_cells, np.float32)
@@ -482,10 +561,15 @@ def update_continuous_3d_parameter_values(
     p.set_values(current_values, realisation_number)
 
 
-
 def set_discrete_3d_parameter_values(
-        grid_model, parameter_name, input_values, code_names, zone_numbers=None,
-        realisation_number=0, is_shared=False, debug_level=Debug.OFF,
+    grid_model,
+    parameter_name,
+    input_values,
+    code_names,
+    zone_numbers=None,
+    realisation_number=0,
+    is_shared=False,
+    debug_level=Debug.OFF,
 ):
     """Set discrete 3D parameter with values for specified grid model.
     Input:
@@ -524,19 +608,29 @@ def set_discrete_3d_parameter_values(
     # Check if specified parameter name exists and create new parameter if it does not exist.
     if parameter_name not in grid_model.properties:
         if debug_level >= Debug.VERY_VERBOSE:
-            print(f'--- Create specified RMS parameter: {parameter_name} in {grid_model.name}')
+            print(
+                f'--- Create specified RMS parameter: {parameter_name} in {grid_model.name}'
+            )
             if is_shared:
                 print('--- Set parameter to shared.')
             else:
                 print('--- Set parameter to non-shared.')
 
         _create_property(
-            grid_model, input_values, parameter_name, zone_numbers, is_shared, realisation_number, code_names,
+            grid_model,
+            input_values,
+            parameter_name,
+            zone_numbers,
+            is_shared,
+            realisation_number,
+            code_names,
             dtype=np.uint8,
         )
     else:
         if debug_level >= Debug.VERY_VERBOSE:
-            print(f'--- Update specified RMS parameter: {parameter_name} in {grid_model.name}')
+            print(
+                f'--- Update specified RMS parameter: {parameter_name} in {grid_model.name}'
+            )
 
         p = grid_model.properties[parameter_name]
         if p.is_empty(realisation_number):
@@ -548,15 +642,21 @@ def set_discrete_3d_parameter_values(
         # Get all active cell values
         p = get3DParameter(grid_model, parameter_name, realisation_number)
         if p.is_empty(realisation_number):
-            raise ValueError(f'In function {function_name}.  Some inconsistency in program.')
+            raise ValueError(
+                f'In function {function_name}.  Some inconsistency in program.'
+            )
         current_values = p.get_values(realisation_number)
-        current_values = modify_selected_grid_cells(grid_model, zone_numbers, realisation_number, current_values, input_values)
+        current_values = modify_selected_grid_cells(
+            grid_model, zone_numbers, realisation_number, current_values, input_values
+        )
         p.set_values(current_values, realisation_number)
 
         code_names = p.code_names.copy()
         for code in code_names.keys():
             if code_names[code] == '':
-                warn('There exists facies codes without facies names. Set facies name equal to facies code')
+                warn(
+                    'There exists facies codes without facies names. Set facies name equal to facies code'
+                )
                 code_names[code] = str(code)
 
         # Calculate updated facies table by combining the existing facies table for the 3D parameter
@@ -570,15 +670,23 @@ def set_discrete_3d_parameter_values(
 
 
 def _create_property(
-        grid_model, values, parameter_name, zone_numbers, is_shared, realisation_number,
-        code_names=None, dtype=np.float32,
+    grid_model,
+    values,
+    parameter_name,
+    zone_numbers,
+    is_shared,
+    realisation_number,
+    code_names=None,
+    dtype=np.float32,
 ):
     property_type = roxar.GridPropertyType.discrete
     if dtype == np.float32:
         property_type = roxar.GridPropertyType.continuous
     p = grid_model.properties.create(parameter_name, property_type, dtype)
     current_values = np.zeros(len(values), dtype)
-    current_values = modify_selected_grid_cells(grid_model, zone_numbers, realisation_number, current_values, values)
+    current_values = modify_selected_grid_cells(
+        grid_model, zone_numbers, realisation_number, current_values, values
+    )
     p.set_values(current_values, realisation_number)
     p.set_shared(is_shared, realisation_number)
     if code_names is not None:
@@ -586,9 +694,17 @@ def _create_property(
 
 
 def update_discrete_3d_parameter_values(
-        grid_model, parameter_name, input_values, num_defined_cells=0, cell_index_defined=None,
-        facies_table=None, realisation_number=0, is_shared=True, set_default_facies_name_when_undefined=True,
-        set_initial_values=False, debug_level=Debug.OFF
+    grid_model,
+    parameter_name,
+    input_values,
+    num_defined_cells=0,
+    cell_index_defined=None,
+    facies_table=None,
+    realisation_number=0,
+    is_shared=True,
+    set_default_facies_name_when_undefined=True,
+    set_initial_values=False,
+    debug_level=Debug.OFF,
 ):
     """
     Description:
@@ -629,7 +745,7 @@ def update_discrete_3d_parameter_values(
     # Check if specified grid model exists and is not empty
     if grid_model.is_empty(realisation_number):
         raise ValueError(
-            f'Specified grid model: {grid_model.name} is empty for realisation {realisation_number+1}.\n'
+            f'Specified grid model: {grid_model.name} is empty for realisation {realisation_number + 1}.\n'
             f'Cannot create parameter: {parameter_name} '
         )
 
@@ -642,14 +758,18 @@ def update_discrete_3d_parameter_values(
     # Check if specified parameter name exists and create new parameter if it does not exist.
     if parameter_name not in grid_model.properties:
         if debug_level >= Debug.VERY_VERBOSE:
-            print(f'--- Create specified RMS parameter: {parameter_name} in {grid_model.name}')
+            print(
+                f'--- Create specified RMS parameter: {parameter_name} in {grid_model.name}'
+            )
             if is_shared:
                 print('--- Set parameter to shared.')
             else:
                 print('--- Set parameter to non-shared.')
 
         # Create a new 3D parameter with the specified name
-        p = grid_model.properties.create(parameter_name, roxar.GridPropertyType.discrete, np.uint8)
+        p = grid_model.properties.create(
+            parameter_name, roxar.GridPropertyType.discrete, np.uint8
+        )
 
         # Initialize the values to 0 for this new 3D parameter
         current_values = np.zeros(num_active_cells, np.uint8)
@@ -663,7 +783,9 @@ def update_discrete_3d_parameter_values(
         p.code_names = facies_table.copy()
     else:
         if debug_level >= Debug.VERY_VERBOSE:
-            print(f'--- Update specified RMS parameter: {parameter_name} in {grid_model.name}')
+            print(
+                f'--- Update specified RMS parameter: {parameter_name} in {grid_model.name}'
+            )
 
         # Parameter exist, but check if it is empty or not
         # Initialize the values to 0
@@ -695,7 +817,9 @@ def update_discrete_3d_parameter_values(
             for code in code_names.keys():
                 if code_names[code] == '':
                     if debug_level >= Debug.ON:
-                        warn('There exists facies codes without facies names. Set facies name equal to facies code')
+                        warn(
+                            'There exists facies codes without facies names. Set facies name equal to facies code'
+                        )
                     code_names[code] = str(code)
 
         if debug_level >= Debug.VERY_VERBOSE:
@@ -722,11 +846,12 @@ def createHorizonDataTypeObject(horizons, representationName, debug_level=Debug.
                 'for variogram azimuth trend'
             )
 
-
     return reprObj
 
 
-def get2DMapDimensions(horizons, horizonName, representationName, debug_level=Debug.OFF):
+def get2DMapDimensions(
+    horizons, horizonName, representationName, debug_level=Debug.OFF
+):
     # Read information about 2D grid size,orientation and resolution
     # from existing 2D map.
     horizonObj = None
@@ -736,8 +861,7 @@ def get2DMapDimensions(horizons, horizonName, representationName, debug_level=De
             break
     if horizonObj is None:
         raise ValueError(
-            f'Error in  get2DMapInfo\n'
-            f'Error: Horizon name: {horizonName} does not exist'
+            f'Error in  get2DMapInfo\nError: Horizon name: {horizonName} does not exist'
         )
 
     reprObj = None
@@ -754,8 +878,7 @@ def get2DMapDimensions(horizons, horizonName, representationName, debug_level=De
     surface = horizons[horizonName][representationName]
     if not isinstance(surface, roxar.Surface):
         raise ValueError(
-            'Error in get2DMapInfo\n'
-            'Error: Specified object is not a 2D grid'
+            'Error in get2DMapInfo\nError: Specified object is not a 2D grid'
         )
     grid = surface.get_grid()
     values = grid.get_values()
@@ -772,7 +895,7 @@ def get2DMapDimensions(horizons, horizonName, representationName, debug_level=De
     ymax = coordinates[:, :, 1].max()
     rotation = grid.rotation
     if debug_level >= Debug.VERY_VERBOSE:
-        print(f'''\
+        print(f"""\
 ---  For 2D map
   Map xmin: {xmin}
   Map xmax: {xmax}
@@ -782,13 +905,23 @@ def get2DMapDimensions(horizons, horizonName, representationName, debug_level=De
   Map yinc: {yinc}
   Map nx:   {nx}
   Map ny:   {ny}
-  Map rotation:   {rotation}''')
+  Map rotation:   {rotation}""")
     return [nx, ny, xinc, yinc, xmin, ymin, xmax, ymax, rotation]
 
 
 def setConstantValueInHorizon(
-        horizons, horizonName, reprName, inputValue,
-        debug_level=Debug.OFF, xmin=0, ymin=0, xinc=0, yinc=0, nx=0, ny=0, rotation=0,
+    horizons,
+    horizonName,
+    reprName,
+    inputValue,
+    debug_level=Debug.OFF,
+    xmin=0,
+    ymin=0,
+    xinc=0,
+    yinc=0,
+    nx=0,
+    ny=0,
+    rotation=0,
 ):
     # This function will replace a horizon with specified name and type with a new one with value equal
     # to the constant value specified in variable inputValue. The 2D grid dimensions can also specified if new maps
@@ -826,7 +959,9 @@ def setConstantValueInHorizon(
             # Create surface
             empty_grid = True
             if nx == 0 or ny == 0:
-                print('Error in setConstantValueInHorizon: Grid dimensions are not specified')
+                print(
+                    'Error in setConstantValueInHorizon: Grid dimensions are not specified'
+                )
                 sys.exit()
             grid = roxar.RegularGrid2D.create(xmin, ymin, xinc, yinc, nx, ny, rotation)
             values = grid.get_values()

@@ -14,10 +14,15 @@ from aps.utils.constants.simple import Debug
 
 
 def simulateGauss(
-        simParamObject, outputDir, logFileName=None, seedFileName=None,
-        writeSeedFile=True, debug_level=Debug.OFF
+    simParamObject,
+    outputDir,
+    logFileName=None,
+    seedFileName=None,
+    writeSeedFile=True,
+    debug_level=Debug.OFF,
 ):
     import gaussianfft
+
     zone_number = simParamObject['zoneNumber']
     region_number = simParamObject['regionNumber']
     gauss_field_name = simParamObject['gaussFieldName']
@@ -35,7 +40,7 @@ def simulateGauss(
     dy = simParamObject['dy']
     dz = simParamObject['dz']
 
-    description = f'''
+    description = f"""
     Zone,region             : ({zone_number}, {region_number})
     Gauss field name        : {gauss_field_name}
     Variogram type          : {variogram_type.name}
@@ -50,14 +55,16 @@ def simulateGauss(
     DX                      : {dx}
     DY                      : {dy}
     DZ for this zone        : {dz}
-'''
+"""
     if logFileName is not None:
         file = open(logFileName, 'w', encoding='utf-8')
         file.write(description)
 
     if debug_level >= Debug.VERBOSE:
         print('')
-        print(f'    Call simulateGauss for (zone,region): ({zone_number}, {region_number}) for field: {gauss_field_name}')
+        print(
+            f'    Call simulateGauss for (zone,region): ({zone_number}, {region_number}) for field: {gauss_field_name}'
+        )
     if debug_level >= Debug.VERY_VERBOSE:
         print(description)
 
@@ -69,8 +76,8 @@ def simulateGauss(
         'MATERN32': 'matern32',
         'MATERN52': 'matern52',
         'MATERN72': 'matern72',
-        'CONSTANT': 'constant'
-        }
+        'CONSTANT': 'constant',
+    }
 
     if not (writeSeedFile or seedFileName is None):
         # Read start seed from seed file for current gauss field, zone and region
@@ -89,7 +96,11 @@ def simulateGauss(
                             # Found the correct line for the seed
                             startSeed = int(words[i + 3])
                             if debug_level >= Debug.VERY_VERBOSE:
-                                print('  Read seed: {} from seed file: {}'.format(startSeed, seedFileName))
+                                print(
+                                    '  Read seed: {} from seed file: {}'.format(
+                                        startSeed, seedFileName
+                                    )
+                                )
                             break
                 if startSeed == -1:
                     raise IOError(
@@ -110,19 +121,36 @@ def simulateGauss(
     #  Note that since RMS uses left-handed coordinate system while gaussianfft uses right-handed coordinate system, we have to use
     #  azimuth for gaussianfft simulation equal to: ( 90 - specified azimuth in simulation box).
     if variogramName == 'general_exponential':
-        simVariogram = gaussianfft.variogram(variogramName, main_range, perpendicular_range, vertical_range, 90.0 - azimuth, dip, power)
+        simVariogram = gaussianfft.variogram(
+            variogramName,
+            main_range,
+            perpendicular_range,
+            vertical_range,
+            90.0 - azimuth,
+            dip,
+            power,
+        )
     else:
-        simVariogram = gaussianfft.variogram(variogramName, main_range, perpendicular_range, vertical_range, 90.0 - azimuth, dip)
+        simVariogram = gaussianfft.variogram(
+            variogramName,
+            main_range,
+            perpendicular_range,
+            vertical_range,
+            90.0 - azimuth,
+            dip,
+        )
 
     # Simulate gauss field. Return numpy 1D vector in F order. Get padding + grid size as information
-    [nx_padding, ny_padding, nz_padding] = gaussianfft.simulation_size(simVariogram, nx, dx, ny, dy, nz, dz)
+    [nx_padding, ny_padding, nz_padding] = gaussianfft.simulation_size(
+        simVariogram, nx, dx, ny, dy, nz, dz
+    )
     if logFileName is not None:
-        file.write(f'''
+        file.write(f"""
     Simulation grid size with padding due to correlation lengths for gauss field {gauss_field_name} for zone,region: ({zone_number}, {region_number})
       nx with padding: {nx_padding}
       ny with padding: {ny_padding}
       nz with padding: {nz_padding}
-''')
+""")
     gaussVector = gaussianfft.simulate(simVariogram, nx, dx, ny, dy, nz, dz)
 
     # Get the start seed
@@ -135,26 +163,30 @@ def simulateGauss(
     np.save(fileName, gaussVector)
 
     if logFileName is not None:
-        file.write(f'''\
+        file.write(f"""\
     Start seed: {startSeed}
     Write file: {fileName}
     Finished running simulation of {gauss_field_name} for zone,region: ({zone_number}, {region_number})
 
-''')
+""")
         file.close()
         if debug_level >= Debug.VERBOSE:
             print(f'    Write file: {logFileName}')
 
     if writeSeedFile and seedFileName is not None:
         file = open(seedFileName, 'w', encoding='utf-8')
-        file.write(f' {gauss_field_name}  {zone_number}  {region_number}  {startSeed}\n')
+        file.write(
+            f' {gauss_field_name}  {zone_number}  {region_number}  {startSeed}\n'
+        )
         file.close()
         if debug_level >= Debug.VERBOSE:
             print(f'    Write file: {seedFileName}')
 
     if debug_level >= Debug.VERBOSE:
         print(f'    Write file: {fileName}')
-        print(f'    Finished running simulation of {gauss_field_name} for zone,region: ({zone_number}, {region_number})')
+        print(
+            f'    Finished running simulation of {gauss_field_name} for zone,region: ({zone_number}, {region_number})'
+        )
         print('')
 
 
@@ -197,11 +229,13 @@ def run_simulations(
             f'in RMS data file: {grid_model_name_from_rms_data} are different.\n'
             'You may have to fix the model file or extract data from RMS for correct grid model again'
         )
-    nx, ny, _, _, sim_box_x_length, sim_box_y_length, _, _, azimuth_angle_grid = rms_data.getGridSize()
+    nx, ny, _, _, sim_box_x_length, sim_box_y_length, _, _, azimuth_angle_grid = (
+        rms_data.getGridSize()
+    )
 
     # Calculate grid cell size
-    dx = sim_box_x_length/nx
-    dy = sim_box_y_length/ny
+    dx = sim_box_x_length / nx
+    dy = sim_box_y_length / ny
 
     # Loop over all zones and simulate gauss fields
     all_zone_models = aps_model.sorted_zone_models
@@ -216,7 +250,7 @@ def run_simulations(
         processes = []
         for gauss_field_name in gauss_field_names:
             azimuth = zone_model.getAzimuthAngle(gauss_field_name)
-            dip     = zone_model.getDipAngle(gauss_field_name)
+            dip = zone_model.getDipAngle(gauss_field_name)
             power = zone_model.getPower(gauss_field_name)
             variogram_type = zone_model.getVariogramType(gauss_field_name)
             main_range = zone_model.getMainRange(gauss_field_name)
@@ -241,15 +275,21 @@ def run_simulations(
                 'vertRange': vertical_range,
                 'azimuth': azimuth_value_sim_box,
                 'dip': dip,
-                'nx': nx, 'ny': ny, 'nz': nz,
-                'dx': dx, 'dy': dy, 'dz': dz,
+                'nx': nx,
+                'ny': ny,
+                'nz': nz,
+                'dx': dx,
+                'dy': dy,
+                'dz': dz,
                 'power': power,
             }
 
             # Add process to simulate gauss field
             log_file_name = None
             if write_log_file:
-                log_file_name = f'{output_dir}/{gauss_field_name}_{zone_number}_{region_number}.log'
+                log_file_name = (
+                    f'{output_dir}/{gauss_field_name}_{zone_number}_{region_number}.log'
+                )
             if write_seed_file:
                 seed_file_name_for_this_process = f'{output_dir}/seed_{gauss_field_name}_{zone_number}_{region_number}'
             else:
@@ -257,8 +297,13 @@ def run_simulations(
             sim_gauss_process = mp.Process(
                 target=simulateGauss,
                 args=(
-                    sim_param, output_dir, log_file_name, seed_file_name_for_this_process, write_seed_file, debug_level,
-                )
+                    sim_param,
+                    output_dir,
+                    log_file_name,
+                    seed_file_name_for_this_process,
+                    write_seed_file,
+                    debug_level,
+                ),
             )
             processes.append(sim_gauss_process)
         # End loop over gauss fields for one zone
@@ -268,7 +313,9 @@ def run_simulations(
         for i in range(len(processes)):
             p = processes[i]
             gauss_field_name = gauss_field_names[i]
-            print(f'- Start simulate: {gauss_field_name} for zone: {zone_number} for region: {region_number}')
+            print(
+                f'- Start simulate: {gauss_field_name} for zone: {zone_number} for region: {region_number}'
+            )
             p.start()
             # Wait at least one second before continuing to ensure that automatically generated start seed values are
             # different since seed values are generated automatically based on clock time.
@@ -300,7 +347,7 @@ def run(roxar=None, project=None, **kwargs):
         model_file=model_file,
         rms_data_file_name=rms_data_file_name,
         output_dir=output_dir,
-        write_log_file=write_log_file
+        write_log_file=write_log_file,
     )
 
 

@@ -8,10 +8,16 @@ from aps.utils.constants.simple import Debug
 from aps.utils.methods import get_run_parameters, get_debug_level
 from aps.utils.roxar.progress_bar import APSProgressBar
 
+
 def update_aps_model_from_fmu(
-        global_variables_file, input_aps_model_file, output_aps_model_file, debug_level=Debug.OFF,
-        project=None, workflow_name=None, current_job_name=None,
-  ):
+    global_variables_file,
+    input_aps_model_file,
+    output_aps_model_file,
+    debug_level=Debug.OFF,
+    project=None,
+    workflow_name=None,
+    current_job_name=None,
+):
     # Create empty APSModel object
     aps_model = APSModel()
     aps_model.debug_level = debug_level
@@ -44,7 +50,9 @@ def run(project, **kwargs):
     if global_variables_file:
         print(f'\nUpdate APS model parameters from FMU parameters')
         if debug_level >= Debug.ON:
-            print(f'- Read file with global variables from FMU: {global_variables_file}')
+            print(
+                f'- Read file with global variables from FMU: {global_variables_file}'
+            )
         update_aps_model_from_fmu(
             global_variables_file,
             input_aps_model_file,
@@ -56,6 +64,8 @@ def run(project, **kwargs):
         )
     else:
         if debug_level >= Debug.ON:
-            print("No global variables file was found. Check FMU project or aps_config.yml file if that is used.")
+            print(
+                'No global variables file was found. Check FMU project or aps_config.yml file if that is used.'
+            )
 
     APSProgressBar.increment()

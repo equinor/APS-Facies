@@ -2,11 +2,11 @@
 
 JRIV/OLIA
 """
+
 import numpy as np
 import xtgeo
 from aps.algorithms.APSModel import APSModel
 from aps.utils.roxar.sample_map_to_grid import trend_map_to_grid_param
-
 
 
 def run(*, project, zone_number, **kwargs):
@@ -20,34 +20,42 @@ def run(*, project, zone_number, **kwargs):
     grid_model_name = aps_model.grid_model_name
     fmu_mode = kwargs['fmu_mode']
 
-
     if fmu_mode:
-        trend_map_to_grid_param(project, ertbox_grid_model_name,
-            trend_map_name, result_param_name,
+        trend_map_to_grid_param(
+            project,
+            ertbox_grid_model_name,
+            trend_map_name,
+            result_param_name,
             fmu_mode=fmu_mode,
-            debug_level=debug_level)
+            debug_level=debug_level,
+        )
 
-    trend_map_to_grid_param(project, grid_model_name,
-        trend_map_name, result_param_name,
+    trend_map_to_grid_param(
+        project,
+        grid_model_name,
+        trend_map_name,
+        result_param_name,
         fmu_mode=fmu_mode,
         zone_number=zone_number,
         zone_param_name=zone_param_name,
-        debug_level=debug_level)
+        debug_level=debug_level,
+    )
 
-if __name__ == "__main__":
+
+if __name__ == '__main__':
     # Test example
 
-    model_file_name = "aps_custom_trend_fmu.xml"
+    model_file_name = 'aps_custom_trend_fmu.xml'
     zone_number = 1
     aps_model = APSModel(model_file_name)
     kwargs = {
         'model_file': model_file_name,
-        'trend_map': "A",
-        'trend_param_name': "Trend_from_map",
+        'trend_map': 'A',
+        'trend_param_name': 'Trend_from_map',
         'aps_model': aps_model,
-        'fmu_simulation_grid_name': "ERTBOXNEW",
+        'fmu_simulation_grid_name': 'ERTBOXNEW',
         'debug_level': Debug.VERBOSE,
-        'zone_param_name': "Zone",
+        'zone_param_name': 'Zone',
         'fmu_mode': True,
     }
 

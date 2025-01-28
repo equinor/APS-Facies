@@ -4,7 +4,11 @@ from typing import List, Union, Dict, Any
 import numpy as np
 from enum import Enum
 
-from aps.algorithms.truncation_rules import Trunc2D_Cubic, Trunc3D_bayfill, Trunc2D_Angle
+from aps.algorithms.truncation_rules import (
+    Trunc2D_Cubic,
+    Trunc3D_bayfill,
+    Trunc2D_Angle,
+)
 from aps.algorithms.properties import FmuProperty
 from aps.algorithms.APSMainFaciesTable import APSMainFaciesTable, Facies
 from aps.utils.constants.simple import Debug
@@ -23,20 +27,28 @@ def ordered(func):
         if all([isinstance(item, tuple) for item in items]):
             return [item[0] for item in sorted(items, key=lambda x: x[1])]
         return items
+
     return wrapper
 
 
 class TruncationSpecification:
-    __slots__ = '_type', '_facies_table', '_gaussian_fields', '_values', '_probabilities', '_use_constant_parameters'
+    __slots__ = (
+        '_type',
+        '_facies_table',
+        '_gaussian_fields',
+        '_values',
+        '_probabilities',
+        '_use_constant_parameters',
+    )
 
     def __init__(
-            self,
-            _type:                   Union[str, TruncationType],
-            facies_table:            Dict[str, List[Facies]],
-            gaussian_fields:         Dict[str, Any],
-            values:                  Dict[str, Any],
-            probabilities:           Dict[str, float],
-            use_constant_parameters: bool,
+        self,
+        _type: Union[str, TruncationType],
+        facies_table: Dict[str, List[Facies]],
+        gaussian_fields: Dict[str, Any],
+        values: Dict[str, Any],
+        probabilities: Dict[str, float],
+        use_constant_parameters: bool,
     ):
         self._type = TruncationType(_type)
         self._facies_table = facies_table
@@ -84,7 +96,9 @@ class TruncationSpecification:
     def values(self) -> dict:
         if self.type == TruncationType.BAYFILL:
             values = {
-                item['name'].lower(): FmuProperty(item['factor']['value'], item['factor']['updatable'])
+                item['name'].lower(): FmuProperty(
+                    item['factor']['value'], item['factor']['updatable']
+                )
                 for item in self._values['polygons']
             }
             return {
@@ -100,7 +114,12 @@ class TruncationSpecification:
         elif self.type == TruncationType.NON_CUBIC:
             return {
                 'truncStructure': [
-                    [polygon['facies'], polygon['angle']['value'], polygon['fraction'], polygon['angle']['updatable']]
+                    [
+                        polygon['facies'],
+                        polygon['angle']['value'],
+                        polygon['fraction'],
+                        polygon['angle']['updatable'],
+                    ]
                     for polygon in self._polygons()
                 ],
                 'overlayGroups': self._get_overlay(),
@@ -108,19 +127,22 @@ class TruncationSpecification:
             }
         elif self.type == TruncationType.CUBIC:
             return {
-                'truncStructureList': [self._values['direction']] + [
-                        [polygon['facies'], polygon['fraction']] + polygon['level']
-                        for polygon in self._polygons(sort=False)
-                    ],
+                'truncStructureList': [self._values['direction']]
+                + [
+                    [polygon['facies'], polygon['fraction']] + polygon['level']
+                    for polygon in self._polygons(sort=False)
+                ],
                 'overlayGroups': self._get_overlay(),
                 'keyResolution': 209,
             }
         else:
-            raise ValueError("Invalid truncation type ({type})".format(type=self.type))
+            raise ValueError('Invalid truncation type ({type})'.format(type=self.type))
 
     def _polygons(self, _type='polygons', sort=True):
         if sort:
-            return sorted(self._values[_type] or [], key=lambda polygon: polygon['order'])
+            return sorted(
+                self._values[_type] or [], key=lambda polygon: polygon['order']
+            )
         else:
             return self._values[_type]
 
@@ -129,10 +151,7 @@ class TruncationSpecification:
         return [self._probabilities[facies.name] for facies in self.facies_in_zone]
 
     @classmethod
-    def from_dict(
-            cls,
-            specification:           dict
-    ) -> 'TruncationSpecification':
+    def from_dict(cls, specification: dict) -> 'TruncationSpecification':
         facies_tables = cls._get_facies_table(specification)
         fields = cls._get_gaussian_fields(specification)
         probabilities = cls._get_facies_probabilities(specification)
@@ -151,7 +170,14 @@ class TruncationSpecification:
             over = self._get_overlay_facies(polygon)
             if over not in overlay:
                 overlay[over] = []
-            overlay[over].append([polygon['field'], polygon['facies'], polygon['fraction'], polygon['center']])
+            overlay[over].append(
+                [
+                    polygon['field'],
+                    polygon['facies'],
+                    polygon['fraction'],
+                    polygon['center'],
+                ]
+            )
         for over in overlay:
             overlay[over] = [overlay[over], list(over)]
         return list(overlay.values())
@@ -205,15 +231,21 @@ class TruncationSpecification:
         return fields
 
 
-def make_truncation_rule(specification: Union[TruncationSpecification, dict]) -> Union[Trunc2D_Angle, Trunc3D_bayfill]:
+def make_truncation_rule(
+    specification: Union[TruncationSpecification, dict],
+) -> Union[Trunc2D_Angle, Trunc3D_bayfill]:
     specification = TruncationSpecification.from_dict(specification)
 
     facies_table = APSMainFaciesTable(
-        facies_table={facies.code: facies.name for facies in specification.global_facies_table}
+        facies_table={
+            facies.code: facies.name for facies in specification.global_facies_table
+        }
     )
     kwargs = {
         'faciesInZone': [facies.name for facies in specification.facies_in_zone],
-        'alphaFieldNameForBackGroundFacies': [field for field in specification.fields_in_background],
+        'alphaFieldNameForBackGroundFacies': [
+            field for field in specification.fields_in_background
+        ],
         'gaussFieldsInZone': [field for field in specification.fields_in_zone],
         'useConstTruncParam': specification.use_constant_parameters,
         'debug_level': Debug.OFF,
@@ -230,10 +262,7 @@ def make_truncation_rule(specification: Union[TruncationSpecification, dict]) ->
     else:
         raise NotImplementedError()
 
-    trunc.initialize(
-        facies_table,
-        **kwargs
-    )
+    trunc.initialize(facies_table, **kwargs)
 
     trunc.setTruncRule(np.array(specification.probabilities))
     return trunc

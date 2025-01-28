@@ -36,4 +36,5 @@ def run(roxar=None, project=None, **kwargs):
 
 if __name__ == '__main__':
     import roxar
+
     run(roxar, project)

@@ -153,6 +153,7 @@ Description:
     check_and_normalise_probability.run(input_dict)
 
 """
+
 import numpy as np
 import roxar
 from roxar.grids import GridModel
@@ -171,54 +172,61 @@ from aps.utils.roxar.grid_model import (
 from aps.utils.checks import check_probability_values, check_probability_normalisation
 from aps.utils.methods import check_missing_keywords_list, check_missing_keywords_dict
 
+
 class NormalisationError(ValueError):
     pass
 
+
 def run(params):
     """
-        Check normalization of input facies probabilities and normalize them if not normalized.
+    Check normalization of input facies probabilities and normalize them if not normalized.
     """
-    project = params.get("project", None)
+    project = params.get('project', None)
     if project is None:
         raise ValueError(f"Missing specification of the project variable in 'params' ")
 
-
     real_number = project.current_realisation
-    print(f'Check normalisation of facies probabilities for realisation {real_number + 1}')
+    print(
+        f'Check normalisation of facies probabilities for realisation {real_number + 1}'
+    )
 
     defined_keywords = [
-        "project",
-        "debug_level",
-        "aps_model_file",
-        "modelling_facies_per_zone",
-        "modelling_facies_per_zone_region",
-        "grid_model_name",
-        "region_param_name",
-        "prob_param_per_facies",
-        "overwrite",
-        "tolerance_of_probability_normalisation",
-        "max_allowed_fraction_of_values_outside_tolerance",
-        "stop_on_error",
-        "report_zone_regions",
+        'project',
+        'debug_level',
+        'aps_model_file',
+        'modelling_facies_per_zone',
+        'modelling_facies_per_zone_region',
+        'grid_model_name',
+        'region_param_name',
+        'prob_param_per_facies',
+        'overwrite',
+        'tolerance_of_probability_normalisation',
+        'max_allowed_fraction_of_values_outside_tolerance',
+        'stop_on_error',
+        'report_zone_regions',
     ]
 
-    if "aps_model_file" not in params:
+    if 'aps_model_file' not in params:
         # Check that necessary input is specified in params
-        if "region_param_name" in params:
+        if 'region_param_name' in params:
             # Require that facies is specified per ( zone, region) pair
-            keyword = "modelling_facies_per_zone_region"
+            keyword = 'modelling_facies_per_zone_region'
             if keyword not in params:
-                raise ValueError(f"Missing keyword: {keyword}. Required when using regions.")
+                raise ValueError(
+                    f'Missing keyword: {keyword}. Required when using regions.'
+                )
         else:
             # Require that facies is specified per zone
-            keyword = "modelling_facies_per_zone"
+            keyword = 'modelling_facies_per_zone'
             if keyword not in params:
-                raise ValueError(f"Missing keyword: {keyword}. Required when not using regions.")
+                raise ValueError(
+                    f'Missing keyword: {keyword}. Required when not using regions.'
+                )
 
         # Check that other required keywords exists
         keywords_required = [
-            "grid_model_name",
-            "prob_param_per_facies",
+            'grid_model_name',
+            'prob_param_per_facies',
         ]
         check_missing_keywords_list(params, keywords_required)
 
@@ -227,27 +235,26 @@ def run(params):
     for key in keys:
         if key not in defined_keywords:
             unknown_keywords.append(key)
-    if len(unknown_keywords)> 0:
+    if len(unknown_keywords) > 0:
         raise ValueError(
-            f"Unknown keywords used: {unknown_keywords}.\n"
-            "Remove unknown keyword "
+            f'Unknown keywords used: {unknown_keywords}.\nRemove unknown keyword '
         )
 
     check_and_normalize_probabilities_for_APS(project, params)
-    print("Finished normalization of facies probabilities")
+    print('Finished normalization of facies probabilities')
+
 
 def check_and_normalize_probabilities_for_APS(
-        project,
-        params,
+    project,
+    params,
 ):
-    aps_model_file_name = params.get("aps_model_file",None)
-    debug_level = params.get("debug_level", Debug.OFF)
+    aps_model_file_name = params.get('aps_model_file', None)
+    debug_level = params.get('debug_level', Debug.OFF)
     realization_number = project.current_realisation
     facies_per_zone_dict = None
     facies_per_zone_region_dict = None
     region_values = None
     prob_params_per_facies = {}
-
 
     if aps_model_file_name is not None:
         # Use APS model file as input to get facies per zone (and region) and probability parameters
@@ -261,10 +268,8 @@ def check_and_normalize_probabilities_for_APS(
             zone_values,
             region_values,
         ) = get_params_from_aps_model(
-            project,
-            aps_model_file_name,
-            realization_number,
-            debug_level=debug_level)
+            project, aps_model_file_name, realization_number, debug_level=debug_level
+        )
 
     else:
         # Get all parameters from input dict
@@ -276,25 +281,28 @@ def check_and_normalize_probabilities_for_APS(
             prob_params_per_facies,
             probability_parameter_names,
             zone_values,
-            region_values
+            region_values,
         ) = get_input_params(project, params, realization_number)
 
-
-    max_prob_norm_tolerance = params.get("tolerance_of_probability_normalisation",
-        ProbabilityTolerances.MAX_ALLOWED_DEVIATION_BEFORE_ERROR)
-    max_allowed_fraction = params.get("max_allowed_fraction_of_values_outside_tolerance",
-        ProbabilityTolerances.MAX_ALLOWED_FRACTION_OF_VALUES_OUTSIDE_TOLERANCE)
+    max_prob_norm_tolerance = params.get(
+        'tolerance_of_probability_normalisation',
+        ProbabilityTolerances.MAX_ALLOWED_DEVIATION_BEFORE_ERROR,
+    )
+    max_allowed_fraction = params.get(
+        'max_allowed_fraction_of_values_outside_tolerance',
+        ProbabilityTolerances.MAX_ALLOWED_FRACTION_OF_VALUES_OUTSIDE_TOLERANCE,
+    )
     min_prob_norm_tolerance = ProbabilityTolerances.MAX_DEVIATION_BEFORE_ACTION
 
-    overwrite = params.get('overwrite',False)
+    overwrite = params.get('overwrite', False)
     stop_on_error = params.get('stop_on_error', True)
-
 
     # Probability values for each RMS parameter
     probability_values_per_rms_param = {
-        parameter_name: getContinuous3DParameterValues(grid_model, parameter_name, realization_number)
+        parameter_name: getContinuous3DParameterValues(
+            grid_model, parameter_name, realization_number
+        )
         for parameter_name in probability_parameter_names
-
     }
 
     if use_regions:
@@ -317,7 +325,8 @@ def check_and_normalize_probabilities_for_APS(
         min_prob_norm_tolerance,
         max_allowed_fraction,
         debug_level,
-        stop_on_error=stop_on_error)
+        stop_on_error=stop_on_error,
+    )
 
     # Write back to RMS project updated probabilities if necessary
     for parameter_name in probability_parameter_names:
@@ -327,9 +336,14 @@ def check_and_normalize_probabilities_for_APS(
             parameter_name = parameter_name + '_norm'
         zone_number_list = []
         is_shared = grid_model.shared
-        update_successful = set_continuous_3d_parameter_values(grid_model, parameter_name,
-                                parameter_values, zone_number_list,
-                                realization_number, is_shared=is_shared)
+        update_successful = set_continuous_3d_parameter_values(
+            grid_model,
+            parameter_name,
+            parameter_values,
+            zone_number_list,
+            realization_number,
+            is_shared=is_shared,
+        )
         if not update_successful:
             raise IOError(f'Can not update parameter {parameter_name}')
         else:
@@ -344,7 +358,7 @@ def get_params_from_aps_model(
     aps_model_file_name: str,
     realization_number: int,
     debug_level: Debug = Debug.OFF,
-    ):
+):
     # Use APS model file as input to get facies per zone (and region) and probability parameters
     from aps.algorithms.APSModel import APSModel
 
@@ -355,21 +369,19 @@ def get_params_from_aps_model(
     grid_model = project.grid_models[grid_model_name]
     region_param_name = aps_model.getRegionParamName()
     zone_param_name = GridModelConstants.ZONE_NAME
-    use_regions = (region_param_name is not None)  and len(region_param_name) > 0
+    use_regions = (region_param_name is not None) and len(region_param_name) > 0
 
     # Read zone and region parameter from RMS
     zone_values, _ = getDiscrete3DParameterValues(
-        grid_model,
-        zone_param_name,
-        realization_number )
+        grid_model, zone_param_name, realization_number
+    )
     facies_per_zone_region_dict = None
     facies_per_zone_dict = None
     region_values = None
     if use_regions:
         region_values, _ = getDiscrete3DParameterValues(
-            grid_model,
-            region_param_name,
-            realization_number)
+            grid_model, region_param_name, realization_number
+        )
         facies_per_zone_region_dict = {}
     else:
         facies_per_zone_dict = {}
@@ -386,16 +398,16 @@ def get_params_from_aps_model(
         (zone_number, region_number) = key
         if debug_level >= Debug.VERBOSE:
             if use_regions:
-                print(f"-- Zone: {zone_number}  Region number: {region_number} ")
+                print(f'-- Zone: {zone_number}  Region number: {region_number} ')
             else:
-                print(f"-- Zone: {zone_number} ")
+                print(f'-- Zone: {zone_number} ')
         if not aps_model.isSelected(zone_number, region_number):
             continue
 
         if zone_model.use_constant_probabilities:
             # No probability cubes for this (zone, region)
             if debug_level >= Debug.VERBOSE:
-                print("--   Constant probabilities specified.")
+                print('--   Constant probabilities specified.')
             continue
         facies_names_for_zone = zone_model.facies_in_zone_model
         if use_regions:
@@ -408,22 +420,25 @@ def get_params_from_aps_model(
             if facies_name not in prob_params_per_facies:
                 prob_params_per_facies[facies_name] = param_name
             else:
-                if param_name != prob_params_per_facies[facies_name] :
+                if param_name != prob_params_per_facies[facies_name]:
                     raise ValueError(
-                        f"The facies {facies_name} has different probability parameter names in different zones.\n"
-                        f"The parameter name: {param_name} is used in  zone number {zone_model.zone_number}\n"
-                        f"The parameter name: {prob_params_per_facies[facies_name]} is used in another zone.\n"
-                        "For each facies name, only use one probability parameter\n"
-                        "(which of course may have different values in each zone and region)"
+                        f'The facies {facies_name} has different probability parameter names in different zones.\n'
+                        f'The parameter name: {param_name} is used in  zone number {zone_model.zone_number}\n'
+                        f'The parameter name: {prob_params_per_facies[facies_name]} is used in another zone.\n'
+                        'For each facies name, only use one probability parameter\n'
+                        '(which of course may have different values in each zone and region)'
                     )
-    return (grid_model,
+    return (
+        grid_model,
         use_regions,
         facies_per_zone_dict,
         facies_per_zone_region_dict,
         prob_params_per_facies,
         probability_parameter_names,
         zone_values,
-        region_values)
+        region_values,
+    )
+
 
 def get_input_params(
     project,
@@ -431,13 +446,13 @@ def get_input_params(
     realization_number: int,
 ):
     project = params.get('project')
-    grid_model_name = params.get("grid_model_name")
-    region_param_name = params.get("region_param_name", None)
+    grid_model_name = params.get('grid_model_name')
+    region_param_name = params.get('region_param_name', None)
     zone_param_name = GridModelConstants.ZONE_NAME
     grid_model = project.grid_models[grid_model_name]
 
     # Get all probability parameter names
-    prob_params_per_facies = params.get("prob_param_per_facies")
+    prob_params_per_facies = params.get('prob_param_per_facies')
     probability_parameter_names = list(prob_params_per_facies.values())
 
     # Read zone and region parameter from RMS
@@ -446,44 +461,48 @@ def get_input_params(
     region_code_names = None
     region_values = None
     zone_values, zone_code_names = getDiscrete3DParameterValues(
-        grid_model,
-        zone_param_name,
-        realization_number)
+        grid_model, zone_param_name, realization_number
+    )
 
     use_regions = (region_param_name is not None) and len(region_param_name) > 0
     facies_per_zone_dict = None
     facies_per_zone_region_dict = None
     if use_regions:
         region_values, region_code_names = getDiscrete3DParameterValues(
-            grid_model,
-            region_param_name,
-            realization_number)
-        facies_per_zone_region_dict = params.get("modelling_facies_per_zone_region")
+            grid_model, region_param_name, realization_number
+        )
+        facies_per_zone_region_dict = params.get('modelling_facies_per_zone_region')
         facies_dict = facies_per_zone_region_dict
 
     else:
-        facies_per_zone_dict = params.get("modelling_facies_per_zone")
+        facies_per_zone_dict = params.get('modelling_facies_per_zone')
         facies_dict = facies_per_zone_dict
 
     # Check consistency
     facies_checked_list = []
     facies_used = []
     facies_list_with_prob_param = list(prob_params_per_facies.keys())
-    for key,facies_list in facies_dict.items():
+    for key, facies_list in facies_dict.items():
         for name in facies_list:
             if name not in facies_used:
                 facies_used.append(name)
-            if (name not in facies_list_with_prob_param) and (name not in facies_checked_list):
+            if (name not in facies_list_with_prob_param) and (
+                name not in facies_checked_list
+            ):
                 facies_checked_list.append(name)
     if len(facies_checked_list) > 0:
-        raise ValueError(f"Facies used in zones but don't have any specified probability parameter:\n {facies_checked_list} ")
+        raise ValueError(
+            f"Facies used in zones but don't have any specified probability parameter:\n {facies_checked_list} "
+        )
 
     not_used = []
     for name in facies_list_with_prob_param:
         if name not in facies_used:
             not_used.append(name)
     if len(not_used) > 0:
-        raise ValueError(f"Facies specified with probability parameters, but not used in any zone or region:\n {not_used}")
+        raise ValueError(
+            f'Facies specified with probability parameters, but not used in any zone or region:\n {not_used}'
+        )
 
     check_grid_zone_regions = params.get('report_zone_regions', False)
     if check_grid_zone_regions:
@@ -491,45 +510,51 @@ def get_input_params(
             zone_code_names,
             zone_values,
             region_code_names=region_code_names,
-            region_param_values=region_values)
+            region_param_values=region_values,
+        )
         if use_regions:
-            print("List of (zone, region) found in the grid and if used or not:")
-            print("Zone number   Region number   Specified")
+            print('List of (zone, region) found in the grid and if used or not:')
+            print('Zone number   Region number   Specified')
             for item in defined_zone_regions:
                 (zone_number, region_number) = item
                 is_used = item in facies_dict
-                print(f"  {zone_number}             {region_number}               {'Yes' if is_used else 'No'} ")
+                print(
+                    f'  {zone_number}             {region_number}               {"Yes" if is_used else "No"} '
+                )
         else:
-            print("List of zones found in the grid and if used or not:")
-            print("  Zone number   Specified")
+            print('List of zones found in the grid and if used or not:')
+            print('  Zone number   Specified')
             for zone_number in defined_zones:
                 is_used = zone_number in facies_dict
-                print(f"  {zone_number}        {is_used} ")
+                print(f'  {zone_number}        {is_used} ')
 
-    return (grid_model,
+    return (
+        grid_model,
         use_regions,
         facies_per_zone_dict,
         facies_per_zone_region_dict,
         prob_params_per_facies,
         probability_parameter_names,
         zone_values,
-        region_values)
+        region_values,
+    )
+
 
 def check_and_normalize_all_zones(
-        facies_per_zone_region_dict,
-        zone_values,
-        region_values,
-        grid_model,
-        realization_number,
-        use_regions,
-        probability_values_per_rms_param,
-        probability_params_per_facies,
-        max_prob_norm_tolerance,
-        min_prob_norm_tolerance,
-        max_allowed_fraction,
-        debug_level,
-        stop_on_error,
-    ):
+    facies_per_zone_region_dict,
+    zone_values,
+    region_values,
+    grid_model,
+    realization_number,
+    use_regions,
+    probability_values_per_rms_param,
+    probability_params_per_facies,
+    max_prob_norm_tolerance,
+    min_prob_norm_tolerance,
+    max_allowed_fraction,
+    debug_level,
+    stop_on_error,
+):
     # if stop_on_error is False then accumulate all error messages and some info message in error_dict
     # and print out at the end to get all error messages for all zones and all regions.
     error_dict = {
@@ -539,14 +564,16 @@ def check_and_normalize_all_zones(
     for key, facies_list_per_zone_region in facies_per_zone_region_dict.items():
         if use_regions:
             (zone_number, region_number) = key
-            print(f"Zone number: {zone_number}  Region number: {region_number}")
+            print(f'Zone number: {zone_number}  Region number: {region_number}')
         else:
             zone_number = int(key)
             region_number = 0
-            print(f"Zone number: {zone_number}")
+            print(f'Zone number: {zone_number}')
 
         # For current (zone,region) find the active cells
-        cell_index_defined = find_defined_cells(zone_values, zone_number, region_values, region_number)
+        cell_index_defined = find_defined_cells(
+            zone_values, zone_number, region_values, region_number
+        )
         if len(cell_index_defined) == 0:
             if use_regions:
                 print(
@@ -562,21 +589,28 @@ def check_and_normalize_all_zones(
 
         # Update contents in probability_values_per_rms_param
         if stop_on_error:
-            num_cells_modified_probability, probability_values_per_rms_param = check_and_normalise_probability(
-                grid_model,
-                realization_number,
-                zone_number,
-                probability_values_per_rms_param,
-                facies_list_per_zone_region,
-                probability_params_per_facies,
-                cell_index_defined,
-                region_number=region_number,
-                tolerance_of_probability_normalisation=max_prob_norm_tolerance,
-                eps=min_prob_norm_tolerance,
-                max_allowed_fraction_with_mismatch=max_allowed_fraction,
-                debug_level=debug_level)
+            num_cells_modified_probability, probability_values_per_rms_param = (
+                check_and_normalise_probability(
+                    grid_model,
+                    realization_number,
+                    zone_number,
+                    probability_values_per_rms_param,
+                    facies_list_per_zone_region,
+                    probability_params_per_facies,
+                    cell_index_defined,
+                    region_number=region_number,
+                    tolerance_of_probability_normalisation=max_prob_norm_tolerance,
+                    eps=min_prob_norm_tolerance,
+                    max_allowed_fraction_with_mismatch=max_allowed_fraction,
+                    debug_level=debug_level,
+                )
+            )
         else:
-            num_cells_modified_probability, probability_values_per_rms_param, error_dict = check_and_normalise_probability(
+            (
+                num_cells_modified_probability,
+                probability_values_per_rms_param,
+                error_dict,
+            ) = check_and_normalise_probability(
                 grid_model,
                 realization_number,
                 zone_number,
@@ -590,7 +624,8 @@ def check_and_normalize_all_zones(
                 max_allowed_fraction_with_mismatch=max_allowed_fraction,
                 debug_level=debug_level,
                 stop_on_error=stop_on_error,
-                error_dict=error_dict)
+                error_dict=error_dict,
+            )
 
         if debug_level >= Debug.ON:
             if region_number > 0:
@@ -606,16 +641,17 @@ def check_and_normalize_all_zones(
     # End loop over (zone, region) pair
     if not stop_on_error:
         if error_dict['Error']:
-            print("")
+            print('')
             if use_regions:
-                print("Errors in normalization per zone and region:\n")
+                print('Errors in normalization per zone and region:\n')
             else:
-                print("\nErrors in normalization per zone:\n")
+                print('\nErrors in normalization per zone:\n')
             for msg in error_dict['Message']:
                 print(msg)
 
-            raise NormalisationError("Normalization errors found.")
+            raise NormalisationError('Normalization errors found.')
     return probability_values_per_rms_param
+
 
 def check_and_normalise_probability(
     grid_model,
@@ -626,12 +662,12 @@ def check_and_normalise_probability(
     prob_param_per_facies,
     cell_index_defined,
     region_number=0,
-    tolerance_of_probability_normalisation = ProbabilityTolerances.MAX_ALLOWED_DEVIATION_BEFORE_ERROR,
+    tolerance_of_probability_normalisation=ProbabilityTolerances.MAX_ALLOWED_DEVIATION_BEFORE_ERROR,
     eps=ProbabilityTolerances.MAX_DEVIATION_BEFORE_ACTION,
     max_allowed_fraction_with_mismatch=ProbabilityTolerances.MAX_ALLOWED_FRACTION_OF_VALUES_OUTSIDE_TOLERANCE,
     debug_level=Debug.OFF,
     stop_on_error=True,
-    error_dict=None
+    error_dict=None,
 ):
     """
     Check that probability values are valid probabilities.
@@ -683,11 +719,13 @@ def check_and_normalise_probability(
     :return: integer with number of grid cells for which the probabilities are re-calculated to be normalised.
     """
     if not stop_on_error:
-        error_dict['Message'].append("")
+        error_dict['Message'].append('')
         if region_number > 0:
-            error_dict['Message'].append(f"Zone number: {zone_number} Region number: {region_number} ")
+            error_dict['Message'].append(
+                f'Zone number: {zone_number} Region number: {region_number} '
+            )
         else:
-            error_dict['Message'].append(f"Zone number: {zone_number}")
+            error_dict['Message'].append(f'Zone number: {zone_number}')
 
     # List of facies names for a specific(zone, region) combination
     facies_names_for_zone = facies_list_per_zone_region
@@ -717,21 +755,24 @@ def check_and_normalise_probability(
         # [1-tolerance_of_probability_normalisation, 1+tolerance_of_probability_normalisation] is
         # larger than max_allowed_fraction_with_mismatch, errors are reported.
         if stop_on_error:
-            probabilities_selected_cells= check_probability_values(
-                probabilities_selected_cells,
-                tolerance_of_probability_normalisation,
-                max_allowed_fraction_with_mismatch,
-                facies_name,
-                parameter_name)
-        else:
-            probabilities_selected_cells, error_dict, err_found = check_probability_values(
+            probabilities_selected_cells = check_probability_values(
                 probabilities_selected_cells,
                 tolerance_of_probability_normalisation,
                 max_allowed_fraction_with_mismatch,
                 facies_name,
                 parameter_name,
-                stop_on_error=stop_on_error,
-                error_dict=error_dict,
+            )
+        else:
+            probabilities_selected_cells, error_dict, err_found = (
+                check_probability_values(
+                    probabilities_selected_cells,
+                    tolerance_of_probability_normalisation,
+                    max_allowed_fraction_with_mismatch,
+                    facies_name,
+                    parameter_name,
+                    stop_on_error=stop_on_error,
+                    error_dict=error_dict,
+                )
             )
             if err_found:
                 err_found_in_zone = True
@@ -745,7 +786,9 @@ def check_and_normalise_probability(
         name = 'APS_problematic_cells_in_probability_cubes'
         # The property MAY have been created with a previous version as a continuous property.
         # In that case, writing code names to that property will cause a runtime error in RMS.
-        _remove_existing_if_necessary(grid_model, name, desired_type=roxar.GridPropertyType.discrete)
+        _remove_existing_if_necessary(
+            grid_model, name, desired_type=roxar.GridPropertyType.discrete
+        )
         grid = grid_model.get_grid(realization_number)
         values = grid.generate_values(np.uint8)
         values[cell_index_defined] = sum_probabilities_selected_cells == 0
@@ -763,11 +806,12 @@ def check_and_normalise_probability(
             debug_level=debug_level,
         )
         parameter_names = _format_names(prob_param_names)
-        err_msg = \
-            f'The probability cubes {parameter_names}, in zone {zone_number}, ' \
-            f'have some areas with 0 cumulative probability.\n' \
-            f'These areas are shown in {name}.' \
+        err_msg = (
+            f'The probability cubes {parameter_names}, in zone {zone_number}, '
+            f'have some areas with 0 cumulative probability.\n'
+            f'These areas are shown in {name}.'
             f'Number of grid cells with 0 cumulative probability is: {number_of_problematic_cells}.'
+        )
         # Can not continue with this error since have to avoid zero division
         raise NormalisationError(err_msg)
 
@@ -777,21 +821,23 @@ def check_and_normalise_probability(
             sum_probabilities_selected_cells,
             eps,
             tolerance_of_probability_normalisation,
-            max_allowed_fraction_with_mismatch)
+            max_allowed_fraction_with_mismatch,
+        )
     else:
         normalise_is_necessary, error_dict, err_found = check_probability_normalisation(
-        sum_probabilities_selected_cells,
-        eps,
-        tolerance_of_probability_normalisation,
-        max_allowed_fraction_with_mismatch,
-        stop_on_error=stop_on_error,
-        error_dict=error_dict)
+            sum_probabilities_selected_cells,
+            eps,
+            tolerance_of_probability_normalisation,
+            max_allowed_fraction_with_mismatch,
+            stop_on_error=stop_on_error,
+            error_dict=error_dict,
+        )
 
         if err_found:
             err_found_in_zone = True
 
     if not stop_on_error and not err_found_in_zone:
-        error_dict['Message'].append("Ok")
+        error_dict['Message'].append('Ok')
 
     if normalise_is_necessary:
         # Normalize
@@ -816,7 +862,12 @@ def check_and_normalise_probability(
     if stop_on_error:
         return num_cell_with_modified_probability, probability_values_per_rms_param
     else:
-        return num_cell_with_modified_probability, probability_values_per_rms_param, error_dict
+        return (
+            num_cell_with_modified_probability,
+            probability_values_per_rms_param,
+            error_dict,
+        )
+
 
 def _format_names(names):
     parameter_names = ''
@@ -833,13 +884,15 @@ def _format_names(names):
             pass
     return parameter_names
 
-def _remove_existing_if_necessary(grid_model: GridModel, name: str,
-    desired_type: roxar.GridPropertyType
+
+def _remove_existing_if_necessary(
+    grid_model: GridModel, name: str, desired_type: roxar.GridPropertyType
 ):
     if name in grid_model.properties:
         prop = grid_model.properties[name]
         if prop.type != desired_type:
             del grid_model.properties[name]
+
 
 def check_zones_regions_used(
     zone_code_names,
@@ -847,18 +900,20 @@ def check_zones_regions_used(
     region_code_names=None,
     region_param_values=None,
 ):
-    zone_region_used =  []
+    zone_region_used = []
     zones_used = []
     if region_code_names is not None:
         for zone_number in zone_code_names:
             for region_number in region_code_names:
                 key = (zone_number, region_number)
-                selected_grid_cells = (zone_param_values == zone_number) & (region_param_values == region_number)
+                selected_grid_cells = (zone_param_values == zone_number) & (
+                    region_param_values == region_number
+                )
                 if len(selected_grid_cells) > 0:
                     zone_region_used.append(key)
     else:
         for zone_number in zone_code_names:
-            selected_grid_cells = (zone_param_values == zone_number)
+            selected_grid_cells = zone_param_values == zone_number
             if len(selected_grid_cells) > 0:
                 zones_used.append(zone_number)
     return zone_region_used, zones_used

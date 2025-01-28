@@ -34,14 +34,14 @@ def extract_values(field_values, defined, zone):
     else:
         # One such case is 'mixed conform'
         raise NotImplementedError('{} is not supported'.format(conformity.name))
-    values[:, :, zone_start:zone_end + 1] = field_values
+    values[:, :, zone_start : zone_end + 1] = field_values
     return values * defined
 
 
 def _trim(field_name, prefix):
     trimmed = False
     if field_name.startswith(prefix):
-        field_name = field_name[len(prefix):]
+        field_name = field_name[len(prefix) :]
         trimmed = True
     return field_name, trimmed
 
@@ -53,10 +53,7 @@ def get_field_names(aps_model: APSModel, zone_model):
         key=len,
         reverse=True,
     )
-    zones = {
-        zone_model.codes[zone.zone_number]: zone
-        for zone in aps_model.zone_models
-    }
+    zones = {zone_model.codes[zone.zone_number]: zone for zone in aps_model.zone_models}
     for field_name in aps_model.gaussian_field_names:
         field_name, _ = _trim(field_name, prefix='aps_')
         for zone_name in zone_names:
@@ -64,9 +61,14 @@ def get_field_names(aps_model: APSModel, zone_model):
             if trimmed:
                 break
         if not trimmed:
-            raise ValueError('Cannot find a zone for the field {}'.format('aps_' + field_name))
+            raise ValueError(
+                'Cannot find a zone for the field {}'.format('aps_' + field_name)
+            )
         fields[field_name].append(
-            (zone_name, zones[zone_name], )
+            (
+                zone_name,
+                zones[zone_name],
+            )
         )
     return fields
 
@@ -77,8 +79,9 @@ def get_field_name(field_name, zone):
 
 def run(project, model_file, geo_grid_name=None, load_dir=None, **kwargs):
     if project.current_realisation > 0:
-        raise ValueError(f'In RMS models to be used with a FMU loop in ERT,'
-                          'the grid and parameters should be shared and realisation = 1'
+        raise ValueError(
+            f'In RMS models to be used with a FMU loop in ERT,'
+            'the grid and parameters should be shared and realisation = 1'
         )
     aps_model = APSModel(model_file)
     file_format = kwargs.get('field_file_format')
@@ -101,7 +104,7 @@ def run(project, model_file, geo_grid_name=None, load_dir=None, **kwargs):
             name=GridModelConstants.ZONE_NAME,
             realization_number=project.current_realisation,
             set_shared=True,
-            debug_level=Debug.VERBOSE
+            debug_level=Debug.VERBOSE,
         )
 
     for field_name, zones in get_field_names(aps_model, zone_model).items():
@@ -111,16 +114,22 @@ def run(project, model_file, geo_grid_name=None, load_dir=None, **kwargs):
             full_field_name = get_field_name(field_name, zone_name)
             field_location = load_dir / f'{full_field_name}.{file_format}'
             if field_location.exists():
-                field = load_field_values(full_field_name, fmu_grid, field_location, debug_level=debug_level)
+                field = load_field_values(
+                    full_field_name, fmu_grid, field_location, debug_level=debug_level
+                )
                 field_values += extract_values(field, defined, zone)
             else:
                 if full_field_name not in zone.gaussian_fields_in_truncation_rule:
                     # This is OK, as we don't need this field
                     continue
-                raise FileNotFoundError('The file {} could not be found.'.format(field_location))
+                raise FileNotFoundError(
+                    'The file {} could not be found.'.format(field_location)
+                )
         nx, ny, nz = rms_grid.dimensions
         field_model = xtgeo.GridProperty(
-            ncol=nx, nrow=ny, nlay=nz,
+            ncol=nx,
+            nrow=ny,
+            nlay=nz,
             values=field_values,
             name=field_name,
             discrete=False,
@@ -165,7 +174,9 @@ def _load_field_values_roff(field_name, grid, path):
     return property.values
 
 
-def load_field_values(field_name: str, grid: xtgeo.Grid, path: Path, debug_level=Debug.OFF):
+def load_field_values(
+    field_name: str, grid: xtgeo.Grid, path: Path, debug_level=Debug.OFF
+):
     if debug_level >= Debug.VERBOSE:
         print(f'-- Read file: {path}')
     if path.suffix == '.grdecl':

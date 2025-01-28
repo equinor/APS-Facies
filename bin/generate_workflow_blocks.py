@@ -15,6 +15,7 @@ Usage:
 
 The suffix MUST include a dot if a file ending is intended.
 """
+
 import random
 import string
 from pathlib import Path
@@ -30,11 +31,11 @@ def run() -> None:
     use_plugin_dir = False
     if '--normal-install' in argv:
         # Install from unpacked plugin directory
-        print("Standard install")
+        print('Standard install')
         use_plugin_dir = True
     else:
         # Install from APS repo bin directory
-        print("Full install")
+        print('Full install')
 
     workflows = get_workflows(use_plugin_dir=use_plugin_dir)
     root_path = get_root_path(use_plugin_dir=use_plugin_dir)
@@ -50,8 +51,16 @@ def run() -> None:
 
     for relative_path, items in workflows.items():
         for file_name in items:
-            create_workflow_block_file(file_name, root_path, relative_path,
-                toolbox_version, use_temporary, salt, suffix, use_plugin_dir=use_plugin_dir)
+            create_workflow_block_file(
+                file_name,
+                root_path,
+                relative_path,
+                toolbox_version,
+                use_temporary,
+                salt,
+                suffix,
+                use_plugin_dir=use_plugin_dir,
+            )
 
     for i in range(len(argv)):
         arg = argv[i]
@@ -63,7 +72,10 @@ def run() -> None:
             add_ipl_scripts(root_path, project_location)
             for rms_name, workflow_name in get_rms_mapping(suffix).items():
                 if workflow_name is not None:
-                    _OS.copy(workflow_dir / rms_name, project_location / 'pythoncomp' / rms_name)
+                    _OS.copy(
+                        workflow_dir / rms_name,
+                        project_location / 'pythoncomp' / rms_name,
+                    )
 
 
 def get_workflow_block(file_name: str, relative_path: str, toolbox_version: str) -> str:
@@ -432,7 +444,12 @@ if file_name != 'turn_off_traceback':
 
 
 def get_root_path(use_plugin_dir=False) -> Path:
-    legal_options = ['--read-only', '--copy-to-rms-project', '--use-temporary-workflow-dir', '--normal-install']
+    legal_options = [
+        '--read-only',
+        '--copy-to-rms-project',
+        '--use-temporary-workflow-dir',
+        '--normal-install',
+    ]
     if not use_plugin_dir:
         if len(argv) == 1 or argv[1] in legal_options:
             path = '.'
@@ -449,20 +466,21 @@ def get_root_path(use_plugin_dir=False) -> Path:
 
 
 def get_toolbox_version() -> str:
-    file_paths = ["bin/STUB_VERSION", "aps_gui/STUB_VERSION" ]
+    file_paths = ['bin/STUB_VERSION', 'aps_gui/STUB_VERSION']
     version = None
     for file_path in file_paths:
         if Path(file_path).exists():
-            with open(file_path, "r", encoding='utf-8') as file:
+            with open(file_path, 'r', encoding='utf-8') as file:
                 for line in file.readlines():
                     if line:
                         version = line.strip()
                         break
     if not version:
         raise IOError(
-            "Did not find the file: STUB_VERSION.\n"
-            "Run from top directory of source code repo  (bin/generate_workflow_blocks.py)\n"
-            "or run from directory for unpacked version of the plugin (aps_gui/generate_workflow_blocks.py --normal-install).")
+            'Did not find the file: STUB_VERSION.\n'
+            'Run from top directory of source code repo  (bin/generate_workflow_blocks.py)\n'
+            'or run from directory for unpacked version of the plugin (aps_gui/generate_workflow_blocks.py --normal-install).'
+        )
     return version
 
 
@@ -513,7 +531,10 @@ def get_rms_mapping(suffix: str = '') -> Dict[str, Optional[str]]:
             ('APS_test_preview', 'testPreview.py'),
             ('APS_update_from_FMU', 'updateAPSModelFromFMU.py'),
             ('APS_define_depositional_trend', 'defineFaciesProbMapDepTrend.py'),
-            ('APS_simulate_gauss_fields_multiprocessing', 'APS_simulate_gauss_multiprocessing.py'),
+            (
+                'APS_simulate_gauss_fields_multiprocessing',
+                'APS_simulate_gauss_multiprocessing.py',
+            ),
             ('APS_import_simulated_gauss_fields', 'APS_update_gauss_rms.py'),
             ('APS_simulate_gauss_fields', 'APS_simulate_gauss_singleprocessing.py'),
             ('APS_export_grid_model_info', 'getGridModelAttributes.py'),
@@ -521,8 +542,14 @@ def get_rms_mapping(suffix: str = '') -> Dict[str, Optional[str]]:
             ('test_gridmodel_parameters_api', None),
             ('Example_discrete_parameter_info', None),
             ('Example_zone_and_region_parameter', None),
-            ('APS_update_from_rms_uncertainty_table', 'updateAPSModelFromUncertaintyTable.py'),
-            ('Compare_files_with_uncertainty_parameters', 'Compare_files_with_uncertainty_parameters.py'),
+            (
+                'APS_update_from_rms_uncertainty_table',
+                'updateAPSModelFromUncertaintyTable.py',
+            ),
+            (
+                'Compare_files_with_uncertainty_parameters',
+                'Compare_files_with_uncertainty_parameters.py',
+            ),
             ('APS_define_probability_logs', 'createProbabilityLogs.py'),
             ('APS_merge_facies_logs', 'createRedefinedBlockedFaciesLog.py'),
             ('APS_create_FMU_tags', 'setupFMUtags.py'),
@@ -530,7 +557,10 @@ def get_rms_mapping(suffix: str = '') -> Dict[str, Optional[str]]:
             ('Compare_files_updated_with_FMU_parameters', None),
             ('APS_normalize_prob_cubes', 'APS_normalize_prob_cubes.py'),
             ('APS_bitmap2rms', 'bitmap2rms.py'),
-            ('APS_set_seed_file_for_multiprocessing_workflow', 'APS_set_seed_file_for_multiprocessing_workflow.py'),
+            (
+                'APS_set_seed_file_for_multiprocessing_workflow',
+                'APS_set_seed_file_for_multiprocessing_workflow.py',
+            ),
             ('APS_compare_files', 'compare_files.py'),
             ('APS_resample_to_ertbox', 'copy_rms_param_to_fmu_grid.py'),
             ('APS_run_workflow', 'test_jobs_and_workflow.py'),
@@ -547,13 +577,15 @@ def get_random_name(length=5):
 
 
 def get_file_mapping(suffix: str = '') -> Dict[str, str]:
-    return {file: rms_name for rms_name, file in get_rms_mapping(suffix).items() if file}
+    return {
+        file: rms_name for rms_name, file in get_rms_mapping(suffix).items() if file
+    }
 
 
 def get_workflow_dir(
-        root_path: Path,
-        use_temporary: Optional[bool] = False,
-        salt: Optional[str] = None,
+    root_path: Path,
+    use_temporary: Optional[bool] = False,
+    salt: Optional[str] = None,
 ) -> Path:
     if use_temporary:
         root_path = Path(gettempdir())
@@ -566,14 +598,14 @@ def get_workflow_dir(
 
 
 def create_workflow_block_file(
-        file_name: str,
-        root_path: Path,
-        relative_path: str,
-        toolbox_version: str,
-        use_temporary: Optional[bool] = False,
-        salt: Optional[str] = None,
-        suffix: str = '',
-        use_plugin_dir: bool = False,
+    file_name: str,
+    root_path: Path,
+    relative_path: str,
+    toolbox_version: str,
+    use_temporary: Optional[bool] = False,
+    salt: Optional[str] = None,
+    suffix: str = '',
+    use_plugin_dir: bool = False,
 ) -> None:
     script_name = file_name + '.py'
     script_path = root_path / relative_path / script_name
@@ -587,7 +619,7 @@ def create_workflow_block_file(
         workflow_dir = get_workflow_dir(root_path, use_temporary, salt)
         workflow_path = str(workflow_dir / get_file_mapping(suffix)[script_name])
     workflow_block = get_workflow_block(file_name, relative_path, toolbox_version)
-    print(f"Generate: {workflow_path} ")
+    print(f'Generate: {workflow_path} ')
     with open(workflow_path, 'w', encoding='utf-8') as f:
         f.write(workflow_block)
 
@@ -643,10 +675,10 @@ class _OS:
 
     @staticmethod
     def _exec(
-            path: Path,
-            fun: Callable,
-            args: tuple = (),
-            kwargs: Optional[dict] = None,
+        path: Path,
+        fun: Callable,
+        args: tuple = (),
+        kwargs: Optional[dict] = None,
     ) -> Optional[Any]:
         if kwargs is None:
             kwargs = {}

@@ -29,12 +29,14 @@ def create_facies_map_vectorized(gauss_fields, truncation_rule, use_code=False):
     num_grid_cells = grid_sizes.pop()
     facies_fraction = {}
     # Find one realization to get the grid size
-    alpha_coord_vectors = np.zeros((num_grid_cells, len(gauss_fields)),  np.float32)
+    alpha_coord_vectors = np.zeros((num_grid_cells, len(gauss_fields)), np.float32)
     for m in range(len(gauss_fields)):
         item = gauss_fields[m]
         alpha_realization = item.field
         alpha_coord_vectors[:, m] = np.asarray(alpha_realization)
-    facies_code_vector, facies_index_vector = truncation_rule.defineFaciesByTruncRule_vectorized(alpha_coord_vectors)
+    facies_code_vector, facies_index_vector = (
+        truncation_rule.defineFaciesByTruncRule_vectorized(alpha_coord_vectors)
+    )
     if use_code:
         facies = facies_code_vector
     else:

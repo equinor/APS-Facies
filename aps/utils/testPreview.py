@@ -4,6 +4,7 @@
 from argparse import ArgumentParser, Namespace
 
 import matplotlib
+
 matplotlib.use('Tkagg')
 from matplotlib import pyplot as plt
 
@@ -22,13 +23,14 @@ from aps.utils.facies_map import create_facies_map
 
 
 def high_resolution_2D_grids(
-    nx, ny, nz,
+    nx,
+    ny,
+    nz,
     preview_cross_section_type,
     original_simulation_box_size,
     preview_scale=False,
-    debug_level=Debug.OFF
+    debug_level=Debug.OFF,
 ):
-
     previewLX, previewLY, previewLZ = original_simulation_box_size
     # Calculate grid resolution for the cross section when choosing high resolution
     # First redefine lateral grid resolution
@@ -63,10 +65,14 @@ def high_resolution_2D_grids(
 
         if debug_level >= Debug.VERY_VERBOSE:
             print('Debug output: Cross section: IJ')
-            print('Debug output:  Grid increment for high resolution preview: dx = {}   dy= {}'
-                  ''.format(dx, dy))
-            print('Debug output:  Grid size for high resolution preview: nxPreview = {}  nyPreview = {}'
-                  ''.format(nx_preview, ny_preview))
+            print(
+                'Debug output:  Grid increment for high resolution preview: dx = {}   dy= {}'
+                ''.format(dx, dy)
+            )
+            print(
+                'Debug output:  Grid size for high resolution preview: nxPreview = {}  nyPreview = {}'
+                ''.format(nx_preview, ny_preview)
+            )
 
     else:
         # Ratio between vertical length multiplied by scaling factor and horizontal length should be the same as the ratio between
@@ -80,10 +86,14 @@ def high_resolution_2D_grids(
 
             if debug_level >= Debug.VERY_VERBOSE:
                 print('Debug output: Cross section: IK')
-                print('Debug output:  Grid increment for high resolution preview: dx = {}   dz= {}'
-                      ''.format(dx, dz))
-                print('Debug output:  Grid size for high resolution preview: nxPreview = {}  nzPreview = {}'
-                      ''.format(nx_preview, nz_preview))
+                print(
+                    'Debug output:  Grid increment for high resolution preview: dx = {}   dz= {}'
+                    ''.format(dx, dz)
+                )
+                print(
+                    'Debug output:  Grid size for high resolution preview: nxPreview = {}  nzPreview = {}'
+                    ''.format(nx_preview, nz_preview)
+                )
 
         if preview_cross_section_type == CrossSectionType.JK:
             ratio = previewLZ / previewLY
@@ -93,55 +103,64 @@ def high_resolution_2D_grids(
             dz = previewLZ / nz_preview
             if debug_level >= Debug.VERY_VERBOSE:
                 print('Debug output: Cross section: JK')
-                print('Debug output:  Grid increment for high resolution preview: dy = {}   dz= {}'
-                      ''.format(dy, dz))
-                print('Debug output:  Grid size for high resolution preview: nyPreview = {}  nzPreview = {}'
-                      ''.format(ny_preview, nz_preview))
+                print(
+                    'Debug output:  Grid increment for high resolution preview: dy = {}   dz= {}'
+                    ''.format(dy, dz)
+                )
+                print(
+                    'Debug output:  Grid size for high resolution preview: nyPreview = {}  nzPreview = {}'
+                    ''.format(ny_preview, nz_preview)
+                )
 
     preview_grid_size = (nx_preview, ny_preview, nz_preview)
     return preview_grid_size
 
 
 def set2DGridDimension(
-        nx, ny, nz,
-        preview_cross_section_type,
-        original_simulation_box_size,
-        preview_scale=False,
-        use_high_resolution=False,
-        debug_level=Debug.OFF
+    nx,
+    ny,
+    nz,
+    preview_cross_section_type,
+    original_simulation_box_size,
+    preview_scale=False,
+    use_high_resolution=False,
+    debug_level=Debug.OFF,
 ):
-    '''
+    """
     Returns a tuple with number of grid cells (nx, ny, nz) for each coordinate direction.
     The output is identical to input if useHighResolution=False and the number of grid cells is
     re-calculated to a higher vertical resolution and possibly higher lateral resolution if
     useHighResolution = True. It is only the number of grid cells in the specified cross section that is re-calculated
     and not the number of cells in the third dimension orthogonal to the cross section.
-    '''
+    """
     if not use_high_resolution:
         # Default is to use the grid resolution from the RMS grid model
         grid_size = (nx, ny, nz)
     else:
         # Increase resolution (preview_size), but no vertical scaling
         grid_size = high_resolution_2D_grids(
-            nx, ny, nz,
+            nx,
+            ny,
+            nz,
             preview_cross_section_type,
             original_simulation_box_size,
             preview_scale=preview_scale,
-            debug_level=debug_level)
+            debug_level=debug_level,
+        )
 
     return grid_size
 
 
 # --------- Main function ----------------
 def run_previewer(
-        model='APS.xml',
-        rms_data_file_name='rms_project_data_for_APS_gui.xml',
-        rotate_plot=False,
-        no_simulation=False,
-        write_simulated_fields_to_file=False,
-        plot_to_file=False,
-        debug_level=Debug.OFF,
-        **kwargs
+    model='APS.xml',
+    rms_data_file_name='rms_project_data_for_APS_gui.xml',
+    rotate_plot=False,
+    no_simulation=False,
+    write_simulated_fields_to_file=False,
+    plot_to_file=False,
+    debug_level=Debug.OFF,
+    **kwargs,
 ) -> None:
     """
 
@@ -165,7 +184,7 @@ def run_previewer(
     elif isinstance(model, APSModel):
         apsModel = model
     else:
-        raise ValueError("The given model format is not recognized.")
+        raise ValueError('The given model format is not recognized.')
     debug_level = apsModel.debug_level
     preview_zone_number = apsModel.getPreviewZoneNumber()
     preview_region_number = apsModel.getPreviewRegionNumber()
@@ -187,7 +206,7 @@ def run_previewer(
                 previewRegionNumber=preview_region_number,
                 previewCrossSectionType=preview_cross_section.type.name,
                 previewCrossSectionRelativePos=preview_cross_section.relative_position,
-                previewScale=preview_scale
+                previewScale=preview_scale,
             )
         )
     # This script read the information about the grid model from a file that is previously written to disk
@@ -195,10 +214,22 @@ def run_previewer(
     # TODO
     rmsData = APSDataFromRMS()
     if debug_level >= Debug.ON:
-        print('- Read file: {rms_data_file_name}'.format(rms_data_file_name=rms_data_file_name))
+        print(
+            '- Read file: {rms_data_file_name}'.format(
+                rms_data_file_name=rms_data_file_name
+            )
+        )
     rmsData.readRMSDataFromXMLFile(rms_data_file_name)
     [
-        nxFromGrid, nyFromGrid, simBoxOrigoX, simBoxOrigoY, simBoxXsize, simBoxYsize, _, _, azimuthGridOrientation
+        nxFromGrid,
+        nyFromGrid,
+        simBoxOrigoX,
+        simBoxOrigoY,
+        simBoxXsize,
+        simBoxYsize,
+        _,
+        _,
+        azimuthGridOrientation,
     ] = rmsData.getGridSize()
 
     if not 0.0 <= azimuthGridOrientation <= 360.0:
@@ -232,16 +263,19 @@ def run_previewer(
                 simBoxYsize=simBoxYsize,
                 simBoxZsize=simBoxZsize,
                 previewCrossSectionType=preview_cross_section.type.name,
-                previewCrossSectionRelativePos=preview_cross_section.relative_position
+                previewCrossSectionRelativePos=preview_cross_section.relative_position,
             )
         )
 
     preview_grid_size = set2DGridDimension(
-        nx, ny, nz, preview_cross_section.type,
+        nx,
+        ny,
+        nz,
+        preview_cross_section.type,
         original_simulation_box_size,
         preview_scale=preview_scale,
         use_high_resolution=use_high_resolution,
-        debug_level=debug_level
+        debug_level=debug_level,
     )
     truncObject = zoneModel.truncation_rule
     faciesNames = zoneModel.facies_in_zone_model
@@ -270,7 +304,14 @@ def run_previewer(
             p = int(v * 1000 + 0.5)
             w = float(p) / 1000.0
             if debug_level >= Debug.ON:
-                print('Zone: ' + str(zoneNumber) + ' Facies: ' + fName + ' Prob: ' + str(w))
+                print(
+                    'Zone: '
+                    + str(zoneNumber)
+                    + ' Facies: '
+                    + fName
+                    + ' Prob: '
+                    + str(w)
+                )
         else:
             v = 1.0 / float(nFacies)
             p = int(v * 1000 + 0.5)
@@ -291,8 +332,11 @@ def run_previewer(
     # Use original_simulation_box_size and not the rescaled lengths of the simulation box in the simulation
     # in order to get correct representation of trends and spatial correlations.
     gauss_field_items = zoneModel.simGaussFieldWithTrendAndTransform(
-        original_simulation_box_size, preview_grid_size,
-        azimuthGridOrientation, preview_cross_section, original_simulation_box_origin
+        original_simulation_box_size,
+        preview_grid_size,
+        azimuthGridOrientation,
+        preview_cross_section,
+        original_simulation_box_origin,
     )
 
     grid2D_dimensions, increments = get_dimensions(
@@ -306,16 +350,32 @@ def run_previewer(
         if debug_level >= Debug.VERBOSE:
             print('Debug output: Write 2D simulated gauss fields:')
             for gaussian_field in gauss_field_items:
-                file_name = gaussian_field.name + '_' + preview_cross_section.type.name + '.dat'
-                writeFileRTF(file_name, gaussian_field.field, grid2D_dimensions, increments, x0, y0, debug_level=debug_level)
+                file_name = (
+                    gaussian_field.name + '_' + preview_cross_section.type.name + '.dat'
+                )
+                writeFileRTF(
+                    file_name,
+                    gaussian_field.field,
+                    grid2D_dimensions,
+                    increments,
+                    x0,
+                    y0,
+                    debug_level=debug_level,
+                )
         writeFileRTF('facies2D.dat', facies, grid2D_dimensions, increments, x0, y0)
 
     if debug_level >= Debug.VERY_VERBOSE:
-        facies_fraction_sorted = collections.OrderedDict(sorted(facies_fraction.items()))
+        facies_fraction_sorted = collections.OrderedDict(
+            sorted(facies_fraction.items())
+        )
         print('\nFacies name:   Simulated fractions:    Specified fractions:')
         for i, f in facies_fraction_sorted.items():
             fraction = float(f) / float(len(facies))
-            print('{0:10}  {1:.3f}   {2:.3f}'.format(faciesNames[i], fraction, faciesProb[i]))
+            print(
+                '{0:10}  {1:.3f}   {2:.3f}'.format(
+                    faciesNames[i], fraction, faciesProb[i]
+                )
+            )
         print('')
 
     # Plot the result
@@ -326,11 +386,14 @@ def run_previewer(
 
     # Figure containing the transformed Gaussian fields and facies realization
     plot_gaussian_fields(
-        fig, gaussFieldIndxList, gauss_field_items,
-        grid2D_dimensions, original_simulation_box_size,
+        fig,
+        gaussFieldIndxList,
+        gauss_field_items,
+        grid2D_dimensions,
+        original_simulation_box_size,
         preview_cross_section,
         vertical_scale=preview_scale,
-        azimuth_grid_orientation=azimuthGridOrientation
+        azimuth_grid_orientation=azimuthGridOrientation,
     )
 
     # Figure containing truncation map and facies
@@ -341,15 +404,24 @@ def run_previewer(
     bounds = np.linspace(0.5, 0.5 + nFacies, nFacies + 1)
     labels = faciesNames
     ax_trunc = plt.subplot(2, 6, 10)
-    plot_truncation_map(truncObject, ax=ax_trunc, num_facies=nFacies, debug_level=debug_level)
-    fmap = np.reshape(facies, grid2D_dimensions[::-1], 'C')  # Reshape to a 2D matrix (gridDim2 = nRows, gridDim1 = nColumns)
+    plot_truncation_map(
+        truncObject, ax=ax_trunc, num_facies=nFacies, debug_level=debug_level
+    )
+    fmap = np.reshape(
+        facies, grid2D_dimensions[::-1], 'C'
+    )  # Reshape to a 2D matrix (gridDim2 = nRows, gridDim1 = nColumns)
     # Facies map is plotted
     axFacies = plt.subplot(2, 6, 11)
-    imFac = plot_facies(axFacies, fmap, nFacies, cm,
-                        preview_cross_section.type,
-                        original_simulation_box_size,
-                        plot_ticks=True,
-                        vertical_scale=preview_scale)
+    imFac = plot_facies(
+        axFacies,
+        fmap,
+        nFacies,
+        cm,
+        preview_cross_section.type,
+        original_simulation_box_size,
+        plot_ticks=True,
+        vertical_scale=preview_scale,
+    )
 
     # Plot crossplot between GRF1 and GRF2,3,4,5
     cross_plots = [
@@ -360,7 +432,10 @@ def run_previewer(
     ]
 
     for base_field_index, compare_field_index, placement in cross_plots:
-        if base_field_index < nGaussFieldsInTruncRule and compare_field_index < nGaussFieldsInTruncRule:
+        if (
+            base_field_index < nGaussFieldsInTruncRule
+            and compare_field_index < nGaussFieldsInTruncRule
+        ):
             ax = plt.subplot(*placement)
             field_1 = gauss_field_items[base_field_index]
             field_2 = gauss_field_items[compare_field_index]
@@ -372,24 +447,35 @@ def run_previewer(
     cax2.set_yticklabels(labels)
 
     # Adjust subplots
-    plt.subplots_adjust(
-        left=0.10, wspace=0.15, hspace=0.20, bottom=0.05, top=0.92
-    )
+    plt.subplots_adjust(left=0.10, wspace=0.15, hspace=0.20, bottom=0.05, top=0.92)
     # Label the rows and columns of the table
     cross_section = preview_cross_section.type.name
     nx_preview, ny_preview, nz_preview = preview_grid_size
     if regionNumber > 0:
-        text = 'Zone number: ' + str(zoneNumber) + '  Region number: ' + str(regionNumber) + '  Cross section: ' + cross_section
+        text = (
+            'Zone number: '
+            + str(zoneNumber)
+            + '  Region number: '
+            + str(regionNumber)
+            + '  Cross section: '
+            + cross_section
+        )
     else:
         text = 'Zone number: ' + str(zoneNumber) + '  Cross section: ' + cross_section
     if preview_scale and (cross_section == 'IK' or cross_section == 'JK'):
         text += '  Vertical scale: ' + str(preview_scale)
     if cross_section == 'IJ':
-        text += '  Cross section for K = ' + str(preview_cross_section.relative_position * nz_preview)
+        text += '  Cross section for K = ' + str(
+            preview_cross_section.relative_position * nz_preview
+        )
     elif cross_section == 'IK':
-        text += '  Cross section for J = ' + str(preview_cross_section.relative_position * ny_preview)
+        text += '  Cross section for J = ' + str(
+            preview_cross_section.relative_position * ny_preview
+        )
     else:
-        text += '  Cross section for I = ' + str(preview_cross_section.relative_position * nx_preview)
+        text += '  Cross section for I = ' + str(
+            preview_cross_section.relative_position * nx_preview
+        )
 
     fig.text(0.50, 0.98, text, ha='center')
     for i in range(nFacies):
@@ -421,11 +507,21 @@ def get_dimensions(preview_cross_section_type, preview_grid_size, simulation_box
         grid2D_dimensions = (y_preview, z_preview)
         increments = (y_simulation / y_preview, z_simulation / z_preview)
     else:
-        raise ValueError("Invalid Cross Section Type ({})".format(preview_cross_section_type))
+        raise ValueError(
+            'Invalid Cross Section Type ({})'.format(preview_cross_section_type)
+        )
     return grid2D_dimensions, increments
 
 
-def plot_truncation_map(truncation_rule, ax=None, fig=None, num_facies=None, facies_colors=None, title='Truncation Map', debug_level=Debug.OFF):
+def plot_truncation_map(
+    truncation_rule,
+    ax=None,
+    fig=None,
+    num_facies=None,
+    facies_colors=None,
+    title='Truncation Map',
+    debug_level=Debug.OFF,
+):
     if num_facies is None:
         num_facies = truncation_rule.num_facies_in_zone
     if ax is None:
@@ -442,7 +538,9 @@ def plot_truncation_map(truncation_rule, ax=None, fig=None, num_facies=None, fac
     if debug_level >= Debug.ON:
         print(
             'Number of facies:          {num_facies}\n'
-            'Number of facies polygons: {num_polygons}'.format(num_facies=num_facies, num_polygons=len(facies_polygons))
+            'Number of facies polygons: {num_polygons}'.format(
+                num_facies=num_facies, num_polygons=len(facies_polygons)
+            )
         )
     for i in range(len(facies_polygons)):
         index = facies_index_per_polygon[i]
@@ -457,8 +555,16 @@ def plot_truncation_map(truncation_rule, ax=None, fig=None, num_facies=None, fac
     return fig, ax
 
 
-def plot_gaussian_fields(fig, gauss_field_index_list, gauss_field_items, grid_dimension,
-                         simulation_box_size, preview_cross_section, vertical_scale=1.0, azimuth_grid_orientation=None):
+def plot_gaussian_fields(
+    fig,
+    gauss_field_index_list,
+    gauss_field_items,
+    grid_dimension,
+    simulation_box_size,
+    preview_cross_section,
+    vertical_scale=1.0,
+    azimuth_grid_orientation=None,
+):
     # Gauss 1 - 6 transformed is plotted
     plots = []
     truncation_rules = [
@@ -470,17 +576,29 @@ def plot_gaussian_fields(fig, gauss_field_index_list, gauss_field_items, grid_di
         (5, plt.subplot(2, 6, 9), False),
     ]
     for number_in_trunc_rule, ax, ticks in truncation_rules:
-        gaussian_field = _get_gaussian_field(gauss_field_index_list, gauss_field_items, number_in_trunc_rule)
-        plots.append(plot_gaussian_field(
-            gaussian_field, lengths=simulation_box_size, grid_dimensions=grid_dimension, ax=ax,
-            plot_ticks=ticks, azimuth_grid_orientation=azimuth_grid_orientation, grid_index_order='C',vertical_scale=vertical_scale
-        ))
+        gaussian_field = _get_gaussian_field(
+            gauss_field_index_list, gauss_field_items, number_in_trunc_rule
+        )
+        plots.append(
+            plot_gaussian_field(
+                gaussian_field,
+                lengths=simulation_box_size,
+                grid_dimensions=grid_dimension,
+                ax=ax,
+                plot_ticks=ticks,
+                azimuth_grid_orientation=azimuth_grid_orientation,
+                grid_index_order='C',
+                vertical_scale=vertical_scale,
+            )
+        )
     # Color legend for the transformed Gaussian fields
     cax1 = fig.add_axes([0.94, 0.52, 0.02, 0.4])
     fig.colorbar(plots[0], cax=cax1)
 
 
-def _get_gaussian_field(gauss_field_index_list, gauss_field_items, number_in_trunc_rule):
+def _get_gaussian_field(
+    gauss_field_index_list, gauss_field_items, number_in_trunc_rule
+):
     try:
         return gauss_field_items[gauss_field_index_list[number_in_trunc_rule]]
     except (IndexError, KeyError):
@@ -488,12 +606,45 @@ def _get_gaussian_field(gauss_field_index_list, gauss_field_items, number_in_tru
 
 
 def get_argument_parser() -> ArgumentParser:
-    parser = ArgumentParser(description="A preliminary previewer for APS GUI")
-    parser.add_argument('model', metavar='FILE', type=str, nargs='?', default='APS.xml', help="The model file to be viewed (default: APS.xml)")
-    parser.add_argument('rms_data_file_name', metavar='DATA', type=str, nargs='?', default='rms_project_data_for_APS_gui.xml', help="The rms data file (default: rms_project_data_for_APS_gui.xml)")
-    parser.add_argument('-r', '--rotate-plot', type=bool, default=False, help="Toggles rotation of plot (default: False)")
-    parser.add_argument('-w', '--write-simulated-fields-to-file', nargs='?', type=bool, default=False, help="Toggles whether the simulated fileds should be dumped to disk (default: False)")
-    parser.add_argument('-d', '--debug-level', type=int, default=0, help="Sets the verbosity. 0-4, where 0 is least verbose (default: 0)")
+    parser = ArgumentParser(description='A preliminary previewer for APS GUI')
+    parser.add_argument(
+        'model',
+        metavar='FILE',
+        type=str,
+        nargs='?',
+        default='APS.xml',
+        help='The model file to be viewed (default: APS.xml)',
+    )
+    parser.add_argument(
+        'rms_data_file_name',
+        metavar='DATA',
+        type=str,
+        nargs='?',
+        default='rms_project_data_for_APS_gui.xml',
+        help='The rms data file (default: rms_project_data_for_APS_gui.xml)',
+    )
+    parser.add_argument(
+        '-r',
+        '--rotate-plot',
+        type=bool,
+        default=False,
+        help='Toggles rotation of plot (default: False)',
+    )
+    parser.add_argument(
+        '-w',
+        '--write-simulated-fields-to-file',
+        nargs='?',
+        type=bool,
+        default=False,
+        help='Toggles whether the simulated fileds should be dumped to disk (default: False)',
+    )
+    parser.add_argument(
+        '-d',
+        '--debug-level',
+        type=int,
+        default=0,
+        help='Sets the verbosity. 0-4, where 0 is least verbose (default: 0)',
+    )
     return parser
 
 
@@ -504,7 +655,13 @@ def run(roxar=None, project=None, **kwargs):
     debug_level = get_debug_level(**kwargs)
     [kwargs.pop(item, None) for item in ['model', 'rms_data_file_name', 'debug_level']]
     plot_to_file = False
-    run_previewer(model=model, rms_data_file_name=rms_data_file_name, plot_to_file=plot_to_file, debug_level=debug_level, **kwargs)
+    run_previewer(
+        model=model,
+        rms_data_file_name=rms_data_file_name,
+        plot_to_file=plot_to_file,
+        debug_level=debug_level,
+        **kwargs,
+    )
 
 
 def get_arguments() -> Namespace:

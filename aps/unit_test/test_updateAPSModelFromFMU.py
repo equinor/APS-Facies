@@ -10,7 +10,12 @@ def test_update_aps_model():
     global_ipl_file = 'testData_updateAPSModel/global_include.ipl'
     output_aps_model_file = 'APS_modified.xml'
     reference_output_file = 'testData_updateAPSModel/APS_modified.xml'
-    update_aps_model_from_fmu(global_ipl_file, input_aps_model_file, output_aps_model_file, debug_level=Debug.OFF)
+    update_aps_model_from_fmu(
+        global_ipl_file,
+        input_aps_model_file,
+        output_aps_model_file,
+        debug_level=Debug.OFF,
+    )
 
     # Compare with reference data
     assert_identical_files(output_aps_model_file, reference_output_file)

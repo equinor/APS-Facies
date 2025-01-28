@@ -6,16 +6,18 @@ import numpy as np
 from aps.algorithms.APSModel import APSModel
 from aps.utils.methods import get_run_parameters
 from aps.utils.roxar.APSDataFromRMS import APSDataFromRMS
-from aps.utils.roxar.generalFunctionsUsingRoxAPI import set_continuous_3d_parameter_values_in_zone
+from aps.utils.roxar.generalFunctionsUsingRoxAPI import (
+    set_continuous_3d_parameter_values_in_zone,
+)
 from aps.utils.constants.simple import Debug
 
 
 def run_main(
-        project,
-        model_file='APS.xml',
-        rms_data_file_name='rms_project_data_for_APS_gui.xml',
-        inputDir='./tmp_gauss_sim',
-        isShared=False
+    project,
+    model_file='APS.xml',
+    rms_data_file_name='rms_project_data_for_APS_gui.xml',
+    inputDir='./tmp_gauss_sim',
+    isShared=False,
 ):
     """
     Description: Read simulated gaussian fields from disk and put into the RMS project
@@ -32,7 +34,11 @@ def run_main(
     gridModelName = apsModel.grid_model_name
 
     if debug_level >= Debug.VERBOSE:
-        print('- Read file: {rms_data_file_name}'.format(rms_data_file_name=rms_data_file_name))
+        print(
+            '- Read file: {rms_data_file_name}'.format(
+                rms_data_file_name=rms_data_file_name
+            )
+        )
     rmsData = APSDataFromRMS(debug_level=debug_level)
 
     rmsData.readRMSDataFromXMLFile(rms_data_file_name)
@@ -61,17 +67,26 @@ def run_main(
             gaussVector = np.load(fileName)
             gaussResult = np.reshape(gaussVector, (nx, ny, nLayers), order='F')
             if debug_level >= Debug.ON:
-                print(f'-- Update RMS parameter: {gaussFieldName} for zone: {zoneNumber}')
+                print(
+                    f'-- Update RMS parameter: {gaussFieldName} for zone: {zoneNumber}'
+                )
             gaussResultListForZone.append(gaussResult)
         set_continuous_3d_parameter_values_in_zone(
-            gridModel, gaussFieldNames, gaussResultListForZone, zoneNumber - 1,
-            realisation_number=realization_number, is_shared=isShared, debug_level=debug_level
+            gridModel,
+            gaussFieldNames,
+            gaussResultListForZone,
+            zoneNumber - 1,
+            realisation_number=realization_number,
+            is_shared=isShared,
+            debug_level=debug_level,
         )
         # End loop over gauss fields for one zone
     # End loop over all active zones in the model
     if debug_level >= Debug.ON:
         print('')
-        print('- Finished reading simulated gauss fields from disk and update RMS project')
+        print(
+            '- Finished reading simulated gauss fields from disk and update RMS project'
+        )
         print('')
 
 
@@ -80,9 +95,15 @@ def run(roxar=None, project=None, **kwargs):
     model_file = params['model_file']
     rms_data_file_name = params['rms_data_file']
     input_dir = params['input_directory']
-    run_main(project, model_file=model_file, rms_data_file_name=rms_data_file_name, inputDir=input_dir)
+    run_main(
+        project,
+        model_file=model_file,
+        rms_data_file_name=rms_data_file_name,
+        inputDir=input_dir,
+    )
 
 
 if __name__ == '__main__':
     import roxar
+
     run(roxar, project)

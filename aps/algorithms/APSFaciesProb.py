@@ -20,7 +20,9 @@ class FaciesProbability:
         self._probability = probability
 
     def __repr__(self):
-        return '{}("{}", {})'.format(self.__class__.__name__, self.name, self.probability)
+        return '{}("{}", {})'.format(
+            self.__class__.__name__, self.name, self.probability
+        )
 
     @property
     def name(self) -> FaciesName:
@@ -52,12 +54,10 @@ class FaciesProbability:
 
     @classmethod
     def from_definition(
-            cls,
-            definition: Union[
-                FaciesProbabilityRecord,
-                Tuple[str, Probability],
-                List[Probability]
-            ]
+        cls,
+        definition: Union[
+            FaciesProbabilityRecord, Tuple[str, Probability], List[Probability]
+        ],
     ) -> 'FaciesProbability':
         definition = FaciesProbabilityRecord._make(definition)
         return cls(
@@ -98,15 +98,14 @@ class APSFaciesProb:
     """
 
     def __init__(
-            self,
-            ET_Tree_zone: Optional[Element] = None,
-            mainFaciesTable: Optional[APSMainFaciesTable] = None,
-            modelFileName: Optional[str] = None,
-            debug_level: int = Debug.OFF,
-            useConstProb: bool = False,
-            zoneNumber: int = 0
+        self,
+        ET_Tree_zone: Optional[Element] = None,
+        mainFaciesTable: Optional[APSMainFaciesTable] = None,
+        modelFileName: Optional[str] = None,
+        debug_level: int = Debug.OFF,
+        useConstProb: bool = False,
+        zoneNumber: int = 0,
     ):
-
         self.__class_name: str = self.__class__.__name__
         self.__faciesProbForZoneModel: List[FaciesProbability] = []
         self.__useConstProb: bool = 0
@@ -157,7 +156,9 @@ class APSFaciesProb:
                             'Error in keyword: FaciesProbForModel for facies name: {2} in zone number: {3}\n'
                             '                  The specified probability is not a number even though '
                             'useConstProb keyword is set to True.'
-                            ''.format(modelFileName, self.__class_name, name, self.zone_number)
+                            ''.format(
+                                modelFileName, self.__class_name, name, self.zone_number
+                            )
                         )
                 else:
                     if isNumber(prob_cube_name):
@@ -167,7 +168,9 @@ class APSFaciesProb:
                             'Error in keyword: FaciesProbForModel for facies name: {2} in zone number: {3}\n'
                             '                  The specified probability is not an RMS parameter name even though '
                             'useConstProb keyword is set to False.'
-                            ''.format(modelFileName, self.__class_name, name, self.zone_number)
+                            ''.format(
+                                modelFileName, self.__class_name, name, self.zone_number
+                            )
                         )
 
                 item = FaciesProbability(name, prob_cube_name)
@@ -197,14 +200,14 @@ class APSFaciesProb:
 
     def initialize(
         self,
-        faciesList:             List[str],
-        faciesProbList:         Union[List[str], List[float]],
-        mainFaciesTable:        APSMainFaciesTable,
-        useConstProb:           int,
-        zoneNumber:             int,
-        debug_level:            Debug                           = Debug.OFF
+        faciesList: List[str],
+        faciesProbList: Union[List[str], List[float]],
+        mainFaciesTable: APSMainFaciesTable,
+        useConstProb: int,
+        zoneNumber: int,
+        debug_level: Debug = Debug.OFF,
     ) -> None:
-        ''' Initialize an APSFaciesProb object. '''
+        """Initialize an APSFaciesProb object."""
         if debug_level >= Debug.VERY_VERBOSE:
             print(f'--- Call the initialize function in {self.__class_name}')
 
@@ -215,8 +218,8 @@ class APSFaciesProb:
         self.updateFaciesWithProbForZone(faciesList, faciesProbList)
 
     def __roundOffProb(self, resolutionRoundOff: int = 100) -> None:
-        ''' Round off the probability value to nearest value which is a multiple of resolutionRoundOff
-            if it is specified as a constant value'''
+        """Round off the probability value to nearest value which is a multiple of resolutionRoundOff
+        if it is specified as a constant value"""
         if self.__useConstProb:
             for item in self.__faciesProbForZoneModel:
                 prob = float(item.probability)
@@ -224,7 +227,7 @@ class APSFaciesProb:
                 item.probability = probNew
 
     def __checkConstProbValuesAndNormalize(self, zoneNumber: ZoneNumber) -> None:
-        ''' Normalize probabilities for the case that constant probabilities is specified.'''
+        """Normalize probabilities for the case that constant probabilities is specified."""
         if not self.__useConstProb:
             return
         sumProb = 0.0
@@ -232,7 +235,9 @@ class APSFaciesProb:
             prob = item.probability
             sumProb += prob
         if abs(sumProb - 1.0) > 0.001:
-            warn(f'Specified constant probabilities sum up to: {sumProb} and not 1.0 in zone {zoneNumber}')
+            warn(
+                f'Specified constant probabilities sum up to: {sumProb} and not 1.0 in zone {zoneNumber}'
+            )
             warn('The specified probabilities will be normalized.')
             for item in self.__faciesProbForZoneModel:
                 prob = item.probability
@@ -240,7 +245,7 @@ class APSFaciesProb:
                 item.probability = str(normalized_prob)
 
     def getAllProbParamForZone(self) -> List[str]:
-        """ Return list of name of all specified RMS probability parameter names"""
+        """Return list of name of all specified RMS probability parameter names"""
         allProbParamList = []
         for item in self.__faciesProbForZoneModel:
             if not self.__useConstProb:
@@ -250,8 +255,8 @@ class APSFaciesProb:
         return allProbParamList
 
     def getConstProbValue(self, facies_name: FaciesName) -> float:
-        ''' Return probability (a number) for specified facies name. This is done when the specified probabilities
-        are constants (numbers) '''
+        """Return probability (a number) for specified facies name. This is done when the specified probabilities
+        are constants (numbers)"""
         if self.__useConstProb:
             for item in self.__faciesProbForZoneModel:
                 fN = item.name
@@ -276,12 +281,12 @@ class APSFaciesProb:
         return itemWithFacies
 
     def updateFaciesWithProbForZone(
-            self,
-            faciesList:         List[str],
-            faciesProbList:     Union[List[str], List[float]],
+        self,
+        faciesList: List[str],
+        faciesProbList: Union[List[str], List[float]],
     ) -> ErrorCode:
-        ''' Update existing facies with new facies probability/probability parameter name.
-            For new facies, add facies and corresponding probability/probability parameter name'''
+        """Update existing facies with new facies probability/probability parameter name.
+        For new facies, add facies and corresponding probability/probability parameter name"""
         err = 0
         # Check that facies is defined
         for fName in faciesList:
@@ -297,19 +302,19 @@ class APSFaciesProb:
             item = self.findFaciesItem(fName)
             if item is None:
                 # insert new facies
-                self.__faciesProbForZoneModel.append(FaciesProbability(fName, fProbName))
+                self.__faciesProbForZoneModel.append(
+                    FaciesProbability(fName, fProbName)
+                )
             else:
                 # Update facies probability cube name
                 item.probability = fProbName
         return err
 
     def updateSingleFaciesWithProbForZone(
-            self,
-            faciesName:         FaciesName,
-            faciesProbCubeName: str
+        self, faciesName: FaciesName, faciesProbCubeName: str
     ) -> ErrorCode:
-        ''' Update specified facies with new facies probability parameter name.
-            If the facies does not exist, add it '''
+        """Update specified facies with new facies probability parameter name.
+        If the facies does not exist, add it"""
         # Check that facies is defined
         if not self.__mainFaciesTable.has_facies_int_facies_table(faciesName):
             err = 1
@@ -318,14 +323,16 @@ class APSFaciesProb:
             itemWithFacies = self.findFaciesItem(faciesName)
             if itemWithFacies is None:
                 # insert new facies
-                self.__faciesProbForZoneModel.append(FaciesProbability(faciesName, faciesProbCubeName))
+                self.__faciesProbForZoneModel.append(
+                    FaciesProbability(faciesName, faciesProbCubeName)
+                )
             else:
                 # Update facies probability cube name
                 itemWithFacies.probability = faciesProbCubeName
         return err
 
     def removeFaciesWithProbForZone(self, fName: FaciesName) -> Index:
-        ''' Remove a specified facies and its probability'''
+        """Remove a specified facies and its probability"""
         indx = -999
         for i in range(len(self.__faciesProbForZoneModel)):
             item = self.__faciesProbForZoneModel[i]
@@ -338,7 +345,7 @@ class APSFaciesProb:
             self.__faciesProbForZoneModel.pop(indx)
 
     def hasFacies(self, facies_name: FaciesName) -> bool:
-        ''' Check that facies with specified name exist'''
+        """Check that facies with specified name exist"""
         for item in self.__faciesProbForZoneModel:
             _facies_name = item.name
             if facies_name == _facies_name:
@@ -346,7 +353,7 @@ class APSFaciesProb:
         return False
 
     def getProbParamName(self, fName: FaciesName) -> Optional[str]:
-        ''' Get probability parameter name for given facies name'''
+        """Get probability parameter name for given facies name"""
         for item in self.__faciesProbForZoneModel:
             if item.name == fName:
                 return item.probability

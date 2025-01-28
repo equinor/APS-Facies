@@ -6,16 +6,19 @@ from xml.dom import minidom
 from xml.etree import ElementTree as ET
 from xml.etree.ElementTree import Element
 
-from aps.utils.exceptions.xml import ReadingXmlError, LessThanExpected, MoreThanExpected, MissingRequiredValue
+from aps.utils.exceptions.xml import (
+    ReadingXmlError,
+    LessThanExpected,
+    MoreThanExpected,
+    MissingRequiredValue,
+)
 from aps.utils.constants.simple import OriginType
 from aps.utils.containers import FmuAttribute
 from aps.utils.types import GaussianFieldName
 
 
 def prettify(
-        elem: Union[Element, str],
-        indent: str = "  ",
-        new_line: str = "\n"
+    elem: Union[Element, str], indent: str = '  ', new_line: str = '\n'
 ) -> str:
     if isinstance(elem, str):
         rough_string = elem
@@ -26,10 +29,12 @@ def prettify(
 
 
 def minify(elem: Element) -> str:
-    return prettify(elem, indent="", new_line="")
+    return prettify(elem, indent='', new_line='')
 
 
-def get_fmu_value_from_xml(xml_tree: Element, keyword: str, _type: type = float, **kwargs) -> Tuple[float, bool]:
+def get_fmu_value_from_xml(
+    xml_tree: Element, keyword: str, _type: type = float, **kwargs
+) -> Tuple[float, bool]:
     types = {
         float: getFloatCommand,
         int: getIntCommand,
@@ -39,11 +44,17 @@ def get_fmu_value_from_xml(xml_tree: Element, keyword: str, _type: type = float,
     return value, fmu_updatable
 
 
-def get_origin_type_from_model_file(trend_rule_xml: Element, model_file_name: str) -> OriginType:
+def get_origin_type_from_model_file(
+    trend_rule_xml: Element, model_file_name: str
+) -> OriginType:
     origin_type = getTextCommand(
-        trend_rule_xml, 'origintype', modelFile=model_file_name, required=False, defaultText="Relative"
+        trend_rule_xml,
+        'origintype',
+        modelFile=model_file_name,
+        required=False,
+        defaultText='Relative',
     )
-    origin_type = origin_type.strip('\"\'')
+    origin_type = origin_type.strip('"\'')
     if origin_type.lower() == 'relative':
         return OriginType.RELATIVE
     elif origin_type.lower() == 'absolute':
@@ -53,11 +64,11 @@ def get_origin_type_from_model_file(trend_rule_xml: Element, model_file_name: st
 
 
 def getKeyword(
-        parent: Element,
-        keyword: str,
-        parentKeyword: str = '',
-        modelFile: Optional[str] = None,
-        required: bool = True
+    parent: Element,
+    keyword: str,
+    parentKeyword: str = '',
+    modelFile: Optional[str] = None,
+    required: bool = True,
 ) -> Optional[Element]:
     """
     Read keyword and return the reference to the xml object for the keyword.
@@ -71,12 +82,12 @@ def getKeyword(
 
 
 def getTextCommand(
-        parent: Element,
-        keyword: str,
-        parentKeyword: str = '',
-        defaultText: Optional[str] = None,
-        modelFile: Optional[str] = None,
-        required: bool = True
+    parent: Element,
+    keyword: str,
+    parentKeyword: str = '',
+    defaultText: Optional[str] = None,
+    modelFile: Optional[str] = None,
+    required: bool = True,
 ) -> Optional[str]:
     """
     Return the text string specified in the keyword. If the keyword is required,
@@ -101,15 +112,15 @@ def getTextCommand(
 
 
 def getFloatCommand(
-        parent: Element,
-        keyword: str,
-        parentKeyword: str = '',
-        minValue: Optional[float] = None,
-        maxValue: Optional[float] = None,
-        defaultValue: Optional[Union[int, float]] = None,
-        modelFile: Optional[str] = None,
-        required: bool = True,
-        moduloAngle: Optional[float] = None,
+    parent: Element,
+    keyword: str,
+    parentKeyword: str = '',
+    minValue: Optional[float] = None,
+    maxValue: Optional[float] = None,
+    defaultValue: Optional[Union[int, float]] = None,
+    modelFile: Optional[str] = None,
+    required: bool = True,
+    moduloAngle: Optional[float] = None,
 ) -> Optional[float]:
     """
     Return the float value specified in the keyword. If the keyword is required,
@@ -148,15 +159,15 @@ def getFloatCommand(
 
 
 def getIntCommand(
-        parent: Element,
-        keyword: str,
-        parentKeyword: str = '',
-        minValue: Optional[int] = None,
-        maxValue: Optional[int] = None,
-        defaultValue: Optional[int] = None,
-        modelFile: Optional[str] = None,
-        required: bool = True,
-        moduloAngle: Optional[float] = None,
+    parent: Element,
+    keyword: str,
+    parentKeyword: str = '',
+    minValue: Optional[int] = None,
+    maxValue: Optional[int] = None,
+    defaultValue: Optional[int] = None,
+    modelFile: Optional[str] = None,
+    required: bool = True,
+    moduloAngle: Optional[float] = None,
 ) -> int:
     """
     Return the int value specified in the keyword. If the keyword is required,
@@ -190,12 +201,12 @@ def getIntCommand(
 
 
 def getBoolCommand(
-        parent: Element,
-        keyword: str,
-        parent_keyword: str = '',
-        default: bool = False,
-        model_file_name: Optional[str] = None,
-        required: bool = True
+    parent: Element,
+    keyword: str,
+    parent_keyword: str = '',
+    default: bool = False,
+    model_file_name: Optional[str] = None,
+    required: bool = True,
 ) -> bool:
     obj = parent.find(keyword)
     value = default
@@ -212,10 +223,7 @@ def getBoolCommand(
     return value
 
 
-def isFMUUpdatable(
-        parent: Element,
-        keyword: str
-) -> bool:
+def isFMUUpdatable(parent: Element, keyword: str) -> bool:
     obj = parent.find(keyword)
     if obj is not None:
         kwAttribute = obj.get('kw')
@@ -225,14 +233,14 @@ def isFMUUpdatable(
 
 
 def fmu_xml_element(
-        tag: str,
-        value: Any,
-        updatable: bool,
-        zone_number: int,
-        region_number: int,
-        gf_name: GaussianFieldName,
-        fmu_creator: Callable[[str, str, int, int], str],
-        fmu_attributes: List[FmuAttribute],
+    tag: str,
+    value: Any,
+    updatable: bool,
+    zone_number: int,
+    region_number: int,
+    gf_name: GaussianFieldName,
+    fmu_creator: Callable[[str, str, int, int], str],
+    fmu_attributes: List[FmuAttribute],
 ) -> Element:
     obj = Element(tag)
     obj.text = f' {value} '
@@ -269,40 +277,41 @@ def _coerce_none_to_integers(func):
 
 @_coerce_none_to_integers
 def createFMUvariableNameForTrend(
-        keyword: str,
-        grf_name: str,
-        zone_number: int,
-        region_number: Optional[int] = None,
+    keyword: str,
+    grf_name: str,
+    zone_number: int,
+    region_number: Optional[int] = None,
 ) -> str:
     return f'APS_{zone_number}_{region_number}_GF_{grf_name}_TREND_{keyword.upper()}'
 
 
 @_coerce_none_to_integers
 def createFMUvariableNameForResidual(
-        keyword: str,
-        grf_name: str,
-        zone_number: int,
-        region_number: Optional[int] = None,
+    keyword: str,
+    grf_name: str,
+    zone_number: int,
+    region_number: Optional[int] = None,
 ) -> str:
     return f'APS_{zone_number}_{region_number}_GF_{grf_name}_RESIDUAL_{keyword.upper()}'
 
 
 @_coerce_none_to_integers
 def createFMUvariableNameForBayfillTruncation(
-        keyword: str,
-        zone_number: int,
-        region_number: Optional[int] = None,
+    keyword: str,
+    zone_number: int,
+    region_number: Optional[int] = None,
 ) -> str:
     return f'APS_{zone_number}_{region_number}_TRUNC_BAYFILL_{keyword.upper()}'
 
 
 @_coerce_none_to_integers
 def createFMUvariableNameForNonCubicTruncation(
-        index: int,
-        zone_number: int,
-        region_number: Optional[int] = None,
+    index: int,
+    zone_number: int,
+    region_number: Optional[int] = None,
 ) -> str:
     return f'APS_{zone_number}_{region_number}_TRUNC_NONCUBIC_POLYNUMBER_{index}_ANGLE'
+
 
 def create_node(tag: str, text: Optional[Union[str, float, int]] = None) -> ET.Element:
     element = ET.Element(tag)

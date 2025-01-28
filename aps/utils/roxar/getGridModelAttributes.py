@@ -14,7 +14,9 @@ from aps.utils.methods import get_run_parameters
 from aps.utils.xmlUtils import prettify
 
 
-def writeXMLFileGridDimensions(project, gridModelName, outputFile, debug_level=Debug.OFF):
+def writeXMLFileGridDimensions(
+    project, gridModelName, outputFile, debug_level=Debug.OFF
+):
     # Find grid model
     grid_models = project.grid_models
     found = False
@@ -25,7 +27,9 @@ def writeXMLFileGridDimensions(project, gridModelName, outputFile, debug_level=D
             found = True
             break
     if not found:
-        raise ValueError(f'Could not find grid model with name: {gridModelName} in RMS project')
+        raise ValueError(
+            f'Could not find grid model with name: {gridModelName} in RMS project'
+        )
     # Get the grid
     grid = gridModel.get_grid()
     zone_names = get_zone_names(gridModel)
@@ -49,7 +53,7 @@ def writeXMLFileGridDimensions(project, gridModelName, outputFile, debug_level=D
             'number': str(i + 1),
             'nLayers': str(grid_attributes.num_layers_per_zone[i]),
             'start': str(grid_attributes.start_layers_per_zone[i]),
-            'end': str(grid_attributes.end_layers_per_zone[i] - 1)
+            'end': str(grid_attributes.end_layers_per_zone[i] - 1),
         }
         name = grid_attributes.zone_names[i]
         zNameObj = Element(tag, attribute)
@@ -93,10 +97,13 @@ def run(roxar=None, project=None, **kwargs):
     debug_level = aps_model.debug_level
     grid_model_name = aps_model.grid_model_name
 
-    writeXMLFileGridDimensions(project, grid_model_name, output_rms_data_file, debug_level)
+    writeXMLFileGridDimensions(
+        project, grid_model_name, output_rms_data_file, debug_level
+    )
     print(f'\nFinished running: {__file__}')
 
 
 if __name__ == '__main__':
     import roxar
+
     run(roxar, project)  # noqa

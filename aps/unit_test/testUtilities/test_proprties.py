@@ -13,7 +13,9 @@ test_data = [
 ]
 
 
-@pytest.mark.parametrize('value,_min,_max,strictly_less,strictly_greater,expected', test_data)
+@pytest.mark.parametrize(
+    'value,_min,_max,strictly_less,strictly_greater,expected', test_data
+)
 def test_is_between(value, _min, _max, strictly_less, strictly_greater, expected):
     actual = is_between(value, _min, _max, strictly_less, strictly_greater)
     assert expected == actual

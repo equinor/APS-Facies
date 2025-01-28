@@ -57,15 +57,33 @@ from aps.utils.roxar.migrations import Migration
 from aps.utils.roxar.progress_bar import APSProgressBar
 from aps.utils.truncation_rules import make_truncation_rule
 from aps.utils.types import (
-    ProjectName, ProjectPath, FmuParameterListPath, WorkflowName, GridName, RegionParameter,
-    TrendParameter, TrendMapName, TrendMapZone, ProbabilityCubeParameter, RealizationParameter,
-    GridSize, ZoneNumber, SimulationBoxOrigin,
-    RegionNumber, Average, XML, VariogramName, TrendName, DirectionName, OriginTypeName,
+    ProjectName,
+    ProjectPath,
+    FmuParameterListPath,
+    WorkflowName,
+    GridName,
+    RegionParameter,
+    TrendParameter,
+    TrendMapName,
+    TrendMapZone,
+    ProbabilityCubeParameter,
+    RealizationParameter,
+    GridSize,
+    ZoneNumber,
+    SimulationBoxOrigin,
+    RegionNumber,
+    Average,
+    XML,
+    VariogramName,
+    TrendName,
+    DirectionName,
+    OriginTypeName,
     GridModelName,
 )
 from aps.utils.xmlUtils import prettify
 from aps.utils.constants.simple import Debug
 from aps.utils.aps_config import APSConfig
+
 
 def empty_if_none(func: Callable) -> Callable:
     def wrapper(*args, **kwargs):
@@ -91,6 +109,7 @@ class RMSData:
     """
     Purpose: Get RMS project data to be used in APS GUI using Roxar API.
     """
+
     def __init__(self, roxar, project: Project):
         self.roxar = roxar
         self.project = project
@@ -98,40 +117,43 @@ class RMSData:
         # Will be initialized to be used when running the APS job.
         APSProgressBar()
 
-
     def is_discrete(self, _property: Property, can_be_empty: bool = False) -> bool:
-        return self.is_property_type(_property, self.roxar.GridPropertyType.discrete, can_be_empty)
+        return self.is_property_type(
+            _property, self.roxar.GridPropertyType.discrete, can_be_empty
+        )
 
     def is_continuous(self, _property: Property, can_be_empty: bool = False) -> bool:
-        return self.is_property_type(_property, self.roxar.GridPropertyType.continuous, can_be_empty)
+        return self.is_property_type(
+            _property, self.roxar.GridPropertyType.continuous, can_be_empty
+        )
 
     def is_property_type(
-            self,
-            _property: Property,
-            type: GridPropertyType,
-            can_be_empty: bool = False,
+        self,
+        _property: Property,
+        type: GridPropertyType,
+        can_be_empty: bool = False,
     ) -> bool:
-        return (
-                _property.type == type
-                and (
-                        can_be_empty
-                        or not _property.is_empty(self.project.current_realisation)
-                )
+        return _property.type == type and (
+            can_be_empty or not _property.is_empty(self.project.current_realisation)
         )
 
     def get_aps_fmu_config(self, use_config_file: bool = False) -> List[str]:
-        APSConfig.init(self.project,
+        APSConfig.init(
+            self.project,
             use_available_config_file=use_config_file,
-            must_read_existing_config_file=True)
+            must_read_existing_config_file=True,
+        )
         dir1 = APSConfig.aps_model_export_dir()
         dir2 = APSConfig.ert_distribution_dir()
         dir3 = APSConfig.fmu_config_input_dir()
         return [dir1, dir2, dir3]
 
     def set_aps_fmu_config(self, use_config_file: bool = False):
-        APSConfig.init(self.project,
+        APSConfig.init(
+            self.project,
             use_available_config_file=use_config_file,
-            must_read_existing_config_file=True)
+            must_read_existing_config_file=True,
+        )
 
     def get_project_name(self) -> ProjectName:
         return Path(self.project.filename).name
@@ -174,21 +196,29 @@ class RMSData:
             zone_names = []
             if exists:
                 zone_names = get_zone_names(grid_model)
-            models.append({
-                'name': name,
-                'exists': exists,
-                'zones': len(zone_names) if exists else 0,
-                'hasDualIndexSystem': grid.has_dual_index_system if exists else False,
-            })
+            models.append(
+                {
+                    'name': name,
+                    'exists': exists,
+                    'zones': len(zone_names) if exists else 0,
+                    'hasDualIndexSystem': grid.has_dual_index_system
+                    if exists
+                    else False,
+                }
+            )
         return models
 
-    def get_realization_parameters(self, grid_model_name: GridName) -> List[RealizationParameter]:
+    def get_realization_parameters(
+        self, grid_model_name: GridName
+    ) -> List[RealizationParameter]:
         return self._get_parameter_names(grid_model_name, self.is_discrete)
 
     def get_region_parameters(self, grid_model_name: GridName) -> List[RegionParameter]:
         return self._get_parameter_names(grid_model_name, self.is_region_parameter)
 
-    def get_rms_trend_parameters(self, grid_model_name: GridName) -> List[TrendParameter]:
+    def get_rms_trend_parameters(
+        self, grid_model_name: GridName
+    ) -> List[TrendParameter]:
         return self._get_parameter_names(grid_model_name, self.is_trend_parameter)
 
     def get_rms_trend_map_zones(self) -> Dict[str, List[str]]:
@@ -212,10 +242,14 @@ class RMSData:
             zones[zone_name] = representations
         return zones
 
-    def get_probability_cube_parameters(self, grid_model_name: GridName) -> List[ProbabilityCubeParameter]:
+    def get_probability_cube_parameters(
+        self, grid_model_name: GridName
+    ) -> List[ProbabilityCubeParameter]:
         return self._get_parameter_names(grid_model_name, self.is_probability_cube)
 
-    def get_simulation_box_size(self, grid_model_name: GridName, rough: bool = False) -> dict:
+    def get_simulation_box_size(
+        self, grid_model_name: GridName, rough: bool = False
+    ) -> dict:
         grid = self.get_grid(grid_model_name)
         sim_box_attributes = GridSimBoxSize(grid)
         kwargs = {}
@@ -245,9 +279,13 @@ class RMSData:
             # RMS 12 compatibility
             return 0, 0, 0
 
-    def _get_parameter_names(self, grid_model_name: GridName, check: Callable) -> List[str]:
+    def _get_parameter_names(
+        self, grid_model_name: GridName, check: Callable
+    ) -> List[str]:
         grid_model = self.get_grid_model(grid_model_name)
-        return [parameter.name for parameter in grid_model.properties if check(parameter)]
+        return [
+            parameter.name for parameter in grid_model.properties if check(parameter)
+        ]
 
     def get_zones(self, grid_model_name: GridName) -> List[dict]:
         grid = self.get_grid(grid_model_name)
@@ -255,24 +293,28 @@ class RMSData:
         zone_names = get_zone_names(grid_model)
         if len(zone_names) == 0:
             name = GridModelConstants.ZONE_NAME
-            warn(f"No zone parameter with name '{name}' found. Create zone parameter from grid.")
+            warn(
+                f"No zone parameter with name '{name}' found. Create zone parameter from grid."
+            )
             create_zone_parameter(grid_model)
             zone_names = get_zone_names(grid_model)
         zones = []
         for key, zonations in grid.simbox_indexer.zonation.items():
             zonation, *_reverse = zonations
-            zones.append({
-                'code': key + 1,
-                'name': zone_names[key],
-                'thickness': zonation.stop - zonation.start,
-            })
+            zones.append(
+                {
+                    'code': key + 1,
+                    'name': zone_names[key],
+                    'thickness': zonation.stop - zonation.start,
+                }
+            )
         return zones
 
     def get_regions(
-            self,
-            grid_model_name: GridName,
-            zone_name: str,
-            region_parameter: RegionParameter,
+        self,
+        grid_model_name: GridName,
+        zone_name: str,
+        region_parameter: RegionParameter,
     ) -> List[dict]:
         # TODO: Ensure that available regions depends on zone
         grid_model = self.get_grid_model(grid_model_name)
@@ -294,37 +336,37 @@ class RMSData:
 
     def is_region_parameter(self, param: Property) -> bool:
         # TODO: Implement properly
-        return (
-                self.is_discrete(param)
-                and len(param.code_names) > 0
-        )
+        return self.is_discrete(param) and len(param.code_names) > 0
 
     def is_trend_parameter(self, param: Property) -> bool:
         return self.is_continuous(param)
 
     def is_probability_cube(self, param: Property) -> bool:
-        return (
-            self.is_continuous(param)
-        )
+        return self.is_continuous(param)
 
     def _get_blocked_well_set(self, grid_model_name: GridName) -> BlockedWellsSet:
         return self.get_grid_model(grid_model_name).blocked_wells_set
 
     def get_blocked_well_set_names(self, grid_model_name: GridName) -> List[str]:
-        return [blocked_well.name for blocked_well in self._get_blocked_well_set(grid_model_name)]
+        return [
+            blocked_well.name
+            for blocked_well in self._get_blocked_well_set(grid_model_name)
+        ]
 
-    def get_blocked_well(self, grid_model_name: GridName, blocked_well_name: str) -> BlockedWells:
+    def get_blocked_well(
+        self, grid_model_name: GridName, blocked_well_name: str
+    ) -> BlockedWells:
         block_wells = self._get_blocked_well_set(grid_model_name)
         return block_wells[blocked_well_name]
 
     def calculate_average_of_probability_cube(
-            self,
-            grid_model_name: GridName,
-            probability_cube_parameters: List[ProbabilityCubeParameter],
-            zone_number: ZoneNumber,
-            region_parameter: Optional[RegionParameter] = None,
-            region_number: Optional[RegionNumber] = None,
-            debug_level=Debug.VERBOSE,
+        self,
+        grid_model_name: GridName,
+        probability_cube_parameters: List[ProbabilityCubeParameter],
+        zone_number: ZoneNumber,
+        region_parameter: Optional[RegionParameter] = None,
+        region_number: Optional[RegionNumber] = None,
+        debug_level=Debug.VERBOSE,
     ) -> Dict[ProbabilityCubeParameter, Average]:
         # Ensure not duplicated parameter names for probability cubes
         param_names = list(set(probability_cube_parameters))
@@ -334,54 +376,74 @@ class RMSData:
         realisation_number = self.project.current_realisation
         grid_model = self.project.grid_models[grid_model_name]
         # get zone_values and region_values
-        zone_values = create_zone_parameter(grid_model, realization_number=realisation_number).get_values(
-            realisation_number)
+        zone_values = create_zone_parameter(
+            grid_model, realization_number=realisation_number
+        ).get_values(realisation_number)
         if region_parameter:
-            region_values, _ = getDiscrete3DParameterValues(grid_model, region_parameter, realisation_number)
+            region_values, _ = getDiscrete3DParameterValues(
+                grid_model, region_parameter, realisation_number
+            )
         else:
             region_values = None
 
         averages = average_of_property_inside_zone_region(
-            grid_model, param_names,
-            zone_values, zone_number,
-            region_values, region_number,
-            realisation_number
+            grid_model,
+            param_names,
+            zone_values,
+            zone_number,
+            region_values,
+            region_number,
+            realisation_number,
         )
         if debug_level >= Debug.VERBOSE:
             if region_values is not None:
-                text = f"zone number: {zone_number}  region number:  {region_number} "
+                text = f'zone number: {zone_number}  region number:  {region_number} '
             else:
-                text = f"zone: {zone_number}"
-            print(f"-- Calculate average of probability cubes for {text}")
-            for name,prob in averages.items():
-                print(f" {name}  Average prob: {prob}")
+                text = f'zone: {zone_number}'
+            print(f'-- Calculate average of probability cubes for {text}')
+            for name, prob in averages.items():
+                print(f' {name}  Average prob: {prob}')
 
         # numpy float to regular float
-        return {parameter: float(probability) for parameter, probability in averages.items()}
+        return {
+            parameter: float(probability) for parameter, probability in averages.items()
+        }
 
-    def create_ertbox_grid(self,
+    def create_ertbox_grid(
+        self,
         geo_grid_model_name: GridName,
         ertbox_grid_model_name: GridName,
         nLayers: int,
-        debug_level: Debug = Debug.OFF) -> None:
-        create_ertbox_grid_model(self.project,
-            geo_grid_model_name, ertbox_grid_model_name,
-            nLayers, debug_level=debug_level)
+        debug_level: Debug = Debug.OFF,
+    ) -> None:
+        create_ertbox_grid_model(
+            self.project,
+            geo_grid_model_name,
+            ertbox_grid_model_name,
+            nLayers,
+            debug_level=debug_level,
+        )
 
     @empty_if_none
-    def get_blocked_well_logs(self, grid_model_name: GridName, blocked_well_name: str) -> List[str]:
+    def get_blocked_well_logs(
+        self, grid_model_name: GridName, blocked_well_name: str
+    ) -> List[str]:
         blocked_wells = self.get_blocked_well(grid_model_name, blocked_well_name)
-        return [property_log.name for property_log in blocked_wells.properties if self.is_discrete(property_log)]
+        return [
+            property_log.name
+            for property_log in blocked_wells.properties
+            if self.is_discrete(property_log)
+        ]
 
     @empty_if_none
     def get_facies_table_from_blocked_well_log(
-            self,
-            grid_model_name: GridModelName,
-            blocked_well_name: str,
-            facies_log_name: str,
-            region_parameter_name: str,
+        self,
+        grid_model_name: GridModelName,
+        blocked_well_name: str,
+        facies_log_name: str,
+        region_parameter_name: str,
     ) -> List[Dict[str, int]]:
-        """ Use Roxar API to get table of discrete codes and associated names for a discrete log"""
+        """Use Roxar API to get table of discrete codes and associated names for a discrete log"""
 
         # Get blocked wells
         grid_model = self.get_grid_model(grid_model_name)
@@ -393,20 +455,32 @@ class RMSData:
 
         # Determine which facies appear in which zone, if any
         observed_facies = facies_property.get_values(self.project.current_realisation)
-        observed_indices = blocked_wells.get_cell_numbers(self.project.current_realisation)
+        observed_indices = blocked_wells.get_cell_numbers(
+            self.project.current_realisation
+        )
 
         # Get zone parameter. If non-existing create it.
         # If existing but empty, fill it with values
-        zone_param = create_zone_parameter(grid_model,
-            realization_number=self.project.current_realisation)
+        zone_param = create_zone_parameter(
+            grid_model, realization_number=self.project.current_realisation
+        )
         zone_values = zone_param.get_values(self.project.current_realisation)
 
         regions = np.zeros(zone_values.shape, zone_values.dtype)
-        if region_parameter_name != '__REGIONS_NOT_IN_USE__':  # Hack to avoid incompatibility with decorator
-            regions = grid_model.properties[region_parameter_name].get_values(self.project.current_realisation)
+        if (
+            region_parameter_name != '__REGIONS_NOT_IN_USE__'
+        ):  # Hack to avoid incompatibility with decorator
+            regions = grid_model.properties[region_parameter_name].get_values(
+                self.project.current_realisation
+            )
 
         def find_defined(property, facies_code):
-            return [int(_code) for _code in set(property[observed_indices[observed_facies == facies_code]])]
+            return [
+                int(_code)
+                for _code in set(
+                    property[observed_indices[observed_facies == facies_code]]
+                )
+            ]
 
         facies = []
         for code, name in facies_property.code_names.items():
@@ -414,28 +488,34 @@ class RMSData:
                 'zones': find_defined(zone_values, code),
                 'regions': find_defined(regions, code),
             }
-            facies.append({
-                'code': code,
-                'name': name,
-                'observed': where,
-            })
+            facies.append(
+                {
+                    'code': code,
+                    'name': name,
+                    'observed': where,
+                }
+            )
         return facies
 
     def load_dot_master(self) -> dict:
         try:
             project_root = Path(__file__).parent.parent.parent.parent
             filename = self.project.filename
-            with open(project_root / 'local.settings.json', encoding="utf-8") as f:
+            with open(project_root / 'local.settings.json', encoding='utf-8') as f:
                 debug_settings = json.load(f)
                 if filename.startswith('/'):
                     filename = filename[1:]
-                project_location = Path(debug_settings['projectRootLocation']) / filename
+                project_location = (
+                    Path(debug_settings['projectRootLocation']) / filename
+                )
         except Exception:
             project_location = Path(self.project.filename)
         try:
             return parse_dot_master(project_location / 'pythoncomp/apsgui/.master')
         except FileNotFoundError as e:
-            warn(f"Could not find a .master file corresponding to {filename}. Looked at {e.filename}")
+            warn(
+                f'Could not find a .master file corresponding to {filename}. Looked at {e.filename}'
+            )
             return {}
 
     def migrate_state(self, state: str, from_version: str, to_version: str):
@@ -458,9 +538,9 @@ class RMSData:
 
     @staticmethod
     def save_file(
-            path: str,
-            content: XML,
-            prettifier: Optional[Callable[[str], str]] = None,
+        path: str,
+        content: XML,
+        prettifier: Optional[Callable[[str], str]] = None,
     ) -> bool:
         if prettifier is None:
             prettifier = lambda _: _
@@ -473,10 +553,10 @@ class RMSData:
 
     @staticmethod
     def dump_aps_model(
-            encoded_xml: str,
-            model_path: str,
-            fmu_configuration_path: Optional[str] = None,
-            prop_dist_path: Optional[str] = None,
+        encoded_xml: str,
+        model_path: str,
+        fmu_configuration_path: Optional[str] = None,
+        prop_dist_path: Optional[str] = None,
     ) -> bool:
         try:
             model = decode_model(encoded_xml)
@@ -509,7 +589,9 @@ class RMSData:
         truncation_rule = make_truncation_rule(specification)
         facies, _ = create_facies_map(simulations, truncation_rule, use_code=True)
 
-        data = np.reshape(facies, simulations[0].settings.dimensions, grid_index_order).transpose()
+        data = np.reshape(
+            facies, simulations[0].settings.dimensions, grid_index_order
+        ).transpose()
         data = flip_if_necessary(data, simulations[0].cross_section)
         return {
             'faciesMap': data.tolist(),
@@ -517,8 +599,9 @@ class RMSData:
                 {
                     'name': simulation.name,
                     'data': simulation.field_as_matrix(grid_index_order).tolist(),
-                } for simulation in simulations
-            ]
+                }
+                for simulation in simulations
+            ],
         }
 
     @staticmethod
@@ -535,10 +618,8 @@ class RMSData:
         names = truncation_rule.getFaciesInTruncRule()
 
         return [
-            {
-                'name': names[facies_index_per_polygon[i]],
-                'polygon': facies_polygons[i]
-            } for i in range(len(facies_polygons))
+            {'name': names[facies_index_per_polygon[i]], 'polygon': facies_polygons[i]}
+            for i in range(len(facies_polygons))
         ]
 
     @staticmethod
@@ -556,21 +637,22 @@ class RMSData:
             elif item in ['tolerance']:
                 res['tolerance'] = ProbabilityTolerances[_property]
             else:
-                raise ValueError('The property type \'{}\' is not known'.format(item))
+                raise ValueError("The property type '{}' is not known".format(item))
         return res
 
     @staticmethod
-    def get_options(_type: str) -> Union[
-        List[VariogramName],
-        List[TrendName],
-        List[DirectionName],
-        List[OriginTypeName]
+    def get_options(
+        _type: str,
+    ) -> Union[
+        List[VariogramName], List[TrendName], List[DirectionName], List[OriginTypeName]
     ]:
         return [item.name for item in _option_mapping()[_type]]
 
     @staticmethod
     def get_code_names(_property: Property) -> List[dict]:
-        return [{'code': code, 'name': name} for code, name in _property.code_names.items()]
+        return [
+            {'code': code, 'name': name} for code, name in _property.code_names.items()
+        ]
 
     @staticmethod
     def is_aps_model_valid(encoded_xml: str) -> Dict[str, Union[bool, str]]:
@@ -590,7 +672,12 @@ class RMSData:
     def _simulate_gaussian_field(field: dict) -> GaussianFieldSimulation:
         if 'field' in field:
             field = field['field']
-        name, variogram, trend, settings = field['name'], field['variogram'], field['trend'], field['settings']
+        name, variogram, trend, settings = (
+            field['name'],
+            field['variogram'],
+            field['trend'],
+            field['settings'],
+        )
 
         if trend is None:
             trend = {}
@@ -610,12 +697,8 @@ class RMSData:
             variogram=Variogram(
                 name=name,
                 type=variogram['type'],
-                ranges=Ranges(
-                    **variogram['range']
-                ),
-                angles=Angles(
-                    **variogram['angle']
-                ),
+                ranges=Ranges(**variogram['range']),
+                angles=Angles(**variogram['angle']),
                 power=variogram['power'],
             ),
             trend=Trend.from_dict(name, **trend),
@@ -625,6 +708,7 @@ class RMSData:
     @staticmethod
     def open_wiki_help() -> None:
         import webbrowser
+
         webbrowser.open('https://equinor.github.io/APS-Facies')
 
     @staticmethod

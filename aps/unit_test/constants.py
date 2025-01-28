@@ -20,13 +20,23 @@ FACIES_OUTPUT_FILE_VECTORIZED = 'facies2D_vectorized.dat'
 USE_CONST_TRUNC_PARAM = 1
 KEYRESOLUTION = 100
 ANGLE_GAUSS_FIELD_FILES = [
-    'testData_Angle/a1.dat', 'testData_Angle/a2.dat', 'testData_Angle/a3.dat',
-    'testData_Angle/a4.dat', 'testData_Angle/a5.dat', 'testData_Angle/a6.dat'
+    'testData_Angle/a1.dat',
+    'testData_Angle/a2.dat',
+    'testData_Angle/a3.dat',
+    'testData_Angle/a4.dat',
+    'testData_Angle/a5.dat',
+    'testData_Angle/a6.dat',
 ]
 CUBIC_GAUSS_FIELD_FILES = [
-    'testData_Cubic/a1.dat', 'testData_Cubic/a2.dat', 'testData_Cubic/a3.dat',
-    'testData_Cubic/a4.dat', 'testData_Cubic/a5.dat', 'testData_Cubic/a6.dat'
+    'testData_Cubic/a1.dat',
+    'testData_Cubic/a2.dat',
+    'testData_Cubic/a3.dat',
+    'testData_Cubic/a4.dat',
+    'testData_Cubic/a5.dat',
+    'testData_Cubic/a6.dat',
 ]
 BAYFILL_GAUSS_FIELD_FILES = [
-    'testData_Bayfill/a1.dat', 'testData_Bayfill/a2.dat', 'testData_Bayfill/a3.dat'
+    'testData_Bayfill/a1.dat',
+    'testData_Bayfill/a2.dat',
+    'testData_Bayfill/a3.dat',
 ]

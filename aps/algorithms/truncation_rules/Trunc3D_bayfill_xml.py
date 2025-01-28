@@ -12,7 +12,11 @@ from aps.algorithms.APSMainFaciesTable import APSMainFaciesTable
 from aps.algorithms.truncation_rules.Trunc2D_Base_xml import Trunc2D_Base
 from aps.utils.constants.simple import Debug
 from aps.utils.containers import FmuAttribute
-from aps.utils.xmlUtils import getKeyword, isFMUUpdatable, createFMUvariableNameForBayfillTruncation
+from aps.utils.xmlUtils import (
+    getKeyword,
+    isFMUUpdatable,
+    createFMUvariableNameForBayfillTruncation,
+)
 
 """
 ------------ Truncation map for Bayfill ----------------------------------
@@ -87,13 +91,13 @@ class Trunc3D_bayfill(Trunc2D_Base):
     """
 
     def __init__(
-            self,
-            trRuleXML: Optional[Element] = None,
-            mainFaciesTable: Optional[APSMainFaciesTable] = None,
-            faciesInZone: Optional[List[str]] = None,
-            gaussFieldsInZone: Optional[List[str]] = None,
-            debug_level: Debug = Debug.OFF,
-            modelFileName: Optional[str] = None
+        self,
+        trRuleXML: Optional[Element] = None,
+        mainFaciesTable: Optional[APSMainFaciesTable] = None,
+        faciesInZone: Optional[List[str]] = None,
+        gaussFieldsInZone: Optional[List[str]] = None,
+        debug_level: Debug = Debug.OFF,
+        modelFileName: Optional[str] = None,
     ) -> None:
         """
         Create either an empty object which have to be initialized
@@ -120,7 +124,12 @@ class Trunc3D_bayfill(Trunc2D_Base):
         # Initialize data structure to empty if trRule is None and call up the base class function setEmpty as well.
         # If the trRule is not none, the base class data structure is initialized.
         super().__init__(
-            trRuleXML, mainFaciesTable, faciesInZone, gaussFieldsInZone, debug_level, modelFileName,
+            trRuleXML,
+            mainFaciesTable,
+            faciesInZone,
+            gaussFieldsInZone,
+            debug_level,
+            modelFileName,
             nGaussFieldsInBackGroundModel=3,
         )
         # Specific variables for class Trunc3D_bayfill
@@ -182,7 +191,9 @@ class Trunc3D_bayfill(Trunc2D_Base):
 
         # Get info from the XML model file tree for this truncation rule
         # Keyword BackGroundModel
-        bgmObj = getKeyword(trRuleXML, 'BackGroundModel', 'TruncationRule', modelFileName, required=True)
+        bgmObj = getKeyword(
+            trRuleXML, 'BackGroundModel', 'TruncationRule', modelFileName, required=True
+        )
 
         kw = 'UseConstTruncParam'
         useParamObj = bgmObj.find(kw)
@@ -206,8 +217,7 @@ class Trunc3D_bayfill(Trunc2D_Base):
         sbObj = bgmObj.find(kw)
         if sbObj is None:
             raise ValueError(
-                f'Error in {self._className}\n'
-                f'Error: Subbay facies is not specified.'
+                f'Error in {self._className}\nError: Subbay facies is not specified.'
             )
         else:
             text = sbObj.text
@@ -239,8 +249,7 @@ class Trunc3D_bayfill(Trunc2D_Base):
         lgObj = bgmObj.find(kw)
         if lgObj is None:
             raise ValueError(
-                f'Error in {self._className}\n'
-                f'Error: Lagoon facies is not specified.'
+                f'Error in {self._className}\nError: Lagoon facies is not specified.'
             )
         else:
             text = lgObj.text
@@ -334,7 +343,7 @@ class Trunc3D_bayfill(Trunc2D_Base):
         sbhd: float,
         sbhd_fmu_updatable: bool,
         useConstTruncParam: int,
-        debug_level: Debug = Debug.OFF
+        debug_level: Debug = Debug.OFF,
     ) -> None:
         """
         Initialize the truncation object from input variables.
@@ -348,7 +357,9 @@ class Trunc3D_bayfill(Trunc2D_Base):
         self._setModelledFacies(mainFaciesTable, faciesInZone)
 
         # Call base class method to associate gauss fields with alpha coordinates
-        self._setGaussFieldForBackgroundFaciesTruncationMap(gaussFieldsInZone, alphaFieldNameForBackGroundFacies, 3)
+        self._setGaussFieldForBackgroundFaciesTruncationMap(
+            gaussFieldsInZone, alphaFieldNameForBackGroundFacies, 3
+        )
         # Set facies in truncation rule
         self._faciesInTruncRule = copy.copy(faciesInTruncRule)
 
@@ -385,7 +396,11 @@ class Trunc3D_bayfill(Trunc2D_Base):
 
     def writeContentsInDataStructure(self):
         print('')
-        print('************  Contents of the data structure for class: ' + self._className + ' ***************')
+        print(
+            '************  Contents of the data structure for class: '
+            + self._className
+            + ' ***************'
+        )
         print('Eps: ' + str(self.__eps))
         print('Main facies table:')
         print(repr(self._mainFaciesTable))
@@ -443,16 +458,12 @@ class Trunc3D_bayfill(Trunc2D_Base):
         return self.__useConstTruncModelParam
 
     def truncMapPolygons(
-        self
+        self,
     ) -> Union[
-        List[Union[
-            List[Union[
-                List[float],
-                List[Union[float, int]]]
-            ],
-            List[List[float]]]
+        List[
+            Union[List[Union[List[float], List[Union[float, int]]]], List[List[float]]]
         ],
-        List[List[List[float]]]
+        List[List[List[float]]],
     ]:
         assert self._setTruncRuleIsCalled
         isDetermined = any(
@@ -473,9 +484,12 @@ class Trunc3D_bayfill(Trunc2D_Base):
     def getTruncationParam(self, gridModel, realNumber):
         # Read truncation parameters
         from aps.utils.roxar.grid_model import getContinuous3DParameterValues
+
         paramName = self.__param_sf_name
         if self._debug_level >= Debug.VERBOSE:
-            print(f'--- Use spatially varying truncation rule parameter SF for truncation rule: {self._className}')
+            print(
+                f'--- Use spatially varying truncation rule parameter SF for truncation rule: {self._className}'
+            )
             print(f'--- Read RMS parameter: {paramName}')
 
         values = getContinuous3DParameterValues(gridModel, paramName, realNumber)
@@ -485,11 +499,11 @@ class Trunc3D_bayfill(Trunc2D_Base):
         return copy.copy(self.__fIndxPerPolygon)
 
     def XMLAddElement(
-            self,
-            parent: Element,
-            zone_number: int,
-            region_number: int,
-            fmu_attributes: List[FmuAttribute],
+        self,
+        parent: Element,
+        zone_number: int,
+        region_number: int,
+        fmu_attributes: List[FmuAttribute],
     ) -> None:
         if self._debug_level >= Debug.VERY_VERBOSE:
             print(f'--- call XMLADDElement from {self._className}')
@@ -503,9 +517,7 @@ class Trunc3D_bayfill(Trunc2D_Base):
         trRuleElement = Element('TruncationRule')
         parent.append(trRuleElement)
 
-        attribute = {
-            'nGFields': str(nGF)
-        }
+        attribute = {'nGFields': str(nGF)}
         trRuleTypeElement = Element('Trunc3D_Bayfill', attribute)
         trRuleElement.append(trRuleTypeElement)
 
@@ -557,7 +569,9 @@ class Trunc3D_bayfill(Trunc2D_Base):
         tag = 'SF'
         obj = Element(tag)
         if self._is_param_sf_fmuupdatable:
-            fmu_attribute = createFMUvariableNameForBayfillTruncation(tag, zone_number, region_number)
+            fmu_attribute = createFMUvariableNameForBayfillTruncation(
+                tag, zone_number, region_number
+            )
             fmu_attributes.append(FmuAttribute(fmu_attribute, self.__param_sf))
             obj.attrib = dict(kw=fmu_attribute)
         if self.__useConstTruncModelParam:
@@ -570,7 +584,9 @@ class Trunc3D_bayfill(Trunc2D_Base):
         obj = Element(tag)
         obj.text = ' ' + ' ' + str(self.__param_ysf) + ' '
         if self._is_param_ysf_fmuupdatable:
-            fmu_attribute = createFMUvariableNameForBayfillTruncation(tag, zone_number, region_number)
+            fmu_attribute = createFMUvariableNameForBayfillTruncation(
+                tag, zone_number, region_number
+            )
             fmu_attributes.append(FmuAttribute(fmu_attribute, self.__param_ysf))
             obj.attrib = dict(kw=fmu_attribute)
         bgModelElement.append(obj)
@@ -579,33 +595,35 @@ class Trunc3D_bayfill(Trunc2D_Base):
         obj = Element(tag)
         obj.text = ' ' + ' ' + str(self.__param_sbhd) + ' '
         if self._is_param_sbhd_fmuupdatable:
-            fmu_attribute = createFMUvariableNameForBayfillTruncation(tag, zone_number, region_number)
+            fmu_attribute = createFMUvariableNameForBayfillTruncation(
+                tag, zone_number, region_number
+            )
             fmu_attributes.append(FmuAttribute(fmu_attribute, self.__param_sbhd))
             obj.attrib = dict(kw=fmu_attribute)
         bgModelElement.append(obj)
 
     @property
     def __eps(self) -> float:
-        """ Tolerance used for probabilities """
+        """Tolerance used for probabilities"""
         return 0.5 * self._epsFaciesProb
 
     @staticmethod
     def __unitSquarePolygon() -> List[List[float]]:
-        """  Create a polygon for the unit square
-        """
+        """Create a polygon for the unit square"""
         return [[0, 0], [1, 0], [1, 1], [0, 1], [0, 0]]
 
     @staticmethod
     def __zeroPolygon() -> List[List[float]]:
-        """ Create a small polygon
-        """
+        """Create a small polygon"""
         return [[0, 0], [0, 0.0001], [0.0001, 0.0001], [0, 0.0001], [0, 0]]
 
     def setSFParam(self, sfValue: float) -> None:
         if 0 <= sfValue <= 1.0:
             self.__param_sf = sfValue
         else:
-            raise ValueError('SF parameter for Bayfill truncation rule must be between 0.0 and 1.0')
+            raise ValueError(
+                'SF parameter for Bayfill truncation rule must be between 0.0 and 1.0'
+            )
 
     def setSFParamFmuUpdatable(self, value: bool) -> None:
         self._is_param_sf_fmuupdatable = value
@@ -614,7 +632,9 @@ class Trunc3D_bayfill(Trunc2D_Base):
         if 0 <= ysfValue <= 1.0:
             self.__param_ysf = ysfValue
         else:
-            raise ValueError('YSF parameter for Bayfill truncation rule must be between 0.0 and 1.0')
+            raise ValueError(
+                'YSF parameter for Bayfill truncation rule must be between 0.0 and 1.0'
+            )
 
     def setYSFParamFmuUpdatable(self, value: bool) -> None:
         self._is_param_ysf_fmuupdatable = value
@@ -623,23 +643,27 @@ class Trunc3D_bayfill(Trunc2D_Base):
         if 0 <= sbhdValue <= 1.0:
             self.__param_sbhd = sbhdValue
         else:
-            raise ValueError('SBHD parameter for Bayfill truncation rule must be between 0.0 and 1.0')
+            raise ValueError(
+                'SBHD parameter for Bayfill truncation rule must be between 0.0 and 1.0'
+            )
 
     def setSBHDParamFmuUpdatable(self, value: bool) -> None:
         self._is_param_sbhd_fmuupdatable = value
 
-    def setTruncRule(self, faciesProb: Union[np.ndarray, List[float]], cellIndx: int = 0) -> None:
+    def setTruncRule(
+        self, faciesProb: Union[np.ndarray, List[float]], cellIndx: int = 0
+    ) -> None:
         """setTruncRule: Calculate internal parameters and polygons that define the truncation rule.
-           Input:  faciesProb - Probability for each facies.
-           Model parameters:
-                 sf  - Floodplain slant line. Bigger value=more slant
-                 ysf - Define where subbay polygon in the truncation cube should start. Value 0 means that
-                       Subbay is neighbour to Floodplain along the whole border between
-                       Floodplain and other facies. Value 1 means that Subbay is neigbour to only the upper part,
-                       but this also depends on facies probabilities.
-                       Low value moves subbay closer to peat protrusion (and mouthbar).
-                sbhd - Slant factor for BHD, low value means BHD are close to floodplain/subbay,
-                       high value means BHD will be longer into the bay/WIB but slimmer. 0<sbhd<1
+        Input:  faciesProb - Probability for each facies.
+        Model parameters:
+              sf  - Floodplain slant line. Bigger value=more slant
+              ysf - Define where subbay polygon in the truncation cube should start. Value 0 means that
+                    Subbay is neighbour to Floodplain along the whole border between
+                    Floodplain and other facies. Value 1 means that Subbay is neigbour to only the upper part,
+                    but this also depends on facies probabilities.
+                    Low value moves subbay closer to peat protrusion (and mouthbar).
+             sbhd - Slant factor for BHD, low value means BHD are close to floodplain/subbay,
+                    high value means BHD will be longer into the bay/WIB but slimmer. 0<sbhd<1
         """
         # Internally in this python code:
         #  Floodplain is 1 with probability P1
@@ -759,7 +783,9 @@ class Trunc3D_bayfill(Trunc2D_Base):
             YF = 1.0
             X1 = 1.0 - sf * (1.0 - YF2)
             X2 = 1.0
-            YL = 1.0 - math.sqrt(max([0, 1.0 - 2.0 * ((1.0 - 0.5 * YF2) * YF2 + P5 / sf)]))
+            YL = 1.0 - math.sqrt(
+                max([0, 1.0 - 2.0 * ((1.0 - 0.5 * YF2) * YF2 + P5 / sf)])
+            )
             XL = 1.0 - sf * (YL - YF2)
             YS = YL + ysf * (1 - math.sqrt(2.0 * P2 / sf) - YL)
             YS2 = 1.0
@@ -837,7 +863,9 @@ class Trunc3D_bayfill(Trunc2D_Base):
             else:
                 YL = 1.0 - math.sqrt(max([0, 1.0 - (2.0 / sf) * (P5 - 1.0 + X2)]))
                 XL = X2 - sf * YL
-            YS = YL + ysf * (1 - math.sqrt(max([0, (1.0 - YF) * (1.0 - YF) + 2.0 * P2 / sf])) - YL)
+            YS = YL + ysf * (
+                1 - math.sqrt(max([0, (1.0 - YF) * (1.0 - YF) + 2.0 * P2 / sf])) - YL
+            )
             X4 = sf * (YF - YS)
             if P2 >= 0.5 * X4 * (1.0 - YF):  # fssit=5
                 fssit = 5
@@ -907,8 +935,14 @@ class Trunc3D_bayfill(Trunc2D_Base):
                     Xm = X4 + c * Ym
                     Xm2 = X4
                     caseA = 1
-                elif AmP4sqrt <= (XL - X4) - 0.5 * (XL - X4) * (XL - X4) / c:  # A1<AmP4sqrt<=A2
-                    Ym = (AmP4sqrt - 0.5 * (XL - X4) * (XL - X4) / c + (XL - X4) * (XL - X4) / c) / (XL - X4)
+                elif (
+                    AmP4sqrt <= (XL - X4) - 0.5 * (XL - X4) * (XL - X4) / c
+                ):  # A1<AmP4sqrt<=A2
+                    Ym = (
+                        AmP4sqrt
+                        - 0.5 * (XL - X4) * (XL - X4) / c
+                        + (XL - X4) * (XL - X4) / c
+                    ) / (XL - X4)
                     Ym2 = Ym - (XL - X4) / c
                     Xm = XL
                     Xm2 = X4
@@ -956,25 +990,51 @@ class Trunc3D_bayfill(Trunc2D_Base):
                     Xm2 = Xm - c * Ym
                     caseA = 1
                 # A1<AmP4sqrt<=A2
-                elif AmP4sqrt <= (XL - X4) * YS - 0.5 * (XL - X4) * (XL - X4) / c - 0.5 * (X2 - X4) * YS:
-                    Ym = math.sqrt(max([
-                        0,
-                        ((XL - X2) * (XL - X2) / (sf * sf)) + (c / (sf * (c - sf))) * (
-                            (XL - X2) * (XL - X2) / c + 2.0 * AmP4sqrt)
-                    ])) - (XL - X2) / sf
+                elif (
+                    AmP4sqrt
+                    <= (XL - X4) * YS
+                    - 0.5 * (XL - X4) * (XL - X4) / c
+                    - 0.5 * (X2 - X4) * YS
+                ):
+                    Ym = (
+                        math.sqrt(
+                            max(
+                                [
+                                    0,
+                                    ((XL - X2) * (XL - X2) / (sf * sf))
+                                    + (c / (sf * (c - sf)))
+                                    * ((XL - X2) * (XL - X2) / c + 2.0 * AmP4sqrt),
+                                ]
+                            )
+                        )
+                        - (XL - X2) / sf
+                    )
                     Ym2 = (1.0 - sf / c) * Ym - (XL - X2) / c
                     Xm = XL
                     Xm2 = X2 - sf * Ym
                     caseA = 2
                 # A2<AmP4sqrt<=A3
-                elif AmP4sqrt <= (XL - X4) - 0.5 * (X2 - X4) * YS - 0.5 * (XL - X4) * (XL - X4) / c:
-                    Ym2 = (AmP4sqrt + 0.5 * (X2 - X4) * YS - 0.5 * (XL - X4) * (XL - X4) / c) / (XL - X4)
+                elif (
+                    AmP4sqrt
+                    <= (XL - X4)
+                    - 0.5 * (X2 - X4) * YS
+                    - 0.5 * (XL - X4) * (XL - X4) / c
+                ):
+                    Ym2 = (
+                        AmP4sqrt
+                        + 0.5 * (X2 - X4) * YS
+                        - 0.5 * (XL - X4) * (XL - X4) / c
+                    ) / (XL - X4)
                     Ym = Ym2 + (XL - X4) / c
                     Xm = XL
                     Xm2 = X4
                     caseA = 3
                 else:  # A3<AmP4sqrt
-                    Ym2 = 1.0 - math.sqrt(max([0, (2.0 / c) * (XL - X4 - 0.5 * (X2 - X4) * YS - AmP4sqrt)]))
+                    Ym2 = 1.0 - math.sqrt(
+                        max(
+                            [0, (2.0 / c) * (XL - X4 - 0.5 * (X2 - X4) * YS - AmP4sqrt)]
+                        )
+                    )
                     Ym = 1.0
                     Xm = XL
                     Xm2 = XL - c * (1.0 - Ym2)
@@ -1003,7 +1063,11 @@ class Trunc3D_bayfill(Trunc2D_Base):
                     Ym2 = 0.0
                     caseA = 3
                 else:  # A3<AmP4sqrt
-                    Ym2 = 1.0 - math.sqrt(max([0, (2.0 / c) * (XL - X4 - 0.5 * (X2 - X4) * YS - AmP4sqrt)]))
+                    Ym2 = 1.0 - math.sqrt(
+                        max(
+                            [0, (2.0 / c) * (XL - X4 - 0.5 * (X2 - X4) * YS - AmP4sqrt)]
+                        )
+                    )
                     Ym = 1.0
                     Xm = XL
                     Xm2 = XL - c * (1.0 - Ym2)
@@ -1018,7 +1082,9 @@ class Trunc3D_bayfill(Trunc2D_Base):
                     Xm2 = Xm - c * Ym
                     caseA = 1
                 # A1<AmP4sqrt<=A2
-                elif AmP4sqrt <= (0.5 / c) * (XL - X4) * (XL - X4) - 0.5 * (X2 - X4) * YS:
+                elif (
+                    AmP4sqrt <= (0.5 / c) * (XL - X4) * (XL - X4) - 0.5 * (X2 - X4) * YS
+                ):
                     Ym = math.sqrt(2.0 * (AmP4sqrt + 0.5 * (X2 - X4) * YS) / c)
                     Ym2 = 0.0
                     Xm = X4 + c * Ym
@@ -1027,15 +1093,24 @@ class Trunc3D_bayfill(Trunc2D_Base):
                 # A2<AmP4sqrt<=A3
                 elif AmP4sqrt <= (
                     (0.5 / c) * (XL - X4) * (XL - X4)
-                    - 0.5 * (X2 - X4) * YS + (XL - X4) * (1.0 - (XL - X4) / c)
+                    - 0.5 * (X2 - X4) * YS
+                    + (XL - X4) * (1.0 - (XL - X4) / c)
                 ):
-                    Ym2 = (AmP4sqrt + 0.5 * (X2 - X4) * YS - 0.5 * (XL - X4) * (XL - X4) / c) / (XL - X4)
+                    Ym2 = (
+                        AmP4sqrt
+                        + 0.5 * (X2 - X4) * YS
+                        - 0.5 * (XL - X4) * (XL - X4) / c
+                    ) / (XL - X4)
                     Ym = Ym2 + (XL - X4) / c
                     Xm = XL
                     Xm2 = X4
                     caseA = 3
                 else:  # A3<AmP4sqrt
-                    Ym2 = 1.0 - math.sqrt(max([0, (2.0 / c) * (XL - X4 - 0.5 * (X2 - X4) * YS - AmP4sqrt)]))
+                    Ym2 = 1.0 - math.sqrt(
+                        max(
+                            [0, (2.0 / c) * (XL - X4 - 0.5 * (X2 - X4) * YS - AmP4sqrt)]
+                        )
+                    )
                     Ym = 1.0
                     Xm = XL
                     Xm2 = XL - c * (1.0 - Ym2)
@@ -1050,8 +1125,12 @@ class Trunc3D_bayfill(Trunc2D_Base):
                 Xm = XL
                 caseA = 1
             # A1<AmP4sqrt<=A2
-            elif AmP4sqrt <= 0.5 * (XL - X4) * (YS - YL - (XL - X4) / c) + (XL - X4) * (1.0 - YS):
-                Ym = YS + (AmP4sqrt - 0.5 * (XL - X4) * (YS - YL - (XL - X4) / c)) / (XL - X4)
+            elif AmP4sqrt <= 0.5 * (XL - X4) * (YS - YL - (XL - X4) / c) + (XL - X4) * (
+                1.0 - YS
+            ):
+                Ym = YS + (AmP4sqrt - 0.5 * (XL - X4) * (YS - YL - (XL - X4) / c)) / (
+                    XL - X4
+                )
                 Ym2 = Ym - (XL - X4) / c
                 Xm = XL
                 Xm2 = X4
@@ -1066,14 +1145,26 @@ class Trunc3D_bayfill(Trunc2D_Base):
             if P3 == 0.0:
                 YWIB = YS + math.sqrt((YS2 - YS) * (YS2 - YS))
             else:
-                YWIB = YS + math.sqrt(max([0, (YS2 - YS) * (YS2 - YS) - 2.0 * P3 * (YS2 - YS) / (X4 - X3)]))
+                YWIB = YS + math.sqrt(
+                    max(
+                        [0, (YS2 - YS) * (YS2 - YS) - 2.0 * P3 * (YS2 - YS) / (X4 - X3)]
+                    )
+                )
         elif bhdsit == 5:
             if P3 < (X4 - X3) * (1.0 - YS2):
                 YWIB = 1.0 - P3 / (X4 - X3)
             else:
-                YWIB = YS + math.sqrt(2.0 * ((YS2 - YS) * (1.0 - 0.5 * (YS2 + YS)) - (YS2 - YS) / (X4 - X3) * P3))
+                YWIB = YS + math.sqrt(
+                    2.0
+                    * (
+                        (YS2 - YS) * (1.0 - 0.5 * (YS2 + YS))
+                        - (YS2 - YS) / (X4 - X3) * P3
+                    )
+                )
         elif bhdsit == 6:
-            YWIB = YS + math.sqrt(max([0, (1.0 - YS) * (1.0 - YS) - 2.0 * P3 * (1.0 - YS) / (X4 - X3)]))
+            YWIB = YS + math.sqrt(
+                max([0, (1.0 - YS) * (1.0 - YS) - 2.0 * P3 * (1.0 - YS) / (X4 - X3)])
+            )
 
         if Amax > 0:
             Zm = 1.0 - math.sqrt(P4 / Amax)
@@ -1081,7 +1172,13 @@ class Trunc3D_bayfill(Trunc2D_Base):
             Zm = 1.0
 
         if self._debug_level >= Debug.VERY_VERY_VERBOSE and cellIndx == 0:
-            print('Internal variables in ' + self._className + ' for cell index = ' + str(cellIndx) + ' :')
+            print(
+                'Internal variables in '
+                + self._className
+                + ' for cell index = '
+                + str(cellIndx)
+                + ' :'
+            )
             print('FSsit= ' + str(fssit))
             print('BHDsit= ' + str(bhdsit))
             print('CaseT= ' + str(caseT))
@@ -1171,14 +1268,9 @@ class Trunc3D_bayfill(Trunc2D_Base):
         if fssit == 1:
             # polygon = Polygon([(0.0,0.0),(1.0,0.0),(X2,YF2),(X1,YF),(0.0,YF)],True) #FP
             if P1 > 0.0:
-                polyFP.extend([
-                    [0.0, 0.0],
-                    [1.0, 0.0],
-                    [X2, YF2],
-                    [X1, YF],
-                    [0.0, YF],
-                    [0.0, 0.0]
-                ])
+                polyFP.extend(
+                    [[0.0, 0.0], [1.0, 0.0], [X2, YF2], [X1, YF], [0.0, YF], [0.0, 0.0]]
+                )
             else:
                 polyFP.extend([[0, 0], [0, 0], [0, 0], [0, 0]])
 
@@ -1186,12 +1278,7 @@ class Trunc3D_bayfill(Trunc2D_Base):
 
             # polygon = Polygon([(X4,YS),(X3,YF),(X1,YF)],True) #SB
             if P2 > 0.0:
-                polySB.extend([
-                    [X4, YS],
-                    [X3, YF],
-                    [X1, YF],
-                    [X4, YS]
-                ])
+                polySB.extend([[X4, YS], [X3, YF], [X1, YF], [X4, YS]])
             else:
                 polySB.extend([[0, 0], [0, 0], [0, 0], [0, 0]])
 
@@ -1200,13 +1287,7 @@ class Trunc3D_bayfill(Trunc2D_Base):
         elif fssit == 2:
             # polygon = Polygon([(0.0,0.0),(X2,YS),(X1,YF),(0.0,YF)],True) #FP
             if P1 > 0:
-                polyFP.extend([
-                    [0.0, 0.0],
-                    [X2, YS],
-                    [X1, YF],
-                    [0.0, YF],
-                    [0.0, 0.0]
-                ])
+                polyFP.extend([[0.0, 0.0], [X2, YS], [X1, YF], [0.0, YF], [0.0, 0.0]])
             else:
                 polyFP.extend([[0, 0], [0, 0], [0, 0], [0, 0]])
 
@@ -1214,13 +1295,7 @@ class Trunc3D_bayfill(Trunc2D_Base):
 
             # polygon = Polygon([(X4,YS),(X3,YF),(X1,YF),(X2,YS)],True) #SB
             if P2 > 0:
-                polySB.extend([
-                    [X4, YS],
-                    [X3, YF],
-                    [X1, YF],
-                    [X2, YS],
-                    [X4, YS]
-                ])
+                polySB.extend([[X4, YS], [X3, YF], [X1, YF], [X2, YS], [X4, YS]])
             else:
                 polySB.extend([[0, 0], [0, 0], [0, 0], [0, 0]])
 
@@ -1229,13 +1304,7 @@ class Trunc3D_bayfill(Trunc2D_Base):
         elif fssit == 3:
             # polygon = Polygon([(0.0,0.0),(X2,YF2),(X1,YF),(0.0,YF)],True) #FP
             if P1 > 0:
-                polyFP.extend([
-                    [0.0, 0.0],
-                    [X2, YF2],
-                    [X1, YF],
-                    [0.0, YF],
-                    [0.0, 0.0]
-                ])
+                polyFP.extend([[0.0, 0.0], [X2, YF2], [X1, YF], [0.0, YF], [0.0, 0.0]])
             else:
                 polyFP.extend([[0, 0], [0, 0], [0, 0], [0, 0]])
 
@@ -1243,12 +1312,7 @@ class Trunc3D_bayfill(Trunc2D_Base):
 
             # polygon = Polygon([(X4,YS),(X3,YF),(X1,YF)],True) #SB
             if P2 > 0:
-                polySB.extend([
-                    [X4, YS],
-                    [X3, YF],
-                    [X1, YF],
-                    [X4, YS]
-                ])
+                polySB.extend([[X4, YS], [X3, YF], [X1, YF], [X4, YS]])
             else:
                 polySB.extend([[0, 0], [0, 0], [0, 0], [0, 0]])
 
@@ -1257,12 +1321,7 @@ class Trunc3D_bayfill(Trunc2D_Base):
         elif fssit == 4:
             # polygon = Polygon([(0.0,0.0),(X2,YS),(X1,YF)],True) #FP
             if P1 > 0:
-                polyFP.extend([
-                    [0.0, 0.0],
-                    [X2, YS],
-                    [X1, YF],
-                    [0.0, 0.0]
-                ])
+                polyFP.extend([[0.0, 0.0], [X2, YS], [X1, YF], [0.0, 0.0]])
             else:
                 polyFP.extend([[0, 0], [0, 0], [0, 0], [0, 0]])
 
@@ -1270,14 +1329,9 @@ class Trunc3D_bayfill(Trunc2D_Base):
 
             # polygon = Polygon([(X4,YS),(X3,1.0),(X1,1.0),(X1,YF),(X2,YS)],True) #SB
             if P2 > 0:
-                polySB.extend([
-                    [X4, YS],
-                    [X3, 1.0],
-                    [X1, 1.0],
-                    [X1, YF],
-                    [X2, YS],
-                    [X4, YS]
-                ])
+                polySB.extend(
+                    [[X4, YS], [X3, 1.0], [X1, 1.0], [X1, YF], [X2, YS], [X4, YS]]
+                )
             else:
                 polySB.extend([[0, 0], [0, 0], [0, 0], [0, 0]])
 
@@ -1286,12 +1340,14 @@ class Trunc3D_bayfill(Trunc2D_Base):
         elif fssit == 5:
             # polygon = Polygon([(0.0,0.0),(X2,YF2),(X1,YF)],True) #FP
             if P1 > 0:
-                polyFP.extend([
-                    [0.0, 0.0],
-                    [X2, YF2],
-                    [X1, YF],
-                    [0.0, 0.0],
-                ])
+                polyFP.extend(
+                    [
+                        [0.0, 0.0],
+                        [X2, YF2],
+                        [X1, YF],
+                        [0.0, 0.0],
+                    ]
+                )
             else:
                 polyFP.extend([[0, 0], [0, 0], [0, 0], [0, 0]])
 
@@ -1299,13 +1355,7 @@ class Trunc3D_bayfill(Trunc2D_Base):
 
             # polygon = Polygon([(X4,YS),(X3,1.0),(X1,1.0),(X1,YF)],True) #SB
             if P2 > 0:
-                polySB.extend([
-                    [X4, YS],
-                    [X3, 1.0],
-                    [X1, 1.0],
-                    [X1, YF],
-                    [X4, YS]
-                ])
+                polySB.extend([[X4, YS], [X3, 1.0], [X1, 1.0], [X1, YF], [X4, YS]])
             else:
                 polySB.extend([[0, 0], [0, 0], [0, 0], [0, 0]])
 
@@ -1314,12 +1364,7 @@ class Trunc3D_bayfill(Trunc2D_Base):
         else:
             # polygon = Polygon([(0.0,0.0),(X2,YF2),(X1,YF)],True) #FP
             if P1 > 0:
-                polyFP.extend([
-                    [0.0, 0.0],
-                    [X2, YF2],
-                    [X1, YF],
-                    [0.0, 0.0]
-                ])
+                polyFP.extend([[0.0, 0.0], [X2, YF2], [X1, YF], [0.0, 0.0]])
             else:
                 polyFP.extend([[0, 0], [0, 0], [0, 0], [0, 0]])
 
@@ -1327,12 +1372,7 @@ class Trunc3D_bayfill(Trunc2D_Base):
 
             # polygon = Polygon([(X4,YS),(X1,YS2),(X1,YF)],True) #SB
             if P2 > 0:
-                polySB.extend([
-                    [X4, YS],
-                    [X1, YS2],
-                    [X1, YF],
-                    [X4, YS]
-                ])
+                polySB.extend([[X4, YS], [X1, YS2], [X1, YF], [X4, YS]])
             else:
                 polySB.extend([[0, 0], [0, 0], [0, 0], [0, 0]])
 
@@ -1348,13 +1388,9 @@ class Trunc3D_bayfill(Trunc2D_Base):
         if bhdsit == 1:
             # polygon = Polygon([(1.0,0.0),(1.0,1.0),(XL,1.0),(XL,0.0)],True) #LG
             if P5 > 0:
-                polyLG.extend([
-                    [1.0, 0.0],
-                    [1.0, 1.0],
-                    [XL, 1.0],
-                    [XL, 0.0],
-                    [1.0, 0.0]
-                ])
+                polyLG.extend(
+                    [[1.0, 0.0], [1.0, 1.0], [XL, 1.0], [XL, 0.0], [1.0, 0.0]]
+                )
             else:
                 polyLG.extend([[0, 0], [0, 0], [0, 0], [0, 0]])
 
@@ -1364,14 +1400,16 @@ class Trunc3D_bayfill(Trunc2D_Base):
             if X2 > XL:
                 # polygon = Polygon([(X2,YF2),(1.0,0.0),(1.0,1.0),(XL,1.0),(XL,y2)],True) #LG
                 if P5 > 0:
-                    polyLG.extend([
-                        [X2, YF2],
-                        [1.0, 0.0],
-                        [1.0, 1.0],
-                        [XL, 1.0],
-                        [XL, y2],
-                        [X2, YF2]
-                    ])
+                    polyLG.extend(
+                        [
+                            [X2, YF2],
+                            [1.0, 0.0],
+                            [1.0, 1.0],
+                            [XL, 1.0],
+                            [XL, y2],
+                            [X2, YF2],
+                        ]
+                    )
                 else:
                     polyLG.extend([[0, 0], [0, 0], [0, 0], [0, 0]])
 
@@ -1380,13 +1418,9 @@ class Trunc3D_bayfill(Trunc2D_Base):
             else:
                 # polygon = Polygon([(XL,0.0),(1.0,0.0),(1.0,1.0),(XL,1.0)],True) #LG
                 if P5 > 0:
-                    polyLG.extend([
-                        [XL, 0.0],
-                        [1.0, 0.0],
-                        [1.0, 1.0],
-                        [XL, 1.0],
-                        [XL, 0.0]
-                    ])
+                    polyLG.extend(
+                        [[XL, 0.0], [1.0, 0.0], [1.0, 1.0], [XL, 1.0], [XL, 0.0]]
+                    )
                 else:
                     polyLG.extend([[0, 0], [0, 0], [0, 0], [0, 0]])
 
@@ -1411,14 +1445,16 @@ class Trunc3D_bayfill(Trunc2D_Base):
                 if Xm2 > X4:
                     # polygon = Polygon([(Xm,Ym2),(Xm2,Ym),(X4,1.0),(X4,0.0),(Xm,0.0)],True) #BHD
                     if P4 > 0:
-                        polyBHD.extend([
-                            [Xm, Ym2],
-                            [Xm2, Ym],
-                            [X4, 1.0],
-                            [X4, 0.0],
-                            [Xm, 0.0],
-                            [Xm, Ym2]
-                        ])
+                        polyBHD.extend(
+                            [
+                                [Xm, Ym2],
+                                [Xm2, Ym],
+                                [X4, 1.0],
+                                [X4, 0.0],
+                                [Xm, 0.0],
+                                [Xm, Ym2],
+                            ]
+                        )
                     else:
                         polyBHD.extend([[0, 0], [0, 0], [0, 0], [0, 0]])
 
@@ -1426,13 +1462,9 @@ class Trunc3D_bayfill(Trunc2D_Base):
 
                     # polygon = Polygon([(Xm,Ym2),(Xm2,Ym),(XL,1.0),(XL,Ym2)],True) #WBF
                     if P3 > 0:
-                        polyWBF.extend([
-                            [Xm, Ym2],
-                            [Xm2, Ym],
-                            [XL, 1.0],
-                            [XL, Ym2],
-                            [Xm, Ym2]
-                        ])
+                        polyWBF.extend(
+                            [[Xm, Ym2], [Xm2, Ym], [XL, 1.0], [XL, Ym2], [Xm, Ym2]]
+                        )
                     else:
                         polyWBF.extend([[0, 0], [0, 0], [0, 0], [0, 0]])
 
@@ -1441,13 +1473,9 @@ class Trunc3D_bayfill(Trunc2D_Base):
                 else:
                     # polygon = Polygon([(Xm,Ym2),(Xm2,Ym),(Xm2,0.0),(Xm,0.0)],True) #BHD
                     if P4 > 0:
-                        polyBHD.extend([
-                            [Xm, Ym2],
-                            [Xm2, Ym],
-                            [Xm2, 0.0],
-                            [Xm, 0.0],
-                            [Xm, Ym2]
-                        ])
+                        polyBHD.extend(
+                            [[Xm, Ym2], [Xm2, Ym], [Xm2, 0.0], [Xm, 0.0], [Xm, Ym2]]
+                        )
                     else:
                         polyBHD.extend([[0, 0], [0, 0], [0, 0], [0, 0]])
 
@@ -1455,14 +1483,16 @@ class Trunc3D_bayfill(Trunc2D_Base):
 
                     # polygon = Polygon([(Xm,Ym2),(Xm2,Ym),(Xm2,1.0),(XL,1.0),(XL,YL)],True) #WBF
                     if P3 > 0:
-                        polyWBF.extend([
-                            [Xm, Ym2],
-                            [Xm2, Ym],
-                            [Xm2, 1.0],
-                            [XL, 1.0],
-                            [XL, YL],
-                            [Xm, Ym2]
-                        ])
+                        polyWBF.extend(
+                            [
+                                [Xm, Ym2],
+                                [Xm2, Ym],
+                                [Xm2, 1.0],
+                                [XL, 1.0],
+                                [XL, YL],
+                                [Xm, Ym2],
+                            ]
+                        )
                     else:
                         polyWBF.extend([[0, 0], [0, 0], [0, 0], [0, 0]])
 
@@ -1473,13 +1503,9 @@ class Trunc3D_bayfill(Trunc2D_Base):
                     if Ym < YS:
                         # polygon = Polygon([(Xm,Ym2),(Xm2,Ym),(X2,0.0),(XL,0.0)],True) #BHD
                         if P4 > 0:
-                            polyBHD.extend([
-                                [Xm, Ym2],
-                                [Xm2, Ym],
-                                [X2, 0.0],
-                                [XL, 0.0],
-                                [Xm, Ym2]
-                            ])
+                            polyBHD.extend(
+                                [[Xm, Ym2], [Xm2, Ym], [X2, 0.0], [XL, 0.0], [Xm, Ym2]]
+                            )
                         else:
                             polyBHD.extend([[0, 0], [0, 0], [0, 0], [0, 0]])
 
@@ -1489,17 +1515,19 @@ class Trunc3D_bayfill(Trunc2D_Base):
                         # Polygon([(Xm,Ym2),(Xm2,Ym),(X4,YS),(X3,YS2),(X3,1.0),(X4,1.0),(XL,1.0),(XL,0.0)],True)
                         # #WBF
                         if P3 > 0:
-                            polyWBF.extend([
-                                [Xm, Ym2],
-                                [Xm2, Ym],
-                                [X4, YS],
-                                [X3, YS2],
-                                [X3, 1.0],
-                                [X4, 1.0],
-                                [XL, 1.0],
-                                [XL, 0.0],
-                                [Xm, Ym2]
-                            ])
+                            polyWBF.extend(
+                                [
+                                    [Xm, Ym2],
+                                    [Xm2, Ym],
+                                    [X4, YS],
+                                    [X3, YS2],
+                                    [X3, 1.0],
+                                    [X4, 1.0],
+                                    [XL, 1.0],
+                                    [XL, 0.0],
+                                    [Xm, Ym2],
+                                ]
+                            )
                         else:
                             polyWBF.extend([[0, 0], [0, 0], [0, 0], [0, 0]])
 
@@ -1510,15 +1538,17 @@ class Trunc3D_bayfill(Trunc2D_Base):
                         # Polygon([(Xm,Ym2),(Xm2,Ym),(X4,1.0),(X4,YS),(X2,YF2),(XL,0.0)],True)
                         # #BHD
                         if P4 > 0:
-                            polyBHD.extend([
-                                [Xm, Ym2],
-                                [Xm2, Ym],
-                                [X4, 1.0],
-                                [X4, YS],
-                                [X2, YF2],
-                                [XL, 0.0],
-                                [Xm, Ym2]
-                            ])
+                            polyBHD.extend(
+                                [
+                                    [Xm, Ym2],
+                                    [Xm2, Ym],
+                                    [X4, 1.0],
+                                    [X4, YS],
+                                    [X2, YF2],
+                                    [XL, 0.0],
+                                    [Xm, Ym2],
+                                ]
+                            )
                         else:
                             polyBHD.extend([[0, 0], [0, 0], [0, 0], [0, 0]])
 
@@ -1528,19 +1558,21 @@ class Trunc3D_bayfill(Trunc2D_Base):
                         # Polygon([(X4,1.0),(X3,1.0),(X3,YS2),(X4,YS),(X4,1.0),(Xm2,1.0),(XL,1.0),(XL,0.0),(Xm,Ym2),(Xm2,Ym)],False)
                         # #WBF
                         if P3 > 0:
-                            polyWBF.extend([
-                                [X4, 1.0],
-                                [X3, 1.0],
-                                [X3, YS2],
-                                [X4, YS],
-                                [X4, 1.0],
-                                [Xm2, 1.0],
-                                [XL, 1.0],
-                                [XL, 0.0],
-                                [Xm, Ym2],
-                                [Xm2, Ym],
-                                [X4, 1.0]
-                            ])
+                            polyWBF.extend(
+                                [
+                                    [X4, 1.0],
+                                    [X3, 1.0],
+                                    [X3, YS2],
+                                    [X4, YS],
+                                    [X4, 1.0],
+                                    [Xm2, 1.0],
+                                    [XL, 1.0],
+                                    [XL, 0.0],
+                                    [Xm, Ym2],
+                                    [Xm2, Ym],
+                                    [X4, 1.0],
+                                ]
+                            )
                         else:
                             polyWBF.extend([[0, 0], [0, 0], [0, 0], [0, 0]])
 
@@ -1549,11 +1581,7 @@ class Trunc3D_bayfill(Trunc2D_Base):
                     if Ym == 0.0 and Ym2 == 0.0:
                         # polygon = Polygon([(Xm,Ym2),(X4,Ym)],True) #BHD
                         if P4 > 0:
-                            polyBHD.extend([
-                                [Xm, Ym2],
-                                [X4, Ym],
-                                [Xm, Ym2]
-                            ])
+                            polyBHD.extend([[Xm, Ym2], [X4, Ym], [Xm, Ym2]])
                         else:
                             polyBHD.extend([[0, 0], [0, 0], [0, 0], [0, 0]])
 
@@ -1563,16 +1591,18 @@ class Trunc3D_bayfill(Trunc2D_Base):
                         # Polygon([(X4,YS),(X3,YS2),(X3,1.0),(X4,1.0),(XL,1.0),(XL,0.0),(X2,0.0)],True)
                         # #WBF
                         if P3 > 0:
-                            polyWBF.extend([
-                                [X4, YS],
-                                [X3, YS2],
-                                [X3, 1.0],
-                                [X4, 1.0],
-                                [XL, 1.0],
-                                [XL, 0.0],
-                                [X2, 0.0],
-                                [X4, YS]
-                            ])
+                            polyWBF.extend(
+                                [
+                                    [X4, YS],
+                                    [X3, YS2],
+                                    [X3, 1.0],
+                                    [X4, 1.0],
+                                    [XL, 1.0],
+                                    [XL, 0.0],
+                                    [X2, 0.0],
+                                    [X4, YS],
+                                ]
+                            )
                         else:
                             polyWBF.extend([[0, 0], [0, 0], [0, 0], [0, 0]])
                         polygons.insert(2, polyWBF)
@@ -1580,14 +1610,16 @@ class Trunc3D_bayfill(Trunc2D_Base):
                     else:
                         # polygon = Polygon([(Xm,Ym2),(X4,Ym),(X4,YS),(X2,0.0),(Xm,0.0)],True) #BHD
                         if P4 > 0:
-                            polyBHD.extend([
-                                [Xm, Ym2],
-                                [X4, Ym],
-                                [X4, YS],
-                                [X2, 0.0],
-                                [Xm, 0.0],
-                                [Xm, Ym2]
-                            ])
+                            polyBHD.extend(
+                                [
+                                    [Xm, Ym2],
+                                    [X4, Ym],
+                                    [X4, YS],
+                                    [X2, 0.0],
+                                    [Xm, 0.0],
+                                    [Xm, Ym2],
+                                ]
+                            )
                         else:
                             polyBHD.extend([[0, 0], [0, 0], [0, 0], [0, 0]])
 
@@ -1597,17 +1629,19 @@ class Trunc3D_bayfill(Trunc2D_Base):
                         # Polygon([(Xm,Ym2),(X4,Ym),(X4,YS),(X3,YS2),(X3,1.0),(X4,1.0),(XL,1.0),(XL,0.0)],True)
                         # #WBF
                         if P3 > 0:
-                            polyWBF.extend([
-                                [Xm, Ym2],
-                                [X4, Ym],
-                                [X4, YS],
-                                [X3, YS2],
-                                [X3, 1.0],
-                                [X4, 1.0],
-                                [XL, 1.0],
-                                [XL, 0.0],
-                                [Xm, Ym2]
-                            ])
+                            polyWBF.extend(
+                                [
+                                    [Xm, Ym2],
+                                    [X4, Ym],
+                                    [X4, YS],
+                                    [X3, YS2],
+                                    [X3, 1.0],
+                                    [X4, 1.0],
+                                    [XL, 1.0],
+                                    [XL, 0.0],
+                                    [Xm, Ym2],
+                                ]
+                            )
                         else:
                             polyWBF.extend([[0, 0], [0, 0], [0, 0], [0, 0]])
 
@@ -1618,12 +1652,7 @@ class Trunc3D_bayfill(Trunc2D_Base):
                     if Ym < YS:
                         # polygon = Polygon([(Xm,Ym2),(Xm2,Ym),(XL,YL)],True) #BHD
                         if P4 > 0:
-                            polyBHD.extend([
-                                [Xm, Ym2],
-                                [Xm2, Ym],
-                                [XL, YL],
-                                [Xm, Ym2]
-                            ])
+                            polyBHD.extend([[Xm, Ym2], [Xm2, Ym], [XL, YL], [Xm, Ym2]])
                         else:
                             polyBHD.extend([[0, 0], [0, 0], [0, 0], [0, 0]])
 
@@ -1633,16 +1662,18 @@ class Trunc3D_bayfill(Trunc2D_Base):
                         # Polygon([(Xm,Ym2),(Xm2,Ym),(X4,YS),(X3,1.0),(X4,1.0),(XL,1.0),(XL,Ym2)],True)
                         # #WBF
                         if P3 > 0:
-                            polyWBF.extend([
-                                [Xm, Ym2],
-                                [Xm2, Ym],
-                                [X4, YS],
-                                [X3, 1.0],
-                                [X4, 1.0],
-                                [XL, 1.0],
-                                [XL, Ym2],
-                                [Xm, Ym2]
-                            ])
+                            polyWBF.extend(
+                                [
+                                    [Xm, Ym2],
+                                    [Xm2, Ym],
+                                    [X4, YS],
+                                    [X3, 1.0],
+                                    [X4, 1.0],
+                                    [XL, 1.0],
+                                    [XL, Ym2],
+                                    [Xm, Ym2],
+                                ]
+                            )
                         else:
                             polyWBF.extend([[0, 0], [0, 0], [0, 0], [0, 0]])
 
@@ -1651,14 +1682,16 @@ class Trunc3D_bayfill(Trunc2D_Base):
                     elif Ym == 1.0:
                         # polygon = Polygon([(Xm,Ym2),(Xm2,Ym),(X4,1.0),(X4,YS),(XL,YL)],True) #BHD
                         if P4 > 0:
-                            polyBHD.extend([
-                                [Xm, Ym2],
-                                [Xm2, Ym],
-                                [X4, 1.0],
-                                [X4, YS],
-                                [XL, YL],
-                                [Xm, Ym2]
-                            ])
+                            polyBHD.extend(
+                                [
+                                    [Xm, Ym2],
+                                    [Xm2, Ym],
+                                    [X4, 1.0],
+                                    [X4, YS],
+                                    [XL, YL],
+                                    [Xm, Ym2],
+                                ]
+                            )
                         else:
                             polyBHD.extend([[0, 0], [0, 0], [0, 0], [0, 0]])
 
@@ -1668,17 +1701,19 @@ class Trunc3D_bayfill(Trunc2D_Base):
                         # Polygon([(X4,1.0),(X3,1.0),(X4,YS),(X4,1.0),(Xm2,1.0),(XL,1.0),(Xm,Ym2),(Xm2,Ym)],False)
                         # #WBF
                         if P3 > 0:
-                            polyWBF.extend([
-                                [X4, 1.0],
-                                [X3, 1.0],
-                                [X4, YS],
-                                [X4, 1.0],
-                                [Xm2, 1.0],
-                                [XL, 1.0],
-                                [Xm, Ym2],
-                                [Xm2, Ym],
-                                [X4, 1.0]
-                            ])
+                            polyWBF.extend(
+                                [
+                                    [X4, 1.0],
+                                    [X3, 1.0],
+                                    [X4, YS],
+                                    [X4, 1.0],
+                                    [Xm2, 1.0],
+                                    [XL, 1.0],
+                                    [Xm, Ym2],
+                                    [Xm2, Ym],
+                                    [X4, 1.0],
+                                ]
+                            )
                         else:
                             polyWBF.extend([[0, 0], [0, 0], [0, 0], [0, 0]])
 
@@ -1686,13 +1721,9 @@ class Trunc3D_bayfill(Trunc2D_Base):
                 else:
                     # polygon = Polygon([(Xm,Ym2),(X4,Ym),(X4,YS),(XL,YL)],True) #BHD
                     if P4 > 0:
-                        polyBHD.extend([
-                            [Xm, Ym2],
-                            [X4, Ym],
-                            [X4, YS],
-                            [XL, YL],
-                            [Xm, Ym2]
-                        ])
+                        polyBHD.extend(
+                            [[Xm, Ym2], [X4, Ym], [X4, YS], [XL, YL], [Xm, Ym2]]
+                        )
                     else:
                         polyBHD.extend([[0, 0], [0, 0], [0, 0], [0, 0]])
 
@@ -1701,24 +1732,28 @@ class Trunc3D_bayfill(Trunc2D_Base):
                     # polygon = Polygon([(Xm,Ym2),(X4,Ym),(X4,YS),(X3,1.0),(X4,1.0),(XL,1.0)],True) #WBF
                     if P3 > 0:
                         if P4 > 0:
-                            polyWBF.extend([
-                                [Xm, Ym2],
-                                [X4, Ym],
-                                [X4, YS],
-                                [X3, 1.0],
-                                [X4, 1.0],
-                                [XL, 1.0],
-                                [Xm, Ym2]
-                            ])
+                            polyWBF.extend(
+                                [
+                                    [Xm, Ym2],
+                                    [X4, Ym],
+                                    [X4, YS],
+                                    [X3, 1.0],
+                                    [X4, 1.0],
+                                    [XL, 1.0],
+                                    [Xm, Ym2],
+                                ]
+                            )
                         else:
-                            polyWBF.extend([
-                                [XL, YL],
-                                [X4, YS],
-                                [X3, 1.0],
-                                [X4, 1.0],
-                                [XL, 1.0],
-                                [XL, YL]
-                            ])
+                            polyWBF.extend(
+                                [
+                                    [XL, YL],
+                                    [X4, YS],
+                                    [X3, 1.0],
+                                    [X4, 1.0],
+                                    [XL, 1.0],
+                                    [XL, YL],
+                                ]
+                            )
                     else:
                         polyWBF.extend([[0, 0], [0, 0], [0, 0], [0, 0]])
                     polygons.insert(2, polyWBF)
@@ -1739,15 +1774,17 @@ class Trunc3D_bayfill(Trunc2D_Base):
                     # Polygon([(X4,1.0),(X4,YWIB),(x2,YWIB),(X4,YS),(XL,YL),(XL,1.0)],True)
                     # #BHD
                     if P4 > 0:
-                        polyBHD.extend([
-                            [X4, 1.0],
-                            [X4, YWIB],
-                            [x2, YWIB],
-                            [X4, YS],
-                            [XL, YL],
-                            [XL, 1.0],
-                            [X4, 1.0]
-                        ])
+                        polyBHD.extend(
+                            [
+                                [X4, 1.0],
+                                [X4, YWIB],
+                                [x2, YWIB],
+                                [X4, YS],
+                                [XL, YL],
+                                [XL, 1.0],
+                                [X4, 1.0],
+                            ]
+                        )
                     else:
                         polyBHD.extend([[0, 0], [0, 0], [0, 0], [0, 0]])
 
@@ -1755,13 +1792,9 @@ class Trunc3D_bayfill(Trunc2D_Base):
 
                     # polygon = Polygon([(X4,1.0),(X4,YWIB),(x2,YWIB),(X3,YS2)],True) #WBF
                     if P3 > 0:
-                        polyWBF.extend([
-                            [X4, 1.0],
-                            [X4, YWIB],
-                            [x2, YWIB],
-                            [X3, YS2],
-                            [X4, 1.0]
-                        ])
+                        polyWBF.extend(
+                            [[X4, 1.0], [X4, YWIB], [x2, YWIB], [X3, YS2], [X4, 1.0]]
+                        )
                     else:
                         polyWBF.extend([[0, 0], [0, 0], [0, 0], [0, 0]])
 
@@ -1772,16 +1805,18 @@ class Trunc3D_bayfill(Trunc2D_Base):
                     # Polygon([(X4,1.0),(X4,YWIB),(x2,YWIB),(X4,YS),(X2,YF2),(XL,0.0),(XL,1.0)],True)
                     # #BHD
                     if P4 > 0:
-                        polyBHD.extend([
-                            [X4, 1.0],
-                            [X4, YWIB],
-                            [x2, YWIB],
-                            [X4, YS],
-                            [X2, YF2],
-                            [XL, 0.0],
-                            [XL, 1.0],
-                            [X4, 1.0]
-                        ])
+                        polyBHD.extend(
+                            [
+                                [X4, 1.0],
+                                [X4, YWIB],
+                                [x2, YWIB],
+                                [X4, YS],
+                                [X2, YF2],
+                                [XL, 0.0],
+                                [XL, 1.0],
+                                [X4, 1.0],
+                            ]
+                        )
                     else:
                         polyBHD.extend([[0, 0], [0, 0], [0, 0], [0, 0]])
 
@@ -1789,13 +1824,9 @@ class Trunc3D_bayfill(Trunc2D_Base):
 
                     # polygon = Polygon([(X4,1.0),(X4,YWIB),(x2,YWIB),(X3,YS2)],True) #WBF
                     if P3 > 0:
-                        polyWBF.extend([
-                            [X4, 1.0],
-                            [X4, YWIB],
-                            [x2, YWIB],
-                            [X3, YS2],
-                            [X4, 1.0]
-                        ])
+                        polyWBF.extend(
+                            [[X4, 1.0], [X4, YWIB], [x2, YWIB], [X3, YS2], [X4, 1.0]]
+                        )
                     else:
                         polyWBF.extend([[0, 0], [0, 0], [0, 0], [0, 0]])
 
@@ -1807,17 +1838,19 @@ class Trunc3D_bayfill(Trunc2D_Base):
                     # Polygon([(X4,1.0),(X4,YWIB),(0.0,YWIB),(0.0,YS2),(X4,YS),(X2,YF2),(XL,YL),(XL,1.0)],True)
                     # #BHD
                     if P4 > 0:
-                        polyBHD.extend([
-                            [X4, 1.0],
-                            [X4, YWIB],
-                            [0.0, YWIB],
-                            [0.0, YS2],
-                            [X4, YS],
-                            [X2, YF2],
-                            [XL, YL],
-                            [XL, 1.0],
-                            [X4, 1.0]
-                        ])
+                        polyBHD.extend(
+                            [
+                                [X4, 1.0],
+                                [X4, YWIB],
+                                [0.0, YWIB],
+                                [0.0, YS2],
+                                [X4, YS],
+                                [X2, YF2],
+                                [XL, YL],
+                                [XL, 1.0],
+                                [X4, 1.0],
+                            ]
+                        )
                     else:
                         polyBHD.extend([[0, 0], [0, 0], [0, 0], [0, 0]])
 
@@ -1825,13 +1858,9 @@ class Trunc3D_bayfill(Trunc2D_Base):
 
                     # polygon = Polygon([(X4,1.0),(X4,YWIB),(0.0,YWIB),(0.0,1.0)],True) #WBF
                     if P3 > 0:
-                        polyWBF.extend([
-                            [X4, 1.0],
-                            [X4, YWIB],
-                            [0.0, YWIB],
-                            [0.0, 1.0],
-                            [X4, 1.0]
-                        ])
+                        polyWBF.extend(
+                            [[X4, 1.0], [X4, YWIB], [0.0, YWIB], [0.0, 1.0], [X4, 1.0]]
+                        )
                     else:
                         polyWBF.extend([[0, 0], [0, 0], [0, 0], [0, 0]])
 
@@ -1842,16 +1871,18 @@ class Trunc3D_bayfill(Trunc2D_Base):
                     # Polygon([(X4,1.0),(X4,YWIB),(x2,YWIB),(X4,YS),(X2,YF2),(XL,YL),(XL,1.0)],True)
                     # #BHD
                     if P4 > 0:
-                        polyBHD.extend([
-                            [X4, 1.0],
-                            [X4, YWIB],
-                            [x2, YWIB],
-                            [X4, YS],
-                            [X2, YF2],
-                            [XL, YL],
-                            [XL, 1.0],
-                            [X4, 1.0]
-                        ])
+                        polyBHD.extend(
+                            [
+                                [X4, 1.0],
+                                [X4, YWIB],
+                                [x2, YWIB],
+                                [X4, YS],
+                                [X2, YF2],
+                                [XL, YL],
+                                [XL, 1.0],
+                                [X4, 1.0],
+                            ]
+                        )
                     else:
                         polyBHD.extend([[0, 0], [0, 0], [0, 0], [0, 0]])
 
@@ -1859,14 +1890,16 @@ class Trunc3D_bayfill(Trunc2D_Base):
 
                     # polygon = Polygon([(X4,1.0),(X4,YWIB),(x2,YWIB),(X3,YS2),(X3,1.0)],True) #WBF
                     if P3 > 0:
-                        polyWBF.extend([
-                            [X4, 1.0],
-                            [X4, YWIB],
-                            [x2, YWIB],
-                            [X3, YS2],
-                            [X3, 1.0],
-                            [X4, 1.0]
-                        ])
+                        polyWBF.extend(
+                            [
+                                [X4, 1.0],
+                                [X4, YWIB],
+                                [x2, YWIB],
+                                [X3, YS2],
+                                [X3, 1.0],
+                                [X4, 1.0],
+                            ]
+                        )
                     else:
                         polyWBF.extend([[0, 0], [0, 0], [0, 0], [0, 0]])
 
@@ -1886,7 +1919,11 @@ class Trunc3D_bayfill(Trunc2D_Base):
             elif Ym < 1.0:
                 A = 0.5 * (Ym2 + Ym) * (Xm - Xm2) - 0.5 * (X2 - X4) * YS
             else:
-                A = 0.5 * (Ym2 + 1.0) * (Xm - X4) + 0.5 * (Xm2 - X4) * (1.0 - Ym2) - 0.5 * (X2 - X4) * YS
+                A = (
+                    0.5 * (Ym2 + 1.0) * (Xm - X4)
+                    + 0.5 * (Xm2 - X4) * (1.0 - Ym2)
+                    - 0.5 * (X2 - X4) * YS
+                )
             BHD_vol = A * (1.0 - Zm)
             WBF_area = 1.0 - BHD_vol - LG_area - FP_area - SB_area
         elif bhdsit == 3:
@@ -1898,18 +1935,25 @@ class Trunc3D_bayfill(Trunc2D_Base):
             BHD_vol = A * (1.0 - Zm)
             WBF_area = 1.0 - BHD_vol - LG_area - FP_area - SB_area
         elif bhdsit == 4:
-            WBF_area = 0.5 * ((X4 - X3) * (YS2 - YS) - (X4 - X3) * (YWIB - YS) * (YWIB - YS) / (YS2 - YS))
+            WBF_area = 0.5 * (
+                (X4 - X3) * (YS2 - YS)
+                - (X4 - X3) * (YWIB - YS) * (YWIB - YS) / (YS2 - YS)
+            )
             BHD_vol = 1.0 - WBF_area - LG_area - FP_area - SB_area
         elif bhdsit == 5:
             if P3 < (X4 - X3) * (1.0 - YS2):
                 WBF_area = (X4 - X3) * (1.0 - YWIB)
                 BHD_vol = 1.0 - WBF_area - LG_area - FP_area - SB_area
             else:
-                WBF_area = (X4 - X3) * (1.0 - 0.5 * (YS2 + YS)) - 0.5 * (X4 - X3) * (YWIB - YS) * (YWIB - YS) / (
-                    YS2 - YS)
+                WBF_area = (X4 - X3) * (1.0 - 0.5 * (YS2 + YS)) - 0.5 * (X4 - X3) * (
+                    YWIB - YS
+                ) * (YWIB - YS) / (YS2 - YS)
                 BHD_vol = 1.0 - WBF_area - LG_area - FP_area - SB_area
         elif bhdsit == 6:
-            WBF_area = 0.5 * ((X4 - X3) * (1.0 - YS) - (X4 - X3) * (YWIB - YS) * (YWIB - YS) / (1.0 - YS))
+            WBF_area = 0.5 * (
+                (X4 - X3) * (1.0 - YS)
+                - (X4 - X3) * (YWIB - YS) * (YWIB - YS) / (1.0 - YS)
+            )
             BHD_vol = 1.0 - WBF_area - LG_area - FP_area - SB_area
 
         if self._debug_level >= Debug.VERY_VERY_VERBOSE and cellIndx == 0:
@@ -1931,14 +1975,14 @@ class Trunc3D_bayfill(Trunc2D_Base):
     def defineFaciesByTruncRule_old(self, alphaCoord):
         """defineFaciesByTruncRule: Calculate facies by applying the truncation rule.
 
-           Input:
-                      x,y,z      - The values of the uniformly distributed fields to be used.
-           Output:    facies     - facies code.
+        Input:
+                   x,y,z      - The values of the uniformly distributed fields to be used.
+        Output:    facies     - facies code.
 
-           Internal variables to be used:
-                     self.__polygons
-                     self.__useZ
-                     self.__Zm
+        Internal variables to be used:
+                  self.__polygons
+                  self.__useZ
+                  self.__Zm
         """
         x = alphaCoord[self._alphaIndxList[0]]
         y = alphaCoord[self._alphaIndxList[1]]
@@ -1992,7 +2036,7 @@ class Trunc3D_bayfill(Trunc2D_Base):
 
     def setParamSFConst(self, value):
         if not (0 <= value <= 1):
-            raise ValueError("Error: The value must be between 0 and 1 (inclusive)")
+            raise ValueError('Error: The value must be between 0 and 1 (inclusive)')
         else:
             self.__param_sf = value
 
@@ -2002,12 +2046,12 @@ class Trunc3D_bayfill(Trunc2D_Base):
 
     def setParamYSFConst(self, value):
         if value < 0 or value > 1:
-            raise ValueError("Error: The value must be between 0 and 1 (inclusive)")
+            raise ValueError('Error: The value must be between 0 and 1 (inclusive)')
         else:
             self.__param_ysf = value
 
     def setParamSBHDConst(self, value):
         if value < 0 or value > 1:
-            raise ValueError("Error: The value must be between 0 and 1 (inclusive)")
+            raise ValueError('Error: The value must be between 0 and 1 (inclusive)')
         else:
             self.__param_sbhd = value

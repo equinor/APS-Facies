@@ -32,7 +32,7 @@ class Version:
         self.patch = patch
 
     def __str__(self):
-        return f"{self.major}.{self.minor}.{self.patch}"
+        return f'{self.major}.{self.minor}.{self.patch}'
 
     def __lt__(self, other: Union['Version', str]) -> bool:
         if isinstance(other, str):

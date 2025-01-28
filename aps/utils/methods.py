@@ -29,9 +29,7 @@ U = TypeVar('U')
 
 
 def invert_dict(to_be_inverted: Dict[T, U]) -> Dict[U, T]:
-    return {
-        to_be_inverted[key]: key for key in to_be_inverted.keys()
-    }
+    return {to_be_inverted[key]: key for key in to_be_inverted.keys()}
 
 
 def get_legal_values_of_enum(enum: Union[Enum, Type[Enum]]) -> Set[int]:
@@ -47,7 +45,9 @@ def get_printable_legal_values_of_enum(enum: Union[Enum, Type[Enum]]) -> List[st
     return ['']
 
 
-def get_item_from_model_file(tree: Element, keyword: str, model_file_name: Optional[str] = None) -> str:
+def get_item_from_model_file(
+    tree: Element, keyword: str, model_file_name: Optional[str] = None
+) -> str:
     item = tree.find(keyword)
     if item is not None:
         text = item.text.strip()
@@ -56,7 +56,9 @@ def get_item_from_model_file(tree: Element, keyword: str, model_file_name: Optio
         raise MissingKeyword(keyword, model_file_name)
 
 
-def get_selected_zones(tree: Element, keyword: str = 'SelectedZones', model_file: Optional[str] = None) -> List[int]:
+def get_selected_zones(
+    tree: Element, keyword: str = 'SelectedZones', model_file: Optional[str] = None
+) -> List[int]:
     obj = tree.find(keyword)
     if obj is None:
         raise MissingKeyword(keyword, model_file)
@@ -65,11 +67,15 @@ def get_selected_zones(tree: Element, keyword: str = 'SelectedZones', model_file
     try:
         zone_numbers = [int(s.strip()) for s in texts]
     except ValueError:
-        print(f"Specified zone numbers in keyword {keyword} are not only positive integer values")
+        print(
+            f'Specified zone numbers in keyword {keyword} are not only positive integer values'
+        )
 
     for znr in zone_numbers:
         if znr <= 0:
-            raise ValueError(f"List of selected zone numbers must have positive integer values")
+            raise ValueError(
+                f'List of selected zone numbers must have positive integer values'
+            )
     return zone_numbers
 
 
@@ -83,8 +89,18 @@ def get_colors(n: int, min_colors: int = 2) -> List[str]:
     :rtype: List[str]
     """
     colors = [
-        'lawngreen', 'grey', 'dodgerblue', 'gold', 'darkorchid', 'cyan', 'firebrick',
-        'olivedrab', 'blue', 'crimson', 'darkorange', 'red',
+        'lawngreen',
+        'grey',
+        'dodgerblue',
+        'gold',
+        'darkorchid',
+        'cyan',
+        'firebrick',
+        'olivedrab',
+        'blue',
+        'crimson',
+        'darkorange',
+        'red',
     ]
     if min_colors <= n <= len(colors):
         return colors[:n]
@@ -94,21 +110,28 @@ def get_colors(n: int, min_colors: int = 2) -> List[str]:
 
 def get_model_file_name(_default_name: str = 'APS.xml', **kwargs) -> ModelFile:
     return _get_file_name(
-        kwargs, legal_kwargs=['modelFileName', 'model_file_name', 'model_file', 'model'], default_name=_default_name,
+        kwargs,
+        legal_kwargs=['modelFileName', 'model_file_name', 'model_file', 'model'],
+        default_name=_default_name,
     )
 
 
 def get_rms_project_data_file(**kwargs) -> RmsProjectDataFile:
     return _get_file_name(
-        kwargs, legal_kwargs=['output_rms_data_file'], default_name='rms_project_data_for_APS_gui.xml',
+        kwargs,
+        legal_kwargs=['output_rms_data_file'],
+        default_name='rms_project_data_for_APS_gui.xml',
     )
 
 
 def get_global_variables_file() -> GlobalVariablesFile:
     return APSConfig.global_variables_file()
 
+
 def get_debug_level(**kwargs) -> Debug:
-    debug_level = _get_value(kwargs, legal_kwargs=['debugInfo', 'debug_level'], default_value=Debug.OFF)
+    debug_level = _get_value(
+        kwargs, legal_kwargs=['debugInfo', 'debug_level'], default_value=Debug.OFF
+    )
     if isinstance(debug_level, str):
         try:
             debug_level = int(debug_level)
@@ -128,26 +151,34 @@ def get_debug_level(**kwargs) -> Debug:
 
 def get_fmu_variables_file(**kwargs):
     return _get_file_name(
-        kwargs, legal_kwargs=['fmu_variables_file', 'input_selected_fmu_variable_file'],
+        kwargs,
+        legal_kwargs=['fmu_variables_file', 'input_selected_fmu_variable_file'],
         default_name='examples/FMU_selected_variables.dat',
     )
 
 
 def get_output_model_file(**kwargs) -> OutputModelFile:
-    return _get_file_name(kwargs, legal_kwargs=['output_model_file'], default_name='APS_updated.xml')
+    return _get_file_name(
+        kwargs, legal_kwargs=['output_model_file'], default_name='APS_updated.xml'
+    )
 
 
 def get_output_tagged_variables_file(**kwargs):
     return _get_file_name(
-        kwargs, legal_kwargs=['output_tagged_variables_file'], default_name='output_list_of_FMU_tagged_variables.dat',
+        kwargs,
+        legal_kwargs=['output_tagged_variables_file'],
+        default_name='output_list_of_FMU_tagged_variables.dat',
     )
 
 
 def get_tag_all_variables(**kwargs):
     return _get_value(kwargs, legal_kwargs=['tag_all_variables'], default_value=True)
 
-def get_model_file_format(**kwargs)-> ModelFileFormat:
-    return ModelFileFormat(_get_value(kwargs, legal_kwargs=['model_file_format'], default_value='both'))
+
+def get_model_file_format(**kwargs) -> ModelFileFormat:
+    return ModelFileFormat(
+        _get_value(kwargs, legal_kwargs=['model_file_format'], default_value='both')
+    )
 
 
 def get_write_log_file(**kwargs):
@@ -155,10 +186,14 @@ def get_write_log_file(**kwargs):
 
 
 def get_seed_log_file(**kwargs) -> SeedLogFile:
-    return _get_file_name(kwargs, legal_kwargs=['seed_log_file'], default_name='seedLogFile.dat')
+    return _get_file_name(
+        kwargs, legal_kwargs=['seed_log_file'], default_name='seedLogFile.dat'
+    )
 
 
-def _get_file_name(kwargs: Dict[str, str], legal_kwargs: List[str], default_name: str) -> Optional[FilePath]:
+def _get_file_name(
+    kwargs: Dict[str, str], legal_kwargs: List[str], default_name: str
+) -> Optional[FilePath]:
     use_prefix_as_fallback = kwargs.get('use_prefix_as_fallback', False)
     file_name = _get_value(kwargs, legal_kwargs, default_name)
     if file_name == default_name and use_prefix_as_fallback:
@@ -196,8 +231,11 @@ class SpecificationType(Enum):
     REMAP_ZONE_MODELS = 7
 
 
-def get_specification_file(_type: SpecificationType = SpecificationType.APS_MODEL,
-    _format: ModelFileFormat = ModelFileFormat.XML, **kwargs) -> Optional[ProbabilityLogSpecificationFile]:
+def get_specification_file(
+    _type: SpecificationType = SpecificationType.APS_MODEL,
+    _format: ModelFileFormat = ModelFileFormat.XML,
+    **kwargs,
+) -> Optional[ProbabilityLogSpecificationFile]:
     mapping_xml = {
         SpecificationType.APS_MODEL: 'APS.xml',
         SpecificationType.PROBABILITY_LOG: 'Create_prob_logs.xml',
@@ -224,18 +262,18 @@ def get_specification_file(_type: SpecificationType = SpecificationType.APS_MODE
             if _type != SpecificationType.APS_MODEL:
                 # This print is meant for help scripts in a period before xml format
                 # is deprecated for the help scripts.
-                print(f"Use XML file: {file} ")
+                print(f'Use XML file: {file} ')
         else:
-            raise ValueError(f"File: {file} does not exist.")
+            raise ValueError(f'File: {file} does not exist.')
         return str(file)
     if _format == ModelFileFormat.YML and _type in mapping_yml:
         file = get_model_file_name(_default_name=mapping_yml[_type], **kwargs)
         if not file:
             file = mapping_yml[_type]
         if Path(file).exists():
-            print(f"Use YML file: {file} ")
+            print(f'Use YML file: {file} ')
         else:
-            raise ValueError(f"File: {file} does not exist.")
+            raise ValueError(f'File: {file} does not exist.')
         return str(file)
     if _format == ModelFileFormat.BOTH:
         # First check yml format then xml format
@@ -244,7 +282,7 @@ def get_specification_file(_type: SpecificationType = SpecificationType.APS_MODE
             if not file:
                 file = mapping_yml[_type]
             if Path(file).exists():
-                print(f"Use YAML file: {file} ")
+                print(f'Use YAML file: {file} ')
                 return str(file)
         if _type in mapping_xml:
             file = get_model_file_name(_default_name=mapping_xml[_type], **kwargs)
@@ -254,12 +292,12 @@ def get_specification_file(_type: SpecificationType = SpecificationType.APS_MODE
                 if _type != SpecificationType.APS_MODEL:
                     # This print is meant for help scripts in a period before xml format
                     # is deprecated for the help scripts.
-                    print(f"Use XML file: {file} ")
+                    print(f'Use XML file: {file} ')
                 return str(file)
             else:
-                raise ValueError(f"File: {file} does not exist.")
+                raise ValueError(f'File: {file} does not exist.')
     else:
-        raise ValueError(f"Unknown file format: {_format}")
+        raise ValueError(f'Unknown file format: {_format}')
 
 
 # TODO: Make more generic; dict with precise names?
@@ -308,6 +346,7 @@ def calc_average(cell_index_defined: List[int], values: List[float]) -> float:
 def get_workflow_name() -> WorkflowName:
     try:
         import roxar.rms
+
         name = roxar.rms.get_running_workflow_name()
     except ImportError:
         name = None
@@ -317,10 +356,12 @@ def get_workflow_name() -> WorkflowName:
 def get_job_name() -> JobName:
     try:
         import roxar.rms
+
         name = roxar.rms.get_running_job_name()
     except ImportError:
         name = None
     return name
+
 
 def check_missing_keywords_list(params: dict, required_kw: list):
     missing_kw = []
@@ -328,7 +369,8 @@ def check_missing_keywords_list(params: dict, required_kw: list):
         if kw not in params or params[kw] is None:
             missing_kw.append(kw)
     if len(missing_kw) > 0:
-        raise ValueError(f"Missing specification of the keywords: {missing_kw}")
+        raise ValueError(f'Missing specification of the keywords: {missing_kw}')
+
 
 def check_missing_keywords_dict(params: dict, required_kw: dict):
     missing_kw = []
@@ -336,9 +378,12 @@ def check_missing_keywords_dict(params: dict, required_kw: dict):
         if kw not in params or params[kw] is None:
             missing_kw.append(kw)
     if len(missing_kw) > 0:
-        raise ValueError(f"Missing specification of the keywords: {missing_kw}")
+        raise ValueError(f'Missing specification of the keywords: {missing_kw}')
 
-def get_cond_prob_dict(input_cond_table: dict, active_zone_list: list, common_facies_list: bool = True):
+
+def get_cond_prob_dict(
+    input_cond_table: dict, active_zone_list: list, common_facies_list: bool = True
+):
     conditional_prob_facies = {}
     err_list = []
     common_prob_spec_all_zones = False
@@ -347,33 +392,41 @@ def get_cond_prob_dict(input_cond_table: dict, active_zone_list: list, common_fa
         try:
             prob = float(input_cond_table[key])
         except ValueError:
-            err_list.append(f"Specified probability '{input_cond_table[key]}'  is not a float number for '{key}'\n")
+            err_list.append(
+                f"Specified probability '{input_cond_table[key]}'  is not a float number for '{key}'\n"
+            )
         key_string = str(key)
         key_string.strip()
         if key_string[0] != '(' or key_string[-1] != ')':
             err_list.append(f'Missing parenteses in {key}\n')
         text = key_string[1:]
-        text = text[:len(text)-1]
+        text = text[: len(text) - 1]
         words = text.split(',')
 
         if len(words) != 3:
-            raise ValueError(f"Expecting 3 values: zonenumber, facies_to_model, facies_interpreted  in {key}\n")
+            raise ValueError(
+                f'Expecting 3 values: zonenumber, facies_to_model, facies_interpreted  in {key}\n'
+            )
         if not common_facies_list:
             if words[0] == '*':
-                err_list.append(f"Facies list vary from zone to zone. Can not use '*' in {key}  for zone number in this case.")
+                err_list.append(
+                    f"Facies list vary from zone to zone. Can not use '*' in {key}  for zone number in this case."
+                )
 
         if words[0] == '*':
             common_prob_spec_all_zones = True
         else:
             if common_prob_spec_all_zones:
-                err_list.append(f"When using '*' for zone number, this must be used for  {key} and all other specified conditional probabilities.")
+                err_list.append(
+                    f"When using '*' for zone number, this must be used for  {key} and all other specified conditional probabilities."
+                )
         try:
             if not common_prob_spec_all_zones:
                 zone_number = int(words[0])
             fac_to_model = words[1].strip()
             fac_conditioned_to = words[2].strip()
         except ValueError:
-            err_list.append(f"Expecting: integer, string, string  in {key}\n")
+            err_list.append(f'Expecting: integer, string, string  in {key}\n')
 
         if len(err_list) == 0:
             if common_prob_spec_all_zones:
@@ -385,10 +438,10 @@ def get_cond_prob_dict(input_cond_table: dict, active_zone_list: list, common_fa
                 conditional_prob_facies[new_key] = input_cond_table[key]
 
     if len(err_list) != 0:
-        print(f"Errors found:\n")
+        print(f'Errors found:\n')
         for err in err_list:
-            print(f" {err}  ")
-        print("\n")
-        raise ValueError(f"Errors found in specification of conditional probabilities.")
+            print(f' {err}  ')
+        print('\n')
+        raise ValueError(f'Errors found in specification of conditional probabilities.')
 
     return conditional_prob_facies

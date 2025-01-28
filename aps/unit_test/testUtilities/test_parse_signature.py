@@ -6,7 +6,10 @@ from aps.utils.parsing import parse_signature
 
 testdata = [
     ('ui.call("get_grid_models")', ('get_grid_models', [])),
-    ('ui.call("get_zones", "GridModel1", undefined)', ('get_zones', ["GridModel1", None])),
+    (
+        'ui.call("get_zones", "GridModel1", undefined)',
+        ('get_zones', ['GridModel1', None]),
+    ),
 ]
 
 

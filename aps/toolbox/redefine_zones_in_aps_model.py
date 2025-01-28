@@ -10,6 +10,7 @@ Input:  A dictionary with specification of the remapping or alternatively specif
 Output: New version of the APS model file.
 
 """
+
 import copy
 
 from pathlib import Path
@@ -87,37 +88,45 @@ def run(params):
     """
     model_file_name = params.get('model_file_name', None)
     debug_level = params.get('debug_level', Debug.OFF)
-    grid_model_name_for_output_model = params.get('output_grid_model_name',None)
+    grid_model_name_for_output_model = params.get('output_grid_model_name', None)
     if model_file_name:
         params = read_model_file(model_file_name)
         params['debug_level'] = debug_level
-        params['output_grid_model_name'] =  grid_model_name_for_output_model
+        params['output_grid_model_name'] = grid_model_name_for_output_model
 
     required_kw = [
-        "input_aps_model_file", "output_aps_model_file", "new_zones",
-        "old_zones", "zone_mapping",
+        'input_aps_model_file',
+        'output_aps_model_file',
+        'new_zones',
+        'old_zones',
+        'zone_mapping',
     ]
     check_missing_keywords_list(params, required_kw)
 
     if debug_level >= Debug.VERBOSE:
-        print(f"-- Input APS model file  : {params['input_aps_model_file']}")
-        print(f"-- Output APS model file : {params['output_aps_model_file']}")
-        print("-- New zones: ")
+        print(f'-- Input APS model file  : {params["input_aps_model_file"]}')
+        print(f'-- Output APS model file : {params["output_aps_model_file"]}')
+        print('-- New zones: ')
         for key, item in params['new_zones'].items():
-            print(f"   {key}  {item}")
-        print(f"-- Old zones: ")
+            print(f'   {key}  {item}')
+        print(f'-- Old zones: ')
         for key, item in params['old_zones'].items():
-            print(f"   {key}  {item}")
-        print(f"-- Zone mapping          : ")
+            print(f'   {key}  {item}')
+        print(f'-- Zone mapping          : ')
         for key, zone_list in params['zone_mapping'].items():
-            print(f"   {key}  {zone_list}")
+            print(f'   {key}  {zone_list}')
         if grid_model_name_for_output_model is not None:
-            print(f"-- Grid model for output APS model:  {grid_model_name_for_output_model} ")
+            print(
+                f'-- Grid model for output APS model:  {grid_model_name_for_output_model} '
+            )
         else:
-            print(f"-- Grid model for output APS model:  The same as for input APS model.")
-        print(" ")
+            print(
+                f'-- Grid model for output APS model:  The same as for input APS model.'
+            )
+        print(' ')
 
     redefine_zones(params)
+
 
 def read_model_file(model_file_name):
     # YAML file format
@@ -126,22 +135,27 @@ def read_model_file(model_file_name):
     if extension in ['yaml', 'yml']:
         return _read_model_file_yml(model_file_name)
     else:
-        raise ValueError(f"Model file name: {model_file_name}  must be in YAML format with file extension 'yml' or 'yaml' ")
+        raise ValueError(
+            f"Model file name: {model_file_name}  must be in YAML format with file extension 'yml' or 'yaml' "
+        )
+
 
 def _read_model_file_yml(model_file_name):
     # Read model file and overwrite model parameters
-    print(f"Read model file: {model_file_name}  ")
+    print(f'Read model file: {model_file_name}  ')
     assert model_file_name
     spec_all = readYml(model_file_name)
 
     parent_kw = 'RemapZoneModels'
     spec = spec_all[parent_kw] if parent_kw in spec_all else None
     if spec is None:
-        raise ValueError(f"Missing keyword: {parent_kw} ")
+        raise ValueError(f'Missing keyword: {parent_kw} ')
 
     input_aps_model_file_name = get_text_value(spec, parent_kw, 'InputAPSModelFile')
     output_aps_model_file_name = get_text_value(spec, parent_kw, 'OutputAPSModelFile')
-    output_grid_model_name = get_text_value(spec, parent_kw, 'OutputGridModel', default="")
+    output_grid_model_name = get_text_value(
+        spec, parent_kw, 'OutputGridModel', default=''
+    )
     new_zones_dict = get_dict(spec, parent_kw, 'NewZones')
     old_zones_dict = get_dict(spec, parent_kw, 'OldZones')
     zone_mapping_dict_input = get_dict(spec, parent_kw, 'ZoneMapping')
@@ -150,15 +164,13 @@ def _read_model_file_yml(model_file_name):
         list_of_zone_names = value.split()
         zone_mapping_dict[key] = list_of_zone_names
 
-
-
     model_param_dict = {
-        "input_aps_model_file": input_aps_model_file_name,
-        "output_aps_model_file": output_aps_model_file_name,
-        "output_grid_model_name": output_grid_model_name,
-        "new_zones": new_zones_dict,
-        "old_zones": old_zones_dict,
-        "zone_mapping": zone_mapping_dict,
+        'input_aps_model_file': input_aps_model_file_name,
+        'output_aps_model_file': output_aps_model_file_name,
+        'output_grid_model_name': output_grid_model_name,
+        'new_zones': new_zones_dict,
+        'old_zones': old_zones_dict,
+        'zone_mapping': zone_mapping_dict,
     }
     return model_param_dict
 
@@ -170,9 +182,11 @@ def redefine_zones(params):
 
     # Start by making a copy
     aps_output_model = APSModel(params['input_aps_model_file'])
-    if 'output_grid_model_name' in params \
-        and params['output_grid_model_name'] is not None \
-        and len(params['output_grid_model_name']) > 0:
+    if (
+        'output_grid_model_name' in params
+        and params['output_grid_model_name'] is not None
+        and len(params['output_grid_model_name']) > 0
+    ):
         grid_model_name_for_output_model = params['output_grid_model_name']
     else:
         grid_model_name_for_output_model = grid_model_name_for_input_model
@@ -185,7 +199,7 @@ def redefine_zones(params):
     old_zones = params['old_zones']
 
     # Unique zone_names so invert the dict
-    orig_zones_per_name = { name: zone_number for zone_number, name in old_zones.items() }
+    orig_zones_per_name = {name: zone_number for zone_number, name in old_zones.items()}
 
     # The remapping
     new_zone_models = {}
@@ -201,11 +215,15 @@ def redefine_zones(params):
         newkey = (zone_number, 0)
         new_zone_models[newkey] = zone_model
         if debug_level >= Debug.VERBOSE:
-            print(f"-- New zone: {zone_number} {zone_name}  use old zone: {orig_zone_number} {first_orig_zone_name} ")
+            print(
+                f'-- New zone: {zone_number} {zone_name}  use old zone: {orig_zone_number} {first_orig_zone_name} '
+            )
 
     aps_output_model.set_zone_models(new_zone_models)
     aps_output_model.grid_model_name = grid_model_name_for_output_model
-    aps_output_model.fmu_mode = "OFF"
+    aps_output_model.fmu_mode = 'OFF'
 
-    print(f"Write file: {params['output_aps_model_file']}")
-    aps_output_model.write_model(params['output_aps_model_file'], debug_level=debug_level)
+    print(f'Write file: {params["output_aps_model_file"]}')
+    aps_output_model.write_model(
+        params['output_aps_model_file'], debug_level=debug_level
+    )

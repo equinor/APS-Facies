@@ -1,9 +1,11 @@
 import roxar
 
+
 class APSProgressBar:
     """
     Keep track of progress step when using progress bar
     """
+
     use_progress_bar = False
     number_of_steps = 100
     progress_step = None
@@ -22,11 +24,9 @@ class APSProgressBar:
             if cls.use_progress_bar:
                 cls.progress_step = 0
                 cls.number_of_steps = number_of_steps
-                roxar.rms.create_progress_bar(cls.number_of_steps, "Running APS job")
+                roxar.rms.create_progress_bar(cls.number_of_steps, 'Running APS job')
         except:
             cls.use_progress_bar = False
-
-
 
     @classmethod
     def close_progress_bar(cls):

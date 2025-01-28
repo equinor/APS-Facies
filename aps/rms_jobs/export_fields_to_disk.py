@@ -30,15 +30,15 @@ from aps.utils.constants.simple import Debug
 
 
 def run(project, **kwargs):
-    ''' Export simulated GRF fields from ERTBOX grid to file readable by ERT
-    '''
+    """Export simulated GRF fields from ERTBOX grid to file readable by ERT"""
     if project.current_realisation > 0:
-        raise ValueError(f'In RMS models to be used with a FMU loop in ERT,'
-                         'the grid and parameters should be shared and realisation = 1'
+        raise ValueError(
+            f'In RMS models to be used with a FMU loop in ERT,'
+            'the grid and parameters should be shared and realisation = 1'
         )
     model_file_name = kwargs.get('model_file', None)
     if model_file_name is None:
-        raise ValueError("Model file name is required in export_fields_to_dist")
+        raise ValueError('Model file name is required in export_fields_to_dist')
     fmu_mode = kwargs.get('fmu_mode', False)
     aps_model = APSModel(model_file_name)
 
@@ -49,23 +49,27 @@ def run(project, **kwargs):
     file_format = aps_model.fmu_field_file_format
     fmu_use_residual_fields = aps_model.fmu_use_residual_fields
 
-    print(" ")
-    print(f"Export 3D parameter files from {fmu_grid_name}")
+    print(' ')
+    print(f'Export 3D parameter files from {fmu_grid_name}')
     if debug_level >= Debug.ON:
         if fmu_use_residual_fields:
-            print(f"- Only the residual for GRF's with trend is written to files to be read by ERT!")
+            print(
+                f"- Only the residual for GRF's with trend is written to files to be read by ERT!"
+            )
         else:
-            print(f"- GRF files are written to files to be read by ERT")
+            print(f'- GRF files are written to files to be read by ERT')
 
     # Get the ERTBOX grid from RMS
     fmu_grid_model = project.grid_models[fmu_grid_name]
     if fmu_grid_model.is_empty(project.current_realisation):
-        raise ValueError(f'Grid model for ERTBOX grid: {fmu_grid_name} is empty for realization {project.current_realisation}.')
+        raise ValueError(
+            f'Grid model for ERTBOX grid: {fmu_grid_name} is empty for realization {project.current_realisation}.'
+        )
     grid3D = fmu_grid_model.get_grid(project.current_realisation)
 
     # For ERTBOX grid the simulation box dimensions from simbox_indexer and grid_indexer are the same.
     indexer = grid3D.simbox_indexer
-    nx, ny, nz  = indexer.dimensions
+    nx, ny, nz = indexer.dimensions
     handedness = indexer.ijk_handedness
 
     field_location = kwargs.get('save_dir', None)
@@ -82,8 +86,10 @@ def run(project, **kwargs):
     for zone in aps_model.zone_models:
         if aps_model.isSelected(zone.zone_number, zone.region_number):
             if debug_level >= Debug.VERBOSE:
-                print(" ")
-                print(f"-- Export GRF fields for (zone,region) = ({zone.zone_number},{zone.region_number})")
+                print(' ')
+                print(
+                    f'-- Export GRF fields for (zone,region) = ({zone.zone_number},{zone.region_number})'
+                )
 
             for field_name in zone.gaussian_fields_in_truncation_rule:
                 if fmu_use_residual_fields and zone.hasTrendModel(field_name):
@@ -93,20 +99,27 @@ def run(project, **kwargs):
                 if field_name in field_properties:
                     field_property = field_properties[field_name]
                     if field_property.is_empty(project.current_realisation):
-                        raise ValueError(f'The parameter {field_name} is empty in grid model {fmu_grid_name}')
+                        raise ValueError(
+                            f'The parameter {field_name} is empty in grid model {fmu_grid_name}'
+                        )
                 else:
-                    raise ValueError(f'The parameter  {field_name} does not exist in grid model {fmu_grid_name}')
+                    raise ValueError(
+                        f'The parameter  {field_name} does not exist in grid model {fmu_grid_name}'
+                    )
 
                 file_name_active = None
                 for property in field_properties:
-
                     # sub_string is None if the property_name does not end with '_active'
                     # and contain the property_name except the '_active' else
                     sub_string = is_active_param_name(property.name)
 
                     # Check if the sub_string match the first part of field_name
-                    if sub_string and is_active_param_defined_for_zone(sub_string, field_name):
-                        file_name_active = str(field_location / f'{property.name}.{file_format}')
+                    if sub_string and is_active_param_defined_for_zone(
+                        sub_string, field_name
+                    ):
+                        file_name_active = str(
+                            field_location / f'{property.name}.{file_format}'
+                        )
                         if file_name_active not in active_params_save_to_file:
                             active_params_save_to_file.append(file_name_active)
                             write_field_name_to_file(
@@ -116,8 +129,10 @@ def run(project, **kwargs):
                                 field_properties,
                                 field_property,
                                 handedness,
-                                nx,ny,nz,
-                                debug_level
+                                nx,
+                                ny,
+                                nz,
+                                debug_level,
                             )
 
                 file_name = str(field_location / f'{field_name}.{file_format}')
@@ -128,30 +143,35 @@ def run(project, **kwargs):
                     field_properties,
                     field_property,
                     handedness,
-                    nx,ny,nz,
-                    debug_level
+                    nx,
+                    ny,
+                    nz,
+                    debug_level,
                 )
 
     APSProgressBar.increment()
 
 
 def write_field_name_to_file(
-        file_name,
-        field_name,
-        file_format,
-        field_properties,
-        field_property,
-        handedness,
-        nx,ny,nz,
-        debug_level
-    ):
-
+    file_name,
+    field_name,
+    file_format,
+    field_properties,
+    field_property,
+    handedness,
+    nx,
+    ny,
+    nz,
+    debug_level,
+):
     if debug_level >= Debug.VERY_VERBOSE:
         print(f'--- Write parameter: {field_name} to file {file_name}')
 
     if file_format.upper() == 'ROFF':
         # Use ROFF Binary
-        field_properties.save(file_name, field_name, format=roxar.FileFormat.ROFF_BINARY)
+        field_properties.save(
+            file_name, field_name, format=roxar.FileFormat.ROFF_BINARY
+        )
     else:
         # Use xtgeo for other formats not available from roxar.grids
         values = field_property.get_values()
@@ -164,13 +184,17 @@ def write_field_name_to_file(
             values3d_flipped = flip_grid_index_origo(values3d, ny)
 
             xtgeo_object = xtgeo.GridProperty(
-                ncol=nx, nrow=ny, nlay=nz,
+                ncol=nx,
+                nrow=ny,
+                nlay=nz,
                 values=values3d_flipped,
                 name=field_name,
             )
         else:
             xtgeo_object = xtgeo.GridProperty(
-                ncol=nx, nrow=ny, nlay=nz,
+                ncol=nx,
+                nrow=ny,
+                nlay=nz,
                 values=values3d,
                 name=field_name,
             )
@@ -183,12 +207,13 @@ def write_field_name_to_file(
 
 
 def is_active_param_name(property_name: str):
-    words = property_name.split("_")
-    if words[-1] == "active":
+    words = property_name.split('_')
+    if words[-1] == 'active':
         return copy.copy(property_name[:-7])
     return None
 
-def is_active_param_defined_for_zone(name: str, field_name:str):
+
+def is_active_param_defined_for_zone(name: str, field_name: str):
     if name is None:
         return False
     try:

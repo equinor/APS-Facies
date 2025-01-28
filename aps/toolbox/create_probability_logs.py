@@ -258,6 +258,7 @@ Output:
     set where the zone is undefined or the input facies log is undefined will also get undefined values for the probabilities.
     The output probability logs will get the name  <prefix>_<modelling_facies_name>.
 """
+
 import xml.etree.ElementTree as ET
 import os
 from pathlib import Path
@@ -268,106 +269,107 @@ from aps.utils.exceptions.xml import MissingKeyword
 from aps.utils.constants.simple import Debug
 from aps.utils.methods import check_missing_keywords_list, get_cond_prob_dict
 
+
 def run(params):
     """
-        Create probability logs from facies logs.
-        Usage alternatives:
-        - Specify a dictionary with model file name containing all input information. See example 1.
-        - Specify a dictionary with all input information. See example 2.
+            Create probability logs from facies logs.
+            Usage alternatives:
+            - Specify a dictionary with model file name containing all input information. See example 1.
+            - Specify a dictionary with all input information. See example 2.
 
-Example 1 using xml model file as input
+    Example 1 using xml model file as input
 
-from aps.toolbox import create_probability_logs
-from aps.utils.constants.simple import Debug
+    from aps.toolbox import create_probability_logs
+    from aps.utils.constants.simple import Debug
 
-input_dict ={
-    'project': project,
-    'model_file_name': "test_prob_logs1.xml",
-    'debug_level': Debug.VERBOSE,
-}
-create_probability_logs.run(input_dict)
-
-
-Example 2 using yaml model file as input
-
-from aps.toolbox import create_probability_logs
-from aps.utils.constants.simple import Debug
-
-input_dict ={
-    'project': project,
-    'model_file_name': "test_prob_logs1.yml",
-    'debug_level': Debug.VERBOSE,
-}
-create_probability_logs.run(input_dict)
+    input_dict ={
+        'project': project,
+        'model_file_name': "test_prob_logs1.xml",
+        'debug_level': Debug.VERBOSE,
+    }
+    create_probability_logs.run(input_dict)
 
 
-Example 3 speciying input directly in the input python dictionary:
+    Example 2 using yaml model file as input
 
-from aps.toolbox import create_probability_logs
-from aps.utils.constants.simple import Debug
+    from aps.toolbox import create_probability_logs
+    from aps.utils.constants.simple import Debug
+
+    input_dict ={
+        'project': project,
+        'model_file_name': "test_prob_logs1.yml",
+        'debug_level': Debug.VERBOSE,
+    }
+    create_probability_logs.run(input_dict)
 
 
-# Define input parameters
+    Example 3 speciying input directly in the input python dictionary:
 
-# Modelled facies for each zone can vary from zone to zone. IN this case regions are not used
-# so the specification has region number 0.
-# The key for modelling_facies_dict is (zone_number, region_number)
-modelling_facies_dict = {
-    (1,0): ["F1", "F2", "F3"],
-    (2,0): ["F1", "F2", "F3"],
-}
-# Observed facies for zone 1 is A, B, C, D
-# Observed facies for zone 2 is A, B, C
-# Prob for modelled facies F1 is set to 1 where A is observed
-# Prob for modelled facies F2 is set to 1 where B is observed
-# Prob for modelled facies F3 is set to 1 where C is observed
-# Where observed facies is D in zone 1 :
-#   F1 is assigned prob = 0.7
-#   F2 is assigned prob = 0.2
-#   F3 is assigned prob = 0.1
-# The dictionary conditional_prob_facies has
-# key of the form (zone_number, modelled_facies_name, interpreted_facies_name)
-conditional_prob_facies ={
-    (1, "F1", "A"): 1.0,
-    (1, "F2", "A"): 0.0,
-    (1, "F3", "A"): 0.0,
-    (1, "F1", "B"): 0.0,
-    (1, "F2", "B"): 1.0,
-    (1, "F3", "B"): 0.0,
-    (1, "F1", "C"): 0.0,
-    (1, "F2", "C"): 0.0,
-    (1, "F3", "C"): 1.0,
-    (1, "F1", "D"): 0.7,
-    (1, "F2", "D"): 0.2,
-    (1, "F3", "D"): 0.1,
+    from aps.toolbox import create_probability_logs
+    from aps.utils.constants.simple import Debug
 
-    (2, "F1", "A"): 1.0,
-    (2, "F2", "A"): 0.0,
-    (2, "F3", "A"): 0.0,
-    (2, "F1", "B"): 0.0,
-    (2, "F2", "B"): 1.0,
-    (2, "F3", "B"): 0.0,
-    (2, "F1", "C"): 0.0,
-    (2, "F2", "C"): 0.0,
-    (2, "F3", "C"): 1.0,
-}
 
-# If the model should use regions, specify the key "region_log_name" with name of the blocked well region log.
-# Only when region is not used, it is possible to use "conditional_prob_facies".
-# The keyword "debug_level" is optional. Possible values are Debug.OFF, Debug.ON, Debug.VERBOSE
-# and specify level of output to terminal when running the script.
-input_dict = {
-    "project":                   project,
-    "debug_level":               Debug.VERBOSE,
-    "grid_model_name":           "GridModelFine",
-    "bw_name":                   "BW4",
-    "facies_log_name":           "Facies",
-    "zone_log_name":             "Zone",
-    "modelling_facies_per_zone_region": modelling_facies_dict,
-    "prefix_prob_logs":          "Prob",
-    "conditional_prob_facies":   conditional_prob_facies,
-}
-create_probability_logs.run(input_dict)
+    # Define input parameters
+
+    # Modelled facies for each zone can vary from zone to zone. IN this case regions are not used
+    # so the specification has region number 0.
+    # The key for modelling_facies_dict is (zone_number, region_number)
+    modelling_facies_dict = {
+        (1,0): ["F1", "F2", "F3"],
+        (2,0): ["F1", "F2", "F3"],
+    }
+    # Observed facies for zone 1 is A, B, C, D
+    # Observed facies for zone 2 is A, B, C
+    # Prob for modelled facies F1 is set to 1 where A is observed
+    # Prob for modelled facies F2 is set to 1 where B is observed
+    # Prob for modelled facies F3 is set to 1 where C is observed
+    # Where observed facies is D in zone 1 :
+    #   F1 is assigned prob = 0.7
+    #   F2 is assigned prob = 0.2
+    #   F3 is assigned prob = 0.1
+    # The dictionary conditional_prob_facies has
+    # key of the form (zone_number, modelled_facies_name, interpreted_facies_name)
+    conditional_prob_facies ={
+        (1, "F1", "A"): 1.0,
+        (1, "F2", "A"): 0.0,
+        (1, "F3", "A"): 0.0,
+        (1, "F1", "B"): 0.0,
+        (1, "F2", "B"): 1.0,
+        (1, "F3", "B"): 0.0,
+        (1, "F1", "C"): 0.0,
+        (1, "F2", "C"): 0.0,
+        (1, "F3", "C"): 1.0,
+        (1, "F1", "D"): 0.7,
+        (1, "F2", "D"): 0.2,
+        (1, "F3", "D"): 0.1,
+
+        (2, "F1", "A"): 1.0,
+        (2, "F2", "A"): 0.0,
+        (2, "F3", "A"): 0.0,
+        (2, "F1", "B"): 0.0,
+        (2, "F2", "B"): 1.0,
+        (2, "F3", "B"): 0.0,
+        (2, "F1", "C"): 0.0,
+        (2, "F2", "C"): 0.0,
+        (2, "F3", "C"): 1.0,
+    }
+
+    # If the model should use regions, specify the key "region_log_name" with name of the blocked well region log.
+    # Only when region is not used, it is possible to use "conditional_prob_facies".
+    # The keyword "debug_level" is optional. Possible values are Debug.OFF, Debug.ON, Debug.VERBOSE
+    # and specify level of output to terminal when running the script.
+    input_dict = {
+        "project":                   project,
+        "debug_level":               Debug.VERBOSE,
+        "grid_model_name":           "GridModelFine",
+        "bw_name":                   "BW4",
+        "facies_log_name":           "Facies",
+        "zone_log_name":             "Zone",
+        "modelling_facies_per_zone_region": modelling_facies_dict,
+        "prefix_prob_logs":          "Prob",
+        "conditional_prob_facies":   conditional_prob_facies,
+    }
+    create_probability_logs.run(input_dict)
 
     """
     project = params['project']
@@ -384,7 +386,7 @@ create_probability_logs.run(input_dict)
         params['region_log_name'] = _file.region_log_name
         params['zone_log_name'] = _file.zone_log_name
         params['modelling_facies_per_zone_region'] = _file.facies_list_per_zone
-        params['prefix_prob_logs'] =_file.prefix_probability_logs
+        params['prefix_prob_logs'] = _file.prefix_probability_logs
         params['realization_number'] = project.current_realisation
         use_cond_prob = _file.use_conditioned_probabilities
 
@@ -393,7 +395,7 @@ create_probability_logs.run(input_dict)
             kw = 'conditional_prob_facies'
             params[kw] = _file.conditional_prob_facies if use_cond_prob else None
             if params[kw] is None:
-                raise ValueError(f"Missing specification of: {kw}")
+                raise ValueError(f'Missing specification of: {kw}')
             conditional_prob_facies = params[kw]
     else:
         # Optional parameters
@@ -403,10 +405,14 @@ create_probability_logs.run(input_dict)
 
     # Check that all necessary parameters are set
     keywords_required = [
-            'project', 'grid_model_name','bw_name',
-            'facies_log_name', 'zone_log_name',
-            'prefix_prob_logs','modelling_facies_per_zone_region',
-             ]
+        'project',
+        'grid_model_name',
+        'bw_name',
+        'facies_log_name',
+        'zone_log_name',
+        'prefix_prob_logs',
+        'modelling_facies_per_zone_region',
+    ]
     kw = 'region_log_name'
     use_regions = False
     if kw in params and params[kw]:
@@ -415,28 +421,30 @@ create_probability_logs.run(input_dict)
     check_missing_keywords_list(params, keywords_required)
     if use_regions:
         if use_cond_prob:
-            print(f"Warning: Conditional probabilities is not implemented when using regions and will be ignored.")
+            print(
+                f'Warning: Conditional probabilities is not implemented when using regions and will be ignored.'
+            )
         use_cond_prob = False
         conditional_prob_facies = None
 
     if debug_level >= Debug.VERBOSE:
-        print(f"Realization number: {project.current_realisation}")
-        print(f"Grid model: {params['grid_model_name']}")
-        print(f"BW        : {params['bw_name']}")
-        print(f"Facies log: {params['facies_log_name']}")
+        print(f'Realization number: {project.current_realisation}')
+        print(f'Grid model: {params["grid_model_name"]}')
+        print(f'BW        : {params["bw_name"]}')
+        print(f'Facies log: {params["facies_log_name"]}')
         if use_regions:
-            print(f"Region log: {params['region_log_name']}")
-        print(f"Zone   log: {params['zone_log_name']}")
-        print(f"Prefix    : {params['prefix_prob_logs']}")
-        print(f"Binary log: {not use_cond_prob}")
-        print("Modelling facies per zone and region")
+            print(f'Region log: {params["region_log_name"]}')
+        print(f'Zone   log: {params["zone_log_name"]}')
+        print(f'Prefix    : {params["prefix_prob_logs"]}')
+        print(f'Binary log: {not use_cond_prob}')
+        print('Modelling facies per zone and region')
         mfac_dict = params['modelling_facies_per_zone_region']
         for key, fac_list in mfac_dict.items():
             (znr, rnr) = key
             if use_regions:
-                print(f"  {key}  {fac_list}  ")
+                print(f'  {key}  {fac_list}  ')
             else:
-                print(f"  {znr}  {fac_list}  ")
+                print(f'  {znr}  {fac_list}  ')
 
     # Case: use_cond_prob == False
     # In this case the probabilities are either 1 or 0 or undefined.
@@ -459,12 +467,18 @@ create_probability_logs.run(input_dict)
     else:
         print('Calculate probability logs using specified conditional probabilities')
         if debug_level >= Debug.VERBOSE:
-            sorted_by_zone_dict = dict(sorted(conditional_prob_facies.items(), key=lambda item: (item[0][0], item [0][2], item[0][1])))
+            sorted_by_zone_dict = dict(
+                sorted(
+                    conditional_prob_facies.items(),
+                    key=lambda item: (item[0][0], item[0][2], item[0][1]),
+                )
+            )
             for key, prob_value in sorted_by_zone_dict.items():
                 print(f'Zone: {key[0]}  Prob({key[1]}| {key[2]}) = {prob_value}')
         createProbabilityLogs(params)
 
     print('Finished createProbabilityLogs')
+
 
 def read_model_file(model_file_name):
     # Check suffix of file for file type
@@ -475,14 +489,17 @@ def read_model_file(model_file_name):
     elif suffix == 'xml':
         _file = _read_model_file_xml(model_file_name)
     else:
-        raise ValueError(f"Model file name: {model_file_name}  must be either 'xml' or 'yml' format")
+        raise ValueError(
+            f"Model file name: {model_file_name}  must be either 'xml' or 'yml' format"
+        )
     return _file
+
 
 def _read_model_file_xml(model_file_name: str):
     assert model_file_name
     print(f'Read model file: {model_file_name}')
     if not os.path.exists(model_file_name):
-        raise IOError(f"File {model_file_name} does not exist")
+        raise IOError(f'File {model_file_name} does not exist')
 
     root = ET.parse(model_file_name).getroot()
     main_keyword = 'ProbLogs'
@@ -495,9 +512,17 @@ def _read_model_file_xml(model_file_name: str):
     facies_log_name = getTextCommand(root, 'FaciesLogName', **kwargs)
     zone_log_name = getTextCommand(root, 'ZoneLogName', **kwargs)
     prefix = getTextCommand(root, 'OutputPrefix', **kwargs)
-    region_log_name = getTextCommand(root, 'RegionLogName', defaultText="", modelFile=model_file_name, required=False)
-    use_conditioned_probabilities = getIntCommand(root, 'UseConditionalProbabilities',
-        minValue=0, maxValue=1, defaultValue=0, **kwargs)
+    region_log_name = getTextCommand(
+        root, 'RegionLogName', defaultText='', modelFile=model_file_name, required=False
+    )
+    use_conditioned_probabilities = getIntCommand(
+        root,
+        'UseConditionalProbabilities',
+        minValue=0,
+        maxValue=1,
+        defaultValue=0,
+        **kwargs,
+    )
     use_regions = False
     if region_log_name:
         use_regions = True
@@ -506,16 +531,20 @@ def _read_model_file_xml(model_file_name: str):
         try:
             facies_per_zone_obj = getKeyword(root, keyword_facies, **kwargs)
         except:
-            raise KeyError(f"When regions are not used, then use the keyword: {keyword_facies} ")
+            raise KeyError(
+                f'When regions are not used, then use the keyword: {keyword_facies} '
+            )
     else:
         keyword_facies = 'ModellingFaciesPerZoneRegion'
         try:
             facies_per_zone_obj = getKeyword(root, keyword_facies, **kwargs)
         except:
-            raise KeyError(f"When regions are used, then use the keyword: {keyword_facies} ")
+            raise KeyError(
+                f'When regions are used, then use the keyword: {keyword_facies} '
+            )
     facies_list_per_zone_region = {}
     if facies_per_zone_obj is None:
-        raise ValueError(f"Missing keyword {keyword_facies} in {model_file_name}")
+        raise ValueError(f'Missing keyword {keyword_facies} in {model_file_name}')
 
     region_number = 0
     for zone_obj in facies_per_zone_obj.findall('Zone'):
@@ -536,7 +565,7 @@ def _read_model_file_xml(model_file_name: str):
         use_same_facies_in_all_zones = True
         zone_region_list = list(facies_list_per_zone_region.keys())
         key_for_first_zone = zone_region_list[0]
-        zone_list =[elem[0] for elem in zone_region_list]
+        zone_list = [elem[0] for elem in zone_region_list]
         zone_region_list = None
         zone_number_first = key_for_first_zone[0]
 
@@ -550,7 +579,6 @@ def _read_model_file_xml(model_file_name: str):
                     if f not in facies_names_first_zone:
                         use_same_facies_in_all_zones = False
 
-
         keyword = 'CondProbMatrix'
         first = True
         common_cond_prob_matrix = False
@@ -560,7 +588,7 @@ def _read_model_file_xml(model_file_name: str):
             if common_cond_prob_matrix:
                 raise KeyError(
                     f"Keyword {keyword} is already specified without attribute 'number' "
-                    "so the keyword can not be specified multiple times."
+                    'so the keyword can not be specified multiple times.'
                 )
 
             zone_number_string = cond_prob_obj.get('number')
@@ -573,15 +601,17 @@ def _read_model_file_xml(model_file_name: str):
 
                 if not use_same_facies_in_all_zones:
                     raise KeyError(
-                        f"The modelled facied per zone vary from zone to zone.\n"
-                        f"In this case it is necessary to specify conditional probabilities for each zone.\n"
+                        f'The modelled facied per zone vary from zone to zone.\n'
+                        f'In this case it is necessary to specify conditional probabilities for each zone.\n'
                         f"Use the attribute 'number' to specify zone number in keyword {keyword}"
                     )
-                conditional_prob_facies = _read_cond_prob_matrix(conditional_prob_facies,
-                                                                keyword,
-                                                                keyword_facies,
-                                                                cond_prob_obj,
-                                                                facies_list_per_zone_region)
+                conditional_prob_facies = _read_cond_prob_matrix(
+                    conditional_prob_facies,
+                    keyword,
+                    keyword_facies,
+                    cond_prob_obj,
+                    facies_list_per_zone_region,
+                )
 
                 first = False
             else:
@@ -589,26 +619,28 @@ def _read_model_file_xml(model_file_name: str):
                 zone_number = int(zone_number_string)
                 if zone_number not in zone_list:
                     raise KeyError(
-                        f"Zone number {zone_number} specified in keyword {keyword} "
-                        f"is not specified in keyword {keyword_facies}"
+                        f'Zone number {zone_number} specified in keyword {keyword} '
+                        f'is not specified in keyword {keyword_facies}'
                     )
 
                 if zone_number in cond_prob_is_specified_for_zone:
                     # Cond prob matrix already read from model file
                     # Can not have two specification of the same cond prob matrix
                     raise KeyError(
-                        f"Keyword {keyword} is specified multiple times for zone number {zone_number}"
+                        f'Keyword {keyword} is specified multiple times for zone number {zone_number}'
                     )
 
                 # Add to list of specified cond prob matrices
                 cond_prob_is_specified_for_zone.append(zone_number)
-                conditional_prob_facies = _read_cond_prob_matrix(conditional_prob_facies,
-                                                                keyword,
-                                                                keyword_facies,
-                                                                cond_prob_obj,
-                                                                facies_list_per_zone_region,
-                                                                zone_number,
-                                                                False)
+                conditional_prob_facies = _read_cond_prob_matrix(
+                    conditional_prob_facies,
+                    keyword,
+                    keyword_facies,
+                    cond_prob_obj,
+                    facies_list_per_zone_region,
+                    zone_number,
+                    False,
+                )
                 first = False
 
         # Check that all specified zones have a specified conditional probability matrix if this is required
@@ -622,7 +654,8 @@ def _read_model_file_xml(model_file_name: str):
                 for i in missing_cond_prob:
                     text = text + ' ' + str(i)
                 raise KeyError(
-                    f"The following zones does not have any specification of the keyword {keyword}: {text}")
+                    f'The following zones does not have any specification of the keyword {keyword}: {text}'
+                )
 
     return _ModelFile(
         grid_model_name,
@@ -636,20 +669,25 @@ def _read_model_file_xml(model_file_name: str):
         conditional_prob_facies,
     )
 
-def _read_cond_prob_matrix(conditional_prob_facies,
-                          keyword_parent,
-                          keyword_facies,
-                          cond_prob_obj,
-                          facies_list_per_zone_region,
-                          zone_number=None,
-                          use_common_cond_prod_matrix=True):
+
+def _read_cond_prob_matrix(
+    conditional_prob_facies,
+    keyword_parent,
+    keyword_facies,
+    cond_prob_obj,
+    facies_list_per_zone_region,
+    zone_number=None,
+    use_common_cond_prod_matrix=True,
+):
     zone_list = []
     if use_common_cond_prod_matrix:
         zone_region_list = list(facies_list_per_zone_region.keys())
-        zone_list =[item[0] for item in zone_region_list]
+        zone_list = [item[0] for item in zone_region_list]
         zone_region_list = None
         if len(zone_list) == 0:
-            raise ValueError("Facies per zone must be specified. Can not have 0 facies.")
+            raise ValueError(
+                'Facies per zone must be specified. Can not have 0 facies.'
+            )
         zone_number = zone_list[0]
     facies_names_for_zone = list(facies_list_per_zone_region[(zone_number, 0)])
     facies_names_conditioned_to = []
@@ -660,13 +698,13 @@ def _read_cond_prob_matrix(conditional_prob_facies,
         if facies_name not in facies_names_for_zone:
             if not use_common_cond_prod_matrix:
                 raise KeyError(
-                    f"Zone number {zone_number} specified in keyword {keyword_parent} has "
-                    f"facies name {facies_name} that is not defined in keyword {keyword_facies}"
+                    f'Zone number {zone_number} specified in keyword {keyword_parent} has '
+                    f'facies name {facies_name} that is not defined in keyword {keyword_facies}'
                 )
             else:
                 raise KeyError(
-                    f"Keyword {keyword_parent} has facies name {facies_name} "
-                    f"that is not defined in keyword {keyword_facies}"
+                    f'Keyword {keyword_parent} has facies name {facies_name} '
+                    f'that is not defined in keyword {keyword_facies}'
                 )
 
         facies_name_conditioned = words[1]
@@ -692,23 +730,23 @@ def _read_cond_prob_matrix(conditional_prob_facies,
             key = (zone_number, facies_name, facies_name_conditioned)
             conditional_prob_facies[key] = prob
 
-
     # Check that all facies names specified to be modelled for the zone actually has a specified probability
-    for facies_name_conditioned  in facies_names_conditioned_to:
+    for facies_name_conditioned in facies_names_conditioned_to:
         for facies_name in facies_names_for_zone:
             key = (zone_number, facies_name, facies_name_conditioned)
             if key not in conditional_prob_facies:
                 if not use_common_cond_prod_matrix:
                     raise ValueError(
-                        f"No conditional probability is specified for facies {facies_name} "
-                        f"in zone {zone_number} conditioned to interpreted facies {facies_name_conditioned}"
+                        f'No conditional probability is specified for facies {facies_name} '
+                        f'in zone {zone_number} conditioned to interpreted facies {facies_name_conditioned}'
                     )
                 else:
                     raise ValueError(
-                        f"No conditional probability is specified for facies {facies_name} "
-                        f"conditioned to interpreted facies {facies_name_conditioned}"
+                        f'No conditional probability is specified for facies {facies_name} '
+                        f'conditioned to interpreted facies {facies_name_conditioned}'
                     )
     return conditional_prob_facies
+
 
 def _read_model_file_yml(model_file_name: str):
     print(f'Read model file: {model_file_name}')
@@ -717,7 +755,7 @@ def _read_model_file_yml(model_file_name: str):
     kw_parent = 'ProbLogs'
     spec = spec_all[kw_parent] if kw_parent in spec_all else None
     if spec is None:
-        raise ValueError(f"Missing keyword: {kw_parent} ")
+        raise ValueError(f'Missing keyword: {kw_parent} ')
 
     grid_model_name = get_text_value(spec, kw_parent, 'GridModelName')
     blocked_wells_name = get_text_value(spec, kw_parent, 'BlockedWells')
@@ -725,7 +763,9 @@ def _read_model_file_yml(model_file_name: str):
     region_log_name = get_text_value(spec, kw_parent, 'RegionLogName', '')
     zone_log_name = get_text_value(spec, kw_parent, 'ZoneLogName')
     prefix = get_text_value(spec, kw_parent, 'OutputPrefix')
-    use_conditioned_probabilities = get_bool_value(spec, 'UseConditionalProbabilities', False)
+    use_conditioned_probabilities = get_bool_value(
+        spec, 'UseConditionalProbabilities', False
+    )
 
     facies_dict = {}
     err_list = []
@@ -757,14 +797,16 @@ def _read_model_file_yml(model_file_name: str):
 
             if len(words) != 2:
                 err = True
-                err_list.append(f"Expecting 2 values: zonenumber, regionnumber in {key}\n")
+                err_list.append(
+                    f'Expecting 2 values: zonenumber, regionnumber in {key}\n'
+                )
             if not err:
                 new_key = (int(words[0]), int(words[1]))
-                facies_dict[new_key]= facies_list
+                facies_dict[new_key] = facies_list
         if len(err_list) > 0:
             for text in err_list:
-                print(f"Error: {text} ")
-            raise ValueError(f"Can not read input model file: {model_file_name}")
+                print(f'Error: {text} ')
+            raise ValueError(f'Can not read input model file: {model_file_name}')
 
     # Check if all specified zones (and regions) use the same set of modelling facies
     common_facies_list = True
@@ -778,7 +820,9 @@ def _read_model_file_yml(model_file_name: str):
     conditional_prob_facies = {}
     if use_conditioned_probabilities and not region_log_name:
         cond_table = get_dict(spec, kw_parent, 'CondProbMatrix')
-        conditional_prob_facies = get_cond_prob_dict(cond_table, active_zone_list, common_facies_list=common_facies_list)
+        conditional_prob_facies = get_cond_prob_dict(
+            cond_table, active_zone_list, common_facies_list=common_facies_list
+        )
 
     return _ModelFile(
         grid_model_name,
@@ -793,24 +837,30 @@ def _read_model_file_yml(model_file_name: str):
     )
 
 
-
 class _ModelFile:
     __slots__ = (
-        'grid_model_name', 'blocked_wells_set_name', 'facies_log_name', 'region_log_name', 'zone_log_name', 'prefix_probability_logs',
-        'use_conditioned_probabilities', 'facies_list_per_zone', 'conditional_prob_facies',
+        'grid_model_name',
+        'blocked_wells_set_name',
+        'facies_log_name',
+        'region_log_name',
+        'zone_log_name',
+        'prefix_probability_logs',
+        'use_conditioned_probabilities',
+        'facies_list_per_zone',
+        'conditional_prob_facies',
     )
 
     def __init__(
-            self,
-            grid_model_name,
-            blocked_wells_name,
-            facies_log_name,
-            region_log_name,
-            zone_log_name,
-            prefix_probability_logs,
-            use_conditioned_probabilities,
-            facies_list_per_zone,
-            conditional_prob_facies,
+        self,
+        grid_model_name,
+        blocked_wells_name,
+        facies_log_name,
+        region_log_name,
+        zone_log_name,
+        prefix_probability_logs,
+        use_conditioned_probabilities,
+        facies_list_per_zone,
+        conditional_prob_facies,
     ):
         self.grid_model_name = grid_model_name
         self.blocked_wells_set_name = blocked_wells_name

@@ -8,7 +8,9 @@ from aps.algorithms.APSModel import APSModel
 from aps.utils.constants.simple import Debug, VariogramType, TrendType
 
 
-def get_list_of_aps_uncertainty_parameters(project: Project, workflow_name: str) -> List[str]:
+def get_list_of_aps_uncertainty_parameters(
+    project: Project, workflow_name: str
+) -> List[str]:
     wf = project.workflows[workflow_name]
     param_list = []
     for param in wf.uncertainty_parameters:
@@ -20,11 +22,13 @@ def get_list_of_aps_uncertainty_parameters(project: Project, workflow_name: str)
 
 
 def read_selected_fmu_variables(
-        input_selected_fmu_variable_file: str,
-) -> List[Union[
-    Tuple[str, int, int, str, str],
-    Tuple[str, int, int, str, int],
-]]:
+    input_selected_fmu_variable_file: str,
+) -> List[
+    Union[
+        Tuple[str, int, int, str, str],
+        Tuple[str, int, int, str, int],
+    ]
+]:
     fmu_variables = []
     with open(input_selected_fmu_variable_file, 'r', encoding='utf-8') as file:
         finished = False
@@ -63,10 +67,10 @@ def read_selected_fmu_variables(
 
 
 def set_all_as_fmu_updatable(
-        input_model_file: str,
-        output_model_file: str,
-        tagged_variable_file: Optional[str] = None,
-        distribution_file_name: Optional[str] = None,
+    input_model_file: str,
+    output_model_file: str,
+    tagged_variable_file: Optional[str] = None,
+    distribution_file_name: Optional[str] = None,
 ) -> None:
     aps_model = APSModel(input_model_file)
     value = True
@@ -86,13 +90,19 @@ def set_all_as_fmu_updatable(
                 if variogram_type == VariogramType.GENERAL_EXPONENTIAL:
                     zone_model.setPowerFmuUpdatable(gauss_name, value)
 
-                useTrend, trendModelObj, relStdDev, relStdDevFMU = zone_model.getTrendModel(gauss_name)
+                useTrend, trendModelObj, relStdDev, relStdDevFMU = (
+                    zone_model.getTrendModel(gauss_name)
+                )
                 if useTrend:
                     zone_model.setRelStdDevFmuUpdatable(gauss_name, value)
                     trendModelObj.setAzimuthFmuUpdatable(value)
                     trendModelObj.setStackingAngleFmuUpdatable(value)
                     _type = trendModelObj.type
-                    if _type in [TrendType.ELLIPTIC, TrendType.HYPERBOLIC, TrendType.ELLIPTIC_CONE]:
+                    if _type in [
+                        TrendType.ELLIPTIC,
+                        TrendType.HYPERBOLIC,
+                        TrendType.ELLIPTIC_CONE,
+                    ]:
                         trendModelObj.setCurvatureFmuUpdatable(value)
                         trendModelObj.setOriginXFmuUpdatable(value)
                         trendModelObj.setOriginYFmuUpdatable(value)
@@ -122,11 +132,11 @@ def set_all_as_fmu_updatable(
 
 
 def set_selected_as_fmu_updatable(
-        input_model_file: str,
-        output_model_file: str,
-        selected_variables: List[Union[str, List[str]]],
-        tagged_variable_file: Optional[str] = None,
-        distribution_file_name: Optional[str] = None,
+    input_model_file: str,
+    output_model_file: str,
+    selected_variables: List[Union[str, List[str]]],
+    tagged_variable_file: Optional[str] = None,
+    distribution_file_name: Optional[str] = None,
 ) -> None:
     aps_model = APSModel(input_model_file)
     updatable = True
@@ -158,7 +168,9 @@ def set_selected_as_fmu_updatable(
                 var_name = words[5]
             elif trunc_name == 'NONCUBIC':
                 poly_number = int(words[6])
-        zone_model = aps_model.getZoneModel(zone_number=zone_number, region_number=region_number)
+        zone_model = aps_model.getZoneModel(
+            zone_number=zone_number, region_number=region_number
+        )
         if aps_model.isSelected(zone_number, region_number):
             if var_type1 == 'GF':
                 if var_type2 == 'RESIDUAL':
@@ -177,7 +189,9 @@ def set_selected_as_fmu_updatable(
                         if variogram_type == VariogramType.GENERAL_EXPONENTIAL:
                             zone_model.setPowerFmuUpdatable(gauss_name, updatable)
                 elif var_type2 == 'TREND':
-                    useTrend, trendModelObj, relStdDev, relStdDevFMU = zone_model.getTrendModel(gauss_name)
+                    useTrend, trendModelObj, relStdDev, relStdDevFMU = (
+                        zone_model.getTrendModel(gauss_name)
+                    )
                     if useTrend:
                         if var_name == 'AZIMUTH':
                             trendModelObj.setAzimuthFmuUpdatable(updatable)
@@ -214,7 +228,9 @@ def set_selected_as_fmu_updatable(
                             elif var_name == 'ORIGIN_Y':
                                 trendModelObj.setOriginYFmuUpdatable(updatable)
                             elif var_name == 'RELATIVESIZE':
-                                trendModelObj.setRelativeSizeOfEllipseFmuUpdatable(updatable)
+                                trendModelObj.setRelativeSizeOfEllipseFmuUpdatable(
+                                    updatable
+                                )
                         if var_name == 'RELSTDDEV':
                             zone_model.setRelStdDevFmuUpdatable(gauss_name, updatable)
 
