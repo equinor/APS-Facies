@@ -510,7 +510,7 @@ class APSModel:
                     zoneNumber=zone_number,
                     regionNumber=region_number,
                     modelFileName=model_file_name,
-                    debug_level=self.__debug_level 
+                    debug_level=self.__debug_level
                 )
                 # This zoneNumber, regionNumber combination is not defined previously
                 # and must be added to the dictionary
@@ -1232,7 +1232,7 @@ class APSModel:
             tag = 'SelectedZonesAndRegions'
             selected_zone_and_region_element = ET.Element(tag)
             root.append(selected_zone_and_region_element)
-            zone_numbers_added = [] 
+            zone_numbers_added = []
             for key, is_selected in selected_zone_numbers.items():
                 zone_number, region_number = key
                 if not is_selected:
@@ -1341,7 +1341,7 @@ class APSModel:
         if attributes_file_name is not None:
             if current_job_name is None:
                 current_job_name = 'apsgui_job_name'
-            write_string_to_file(attributes_file_name, 
+            write_string_to_file(attributes_file_name,
                 fmu_configuration(fmu_attributes, current_job_name,alternative=True),
                 debug_level=debug_level)
 
@@ -1505,7 +1505,7 @@ class APSModel:
 
     @staticmethod
     def write_model_from_xml_root(
-            input_tree: ET.Element, 
+            input_tree: ET.Element,
             output_model_file_name: FilePath,
             debug_level: Debug = Debug.OFF) -> None:
         if debug_level >= Debug.ON:

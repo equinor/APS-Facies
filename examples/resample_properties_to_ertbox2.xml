@@ -26,9 +26,9 @@
         <Zone number="5">  BaseConform </Zone>
         <Zone number="6">  BaseConform </Zone>
     </Conformity>
-    <!-- 
+    <!--
          Available extrapolation methods: zero, mean, extend,
-         repeat, extend_layer_mean, repeat_layer_mean 
+         repeat, extend_layer_mean, repeat_layer_mean
     -->
     <ExtrapolationMethod>repeat </ExtrapolationMethod>
 </Resample>

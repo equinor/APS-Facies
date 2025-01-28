@@ -164,7 +164,7 @@ def _read_model_file_yml(model_file_name):
 
 
 def redefine_zones(params):
-    debug_level = params['debug_level'] 
+    debug_level = params['debug_level']
     aps_input_model = APSModel(params['input_aps_model_file'])
     grid_model_name_for_input_model = aps_input_model.grid_model_name
 

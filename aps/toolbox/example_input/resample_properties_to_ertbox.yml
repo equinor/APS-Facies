@@ -27,6 +27,3 @@ Resample:
 # Available extrapolation methods:
 #  zero, mean, extend, repeat,
 #  extend_layer_mean, repeat_layer_mean
-
-
-

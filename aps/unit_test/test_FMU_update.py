@@ -157,5 +157,3 @@ def test_all_element_values_are_correctly_updated(original_values, update_values
         expected_value = update_values[key]
         found_value = new_values[key]
         assert expected_value == found_value
-
-

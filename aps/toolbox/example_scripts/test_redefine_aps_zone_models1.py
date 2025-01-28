@@ -10,4 +10,3 @@ params = {
     "model_file_name": "examples/test_redefine_aps_zone_models.yml",
 }
 redefine_zones_in_aps_model.run(params)
-

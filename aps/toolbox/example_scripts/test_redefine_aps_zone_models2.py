@@ -48,4 +48,3 @@ params = {
     "model_file_name": None,
 }
 redefine_zones_in_aps_model.run(params)
-

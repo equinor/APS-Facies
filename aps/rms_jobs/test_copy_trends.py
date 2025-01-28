@@ -18,7 +18,7 @@ def test_copy_from_geo_to_ertbox_grid(project):
         'fmu_simulation_grid_name': ertbox_grid_model_name,
         'debug_level': debug_level,
         'extrapolation_method': extrapolation_method,
-    } 
+    }
     run(project=project,
         save_region_param_to_ertbox=True,
         normalize_trend=True,

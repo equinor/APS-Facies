@@ -35,28 +35,28 @@ Input:
 
     Example of model file format for a model creating binary probability logs:
     <?xml version="1.0" ?>
-    <!-- This model specification is used in the script createProbabilityLogs.py 
-         This example creates probability logs with probability equal to 0 or 1 (binary logs) 
-         This example show a case where number of modelling facies vary from zone to zone. 
-         Assume that facies A, B, C, D are observed and found in the facies log, but not in every zone. 
+    <!-- This model specification is used in the script createProbabilityLogs.py
+         This example creates probability logs with probability equal to 0 or 1 (binary logs)
+         This example show a case where number of modelling facies vary from zone to zone.
+         Assume that facies A, B, C, D are observed and found in the facies log, but not in every zone.
          They may or may not be used as modelling facies depending on the zone. In this example facies E can
-         be an additional facies to be modelled, but that is not observed in any wells. The probability facies 
+         be an additional facies to be modelled, but that is not observed in any wells. The probability facies
          for facies E will then get 0 as value within zone 5 in this example and missing code in all other zones.
-         
-         The output blocked well probability logs that appear within the RMS project after running 
-         with this model file will have 0 or 1 for the facies specified to be modelling facies in a zone 
-         and missing values for all the facies that is not specified as being modelling facies for a zone 
-         The probability logs will have a name starting with the specified output prefix and will have 
-         the facies name as a part of the log name. 
-         The probability logs should be used in e.g. petrosim module in RMS together with 
+
+         The output blocked well probability logs that appear within the RMS project after running
+         with this model file will have 0 or 1 for the facies specified to be modelling facies in a zone
+         and missing values for all the facies that is not specified as being modelling facies for a zone
+         The probability logs will have a name starting with the specified output prefix and will have
+         the facies name as a part of the log name.
+         The probability logs should be used in e.g. petrosim module in RMS together with
          probability trend parameters to create 3D probability parameters conditioned to these logs.
          Note that it is important to be consistent and use the same set of modelled facies for a given zone
          when:
           1. Creating probability logs
           2. Creating probability trends
           3. Creating conditioned probability parameters in e.g petrosim
-          4. When specifying APS model using the APSGUI plugin in RMS.   
-         Inconsistent definition of which facies is modelling facies will result 
+          4. When specifying APS model using the APSGUI plugin in RMS.
+         Inconsistent definition of which facies is modelling facies will result
          in wrong conditioning and wrong normalization of the final probability parameters to be used in APS. -->
 
     <ProbLogs>
@@ -79,23 +79,23 @@ Input:
     Example of model file format for a model using conditional probabilities:
 
     <?xml version="1.0" ?>
-    <!-- This model specification is used in the script createProbabilityLogs.py 
-         This example creates probability logs with probability between 0 and 1 
-         The number of modelled facies may vary from zone to zone 
-         Remember that the specified conditional probabilites must be normalized 
+    <!-- This model specification is used in the script createProbabilityLogs.py
+         This example creates probability logs with probability between 0 and 1
+         The number of modelled facies may vary from zone to zone
+         Remember that the specified conditional probabilites must be normalized
          The keyword <UseConditionalProbabilities> is set to 1 and it is necessary to
          specify probability for facies to be modelled for each facies in the facies log.
          The keyword <CondProbMatrix> can be specified with or without the attribute number which is zone number.
-         If the keyword is specified without the attribute number, it means that the specified 
+         If the keyword is specified without the attribute number, it means that the specified
          conditional probabilities is common for all zones. In this case the number and name of modelled facies
          must be the same for all zones that are specified in keyword <ModellingFaciesPerZone>. IN the example below
-         the number of facies to be modelled vary from zone to zone and <CondProbMatrix number="X"> 
-         is specified for each zone number X. Each line defined by keyword <Line> define the conditional probability 
+         the number of facies to be modelled vary from zone to zone and <CondProbMatrix number="X">
+         is specified for each zone number X. Each line defined by keyword <Line> define the conditional probability
          for modelled facies given observed facies P(modelled_facies | observed_facies). The first facies name is
-         the modelled facies (specified in keyword <Zone number="X"> in <ModellingFaciesPerZone>) while the second 
-         is the observed facies (from the facies log). It is up to the user what the modelled facies is called, 
-         but the observed facies must be the facies in the facies log. 
-         Note that it is necessary to specify a probability for modelled facies for each observed facies in the log. --> 
+         the modelled facies (specified in keyword <Zone number="X"> in <ModellingFaciesPerZone>) while the second
+         is the observed facies (from the facies log). It is up to the user what the modelled facies is called,
+         but the observed facies must be the facies in the facies log.
+         Note that it is necessary to specify a probability for modelled facies for each observed facies in the log. -->
 
     <ProbLogs>
       <GridModelName>GridModelFine</GridModelName>
@@ -104,8 +104,8 @@ Input:
       <ZoneLogName>   Zone  </ZoneLogName>
       <OutputPrefix> Prob_example2 </OutputPrefix>
       <ModellingFaciesPerZone>
-       <Zone number="1">  A  B  C  D F5 </Zone> 
-       <Zone number="2">  A  B  C       </Zone> 
+       <Zone number="1">  A  B  C  D F5 </Zone>
+       <Zone number="2">  A  B  C       </Zone>
        <Zone number="4">  A  B  C  D     </Zone>
        <Zone number="6">        C  D    </Zone>
       </ModellingFaciesPerZone>
@@ -442,7 +442,7 @@ create_probability_logs.run(input_dict)
     # In this case the probabilities are either 1 or 0 or undefined.
 
     # Case: use_cond_prob == True (Note: This feature is experimental, not for use as default)
-    # In this case the user must for each zone specify a probability for each modelled facies given the 
+    # In this case the user must for each zone specify a probability for each modelled facies given the
     # observed facies in the facies log.
     # The conditional probabilities are specifed by one item per conditioned probability
     #   P(modelled_facies|observation_facies)
@@ -451,7 +451,7 @@ create_probability_logs.run(input_dict)
     #   key = (zone_number, 'modelled_facies', 'observed_facies') and value is probability
     # and is the way to specify the conditional probability P('modelled_facies' | 'observed_facies') for a given zone number.
     # Note that conditional probabilities must be specified for all observed facies in the log.
-    # The modelled facies can be different in number and have different names compared with observed facies, 
+    # The modelled facies can be different in number and have different names compared with observed facies,
     # but they can also have the same name and they may depend on zone number.
     if not use_cond_prob:
         print('Calculate probability logs as binary logs')
@@ -529,7 +529,7 @@ def _read_model_file_xml(model_file_name: str):
             facies_names.append(facies_name)
             key = (zone_number, region_number)
             facies_list_per_zone_region[key] = facies_names
-    
+
     conditional_prob_facies = {}
     if use_conditioned_probabilities and not use_regions:
         # Check if same facies is specified in all zones or not
@@ -677,13 +677,13 @@ def _read_cond_prob_matrix(conditional_prob_facies,
                 raise ValueError(
                     'Probability value {} specified in {} for zone {} is not in interval [0,1]'
                     ''.format(prob, keyword_parent, zone_number)
-                ) 
+                )
             else:
                 raise ValueError(
                     'Probability value {} specified in {} is not in interval [0,1]'
                     ''.format(prob, keyword_parent)
-                ) 
-                
+                )
+
         if use_common_cond_prod_matrix:
             for zone_number in zone_list:
                 key = (zone_number, facies_name, facies_name_conditioned)
@@ -702,12 +702,12 @@ def _read_cond_prob_matrix(conditional_prob_facies,
                     raise ValueError(
                         f"No conditional probability is specified for facies {facies_name} "
                         f"in zone {zone_number} conditioned to interpreted facies {facies_name_conditioned}"
-                    )   
+                    )
                 else:
                     raise ValueError(
                         f"No conditional probability is specified for facies {facies_name} "
                         f"conditioned to interpreted facies {facies_name_conditioned}"
-                    )   
+                    )
     return conditional_prob_facies
 
 def _read_model_file_yml(model_file_name: str):
@@ -821,4 +821,3 @@ class _ModelFile:
         self.use_conditioned_probabilities = use_conditioned_probabilities
         self.facies_list_per_zone = facies_list_per_zone
         self.conditional_prob_facies = conditional_prob_facies
-

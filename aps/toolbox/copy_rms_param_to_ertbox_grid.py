@@ -56,7 +56,7 @@ from aps.utils.constants.simple import Debug
 #       correspond to any active grid cell value in the geo grid. To fill in some values for
 #       those grid cells, an extrapolation method is used. The reason for extrapolating is to
 #       avoid having undefined values in Ertbox since all cell values are used in ERT when updating
-#       field values. It is an advantage to avoid unrealistic values in ERT ensemble vector due to the 
+#       field values. It is an advantage to avoid unrealistic values in ERT ensemble vector due to the
 #       calculation of updated (analysis step in ERT) ensemble vectors to avoid making linear combinations
 #       of values for grid cells that may correspond to active grid cell in geogrid in one realization,
 #       but not for another realisation due to 3D grids varying from realisation to realisation.
@@ -188,7 +188,7 @@ def from_geogrid_to_ertbox(project, params, seed=12345):
 
 
     zone_dict = {}
-    zone_names_used =[] 
+    zone_names_used =[]
     if debug_level >= Debug.ON:
         print(
             f"\nCopy RMS 3D parameters from {grid_model_name} "
@@ -397,7 +397,7 @@ def _read_model_file_yml(model_file_name, debug_level=Debug.OFF):
     valid_strings = ['from_geo_to_ertbox', 'from_ertbox_to_geo']
     mode = get_text_value(spec, kw_parent, 'Mode', default='from_geo_to_ertbox')
     if mode not in valid_strings:
-        raise ValueError(f"The keyword 'Mode' must be followed by one of the keywords {valid_strings}  ") 
+        raise ValueError(f"The keyword 'Mode' must be followed by one of the keywords {valid_strings}  ")
     grid_model_name = get_text_value(spec, kw_parent, 'GridModelName')
     ertbox_grid_model_name = get_text_value(spec, kw_parent, 'ERTBoxGridName')
     zone_param_name = get_text_value(spec, kw_parent, 'ZoneParam')

@@ -106,7 +106,7 @@ def add_trends(
     gf_names_for_zone = zone_model.used_gaussian_field_names
     gf_names_for_truncation_rule = zone_model.getGaussFieldsInTruncationRule()
     realization_number = project.current_realisation
-    
+
     # Initialize dictionaries keeping gauss field values and trends for all used gauss fields
     gf_all_values, _, gf_all_trend_values, gf_all_residual_values = initialize_rms_parameters(
         project, aps_model, [1, 0, 1, 1], write_rms_parameters_for_qc_purpose,

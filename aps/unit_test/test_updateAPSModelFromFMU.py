@@ -14,5 +14,3 @@ def test_update_aps_model():
 
     # Compare with reference data
     assert_identical_files(output_aps_model_file, reference_output_file)
-
-

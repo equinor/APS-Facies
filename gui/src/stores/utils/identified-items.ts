@@ -89,4 +89,3 @@ export interface CurrentIdentifiedStoreSerialization<T extends Identifiable> {
   available: T[]
   current: ID | null
 }
-

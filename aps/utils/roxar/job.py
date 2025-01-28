@@ -172,7 +172,7 @@ class JobConfig:
         #  It means that it should be checked if the ERT iteration is 0 or not.
         #  If no folder with iteration exists, the default is to return True which means to simulate and export GRF files.
         #  If folder with name 0 exist, also in this case return True.
-        #  If there exist a folder with name equal to an integer > 0, the return is False 
+        #  If there exist a folder with name equal to an integer > 0, the return is False
         #  since in this case ERT iteration is > 0 and APS must use the updated GRF coming from ERT.
         #  In this case the GRF's should be imported into APS instead.
         # If this is False:
@@ -299,7 +299,7 @@ class JobConfig:
         return self.debug_level >= Debug.VERY_VERBOSE
 
     @property
-    def rms_param_trend_extrapolation_method(self): 
+    def rms_param_trend_extrapolation_method(self):
         return ExtrapolationMethod(self._config['fmu']['customTrendExtrapolationMethod'])
 
     def to_json(self):

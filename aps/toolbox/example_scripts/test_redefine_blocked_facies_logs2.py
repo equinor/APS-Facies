@@ -12,4 +12,3 @@ params = {
     "realization_number": project.current_realisation,
 }
 create_redefined_blocked_facies_log.run(params)
-

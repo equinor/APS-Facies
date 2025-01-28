@@ -16,4 +16,3 @@ facies = CreateDiscreteParameter(gm)
 facies = 0
 SetCodeName(facies,0,"Undefined")
 STsetParameter(gm, paramName, facies)
-

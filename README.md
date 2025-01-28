@@ -1,4 +1,4 @@
-[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0) 
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
 # Adaptive Pluri-Gaussian Simulation
 
@@ -36,7 +36,7 @@ The GUI will automatically get these rules, when it is built.
 
 ## Releasing a new version
 1. Create a new branch (e.g. `git switch -c release/v<new version>`)
-2. Update the `"version"` field in `gui/package.json` 
+2. Update the `"version"` field in `gui/package.json`
 3. Add a new entry in `gui/public/CHANGELOG.md` for this particular version
     *  To get a list of all commits since last, execute
        ```bash
@@ -48,29 +48,29 @@ The GUI will automatically get these rules, when it is built.
        ```markdown
        ## <version>
        <Optionally some description or extra notes that the user should be aware of>
-    
+
        ### What's new
        * <list of relevant new features, or breaking changes>
-    
+
        ### Deprecations
        * <list of removals of user facing things>
        * <dropping support of RMS versions should go here, and (probably) in the general description>
-    
+
        ### Fixes
        * <list of fixes that are included in this release>
-    
+
        ### Performance
        * <list of changes that are improve the performance of the plugin>
-    
+
        ### Technical debt
        * <list of changes that "pays down" techincal dept>
-    
+
        ### Restructure
        * <list of things that have been moved, refactored, and otherwise changed / improved without affecting the usability or features>
-    
+
        ### Miscellaneous
        * <list of various changes that don't fit neatly anywhere else>
-       * <this can include updates to libraries that are used>    
+       * <this can include updates to libraries that are used>
        ```
 
 4. Add the changes in `CHANGELOG.md` and `gui/package.json` to the commit and make new commit

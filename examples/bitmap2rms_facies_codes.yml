@@ -25,4 +25,3 @@ bitmap2rms:
       Output: B2.irap
     - Input:  examples/img/bitmap/B3.bmp
       Output: B3.irap
-

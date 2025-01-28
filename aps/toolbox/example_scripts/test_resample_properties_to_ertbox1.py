@@ -36,4 +36,3 @@ params ={
     "AddNoiseToInactive": True,
 }
 copy_rms_param_to_ertbox_grid.run(params, project.seed)
-

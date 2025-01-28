@@ -23,4 +23,3 @@ def run(
     check_and_normalise_probability.run(params)
     APSProgressBar.increment()
     return
-

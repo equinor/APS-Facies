@@ -82,7 +82,7 @@ def check_probability_values(
 
     above_one_fraction = num_above_one / num_defined_cells
     if above_one_fraction > max_allowed_fraction_with_mismatch:
-        err_list = [] 
+        err_list = []
         err_list.append(f'Facies: {facies_name}  Parameter name: {parameter_name}')
         err_list.append(f'Number of grid cells with probability values > {1.0 + tolerance_of_probability_normalisation}:  {num_above_one}')
         err_list.append(f'Fraction of grid cells probability values  > {1.0 + tolerance_of_probability_normalisation}:  {above_one_fraction * 100:.2f}%')

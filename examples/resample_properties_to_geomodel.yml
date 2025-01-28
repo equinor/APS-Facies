@@ -13,7 +13,7 @@ Resample:
     4:  PermFromErtbox2 PoroFromErtbox2
     5:  PermFromErtbox2 PoroFromErtbox2
     6:  PermFromErtbox2 PoroFromErtbox2
-    
+
   ErtboxParameters:
     1:  middle_Neslen_1_Perm  middle_Neslen_1_Poro
     2:  middle_Neslen_2_Perm  middle_Neslen_2_Poro
@@ -29,5 +29,3 @@ Resample:
     4: TopConform
     5: BaseConform
     6: BaseConform
-
-

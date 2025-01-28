@@ -9,7 +9,7 @@ def run_test(project, aps_model_name):
        max_layers = 50
        debug_level = Debug.VERBOSE
        fmu_grid_name = "ERTBOX_TEST"
-       
+
        kwargs = {
               'aps_model': aps_model,
               'fmu_simulation_grid_name': fmu_grid_name,

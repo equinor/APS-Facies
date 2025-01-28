@@ -233,4 +233,3 @@ def _read_model_file_yml(model_file_name):
         "mapping_between_original_and_new":  mapping,
     }
     return model_param_dict
-

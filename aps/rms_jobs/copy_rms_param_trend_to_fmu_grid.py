@@ -12,7 +12,7 @@ import math
 from roxar import Direction
 from aps.algorithms.APSModel import APSModel
 from aps.utils.constants.simple import (
-    Debug, TrendType, Conform, 
+    Debug, TrendType, Conform,
     ExtrapolationMethod,
 )
 from aps.utils.roxar.grid_model import get_zone_layer_numbering, get_zone_names
@@ -73,9 +73,9 @@ def get_trend_param_names_from_aps_model(
     number_layers_per_zone, _ , _  = get_zone_layer_numbering(geogrid)
     nz_ertbox = ertboxgrid.simbox_indexer.dimensions[2]
     real_number = project.current_realisation
-    
+
     # Get trend parameter names from model specification
-    zone_dict = {} 
+    zone_dict = {}
     use_rms_param_trend = False
     all_zone_models = aps_model.sorted_zone_models
     for key, zone_model in all_zone_models.items():
@@ -138,7 +138,7 @@ def assign_undefined_constant(ertbox_values_3d_masked, value, debug_level):
 def fill_remaining_masked_values_within_colum(column_values_masked, nz_ertbox):
     if not ma.is_masked(column_values_masked):
         return column_values_masked
-    else: 
+    else:
         index_array = np.arange(nz_ertbox)
         work_array = column_values_masked.copy()
         list_of_unmasked_intervals = ma.notmasked_contiguous(column_values_masked)
@@ -162,7 +162,7 @@ def fill_remaining_masked_values_within_colum(column_values_masked, nz_ertbox):
                 column_values_masked[k] = v0 + (v1-v0)*indx/n
                 indx += 1
 
-        return column_values_masked       
+        return column_values_masked
 
 
 def assign_undefined_vertical(method, nx, ny, nz_ertbox, ertbox_values_3d_masked, fill_value):
@@ -222,7 +222,7 @@ def assign_undefined_vertical(method, nx, ny, nz_ertbox, ertbox_values_3d_masked
                             fill_remaining_masked_values_within_colum(column_values_masked, nz_ertbox)
                     ertbox_values_3d_masked[i,j,:] = column_values_masked
 
-    ertbox_values_3d = ertbox_values_3d_masked.filled(fill_value) 
+    ertbox_values_3d = ertbox_values_3d_masked.filled(fill_value)
     return ertbox_values_3d
 
 
@@ -307,7 +307,7 @@ def copy_from_geo_to_ertbox_grid(
 ):
     """
     zone_dict[zone_name] = (zone_number, region_number, conformity, param_name_list)
-    extrapolation_method is one of: 
+    extrapolation_method is one of:
         ZERO -  where all undefined cells get 0 as value
         MEAN - where all undefined cells get mean value of defined cell values
         EXTEND_LAYER_MEAN - where all undefined values in a layer is replaced by the
@@ -325,7 +325,7 @@ def copy_from_geo_to_ertbox_grid(
                            If the number of active cells in a column is less than the undefined
                            cells above the uppermost active cell, they will be assigned a constant
                            value in the same way as option EXTEND_LAYER_MEAN. The same procedure
-                           is used to fill in inactive cell values below lowermost active cell.  
+                           is used to fill in inactive cell values below lowermost active cell.
      """
     real_number = project.current_realisation
     geogrid_model, geogrid = get_grid_model(project, geo_grid_model_name)
@@ -795,7 +795,7 @@ def ertbox_active_param_to_rms(prefix, real_number, zone_name, ertbox_grid_model
 def run(*, project,
     save_active_param_to_ertbox=True,
     save_region_param_to_ertbox=False,
-    normalize_trend=True, 
+    normalize_trend=True,
         **kwargs):
     """
     Read the APS model and find specifications of user defined trends
@@ -804,7 +804,7 @@ def run(*, project,
     for assigning values to undefined grid cell values is choosen by the user,
     and the implemented methods are:
     ZERO - All undefined cell values are assigned 0 as value.
-    MEAN - All undefined cell values are assigned the mean value calculated 
+    MEAN - All undefined cell values are assigned the mean value calculated
            by using the defined cell values.
     EXTEND_LAYER_MEAN -  See doc string for copy_from_geo_to_ertbox_grid.
     REPEAT_LAYER_MEAN - See doc string for copy_from_geo_to_ertbox_grid.

@@ -81,7 +81,7 @@ def getTextCommand(
     """
     Return the text string specified in the keyword. If the keyword is required,
     but the keyword does not exist, error message is called.
-    If the text string specified in the keyword is None but a value is required, 
+    If the text string specified in the keyword is None but a value is required,
     error message is called.
     If the keyword is not required and the keyword is not found, the default text is returned.
     """

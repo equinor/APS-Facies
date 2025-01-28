@@ -58,7 +58,7 @@ def _get_plugin_dir():
     preferences = Path(Path.home() / '.roxar/rms-{}/preferences.master'.format(rms_version))
     with open(preferences) as f:
         lines = f.readlines()
-    
+
     plugin_dir = _get_path_from_environment(RMS_PLUGINS_LIBRARY, '/project/res/APSGUI/releases/stable')
     for line in lines:
         if line.startswith('jobplugindir'):

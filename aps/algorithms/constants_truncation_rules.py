@@ -67,4 +67,3 @@ class NonCubicAndOverlayIndices:
     NAME_OL_INDX = 1
     STRUCT_NONCUBIC_INDX = 2
     OVERLAYGROUP_INDX = 3
-

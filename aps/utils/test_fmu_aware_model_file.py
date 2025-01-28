@@ -9,7 +9,7 @@ aps_model = APSModel(aps_model_file)
 debug_level = Debug.VERY_VERBOSE
 ertbox_grid_model_name = 'ERTBOX'
 fmu_mode = True
-kwargs ={ 
+kwargs ={
     'project': project,
     'model_file': aps_model_file,
     'output_model_file': output_aps_model_file,

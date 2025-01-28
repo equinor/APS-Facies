@@ -28,12 +28,12 @@ def getBlockedWells(project, grid_model_name, bw_name):
     return blocked_wells
 
 
-def getFaciesTableAndLogValuesFromBlockedWells(project, grid_model_name, 
-                                               blocked_wells_set_name, 
+def getFaciesTableAndLogValuesFromBlockedWells(project, grid_model_name,
+                                               blocked_wells_set_name,
                                                facies_log_name, realization_number=0):
-    """ Get blocked well of type discrete and return dictionary with facies codes and names 
+    """ Get blocked well of type discrete and return dictionary with facies codes and names
         and facies log values in numpy array.
-        Note that the returned facies log values can be a masked numpy array 
+        Note that the returned facies log values can be a masked numpy array
         (to represent inactive or undefined values)
         so the output must be checked if it is a masked array.
     """
@@ -269,7 +269,7 @@ def createProbabilityLogs(params):
                 # Facies specified to be modelled and also found in blocked well facies log
                 if facies_name not in modelled_facies_observed:
                     modelled_facies_observed.append(facies_name)
-                
+
             prob_log_name = prefix_prob_logs + '_' + str(facies_name)
             if prob_log_name not in probability_log_names:
                 probability_log_names.append(prob_log_name)
@@ -426,7 +426,7 @@ def createProbabilityLogs(params):
             (zone_number, region_number) = key
             for name in facies_per_zone_region[key]:
                 sum_prob = 0.0
-                err_list =[] 
+                err_list =[]
                 for facies_name in facies_for_modelling:
                     key_for_cond_prob = (zone_number, facies_name, name)
                     if key_for_cond_prob not in conditional_prob_facies:
@@ -510,14 +510,14 @@ def createProbabilityLogs(params):
                     except:
                         # For this case the probability is undefined
                         pass
-                        
+
 
             prob_values_with_mask = np.ma.array(prob_values, mask=mask_values)
             prob_log.set_values(prob_values_with_mask, realization_number)
             print(f'Probability log defined:  {prob_log.name}')
 
-    # Verify that the created probability logs are consistent (sum up to 1) for each grid cell in blocked wells 
-    check_probability_logs(probability_log_names, 
+    # Verify that the created probability logs are consistent (sum up to 1) for each grid cell in blocked wells
+    check_probability_logs(probability_log_names,
                            probability_logs,
                            code_names,
                            zone_log_values,
@@ -576,21 +576,21 @@ def check_observed_facies_per_zone(specified_modelled_facies_per_zone_region_dic
         codes = list(code_names.keys())
         keys = modelled_facies_codes_observed_in_zone_region.keys()
         # Include also facies code -1 which is defined as the code for all modelled facies not found in the facies log
-        codes.append(-1) 
+        codes.append(-1)
         if number_of_modelled_facies_observed_in_zone_region > 0:
             for facies_code in codes:
                 key_obs = (zone_number, region_number, facies_code)
                 if key_obs in keys:
                     if modelled_facies_codes_observed_in_zone_region[key_obs] == 0:
-                        # This facies is defined as modelled but not observed and there exist 
+                        # This facies is defined as modelled but not observed and there exist
                         # modelled facies that is observed for the same zone
-                        # Need to distinguish this facies from unobserved facies in zones that 
+                        # Need to distinguish this facies from unobserved facies in zones that
                         # does not have any observed facies at all.
                         modelled_facies_codes_observed_in_zone_region[key_obs] = -1
 
     return modelled_facies_codes_observed_in_zone_region
 
-def check_probability_logs(probability_log_names, 
+def check_probability_logs(probability_log_names,
                            probability_logs,
                            code_names,
                            zone_log_values,

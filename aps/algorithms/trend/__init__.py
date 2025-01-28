@@ -355,7 +355,7 @@ class Trend3D:
 
         zonation = grid_indexer.zonation
         layer_ranges = zonation[zone_number - 1]
-        # In simbox there is only one interval of layers per zone and they 
+        # In simbox there is only one interval of layers per zone and they
         # come after each other and layer numbering increases downwards
         start_layer = np.infty
         end_layer = -np.infty
@@ -453,7 +453,7 @@ class Trend3D:
             x_vec = cell_center_points[index_vector, 0]
             y_vec = cell_center_points[index_vector, 1]
             k_vec = ijk_cell_indices[index_vector, 2]
-            values_in_selected_cells = self._trendValueCalculation_vectorized(parameters_for_trend_calc, 
+            values_in_selected_cells = self._trendValueCalculation_vectorized(parameters_for_trend_calc,
                                                                                   x_vec, y_vec, k_vec, zinc)
         if len(values_in_selected_cells)> 0:
             min_value = values_in_selected_cells.min()

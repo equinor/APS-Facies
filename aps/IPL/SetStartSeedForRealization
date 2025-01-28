@@ -1,4 +1,4 @@
-// IPL: Get start seed from project realization in RMS and write to seed file. 
+// IPL: Get start seed from project realization in RMS and write to seed file.
 //      The seed file will be used to set start seed for gaussian simulations.
 
 Int projectRealizationSeed

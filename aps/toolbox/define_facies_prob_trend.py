@@ -178,4 +178,3 @@ define_facies_prob_trend(kwargs)
     define_facies_trend = DefineFaciesProb(**kwargs)
     define_facies_trend.calculate_facies_probability_parameter()
     print('Finished running defineFaciesProbTrend')
-

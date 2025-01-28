@@ -11,4 +11,3 @@ params ={
     "debug_level": Debug.VERBOSE,
 }
 copy_rms_param_to_ertbox_grid.run(params)
-

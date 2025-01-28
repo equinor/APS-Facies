@@ -265,7 +265,7 @@ model_root = _get_path_from_environment(APS_RESOURCES, project_location_path)
 if APS_ROOT not in os.environ:
     # Add the path to searchable path
     # Assumed that the plugin should not be used, if 'APS_ROOT' is set
-    
+
     extract_plugin()
     sys.path.insert(0, stringify_path(root_path))
 
@@ -371,7 +371,7 @@ def get_debug_level():
     return _get_value(APS_DEBUG_LEVEL, -1)
 
 def get_transform_type():
-    # Which type of transformation to use for GRF's 
+    # Which type of transformation to use for GRF's
     # (Default = EMPIRIC, Cumulative normal distribution function = CUMNORM)
     return _get_value(APS_GRF_TRANSFORM, 0)
 

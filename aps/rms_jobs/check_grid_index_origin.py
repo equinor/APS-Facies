@@ -37,7 +37,7 @@ def run(project,
         return grid_ijk_handedness
 
     def is_grid_model_shared(grid_model_name):
-        return project.grid_models[grid_model_name].shared    
+        return project.grid_models[grid_model_name].shared
 
     # Check the geo-modeling grid
     rms_ijk_handedness = _get_grid_ijk_handedness(rms_grid_name)

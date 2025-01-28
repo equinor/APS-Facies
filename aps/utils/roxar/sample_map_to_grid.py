@@ -89,5 +89,3 @@ def _create_property_and_store(project, grid_model_name, grid, gridpoints, kminm
         newprop.values[ixn, jyn, klay] = zvalues
 
     newprop.to_roxar(project, grid_model_name, result_param_name)
-
-

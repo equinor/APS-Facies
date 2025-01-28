@@ -23,13 +23,13 @@ Description:
       create a 3D parameter with value 1 for these grid cells and report the
       number of such grid cells.
     - If all these tests are successfully completed, and if there are need for normalization
-      the probabilities are normalized cell by cell by dividing each facies probability 
+      the probabilities are normalized cell by cell by dividing each facies probability
       by the sum of facies probabilities.
 
     The script take a dictionary as input. It is possible to run the script by:
     - specify aps_model_file as input. In this case no other specification of input is necessary.
       The aps_model_file must then be an export from the APSGUI job that will use the facies probabilities.
-    - specify for each zone  or (zone, region) combination which facies to use 
+    - specify for each zone  or (zone, region) combination which facies to use
       and which 3D parameter with facies probabilities belongs to each of the facies. Furthermore, specify
       tolerance criteria, grid model name, region parameter name. If the user wants to use this script
       to calculate the normalization without tolerance restrictions, it can be done by specifying that
@@ -79,7 +79,7 @@ Description:
     }
 
     # For each facies, name of the 3D probability parameter is specified.
-    # Note that specification of probabilities for all zones are saved in 
+    # Note that specification of probabilities for all zones are saved in
     # the same 3D facies probability parameter.
     prob_param_names_dict = {
         "F1": "Prob_F1",
@@ -200,7 +200,7 @@ def run(params):
         "max_allowed_fraction_of_values_outside_tolerance",
         "stop_on_error",
         "report_zone_regions",
-    ] 
+    ]
 
     if "aps_model_file" not in params:
         # Check that necessary input is specified in params
@@ -222,7 +222,7 @@ def run(params):
         ]
         check_missing_keywords_list(params, keywords_required)
 
-    unknown_keywords = [] 
+    unknown_keywords = []
     keys = list(params.keys())
     for key in keys:
         if key not in defined_keywords:
@@ -669,7 +669,7 @@ def check_and_normalise_probability(
     :param region_number:
     :type region_number: int
     :param tolerance_of_probability_normalisation: Criteria to check probabilities, cumulative probabilities and negative probabilities.
-    :type tolerance_of_probability_normalisation: float                                                  
+    :type tolerance_of_probability_normalisation: float
     :param eps: Dfine maximum difference between sum of input probabilities and 1.0 that is accepted without having to do any normalisation.
     :type eps: float
     :param max_allowed_fraction_with_mismatch: Criteria for raising error if the fraction of number of grid cells with invalid probabilities exceed this fraction.
@@ -693,7 +693,7 @@ def check_and_normalise_probability(
     facies_names_for_zone = facies_list_per_zone_region
 
     # RMS probability parameter names for each facies
-    # Dictionary where the key is facies_name, and the value is 
+    # Dictionary where the key is facies_name, and the value is
     # rms parameter name for the probabilities for this facies
     prob_param_names = probability_values_per_rms_param.keys()
 
@@ -769,7 +769,7 @@ def check_and_normalise_probability(
             f'These areas are shown in {name}.' \
             f'Number of grid cells with 0 cumulative probability is: {number_of_problematic_cells}.'
         # Can not continue with this error since have to avoid zero division
-        raise NormalisationError(err_msg)        
+        raise NormalisationError(err_msg)
 
     # Check normalisation and report error if input probabilities are too far from 1.0
     if stop_on_error:

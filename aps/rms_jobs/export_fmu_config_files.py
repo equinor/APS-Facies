@@ -56,7 +56,7 @@ def run(project, **kwargs):
         else:
             # APS param file to include into global_master_config.yml file
             param_file_name = param_dir_path + "/" + aps_fmuconfig_name
- 
+
         probability_distribution_file_name = aps_config.ert_distribution_dir_absolute() + "/" + prob_name
         ert_field_keyword_file_name = aps_config.ert_model_dir_absolute() + "/" + ert_field_name
 
@@ -137,4 +137,3 @@ def run(project, **kwargs):
             write_string_to_file(ert_field_keyword_file_name, content, debug_level=debug_level)
 
     APSProgressBar.increment()
-

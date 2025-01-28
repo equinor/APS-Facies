@@ -41,4 +41,3 @@ ELSE
    WriteLine(file,"1")
    CloseFile(file)
 ENDIF
-
