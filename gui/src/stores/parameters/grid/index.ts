@@ -14,8 +14,7 @@ export const useParameterGridStore = defineStore('parameter-grid', () => {
 
   function $reset() {
     _waiting.value = false
-    useParameterGridSimulationBoxStore()
-      .$reset() // this resets simulation-boxes in turn
+    useParameterGridSimulationBoxStore().$reset() // this resets simulation-boxes in turn
   }
 
   const waiting = computed(() => _waiting.value)
@@ -23,15 +22,15 @@ export const useParameterGridStore = defineStore('parameter-grid', () => {
   const size = computed<Coordinate3D>(() => {
     const gridModelStore = useGridModelStore()
     const gridModel = gridModelStore.current
-    if (!gridModel) return {
-      x: null,
-      y: null,
-      z: null,
-    }
+    if (!gridModel)
+      return {
+        x: null,
+        y: null,
+        z: null,
+      }
 
     return gridModel.dimension
   })
-
 
   async function fetch(rough: boolean = false) {
     const gridModelStore = useGridModelStore()

@@ -9,7 +9,7 @@
       variant="text"
       @click="() => emit('click')"
     />
-    <template #popper>{{help}}</template>
+    <template #popper>{{ help }}</template>
   </floating-tooltip>
 </template>
 

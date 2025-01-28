@@ -68,7 +68,6 @@ export function useOptionStoreSerialization(): OptionStoreSerialization {
   }
 }
 
-
 if (import.meta.hot) {
   import.meta.hot.accept(acceptHMRUpdate(useOptionStore, import.meta.hot))
 }

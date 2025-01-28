@@ -1,82 +1,81 @@
 // For format details, see https://aka.ms/devcontainer.json. For config options, see the README at:
 // https://github.com/microsoft/vscode-dev-containers/tree/v0.236.0/containers/python-3
 {
-	"name": "Python 3",
-	"build": {
-		"dockerfile": "Dockerfile",
-		"context": "..",
-		"args": {
-			// Update 'VARIANT' to pick a Python version: 3, 3.10, 3.9, 3.8, 3.7, 3.6
-			// Append -bullseye or -buster to pin to an OS version.
-			// Use -bullseye variants on local on arm64/Apple Silicon.
-			"VARIANT": "3.8",
-			// Options
-			"NODE_VERSION": "14"
-		}
-	},
+  "name": "Python 3",
+  "build": {
+    "dockerfile": "Dockerfile",
+    "context": "..",
+    "args": {
+      // Update 'VARIANT' to pick a Python version: 3, 3.10, 3.9, 3.8, 3.7, 3.6
+      // Append -bullseye or -buster to pin to an OS version.
+      // Use -bullseye variants on local on arm64/Apple Silicon.
+      "VARIANT": "3.8",
+      // Options
+      "NODE_VERSION": "14"
+    }
+  },
 
-	// Configure tool-specific properties.
-	"customizations": {
-		// Configure properties specific to VS Code.
-		"vscode": {
-			// Set *default* container specific settings.json values on container create.
-			"settings": {
-				"python.defaultInterpreterPath": "/home/vscode/.cache/pypoetry/virtualenvs/aps-gui-Kns6vrWt-py3.8/bin/python",
-				"python.linting.enabled": true,
-				"python.linting.pylintEnabled": true,
-				"python.formatting.autopep8Path": "/usr/local/py-utils/bin/autopep8",
-				"python.formatting.blackPath": "/usr/local/py-utils/bin/black",
-				"python.formatting.yapfPath": "/usr/local/py-utils/bin/yapf",
-				"python.linting.banditPath": "/usr/local/py-utils/bin/bandit",
-				"python.linting.flake8Path": "/usr/local/py-utils/bin/flake8",
-				"python.linting.mypyPath": "/usr/local/py-utils/bin/mypy",
-				"python.linting.pycodestylePath": "/usr/local/py-utils/bin/pycodestyle",
-				"python.linting.pydocstylePath": "/usr/local/py-utils/bin/pydocstyle",
-				"python.linting.pylintPath": "/usr/local/py-utils/bin/pylint"
-			},
+  // Configure tool-specific properties.
+  "customizations": {
+    // Configure properties specific to VS Code.
+    "vscode": {
+      // Set *default* container specific settings.json values on container create.
+      "settings": {
+        "python.defaultInterpreterPath": "/home/vscode/.cache/pypoetry/virtualenvs/aps-gui-Kns6vrWt-py3.8/bin/python",
+        "python.linting.enabled": true,
+        "python.linting.pylintEnabled": true,
+        "python.formatting.autopep8Path": "/usr/local/py-utils/bin/autopep8",
+        "python.formatting.blackPath": "/usr/local/py-utils/bin/black",
+        "python.formatting.yapfPath": "/usr/local/py-utils/bin/yapf",
+        "python.linting.banditPath": "/usr/local/py-utils/bin/bandit",
+        "python.linting.flake8Path": "/usr/local/py-utils/bin/flake8",
+        "python.linting.mypyPath": "/usr/local/py-utils/bin/mypy",
+        "python.linting.pycodestylePath": "/usr/local/py-utils/bin/pycodestyle",
+        "python.linting.pydocstylePath": "/usr/local/py-utils/bin/pydocstyle",
+        "python.linting.pylintPath": "/usr/local/py-utils/bin/pylint"
+      },
 
-			// Add the IDs of extensions you want installed when the container is created.
-			"extensions": [
-				"ms-python.python",
-				"ms-python.vscode-pylance",
-				"ms-azuretools.vscode-docker",
-				"dbaeumer.vscode-eslint",
-				"eamodio.gitlens",
-				"vuetifyjs.vuetify-vscode",
-				"Vue.vscode-typescript-vue-plugin",
-				"Vue.volar",
-				"ms-vscode.makefile-tools",
-				"ahmadalli.vscode-nginx-conf"
-			]
-		}
-	},
+      // Add the IDs of extensions you want installed when the container is created.
+      "extensions": [
+        "ms-python.python",
+        "ms-python.vscode-pylance",
+        "ms-azuretools.vscode-docker",
+        "dbaeumer.vscode-eslint",
+        "eamodio.gitlens",
+        "vuetifyjs.vuetify-vscode",
+        "Vue.vscode-typescript-vue-plugin",
+        "Vue.volar",
+        "ms-vscode.makefile-tools",
+        "ahmadalli.vscode-nginx-conf"
+      ]
+    }
+  },
 
-	// Use 'forwardPorts' to make a list of ports inside the container available locally.
-	"forwardPorts": [8888],
+  // Use 'forwardPorts' to make a list of ports inside the container available locally.
+  "forwardPorts": [8888],
 
-	// Use 'postCreateCommand' to run commands after the container is created.
-	"updateContentCommand": ["/bin/bash", "./.devcontainer/postCreateCommand.sh"],
+  // Use 'postCreateCommand' to run commands after the container is created.
+  "updateContentCommand": ["/bin/bash", "./.devcontainer/postCreateCommand.sh"],
 
-	// "postStartCommand": "source ./venv/bin/activate",
+  // "postStartCommand": "source ./venv/bin/activate",
 
-	// Comment out to connect as root instead. More info: https://aka.ms/vscode-remote/containers/non-root.
-	"remoteUser": "vscode",
-	"features": {
-		"ghcr.io/devcontainers/features/git-lfs:1": {},
-		"ghcr.io/devcontainers/features/sshd:1": {
-			"version": "latest"
-		}
-	},
+  // Comment out to connect as root instead. More info: https://aka.ms/vscode-remote/containers/non-root.
+  "remoteUser": "vscode",
+  "features": {
+    "ghcr.io/devcontainers/features/git-lfs:1": {},
+    "ghcr.io/devcontainers/features/sshd:1": {
+      "version": "latest"
+    }
+  },
 
-
-	"hostRequirements": {
-		"memory": "8gb",
-		// The Git repo is around 24 GB mostly due to LFS
-		"storage": "64gb"
-	},
-	"portsAttributes": {
-		"8888": {
-			"label": "main"
-		}
-	}
+  "hostRequirements": {
+    "memory": "8gb",
+    // The Git repo is around 24 GB mostly due to LFS
+    "storage": "64gb"
+  },
+  "portsAttributes": {
+    "8888": {
+      "label": "main"
+    }
+  }
 }

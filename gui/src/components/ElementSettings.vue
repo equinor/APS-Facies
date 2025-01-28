@@ -44,7 +44,7 @@ import TruncationRule from '@/components/specification/TruncationRule/index.vue'
 import SectionTitle from '@/components/baseComponents/headings/SectionTitle.vue'
 
 import type { Facies, Region } from '@/utils/domain'
-import  { Zone } from '@/utils/domain'
+import { Zone } from '@/utils/domain'
 import { computed, watch } from 'vue'
 import { usePanelStore } from '@/stores/panels'
 import { useRegionStore } from '@/stores/regions'
@@ -77,7 +77,10 @@ const title = computed<string>(() => {
 })
 
 function getNameOrCode(item: Zone | Region): string | number {
-  const nameOrNumber = optionStore.options.showNameOrNumber[item instanceof Zone ? 'zone' : 'region']
+  const nameOrNumber =
+    optionStore.options.showNameOrNumber[
+      item instanceof Zone ? 'zone' : 'region'
+    ]
   if (nameOrNumber === 'name') return item.name
   return `${item instanceof Zone ? 'Zone' : 'Region'} ${item.code}`
 }
@@ -85,7 +88,9 @@ function getNameOrCode(item: Zone | Region): string | number {
 const _facies = computed<Facies[]>(() => faciesStore.selected)
 const hasFacies = computed<boolean>(() => _facies.value.length > 0)
 const minFacies = 2
-const hasEnoughFacies = computed<boolean>(() => _facies.value.length >= minFacies)
+const hasEnoughFacies = computed<boolean>(
+  () => _facies.value.length >= minFacies,
+)
 
 watch(
   _facies,

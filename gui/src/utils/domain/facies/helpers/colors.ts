@@ -1,9 +1,6 @@
 import type { Branded } from '@/utils/typing/simple'
 
-export type Color = Branded<string, "color">
-  | 'primary'
-  | 'black'
-  | 'white'
+export type Color = Branded<string, 'color'> | 'primary' | 'black' | 'white'
 
 export const apsColors: Color[] = [
   '#7cfc00', // lawngreen

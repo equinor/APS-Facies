@@ -3,10 +3,7 @@ import { getId } from '@/utils/helpers'
 import type Region from '@/utils/domain/region'
 import type { ID } from '@/utils/domain/types'
 import type Zone from '@/utils/domain/zone'
-import type {
-  BaseItemConfiguration,
-  BaseItemSerialization,
-} from './baseItem'
+import type { BaseItemConfiguration, BaseItemSerialization } from './baseItem'
 import BaseItem from './baseItem'
 import type { ParentReference } from './interfaces'
 import type { Optional } from '@/utils/typing'

@@ -1,8 +1,5 @@
 <template>
-  <v-row
-    no-gutters
-    class="truncation-rule-header"
-  >
+  <v-row no-gutters class="truncation-rule-header">
     <v-col>
       <v-select
         ref="chooseTruncationRuleType"
@@ -21,12 +18,17 @@
         :disabled="!type"
         label="Template"
         variant="underlined"
-        @update:model-value="(value: string | RuleName) => {
-          // value will always be the object from :items
-          // ref https://vuetifyjs.com/en/components/combobox/#caveats
-          // however, the typing insists that @update:model-value gives a string
-          rulePresetStore.change(type, typeof value === 'string' ? value : value.title)
-        }"
+        @update:model-value="
+          (value: string | RuleName) => {
+            // value will always be the object from :items
+            // ref https://vuetifyjs.com/en/components/combobox/#caveats
+            // however, the typing insists that @update:model-value gives a string
+            rulePresetStore.change(
+              type,
+              typeof value === 'string' ? value : value.title,
+            )
+          }
+        "
       >
         <template #item="{ item, props }">
           <truncation-rule-preview
@@ -46,7 +48,10 @@
 import TruncationRulePreview from './TruncationRulePreview.vue'
 
 import { computed } from 'vue'
-import { type RuleName, useTruncationRuleStore } from '@/stores/truncation-rules'
+import {
+  type RuleName,
+  useTruncationRuleStore,
+} from '@/stores/truncation-rules'
 import { useTruncationRulePresetStore } from '@/stores/truncation-rules/presets'
 import type { TruncationRuleType } from '@/utils/domain/truncationRule/base'
 import { useOptionStore } from '@/stores/options'
@@ -57,18 +62,19 @@ const rulePresetStore = useTruncationRulePresetStore()
 const optionStore = useOptionStore()
 
 const truncationRules = computed(() => ruleStore.ruleTypes)
-const templates = computed<ListItem<never, { overlay: boolean }>[]>(() => ruleStore.ruleNames
-  // templates with overlay will only work as expected if facies selection is automatic
-  .filter(template => template.overlay
-    ? optionStore.options.automaticFaciesFill
-    : true)
-  .map(({ title, overlay, disabled }) => ({
-    title,
-    props: {
-      overlay,
-      disabled,
-    }
-  }))
+const templates = computed<ListItem<never, { overlay: boolean }>[]>(() =>
+  ruleStore.ruleNames
+    // templates with overlay will only work as expected if facies selection is automatic
+    .filter((template) =>
+      template.overlay ? optionStore.options.automaticFaciesFill : true,
+    )
+    .map(({ title, overlay, disabled }) => ({
+      title,
+      props: {
+        overlay,
+        disabled,
+      },
+    })),
 )
 
 const preset = computed(() => {

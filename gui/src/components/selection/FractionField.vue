@@ -40,6 +40,9 @@ withDefaults(defineProps<Props>(), {
 })
 const emit = defineEmits<{
   (event: 'click:append', value: MouseEvent): void
-  (event: 'update:model-value', value: PROBABILITY | FmuUpdatable<PROBABILITY> | null): void
+  (
+    event: 'update:model-value',
+    value: PROBABILITY | FmuUpdatable<PROBABILITY> | null,
+  ): void
 }>()
 </script>

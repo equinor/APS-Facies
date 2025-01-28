@@ -1,39 +1,39 @@
 ProbCubeUpdate:
-    GridModelName: GridModelFine
-    ZoneParamName: Zone
-    ResultProbParamNamePrefix: Prob_update
-    NormalizeInputProb: True
-    FaciesPerZone:
-      1: F1 F2 F3
-      2:    F2    F4
-      3:       F3 F4
-    WeightsPerZone:
-      1:
-        SetA: 0.5
-        SetB: 0.3
-        SetC: 0.2
-      2:
-        SetA: 0.6
-        SetB: 0.2
-        SetC: 0.2
-      3:
-        SetA: 0.4
-        SetB: 0.3
-        SetC: 0.3
+  GridModelName: GridModelFine
+  ZoneParamName: Zone
+  ResultProbParamNamePrefix: Prob_update
+  NormalizeInputProb: True
+  FaciesPerZone:
+    1: F1 F2 F3
+    2: F2    F4
+    3: F3 F4
+  WeightsPerZone:
+    1:
+      SetA: 0.5
+      SetB: 0.3
+      SetC: 0.2
+    2:
+      SetA: 0.6
+      SetB: 0.2
+      SetC: 0.2
+    3:
+      SetA: 0.4
+      SetB: 0.3
+      SetC: 0.3
 
-    InputProbParams:
-      SetA:
-        F1: Prob_A_F1
-        F2: Prob_A_F2
-        F3: Prob_A_F3
-        F4: Prob_A_F4
-      SetB:
-        F1: Prob_B_F1
-        F2: Prob_B_F2
-        F3: Prob_B_F3
-        F4: Prob_B_F4
-      SetC:
-        F1: Prob_C_F1
-        F2: Prob_C_F2
-        F3: Prob_C_F3
-        F4: Prob_C_F4
+  InputProbParams:
+    SetA:
+      F1: Prob_A_F1
+      F2: Prob_A_F2
+      F3: Prob_A_F3
+      F4: Prob_A_F4
+    SetB:
+      F1: Prob_B_F1
+      F2: Prob_B_F2
+      F3: Prob_B_F3
+      F4: Prob_B_F4
+    SetC:
+      F1: Prob_C_F1
+      F2: Prob_C_F2
+      F3: Prob_C_F3
+      F4: Prob_C_F4

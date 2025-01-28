@@ -6,7 +6,7 @@
       </v-col>
     </v-app-bar>
     <v-main>
-    <the-information-bar />
+      <the-information-bar />
       <main-page />
     </v-main>
   </v-app>

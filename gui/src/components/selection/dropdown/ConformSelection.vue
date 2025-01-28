@@ -1,5 +1,10 @@
 <template>
-  <v-select v-model="conformity" :items="options" :dark="dark" variant="underlined"/>
+  <v-select
+    v-model="conformity"
+    :items="options"
+    :dark="dark"
+    variant="underlined"
+  />
 </template>
 
 <script setup lang="ts">
@@ -9,12 +14,15 @@ import type { ListItem } from '@/utils/typing'
 import { computed } from 'vue'
 import { useZoneStore } from '@/stores/zones'
 
-const props = withDefaults(defineProps<{
-  value: Zone
-  dark?: boolean
-}>(), {
-  dark: false,
-})
+const props = withDefaults(
+  defineProps<{
+    value: Zone
+    dark?: boolean
+  }>(),
+  {
+    dark: false,
+  },
+)
 
 const zoneStore = useZoneStore()
 

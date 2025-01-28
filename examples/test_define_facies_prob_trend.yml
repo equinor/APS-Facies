@@ -1,39 +1,39 @@
 FaciesProbTrend:
-    GridModelName: GridModelFine
-    ZoneParamName: Zone
-    FaciesParamName: Deterministic_facies
-    ProbParamNamePrefix: ProbTrendTest2Yml
-    SelectedZones: 1 2
-    UseConstantProbFromVolumeFraction: False
-    CondProbMatrix:
-      (1, F1, A): 0.5
-      (1, F2, A): 0.3
-      (1, F3, A): 0.2
+  GridModelName: GridModelFine
+  ZoneParamName: Zone
+  FaciesParamName: Deterministic_facies
+  ProbParamNamePrefix: ProbTrendTest2Yml
+  SelectedZones: 1 2
+  UseConstantProbFromVolumeFraction: False
+  CondProbMatrix:
+    (1, F1, A): 0.5
+    (1, F2, A): 0.3
+    (1, F3, A): 0.2
 
-      (1, F1, B): 0.0
-      (1, F2, B): 1.0
-      (1, F3, B): 0.0
+    (1, F1, B): 0.0
+    (1, F2, B): 1.0
+    (1, F3, B): 0.0
 
-      (1, F1, C): 0.1
-      (1, F2, C): 0.2
-      (1, F3, C): 0.7
+    (1, F1, C): 0.1
+    (1, F2, C): 0.2
+    (1, F3, C): 0.7
 
-      (1, F1, D): 0.15
-      (1, F2, D): 0.25
-      (1, F3, D): 0.6
+    (1, F1, D): 0.15
+    (1, F2, D): 0.25
+    (1, F3, D): 0.6
 
-      (2, F1, A): 1.0
-      (2, F2, A): 0.0
-      (2, F3, A): 0.0
+    (2, F1, A): 1.0
+    (2, F2, A): 0.0
+    (2, F3, A): 0.0
 
-      (2, F1, B): 0.0
-      (2, F2, B): 1.0
-      (2, F3, B): 0.0
+    (2, F1, B): 0.0
+    (2, F2, B): 1.0
+    (2, F3, B): 0.0
 
-      (2, F1, C): 0.0
-      (2, F2, C): 0.0
-      (2, F3, C): 1.0
+    (2, F1, C): 0.0
+    (2, F2, C): 0.0
+    (2, F3, C): 1.0
 
-      (2, F1, D): 0.5
-      (2, F2, D): 0.4
-      (2, F3, D): 0.1
+    (2, F1, D): 0.5
+    (2, F2, D): 0.4
+    (2, F3, D): 0.1

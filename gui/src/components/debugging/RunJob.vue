@@ -1,9 +1,5 @@
 <template>
-  <wait-button
-    :waiting="executing"
-    variant="elevated"
-    @click="execute"
-  >
+  <wait-button :waiting="executing" variant="elevated" @click="execute">
     RUN
   </wait-button>
 </template>

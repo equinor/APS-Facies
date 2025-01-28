@@ -57,11 +57,7 @@ export const usePanelStore = defineStore('panels', () => {
   function set<
     K1 extends string & keyof PanelStructure,
     K2 extends string & keyof PanelStructure[K1],
-  >(
-    sectionName: K1,
-    panelName: K2 | undefined,
-    open: number[] | boolean
-  ) {
+  >(sectionName: K1, panelName: K2 | undefined, open: number[] | boolean) {
     if (!panelName) {
       for (const panelName in panels[sectionName]) {
         set(sectionName, panelName, open)
@@ -74,10 +70,16 @@ export const usePanelStore = defineStore('panels', () => {
           sectionName,
           panelName,
           panel,
-        });
+        })
       }
-      if (sectionName === 'settings' && panelName === 'individualGaussianRandomFields') {
-        if (!isArray(open)) throw new Error('individual gaussian fields expects a list of numbers')
+      if (
+        sectionName === 'settings' &&
+        panelName === 'individualGaussianRandomFields'
+      ) {
+        if (!isArray(open))
+          throw new Error(
+            'individual gaussian fields expects a list of numbers',
+          )
       }
       // @ts-ignore: We check the types are consistent above
       panels[sectionName][panelName] = open
@@ -99,7 +101,9 @@ export const usePanelStore = defineStore('panels', () => {
   const getOpen = computed(() => {
     return (sectionName: keyof PanelStructure) =>
       Object.entries(panels[sectionName])
-        .filter(([name, panel]) => typeof panel === 'boolean' ? panel : Object.values(panel).length > 0)
+        .filter(([name, panel]) =>
+          typeof panel === 'boolean' ? panel : Object.values(panel).length > 0,
+        )
         .map(([name, panel]) => name)
   })
   function setOpen<
@@ -108,12 +112,12 @@ export const usePanelStore = defineStore('panels', () => {
   >(sectionName: S, openPanels: string[]) {
     for (const panelName of Object.keys(panels[sectionName])) {
       // This one is special
-      if (panelName === "individualGaussianRandomFields") continue;
+      if (panelName === 'individualGaussianRandomFields') continue
       set(sectionName, panelName as P, openPanels.includes(panelName))
     }
   }
 
-  function populate (panelSerialization: PanelStoreSerialization) {
+  function populate(panelSerialization: PanelStoreSerialization) {
     Object.assign(panels, panelSerialization)
   }
 
@@ -146,7 +150,7 @@ export const usePanelStore = defineStore('panels', () => {
 })
 
 export type PanelStoreSerialization = PanelStructure
-export function usePanelStoreSerialization (): PanelStoreSerialization {
+export function usePanelStoreSerialization(): PanelStoreSerialization {
   const { panels } = usePanelStore()
   return panels
 }

@@ -13,11 +13,12 @@
 <script
   setup
   lang="ts"
-  generic="T extends Polygon,
-  S extends PolygonSerialization,
-  P extends PolygonSpecification,
-  RULE extends OverlayTruncationRule<T, S, P>
-"
+  generic="
+    T extends Polygon,
+    S extends PolygonSerialization,
+    P extends PolygonSpecification,
+    RULE extends OverlayTruncationRule<T, S, P>
+  "
 >
 import type {
   Polygon,
@@ -32,15 +33,18 @@ import BasePolygonOrder from '@/components/specification/PolygonOrder.vue'
 import { computed } from 'vue'
 import { useTruncationRuleStore } from '@/stores/truncation-rules'
 
-const props = withDefaults(defineProps<{
-  value: T
-  rule: RULE
-  overlay?: boolean
-  minPolygons?: number
-}>(), {
-  overlay: false,
-  minPolygons: 0,
-})
+const props = withDefaults(
+  defineProps<{
+    value: T
+    rule: RULE
+    overlay?: boolean
+    minPolygons?: number
+  }>(),
+  {
+    overlay: false,
+    minPolygons: 0,
+  },
+)
 const ruleStore = useTruncationRuleStore()
 
 const polygons = computed(() =>

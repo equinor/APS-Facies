@@ -1,4 +1,4 @@
-name: "Build and test the GUI"
+name: 'Build and test the GUI'
 # This workflow should only test that the pushed code works well.
 # Consider it a quality check workflow.
 

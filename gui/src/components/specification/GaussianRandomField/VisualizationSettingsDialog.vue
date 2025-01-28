@@ -19,10 +19,7 @@
           </v-col>
         </v-row>
         <v-col cols="6">
-          <v-checkbox
-            v-model="settings.gridModel.use"
-            label="Use model grid"
-          />
+          <v-checkbox v-model="settings.gridModel.use" label="Use model grid" />
         </v-col>
         <v-col cols="6" />
         <v-row v-if="settings.gridModel.use" justify="space-around">
@@ -84,24 +81,29 @@ import { ref } from 'vue'
 import { useTheme } from 'vuetify'
 import type { Settings } from '@/utils/domain/gaussianRandomField'
 
-type ReturnValue  = {
-  save: true
-  settings: Settings
-} | {
-  save: false,
-  settings: null
-}
+type ReturnValue =
+  | {
+      save: true
+      settings: Settings
+    }
+  | {
+      save: false
+      settings: null
+    }
 
 const dialog = ref(false)
 const resolve = ref<Optional<({ save, settings }: ReturnValue) => void>>(null)
 const reject = ref<Optional<({ save, settings }: ReturnValue) => void>>(null)
-const settings = ref<Settings | {
-  crossSection : {
-    type: null
-  },
-  gridModel: Settings['gridModel']
-  seed: null
-}>({
+const settings = ref<
+  | Settings
+  | {
+      crossSection: {
+        type: null
+      }
+      gridModel: Settings['gridModel']
+      seed: null
+    }
+>({
   crossSection: {
     type: null,
   },
@@ -123,7 +125,10 @@ const options = ref<DialogOptions>({
   width: 290,
 })
 
-async function open(newSettings: Settings, newOptions: DialogOptions = {}): Promise<ReturnValue> {
+async function open(
+  newSettings: Settings,
+  newOptions: DialogOptions = {},
+): Promise<ReturnValue> {
   dialog.value = true
   settings.value = newSettings
   options.value = { ...options.value, ...newOptions }

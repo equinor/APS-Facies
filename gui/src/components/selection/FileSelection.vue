@@ -59,22 +59,23 @@ const path = computed({
   },
 })
 
-const v = useVuelidate({
-  path: {
-    required,
-    exists: helpers.withAsync(
-      async (path: string) => {
+const v = useVuelidate(
+  {
+    path: {
+      required,
+      exists: helpers.withAsync(async (path: string) => {
         return await rms.exists(
           btoa(props.relativeTo ? `${props.relativeTo}/${path}` : path),
           !props.directory,
         )
-      },
-    ),
-  }
-}, {
-  props,
-  path,
-})
+      }),
+    },
+  },
+  {
+    props,
+    path,
+  },
+)
 useInvalidation(v)
 
 const errors = computed(() => {

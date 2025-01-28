@@ -10,14 +10,14 @@
       v-else
       :value="facies"
       field="name"
-      @submit="name => facies.name = name.toString() || `F${facies.code}`"
+      @submit="(name) => (facies.name = name.toString() || `F${facies.code}`)"
     />
   </td>
   <td v-if="!hideAlias" class="text-left">
     <editable-cell
       :value="facies"
       field="alias"
-      @submit="(alias) => facies.alias = alias.toString()"
+      @submit="(alias) => (facies.alias = alias.toString())"
     />
   </td>
   <td class="text-left">
@@ -30,7 +30,10 @@
       :restrictions="faciesCodeRestrictions(facies)"
       field="code"
       numeric
-      @submit="code => facies.code = typeof code === 'number' ? code : parseInt(code, 10)"
+      @submit="
+        (code) =>
+          (facies.code = typeof code === 'number' ? code : parseInt(code, 10))
+      "
     />
   </td>
   <td
@@ -50,17 +53,20 @@ import { useGlobalFaciesStore } from '@/stores/facies/global'
 import { useFaciesStore } from '@/stores/facies'
 import type { ID } from '@/utils/domain/types'
 
-const props = withDefaults(defineProps<{
-  modeValue: GlobalFacies
-  expanded?: GlobalFacies[]
-  hideAlias?: boolean
-}>(), {
-  hideAlias: false,
-})
+const props = withDefaults(
+  defineProps<{
+    modeValue: GlobalFacies
+    expanded?: GlobalFacies[]
+    hideAlias?: boolean
+  }>(),
+  {
+    hideAlias: false,
+  },
+)
 
 const emit = defineEmits<{
   (event: 'update:modelValue', value: GlobalFacies): void
-  (event: 'expanded', value: GlobalFacies[]) :void
+  (event: 'expanded', value: GlobalFacies[]): void
 }>()
 
 const facies = computed(() => props.modeValue)
@@ -68,12 +74,10 @@ const facies = computed(() => props.modeValue)
 const faciesStore = useFaciesStore()
 const faciesGlobalStore = useGlobalFaciesStore()
 
-
 const currentId = computed({
   get: () => faciesGlobalStore.currentId,
   set: (id: ID | null) => faciesGlobalStore.setCurrentId(id),
 })
-
 
 function isFaciesFromRms(facies: GlobalFacies): boolean {
   return faciesStore.isFromRMS(facies)

@@ -9,7 +9,9 @@ export type MaybeFmuUpdatable<T extends number = number> = FmuUpdatable<T> | T
 
 export type FmuUpdatableSerialization = FmuUpdatable
 
-export default class FmuUpdatableValue<T extends number = number> implements FmuUpdatable {
+export default class FmuUpdatableValue<T extends number = number>
+  implements FmuUpdatable
+{
   public value: number
   public updatable: boolean
 

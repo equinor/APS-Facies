@@ -8,20 +8,20 @@ Resample:
   ZoneParam: Zone
   ExtrapolationMethod: repeat
   GeoGridParameters:
-    1:  perm poro
-    2:  perm poro
-    3:  perm poro
-    4:  perm poro
-    5:  perm poro
-    6:  perm poro
+    1: perm poro
+    2: perm poro
+    3: perm poro
+    4: perm poro
+    5: perm poro
+    6: perm poro
 
   ErtboxParameters:
-    1:  A3_perm  A3_poro
-    2:  A2_perm  A2_poro
-    3:  A1_perm  A1_poro
-    4:  B_perm  B_poro
-    5:  C_perm  C_poro
-    6:  D_perm  D_poro
+    1: A3_perm  A3_poro
+    2: A2_perm  A2_poro
+    3: A1_perm  A1_poro
+    4: B_perm  B_poro
+    5: C_perm  C_poro
+    6: D_perm  D_poro
 
   Conformity:
     1: TopConform
@@ -30,8 +30,6 @@ Resample:
     4: TopConform
     5: BaseConform
     6: BaseConform
-
-
 # Available extrapolation methods:
 #  zero, mean, extend, repeat,
 #  extend_layer_mean, repeat_layer_mean

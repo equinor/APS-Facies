@@ -52,16 +52,14 @@ const plot = ref<InstanceType<typeof StaticPlot> | null>(null)
 const polygons = asyncComputed<PolygonDescription[]>(async () => {
   try {
     return await rms.truncationPolygons(
-        makeSimplifiedTruncationRuleSpecification(props.rule),
-      )
+      makeSimplifiedTruncationRuleSpecification(props.rule),
+    )
   } catch (e) {
     console.warn(e)
     // Ignore, as a cubic truncation rule may be inconsistent during an (vuex) action
-    return new Promise(resolve => resolve([]))
+    return new Promise((resolve) => resolve([]))
   }
-},
-  [],
-)
+}, [])
 
 const maxSize = { width: 400, height: 400 }
 
@@ -84,7 +82,7 @@ const __data = computed<PlotSpecification>(() =>
         name: polygon.id,
         color: has(polygon)
           ? (theme.global.current.value.colors.primary as Color)
-          : '#000' as Color,
+          : ('#000' as Color),
         alias: polygon.level.filter((lvl) => lvl !== 0).join('.'),
       }
     }),

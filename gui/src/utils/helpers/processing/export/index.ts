@@ -98,39 +98,43 @@ function addPreview(doc: Document, parentElement: HTMLElement) {
   const { current: currentRegion } = useRegionStore()
   const crossSectionStore = useGaussianRandomFieldCrossSectionStore()
 
-  const parent: Parent | null = currentZone ? {
-    zone: currentZone,
-    region: currentRegion,
-  } : null
-  let crossSectionType = (DEFAULT_CROSS_SECTION.type as CrossSectionType)
+  const parent: Parent | null = currentZone
+    ? {
+        zone: currentZone,
+        region: currentRegion,
+      }
+    : null
+  let crossSectionType = DEFAULT_CROSS_SECTION.type as CrossSectionType
   if (parent) {
     const type = crossSectionStore.byParent(parent)
     if (type) {
       crossSectionType = type.type
     }
   }
-  parentElement.appendChild(createElement(doc, 'Preview', null, [
-    {
-      name: 'zoneNumber',
-      value: currentZone ? currentZone.code.toString(10) : "0",
-    },
-    {
-      name: 'regionNumber',
-      value: currentRegion ? currentRegion.code.toString(10) : "0",
-    },
-    {
-      name: 'crossSectionType',
-      value: crossSectionType,
-    },
-    {
-      name: 'crossSectionRelativePos',
-      value: '0.5',  // This value is not editable from the GUI
-    },
-    {
-      name: 'scale',
-      value: '1', // This value is not editable from the GUI
-    }
-  ]))
+  parentElement.appendChild(
+    createElement(doc, 'Preview', null, [
+      {
+        name: 'zoneNumber',
+        value: currentZone ? currentZone.code.toString(10) : '0',
+      },
+      {
+        name: 'regionNumber',
+        value: currentRegion ? currentRegion.code.toString(10) : '0',
+      },
+      {
+        name: 'crossSectionType',
+        value: crossSectionType,
+      },
+      {
+        name: 'crossSectionRelativePos',
+        value: '0.5', // This value is not editable from the GUI
+      },
+      {
+        name: 'scale',
+        value: '1', // This value is not editable from the GUI
+      },
+    ]),
+  )
 }
 
 function addRMSProjectName(doc: Document, parentElement: HTMLElement): void {
@@ -236,8 +240,8 @@ function addJobSettings(doc: Document, parentElement: HTMLElement): void {
   const fmuMode = fmuUpdateFields
     ? 'FIELDS'
     : onlyUpdateFromFmu
-    ? 'NOFIELDS'
-    : 'OFF'
+      ? 'NOFIELDS'
+      : 'OFF'
   const exchangeMode = importFieldsFromFmu ? 'AUTO' : 'SIMULATE'
   const exportConfigMode = exportFmuConfigFiles ? 'YES' : 'NO'
   const useResidualFields = fmuOnlyUpdateResidualFields ? 'YES' : 'NO'
@@ -725,10 +729,12 @@ function addGaussianRandomFields(
   zoneElement: HTMLElement,
 ): void {
   const fieldStore = useGaussianRandomFieldStore()
-  const relevantFields = getRelevant(fieldStore.available as GaussianRandomField[], parent)
-    .sort((a, b): number =>
-      a.name.localeCompare(b.name, undefined, { numeric: true }),
-    )
+  const relevantFields = getRelevant(
+    fieldStore.available as GaussianRandomField[],
+    parent,
+  ).sort((a, b): number =>
+    a.name.localeCompare(b.name, undefined, { numeric: true }),
+  )
   if (relevantFields.length < 2) {
     let message = ''
     if (parent.region) {
@@ -754,7 +760,10 @@ function addGaussianRandomFields(
 function getNumberOfFieldsForTruncRule(parent: Parent): number {
   const fieldStore = useGaussianRandomFieldStore()
 
-  const relevantFields = getRelevant(fieldStore.available as GaussianRandomField[], parent)
+  const relevantFields = getRelevant(
+    fieldStore.available as GaussianRandomField[],
+    parent,
+  )
   return relevantFields.length
 }
 
@@ -769,10 +778,10 @@ function findFaciesNameForNamedPolygon(
 }
 
 function getAlphaNames<
-    T extends Polygon,
-    S extends PolygonSerialization,
-    P extends PolygonSpecification,
-    RULE extends TruncationRuleBase<T, S, P>,
+  T extends Polygon,
+  S extends PolygonSerialization,
+  P extends PolygonSpecification,
+  RULE extends TruncationRuleBase<T, S, P>,
 >(truncRule: RULE): string {
   const alphaFields = truncRule.backgroundFields
   return alphaFields.map((field): string => (field ? field.name : '')).join(' ')
@@ -882,12 +891,15 @@ function addTruncationRuleOverlay<
   backgroundPolygonsHandler(backGroundModelElem)
 
   const overlayGroups: Identified<OverlayPolygon[]> =
-    truncRule.overlayPolygons.reduce((obj, polygon) => {
-      const groupId = polygon.group.id
-      if (!hasOwnProperty(obj, groupId)) obj[groupId] = []
-      obj[groupId].push(polygon)
-      return obj
-    }, {} as Identified<OverlayPolygon[]>)
+    truncRule.overlayPolygons.reduce(
+      (obj, polygon) => {
+        const groupId = polygon.group.id
+        if (!hasOwnProperty(obj, groupId)) obj[groupId] = []
+        obj[groupId].push(polygon)
+        return obj
+      },
+      {} as Identified<OverlayPolygon[]>,
+    )
   if (Object.values(overlayGroups).length > 0 && truncRule.useOverlay) {
     const overLayModelElem = createElement(doc, 'OverLayModel')
     truncElement.append(overLayModelElem)
@@ -954,9 +966,11 @@ function addTruncationRuleCubic(
           attributes,
         )
         element.append(child)
-        polygon.children.toSorted((a, b) => a.order - b.order).forEach((polygon): void => {
-          addPolygon(child, polygon)
-        })
+        polygon.children
+          .toSorted((a, b) => a.order - b.order)
+          .forEach((polygon): void => {
+            addPolygon(child, polygon)
+          })
       } else {
         addFraction(element, polygon)
       }
@@ -1026,8 +1040,9 @@ function addTruncationRule(
   zoneElement.append(truncRuleElem)
 
   const truncationRuleStore = useTruncationRuleStore()
-  const truncRule = (truncationRuleStore.available as InstantiatedTruncationRule[])
-    .find(rule => hasParents(rule, parent.zone, parent.region))
+  const truncRule = (
+    truncationRuleStore.available as InstantiatedTruncationRule[]
+  ).find((rule) => hasParents(rule, parent.zone, parent.region))
   if (!truncRule) {
     let errMessage = `No truncation rule specified for zone ${parent.zone.code}`
     if (parent.region) {
@@ -1037,16 +1052,15 @@ function addTruncationRule(
   }
   if (truncRule.type === 'bayfill') {
     addTruncationRuleBayFill(doc, parent, truncRule, truncRuleElem)
-  }
-  else if (truncRule.type === 'non-cubic') {
+  } else if (truncRule.type === 'non-cubic') {
     addTruncationRuleNonCubic(doc, parent, truncRule, truncRuleElem)
-  }
-  else if (truncRule.type === 'cubic') {
+  } else if (truncRule.type === 'cubic') {
     addTruncationRuleCubic(doc, parent, truncRule, truncRuleElem)
-  }
-  else {
+  } else {
     console.error('unknown truncation rule', truncRule)
-    throw new APSExportError(`Unknown truncation rule type for Zone: ${parent.zone}, Region: ${parent.region}`)
+    throw new APSExportError(
+      `Unknown truncation rule type for Zone: ${parent.zone}, Region: ${parent.region}`,
+    )
   }
 }
 
@@ -1084,17 +1098,11 @@ function addZoneModel(
     zValue = 0
   } else if (typeof simboxHeight === 'object') {
     zValue = simboxHeight[zone.code]
-  } else /*if (typeof  simboxHeight === 'number') */{
+  } /*if (typeof  simboxHeight === 'number') */ else {
     // Assuming it is a number
     zValue = simboxHeight
   }
-  zoneElement.append(
-    createElement(
-      doc,
-      'SimBoxThickness',
-      zValue,
-    ),
-  )
+  zoneElement.append(createElement(doc, 'SimBoxThickness', zValue))
 
   addFaciesProb(doc, parent, zoneElement)
 
@@ -1138,7 +1146,11 @@ function addZoneModels(doc: Document, parentElement: HTMLElement): void {
   })
 }
 
-function addContent(doc: Document, rootElem: HTMLElement, includeAuxiliaryData: boolean): void {
+function addContent(
+  doc: Document,
+  rootElem: HTMLElement,
+  includeAuxiliaryData: boolean,
+): void {
   if (includeAuxiliaryData) {
     addPreview(doc, rootElem)
   }

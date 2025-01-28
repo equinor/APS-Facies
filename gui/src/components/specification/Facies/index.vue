@@ -9,9 +9,7 @@
 <script
   setup
   lang="ts"
-  generic="T extends Polygon,
-  RULE extends InstantiatedTruncationRule
-"
+  generic="T extends Polygon, RULE extends InstantiatedTruncationRule"
 >
 import type Facies from '@/utils/domain/facies/local'
 import type Polygon from '@/utils/domain/polygon/base'

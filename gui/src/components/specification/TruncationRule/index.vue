@@ -88,8 +88,8 @@ const hasEnoughFacies = computed(() => {
   if (!rule.value) return true
   const numFacies = faciesStore.selected.length
   const numFaciesInBackground = new Set(
-    (rule.value!).backgroundPolygons
-      .map((polygon) => polygon.facies)
+    rule
+      .value!.backgroundPolygons.map((polygon) => polygon.facies)
       .filter((facies) => !!facies),
   ).size
   return numFacies > numFaciesInBackground

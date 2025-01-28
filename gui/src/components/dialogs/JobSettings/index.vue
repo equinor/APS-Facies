@@ -12,7 +12,9 @@
     "
   >
     <template #activator="{ props }">
-      <v-btn color="primary" v-bind="props" variant="outlined"> Job Settings </v-btn>
+      <v-btn color="primary" v-bind="props" variant="outlined">
+        Job Settings
+      </v-btn>
     </template>
     <v-card>
       <v-card-title class="text-h5" />
@@ -91,7 +93,7 @@
                   >
                     <template #item="{ item, props }">
                       <v-list-item v-bind="props">
-                        <br>
+                        <br />
                         <v-row>
                           <v-col
                             v-for="color in item.value.colors"
@@ -134,7 +136,7 @@
             </v-col>
           </v-row>
         </settings-panel>
-        <br>
+        <br />
         <grid-information />
       </v-card-text>
       <v-card-actions>
@@ -169,14 +171,15 @@ import type { NameOrNumber } from '@/stores/options'
 import { useOptionStore } from '@/stores/options'
 import type {
   FieldFormats,
-  TrendExtrapolationMethod
+  TrendExtrapolationMethod,
 } from '@/stores/fmu/options'
-import {
-  useFmuOptionStore,
-} from '@/stores/fmu/options'
+import { useFmuOptionStore } from '@/stores/fmu/options'
 import { useFmuMaxDepthStore } from '@/stores/fmu/maxDepth'
 import { useParameterDebugLevelStore } from '@/stores/parameters/debug-level'
-import { type TransformType, useParameterTransformTypeStore } from '@/stores/parameters/transform-type'
+import {
+  type TransformType,
+  useParameterTransformTypeStore,
+} from '@/stores/parameters/transform-type'
 import {
   useParametersMaxFractionOfValuesOutsideToleranceStore,
   useParametersToleranceOfProbabilityNormalisationStore,
@@ -199,12 +202,14 @@ const stores = {
   parameter: {
     transformType: useParameterTransformTypeStore(),
     debugLevel: useParameterDebugLevelStore(),
-    maxFractionOfValuesOutsideTolerance: useParametersMaxFractionOfValuesOutsideToleranceStore(),
-    toleranceOfProbabilityNormalisation: useParametersToleranceOfProbabilityNormalisationStore(),
+    maxFractionOfValuesOutsideTolerance:
+      useParametersMaxFractionOfValuesOutsideToleranceStore(),
+    toleranceOfProbabilityNormalisation:
+      useParametersToleranceOfProbabilityNormalisationStore(),
   },
   constants: {
-    faciesColors: useConstantsFaciesColorsStore()
-  }
+    faciesColors: useConstantsFaciesColorsStore(),
+  },
 }
 
 type Invalid = { fmu: boolean }
@@ -328,7 +333,8 @@ async function ok(): Promise<void> {
 
   // Create ERTBOX grid if createFmuGrid.value is true
   if (runFmuWorkflows.value && createFmuGrid.value) {
-    if (!currentGridModelName.value) throw new Error('No grid model name selected')
+    if (!currentGridModelName.value)
+      throw new Error('No grid model name selected')
     await rms.createErtBoxGrid(
       currentGridModelName.value as string,
       fmuGrid.value,

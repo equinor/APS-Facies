@@ -1,9 +1,6 @@
 <template>
   <settings-panel v-if="!!gridModelStore.current" title="Grid information">
-    <v-container
-      v-if="!parameterGridModelStore.waiting"
-      class="text-center"
-    >
+    <v-container v-if="!parameterGridModelStore.waiting" class="text-center">
       <v-row class="fill" justify="space-around">
         <v-col cols="4">
           <numeric-field
@@ -39,8 +36,12 @@
           />
         </v-col>
       </v-row>
-        <v-spacer />
-      <v-row v-if="parameterSimboxStore.waiting" justify="center" align="center">
+      <v-spacer />
+      <v-row
+        v-if="parameterSimboxStore.waiting"
+        justify="center"
+        align="center"
+      >
         <v-icon size="x-large" :icon="$vuetify.icons.aliases?.refreshSpinner" />
       </v-row>
       <v-row v-else>
@@ -140,7 +141,7 @@ const simulationBox = computed<Coordinate3D & { hint: string }>(() => {
   let hint: string = 'The height of the simulation box'
   let zValue: number
   if (z !== null) {
-    if (typeof  z === 'object') {
+    if (typeof z === 'object') {
       if (zoneStore.current) {
         zValue = z[zoneStore.current.code]
         hint = `The height of the simulation box in zone '${zoneStore.current.name}'`
@@ -156,11 +157,10 @@ const simulationBox = computed<Coordinate3D & { hint: string }>(() => {
     zValue = 0
     hint = 'Unknown height of the simulation box'
   }
-  return ({
+  return {
     ...parameterSimboxStore.size,
     z: zValue,
     hint,
-  })
+  }
 })
-
 </script>

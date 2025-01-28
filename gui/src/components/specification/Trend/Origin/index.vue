@@ -7,7 +7,7 @@
           :value="value"
           :origin-type="originType"
           coordinate-axis="x"
-          @update:error="(e: boolean) => invalid.x = e"
+          @update:error="(e: boolean) => (invalid.x = e)"
         />
       </v-col>
       <v-col :class="coordinateClass">
@@ -15,7 +15,7 @@
           :value="value"
           :origin-type="originType"
           coordinate-axis="y"
-          @update:error="(e: boolean) => invalid.y = e"
+          @update:error="(e: boolean) => (invalid.y = e)"
         />
       </v-col>
       <v-col v-if="!isEllipticCone" :class="coordinateClass">
@@ -23,7 +23,7 @@
           :value="value"
           :origin-type="originType"
           coordinate-axis="z"
-          @update:error="(e: boolean) => invalid.z = e"
+          @update:error="(e: boolean) => (invalid.z = e)"
         />
       </v-col>
     </v-row>

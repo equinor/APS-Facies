@@ -1,7 +1,13 @@
 import { acceptHMRUpdate, defineStore } from 'pinia'
 import { computed, ref } from 'vue'
 import type { Identifiable, Identified } from '@/utils/domain/bases/interfaces'
-import type { Parent, Region, Zone, InstantiatedTruncationRule, Polygon } from '@/utils/domain'
+import type {
+  Parent,
+  Region,
+  Zone,
+  InstantiatedTruncationRule,
+  Polygon,
+} from '@/utils/domain'
 import { Facies, GlobalFacies } from '@/utils/domain'
 import type {
   FaciesSerialization,
@@ -13,9 +19,7 @@ import { getRelevant } from '@/stores/utils/helpers'
 import { isNumber } from 'lodash'
 import type GridModel from '@/utils/domain/gridModel'
 import type { IdentifiedStorePopulationData } from '@/stores/utils/identified-items'
-import {
-  useIdentifiedItems,
-} from '@/stores/utils/identified-items'
+import { useIdentifiedItems } from '@/stores/utils/identified-items'
 import { useRootStore } from '@/stores'
 import { useZoneStore } from '@/stores/zones'
 import { useRegionStore } from '@/stores/regions'
@@ -30,17 +34,27 @@ import { resolveParentReference } from '@/stores/utils'
 import { useGlobalFaciesStore } from './global'
 import { useFaciesGroupStore } from './groups'
 import { useTruncationRuleStore } from '@/stores/truncation-rules'
-import type { PolygonSerialization, PolygonSpecification } from "@/utils/domain/polygon/base";
-import type OverlayTruncationRule from "@/utils/domain/truncationRule/overlay";
+import type {
+  PolygonSerialization,
+  PolygonSpecification,
+} from '@/utils/domain/polygon/base'
+import type OverlayTruncationRule from '@/utils/domain/truncationRule/overlay'
 
 export type FaciesStorePopulationData = IdentifiedStorePopulationData<Facies>
 
-function removeUnavailableFaciesFromTruncationRule(globalFacies: GlobalFacies[], parent: Parent) {
+function removeUnavailableFaciesFromTruncationRule(
+  globalFacies: GlobalFacies[],
+  parent: Parent,
+) {
   const { available } = useTruncationRuleStore()
-  const relevantTruncationRule = (available as InstantiatedTruncationRule[]).find((rule: InstantiatedTruncationRule) => hasParents(rule, parent.zone, parent.region))
-  const globalFaciesCodes = new Set(globalFacies.map(({code}) => code))
+  const relevantTruncationRule = (
+    available as InstantiatedTruncationRule[]
+  ).find((rule: InstantiatedTruncationRule) =>
+    hasParents(rule, parent.zone, parent.region),
+  )
+  const globalFaciesCodes = new Set(globalFacies.map(({ code }) => code))
   if (relevantTruncationRule) {
-    relevantTruncationRule.polygons.forEach(polygon => {
+    relevantTruncationRule.polygons.forEach((polygon) => {
       if (polygon.facies && !globalFaciesCodes.has(polygon.facies.code)) {
         polygon.facies = null
       }
@@ -50,7 +64,8 @@ function removeUnavailableFaciesFromTruncationRule(globalFacies: GlobalFacies[],
 
 export const useFaciesStore = defineStore('facies', () => {
   const store = useIdentifiedItems<Facies>()
-  const { available, identifiedAvailable, addAvailable, removeAvailable } = store
+  const { available, identifiedAvailable, addAvailable, removeAvailable } =
+    store
   const _constantProbability = ref<Identified<boolean>>({})
 
   const byId = computed(() => {
@@ -78,8 +93,9 @@ export const useFaciesStore = defineStore('facies', () => {
     const { current: region } = useRegionStore()
     if (!zone) return []
 
-    return getRelevant(available.value, { zone, region } as Parent)
-      .sort((a, b) => a.facies.code - b.facies.code)
+    return getRelevant(available.value, { zone, region } as Parent).sort(
+      (a, b) => a.facies.code - b.facies.code,
+    )
   })
 
   const cumulative = computed(() =>
@@ -94,11 +110,15 @@ export const useFaciesStore = defineStore('facies', () => {
 
   const availableForBackgroundFacies = computed(() => {
     const groupsStore = useFaciesGroupStore()
-    return <T extends Polygon,
-    S extends PolygonSerialization,
-    P extends PolygonSpecification,
-    RULE extends OverlayTruncationRule<T, S, P>,
-  >(rule: RULE, facies: Facies) =>
+    return <
+      T extends Polygon,
+      S extends PolygonSerialization,
+      P extends PolygonSpecification,
+      RULE extends OverlayTruncationRule<T, S, P>,
+    >(
+      rule: RULE,
+      facies: Facies,
+    ) =>
       !groupsStore.isUsed(facies) &&
       rule.backgroundPolygons
         .map((polygon) => getId(polygon.facies))
@@ -109,9 +129,10 @@ export const useFaciesStore = defineStore('facies', () => {
     const globalStore = useGlobalFaciesStore()
     return (facies: GlobalFacies | null): boolean =>
       (facies &&
-      !!globalStore.rmsFacies.find(
-        (f) => f.code === facies.code && f.name === facies.name,
-      )) ?? false
+        !!globalStore.rmsFacies.find(
+          (f) => f.code === facies.code && f.name === facies.name,
+        )) ??
+      false
   })
 
   const isFaciesFetchedFromRMS = computed(() => {
@@ -130,11 +151,12 @@ export const useFaciesStore = defineStore('facies', () => {
     previewProbability: PROBABILITY | null = null,
     id: ID | null = null,
   ) {
-    const facies = globalFacies instanceof GlobalFacies
-          ? globalFacies
-          : byId.value(globalFacies)
+    const facies =
+      globalFacies instanceof GlobalFacies
+        ? globalFacies
+        : byId.value(globalFacies)
     if (!(facies instanceof GlobalFacies)) {
-      throw new Error("The given facies is not a valid GlobalFacies")
+      throw new Error('The given facies is not a valid GlobalFacies')
     }
     const localFacies = new Facies({
       id: id ?? undefined,
@@ -209,19 +231,19 @@ export const useFaciesStore = defineStore('facies', () => {
 
   function populate(faciesSerializations: FaciesSerialization[]) {
     const globalStore = useGlobalFaciesStore()
-    available.value = faciesSerializations.map(
-      (serialization) => {
-        const globalFacies = globalStore.byId(getId(serialization.facies))
-        if (!globalFacies) {
-          throw new Error(`Could not find facies with ID '${serialization.facies}'`)
-        }
-        return new Facies({
-          ...serialization,
-          facies: globalFacies,
-          parent: resolveParentReference(serialization.parent),
-        })
-      },
-    )
+    available.value = faciesSerializations.map((serialization) => {
+      const globalFacies = globalStore.byId(getId(serialization.facies))
+      if (!globalFacies) {
+        throw new Error(
+          `Could not find facies with ID '${serialization.facies}'`,
+        )
+      }
+      return new Facies({
+        ...serialization,
+        facies: globalFacies,
+        parent: resolveParentReference(serialization.parent),
+      })
+    })
   }
 
   function updateProbabilities(
@@ -347,7 +369,10 @@ export const useFaciesStore = defineStore('facies', () => {
     facies.probabilityCube = cube
   }
 
-  function changePreviewProbability(facies: Facies, probability: PROBABILITY | null) {
+  function changePreviewProbability(
+    facies: Facies,
+    probability: PROBABILITY | null,
+  ) {
     facies.previewProbability = probability
   }
 
@@ -358,10 +383,8 @@ export const useFaciesStore = defineStore('facies', () => {
 
   function $reset() {
     store.$reset()
-    useGlobalFaciesStore()
-      .$reset()
-    useFaciesGroupStore()
-      .$reset()
+    useGlobalFaciesStore().$reset()
+    useFaciesGroupStore().$reset()
     _constantProbability.value = {}
   }
 

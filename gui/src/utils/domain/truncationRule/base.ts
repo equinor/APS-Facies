@@ -7,9 +7,7 @@ import type {
 import Simulation from '@/utils/domain/bases/simulation'
 import APSTypeError from '@/utils/domain/errors/type'
 import Facies from '@/utils/domain/facies/local'
-import type {
-  GaussianRandomFieldSerialization,
-} from '@/utils/domain/gaussianRandomField'
+import type { GaussianRandomFieldSerialization } from '@/utils/domain/gaussianRandomField'
 import GaussianRandomField from '@/utils/domain/gaussianRandomField'
 import type {
   Polygon,
@@ -20,9 +18,8 @@ import type { ID } from '@/utils/domain/types'
 import { getId, identify, allSet } from '@/utils/helpers'
 import { isCloseToUnity } from '@/utils/helpers/simple'
 
-export interface TruncationRuleSerialization<
-  S extends PolygonSerialization,
-> extends SimulationSerialization {
+export interface TruncationRuleSerialization<S extends PolygonSerialization>
+  extends SimulationSerialization {
   name: string
   type: TruncationRuleType
   polygons: S[]
@@ -44,9 +41,7 @@ export type TruncationRuleConfiguration<T extends Polygon> =
     backgroundFields: (GaussianRandomField | null)[]
   }
 
-export interface TruncationRuleSpecification<
-  P extends PolygonSpecification,
-> {
+export interface TruncationRuleSpecification<P extends PolygonSpecification> {
   polygons: P[]
 }
 
@@ -179,7 +174,9 @@ export default abstract class TruncationRule<
     )
     return index < 0
       ? false
-        : index !== channel - 1 /* Channel is 1-indexed, while order of fields are 0-indexed */
+      : index !==
+          channel -
+            1 /* Channel is 1-indexed, while order of fields are 0-indexed */
   }
 
   public isUsedInBackground(item: GaussianRandomField | Facies): boolean {

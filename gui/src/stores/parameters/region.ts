@@ -12,7 +12,10 @@ export const useParameterRegionStore = defineStore('parameter-region', () => {
   const loading = ref(false)
 
   async function select(regionParameter: string | null) {
-    if (regionParameter !== null && !available.value.includes(regionParameter)) {
+    if (
+      regionParameter !== null &&
+      !available.value.includes(regionParameter)
+    ) {
       throw new Error(
         `Selected regionParam ( ${regionParameter} ) ` +
           'is not present in the current project\n\n' +
@@ -23,17 +26,15 @@ export const useParameterRegionStore = defineStore('parameter-region', () => {
 
     selected.value = regionParameter
 
-    await useRegionStore()
-      .setUse(!!regionParameter)
+    await useRegionStore().setUse(!!regionParameter)
 
-    await useGlobalFaciesStore()
-      .refresh()
+    await useGlobalFaciesStore().refresh()
   }
 
   async function refresh() {
     loading.value = true
     const gridModelStore = useGridModelStore()
-    const { current: gridModel} = gridModelStore
+    const { current: gridModel } = gridModelStore
     if (!gridModel) {
       loading.value = false
       throw new APSError(

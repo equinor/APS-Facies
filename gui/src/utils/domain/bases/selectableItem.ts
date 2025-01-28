@@ -1,7 +1,4 @@
-import type {
-  DiscreteConfiguration,
-  DiscreteSerialization,
-} from './discrete'
+import type { DiscreteConfiguration, DiscreteSerialization } from './discrete'
 import Discrete from './discrete'
 import type { Selectable } from './interfaces'
 

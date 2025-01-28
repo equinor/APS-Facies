@@ -38,9 +38,7 @@
                   }
                 "
               />
-              <template #popper>
-                No grid model has been selected
-              </template>
+              <template #popper> No grid model has been selected </template>
             </floating-tooltip>
           </hover-helper>
           <v-row v-if="!fmuGridExists">
@@ -149,7 +147,7 @@ import {
 } from '@/stores/fmu/options'
 import { useGridModelStore } from '@/stores/grid-models'
 import { useGaussianRandomFieldStore } from '@/stores/gaussian-random-fields'
-import HoverHelper from "@/components/selection/dropdown/HoverHelper.vue";
+import HoverHelper from '@/components/selection/dropdown/HoverHelper.vue'
 
 type FieldUsage = 'generate' | 'automatic_detect'
 
@@ -313,7 +311,7 @@ const fmuGrids = computed(() => {
           grid.name !== selectedGrid.name &&
           grid.zones === 1
         ),
-      }
+      },
     }
   })
 })

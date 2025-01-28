@@ -21,21 +21,22 @@
 <script setup lang="ts" generic="T, N extends boolean">
 import { computed, onBeforeMount, ref } from 'vue'
 
-type OnSubmit = N extends true
-  ? number
-  : string
+type OnSubmit = N extends true ? number : string
 
-const props = withDefaults(defineProps<{
-  value: T
-  field: keyof T
-  label?: string
-  numeric?: N
-  restrictions?: ((value: string) => string)[]
-}>(), {
-  label: 'Edit',
-  numeric: undefined,
-  restrictions: () => [],
-})
+const props = withDefaults(
+  defineProps<{
+    value: T
+    field: keyof T
+    label?: string
+    numeric?: N
+    restrictions?: ((value: string) => string)[]
+  }>(),
+  {
+    label: 'Edit',
+    numeric: undefined,
+    restrictions: () => [],
+  },
+)
 const emit = defineEmits<{
   (event: 'submit', value: OnSubmit): void
   (event: 'update:error', error: boolean): void

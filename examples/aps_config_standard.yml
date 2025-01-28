@@ -6,19 +6,19 @@
 # Only file paths relevant for APS plugin is specified here.
 top_directory_relative_to_rms_project: ../..
 relative_paths:
-    fmuconfig: fmuconfig
-    fmu_config_input: fmuconfig/input
-    fmu_config_output: fmuconfig/output
-    global_variables_file: fmuconfig/output/global_variables.yml
-    ert: ert
-    ert_model: ert/model
-    ert_dist: ert/input/distributions
-    rms: rms
-    rms_model: rms/model
-    rms_field: rms/output/aps
-    aps_model_export: rms/input/config/apsgui
+  fmuconfig: fmuconfig
+  fmu_config_input: fmuconfig/input
+  fmu_config_output: fmuconfig/output
+  global_variables_file: fmuconfig/output/global_variables.yml
+  ert: ert
+  ert_model: ert/model
+  ert_dist: ert/input/distributions
+  rms: rms
+  rms_model: rms/model
+  rms_field: rms/output/aps
+  aps_model_export: rms/input/config/apsgui
 aps_file_extensions:
-    fmu_master_config: _aps_params.yml
-    fmu_config: _aps_fmu_config.yml
-    ert_fields: _aps_ert_config_fields.txt
-    ert_prob: _aps_ert_config_dist.txt
+  fmu_master_config: _aps_params.yml
+  fmu_config: _aps_fmu_config.yml
+  ert_fields: _aps_ert_config_fields.txt
+  ert_prob: _aps_ert_config_dist.txt

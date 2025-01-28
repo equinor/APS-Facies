@@ -1,11 +1,15 @@
 import { acceptHMRUpdate, defineStore } from 'pinia'
 import _truncationRules from './truncationRules.json'
 import _simpleTruncationRules from './simpleTruncationRules.json'
-import type {
-  TruncationRuleTemplateType,
-} from '@/stores/truncation-rules/templates/types'
+import type { TruncationRuleTemplateType } from '@/stores/truncation-rules/templates/types'
 import { Bayfill } from '@/utils/domain'
-import type { Facies, FaciesGroup, Parent, Polygon, GaussianRandomField } from '@/utils/domain'
+import type {
+  Facies,
+  FaciesGroup,
+  Parent,
+  Polygon,
+  GaussianRandomField,
+} from '@/utils/domain'
 import { useZoneStore } from '@/stores/zones'
 import { useRegionStore } from '@/stores/regions'
 import { APSError } from '@/utils/domain/errors'
@@ -15,7 +19,12 @@ import { sortAlphabetically } from '@/utils'
 import { useTruncationRuleTemplateTypeStore } from './types'
 import { useOptionStore } from '@/stores/options'
 import { useFaciesGroupStore } from '@/stores/facies/groups'
-import { makeRule, processFields, processOverlay, processPolygons } from './utils'
+import {
+  makeRule,
+  processFields,
+  processOverlay,
+  processPolygons,
+} from './utils'
 import type { FmuUpdatableSerialization } from '@/utils/domain/bases/fmuUpdatable'
 import { ref } from 'vue'
 import type { TruncationRuleType } from '@/utils/domain/truncationRule/base'
@@ -184,17 +193,22 @@ export const useTruncationRuleTemplateStore = defineStore(
 
       const autoFill = optionStore.options.automaticFaciesFill
 
-      parent = parent ?? {
-        zone: zoneStore.current!,
-        region: regionStore.current,
-      } as Parent
+      parent =
+        parent ??
+        ({
+          zone: zoneStore.current!,
+          region: regionStore.current,
+        } as Parent)
 
       const template = available.value.find(
         (template) => template.name === name && template.type === type,
       )
       if (!template)
         throw new APSError('No template with the given name and type')
-      const missing = template.minFields - getRelevant(fieldStore.available as GaussianRandomField[], parent).length
+      const missing =
+        template.minFields -
+        getRelevant(fieldStore.available as GaussianRandomField[], parent)
+          .length
       for (let i = 0; i < missing; i++) {
         fieldStore.addEmptyField()
       }
@@ -209,10 +223,11 @@ export const useTruncationRuleTemplateStore = defineStore(
       if (autoFill && !isBayfillRuleTemplate(template) && template.overlay) {
         const selectedFacies = sortAlphabetically(faciesStore.selected)
         template.overlay.forEach((item) =>
-          faciesGroupStore.get(/* creates new if none is found */
+          faciesGroupStore.get(
+            /* creates new if none is found */
             item.background.map((facies) => selectedFacies[facies.index]),
             parent!,
-          )
+          ),
         )
       }
 
@@ -259,19 +274,16 @@ export const useTruncationRuleTemplateStore = defineStore(
       }
       const direction = getDirection(template.settings)
 
-      const rule = makeRule(
-        type,
-        {
-          direction,
-          polygons,
-          backgroundFields,
-          overlay: {
-            use: overlayPolygons ? overlayPolygons.length > 0 : false
-          },
-          name,
-          ...parent,
+      const rule = makeRule(type, {
+        direction,
+        polygons,
+        backgroundFields,
+        overlay: {
+          use: overlayPolygons ? overlayPolygons.length > 0 : false,
         },
-      )
+        name,
+        ...parent,
+      })
 
       ruleStore.add(rule)
 
@@ -293,12 +305,9 @@ export const useTruncationRuleTemplateStore = defineStore(
               ? polygon.proportion
               : 1,
         }))
-        probabilityFacies
-          .forEach(({ facies, probability }) => {
-            if (facies)
-              facies.previewProbability = probability
-          }
-        )
+        probabilityFacies.forEach(({ facies, probability }) => {
+          if (facies) facies.previewProbability = probability
+        })
       }
 
       if (autoFill && faciesStore.unset) {

@@ -14,9 +14,7 @@
 </template>
 
 <script setup lang="ts">
-import type {
-  CrossSectionType,
-} from '@/utils/domain/gaussianRandomField/crossSection'
+import type { CrossSectionType } from '@/utils/domain/gaussianRandomField/crossSection'
 
 import { computed } from 'vue'
 import { useGaussianRandomFieldCrossSectionStore } from '@/stores/gaussian-random-fields/cross-sections'

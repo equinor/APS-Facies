@@ -28,7 +28,6 @@ export default async function migrate(
     )
   }
 
-
   try {
     const result = await rms.migrate(encodeState(data), fromVersion, toVersion)
     rootStore.startLoading()

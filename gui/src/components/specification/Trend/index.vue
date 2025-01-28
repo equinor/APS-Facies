@@ -10,7 +10,7 @@
         <relative-standard-deviation
           v-if="useTrend"
           :value="value"
-          @update:error="(e: boolean) => invalid.relativeStdDev=e"
+          @update:error="(e: boolean) => (invalid.relativeStdDev = e)"
         />
       </v-col>
     </v-row>
@@ -22,22 +22,22 @@
             :items="availableTrends"
             :constraints="{ required: true }"
             label="Trend type"
-            @update:error="(e: boolean) => invalid.type=e"
+            @update:error="(e: boolean) => (invalid.type = e)"
           />
           <div v-if="hasLinearProperties">
             <depositional-azimuth-angle
               :value="value"
-              @update:error="(e: boolean) => invalid.azimuth=e"
+              @update:error="(e: boolean) => (invalid.azimuth = e)"
             />
             <stacking-angle-specification
               :value="value"
-              @update:error="(e: boolean) => invalid.stacking=e"
+              @update:error="(e: boolean) => (invalid.stacking = e)"
             />
           </div>
           <migration-angle
             v-if="hasHyperbolicProperties"
             :value="value"
-            @update:error="(e: boolean) => invalid.migration=e"
+            @update:error="(e: boolean) => (invalid.migration = e)"
           />
         </v-col>
         <v-spacer />
@@ -71,18 +71,18 @@
           <div v-if="hasEllipticProperties">
             <curvature-specification
               :value="value"
-              @update:error="(e: boolean) => invalid.curvature=e"
+              @update:error="(e: boolean) => (invalid.curvature = e)"
             />
             <origin-specification
               :value="value"
-              @update:error="(e: boolean) => invalid.origin=e"
+              @update:error="(e: boolean) => (invalid.origin = e)"
             />
           </div>
           <v-col>
             <relative-size-of-ellipse
               v-if="hasEllipticConeProperties"
               :value="value"
-              @update:error="(e: boolean) => invalid.relativeEllipseSize=e"
+              @update:error="(e: boolean) => (invalid.relativeEllipseSize = e)"
             />
           </v-col>
         </v-col>
@@ -110,7 +110,10 @@ import {
 
 import { TREND_NOT_IMPLEMENTED_PREVIEW_VISUALIZATION } from '@/config'
 import { useParameterRmsTrendStore } from '@/stores/parameters/rms-trend'
-import { type TrendMap, useParameterRmsTrendMapZoneStore } from '@/stores/parameters/rms-trend-map-zones'
+import {
+  type TrendMap,
+  useParameterRmsTrendMapZoneStore,
+} from '@/stores/parameters/rms-trend-map-zones'
 import { ref, computed, watch } from 'vue'
 import { useConstantsOptionsTrendsStore } from '@/stores/constants/options'
 
@@ -160,10 +163,13 @@ const availableRmsTrendZones = computed(() =>
 )
 
 const trendMapZoneLookup = computed<Record<string, string[]>>(() => {
-  return rmsTrendMapZones.value.reduce((mapping, trendMap) => {
-    mapping[trendMap.name] = trendMap.representations
-    return mapping
-  }, {} as Record<string, string[]>)
+  return rmsTrendMapZones.value.reduce(
+    (mapping, trendMap) => {
+      mapping[trendMap.name] = trendMap.representations
+      return mapping
+    },
+    {} as Record<string, string[]>,
+  )
 })
 
 const availableRmsTrendMaps = computed(() =>

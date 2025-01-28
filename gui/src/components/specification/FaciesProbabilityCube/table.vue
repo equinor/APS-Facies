@@ -13,17 +13,24 @@
             :model-value="facies.probabilityCube"
             :items="probabilityCubes"
             clearable
-            @update:model-value="(cube: ProbabilityCube) => changeProbabilityCube(facies, cube)"
+            @update:model-value="
+              (cube: ProbabilityCube) => changeProbabilityCube(facies, cube)
+            "
           />
         </td>
         <td v-if="useProbabilityCubes">
-          {{ facies.previewProbability !== null ? facies.previewProbability.toFixed(2) : '-' }}
+          {{
+            facies.previewProbability !== null
+              ? facies.previewProbability.toFixed(2)
+              : '-'
+          }}
         </td>
         <td v-else>
           <fraction-field
             :model-value="facies.previewProbability"
             @update:model-value="
-              (probability) => changeProbability(facies, probability as PROBABILITY)
+              (probability) =>
+                changeProbability(facies, probability as PROBABILITY)
             "
             label=""
             dense
@@ -55,14 +62,14 @@ const facies = computed(() => faciesStore.selected)
 
 const probabilityCubes = computed<ListItem<ProbabilityCube>[]>(() =>
   [{ title: '', props: { disabled: false } }].concat(
-    useParameterProbabilityCubeStore().available.map(parameter => {
+    useParameterProbabilityCubeStore().available.map((parameter) => {
       return {
         title: parameter,
         props: {
           disabled: facies.value
             .map((facies) => facies.probabilityCube)
             .includes(parameter),
-        }
+        },
       }
     }),
   ),
@@ -72,7 +79,9 @@ const useProbabilityCubes = computed(
   () => !faciesStore.constantProbability(rootStore.parent),
 )
 
-const items = computed<Facies[]>(() => [...facies.value].sort((a, b) => a.code - b.code))
+const items = computed<Facies[]>(() =>
+  [...facies.value].sort((a, b) => a.code - b.code),
+)
 
 const headers = computed<HeaderItem[]>(() => {
   if (useProbabilityCubes.value) {
@@ -89,7 +98,10 @@ const headers = computed<HeaderItem[]>(() => {
   }
 })
 
-function changeProbabilityCube(facies: Facies, probabilityCube: ProbabilityCube): void {
+function changeProbabilityCube(
+  facies: Facies,
+  probabilityCube: ProbabilityCube,
+): void {
   faciesStore.changeProbabilityCube(facies, probabilityCube)
 }
 

@@ -3,7 +3,9 @@
     :model-value="props.value.fraction"
     :append-icon="appendIcon"
     :disabled="disabled"
-    @update:model-value="(fraction) => updateFactor(props.value, fraction as number)"
+    @update:model-value="
+      (fraction) => updateFactor(props.value, fraction as number)
+    "
     @click:append="normalizeFractions()"
   />
 </template>
@@ -11,11 +13,12 @@
 <script
   setup
   lang="ts"
-  generic="T extends Polygon,
-  S extends PolygonSerialization,
-  P extends PolygonSpecification,
-  RULE extends TruncationRule<T, S, P> | InstantiatedTruncationRule
-"
+  generic="
+    T extends Polygon,
+    S extends PolygonSerialization,
+    P extends PolygonSpecification,
+    RULE extends TruncationRule<T, S, P> | InstantiatedTruncationRule
+  "
 >
 import FractionField from '@/components/selection/FractionField.vue'
 
@@ -59,15 +62,16 @@ function updateFactor(polygon: T, value: number): void {
 
 async function normalizeFractions(): Promise<void> {
   const polygons = props.rule.polygons.filter(
-    (polygon): boolean =>
-      getId(polygon.facies) === getId(props.value.facies),
+    (polygon): boolean => getId(polygon.facies) === getId(props.value.facies),
   )
   const sum = polygons.reduce(
     (sum, polygon): number => polygon.fraction + sum,
     0,
   )
   await Promise.all(
-    (polygons as T[]).map((polygon) => updateFactor(polygon, polygon.fraction / sum)),
+    (polygons as T[]).map((polygon) =>
+      updateFactor(polygon, polygon.fraction / sum),
+    ),
   )
 }
 </script>

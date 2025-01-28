@@ -9,15 +9,21 @@
 <script
   setup
   lang="ts"
-  generic="T extends Polygon,
-  S extends PolygonSerialization,
-  P extends PolygonSpecification,
-  RULE extends OverlayTruncationRule<T, S, P>
-"
+  generic="
+    T extends Polygon,
+    S extends PolygonSerialization,
+    P extends PolygonSpecification,
+    RULE extends OverlayTruncationRule<T, S, P>
+  "
 >
 import FaciesSpecification from '@/components/specification/Facies/index.vue'
 
-import type { InstantiatedOverlayTruncationRule, OverlayPolygon, Polygon, Facies } from '@/utils/domain'
+import type {
+  InstantiatedOverlayTruncationRule,
+  OverlayPolygon,
+  Polygon,
+  Facies,
+} from '@/utils/domain'
 import type {
   PolygonSerialization,
   PolygonSpecification,

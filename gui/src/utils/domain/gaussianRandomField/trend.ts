@@ -1,6 +1,4 @@
-import type {
-  FmuUpdatableSerialization,
-} from '@/utils/domain/bases/fmuUpdatable'
+import type { FmuUpdatableSerialization } from '@/utils/domain/bases/fmuUpdatable'
 import FmuUpdatableValue from '@/utils/domain/bases/fmuUpdatable'
 
 export type TrendType =

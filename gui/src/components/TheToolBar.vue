@@ -24,7 +24,9 @@
       <export-state />
     </v-row>
     <job-settings />
-    <v-btn v-if="false" disabled variant="outlined" color="primary"> Run Settings </v-btn>
+    <v-btn v-if="false" disabled variant="outlined" color="primary">
+      Run Settings
+    </v-btn>
     <icon-button
       icon="changelog"
       color="primary"
@@ -92,7 +94,9 @@ async function loadModelFile(
 ): Promise<void> {
   let json: string | null = null
 
-  rootStore.startLoading(`Checking the model file, "${fileName}", for consistency`)
+  rootStore.startLoading(
+    `Checking the model file, "${fileName}", for consistency`,
+  )
   if (!fileContent) fileContent = await rms.loadFile(fileName)
 
   if (!fileContent) {
@@ -113,7 +117,6 @@ async function loadModelFile(
           if (root) {
             root.add(this)
           }
-
         }
         public add(child: Node): void {
           child.parent = this
@@ -128,8 +131,11 @@ async function loadModelFile(
         updateTag(tagName, jPath, attrs) {
           if (jPath.includes('Trunc2D_Cubic.BackGroundModel')) {
             if (/\.L\d+(\.ProbFrac)?$/.test(jPath)) {
-              const previousLevel: number = previousPath?.replace('.ProbFrac', '').split('.').length ?? 0
-              const currentLevel = jPath.replace('.ProbFrac', '').split('.').length
+              const previousLevel: number =
+                previousPath?.replace('.ProbFrac', '').split('.').length ?? 0
+              const currentLevel = jPath
+                .replace('.ProbFrac', '')
+                .split('.').length
               if (previousLevel === 0 || previousPath === null) {
                 // New cubic truncation rule
                 node = new Node(null)
@@ -143,10 +149,16 @@ async function loadModelFile(
                   // That is, is a new level, adjacent to the previous
                   node = new Node(node!.parent)
                 }
-              } else if (previousPath?.endsWith('ProbFrac') && /L\d+$/.test(tagName)) {
+              } else if (
+                previousPath?.endsWith('ProbFrac') &&
+                /L\d+$/.test(tagName)
+              ) {
                 // That is, we go up one level from a leaf / ProgFrac to a new 'empy' node
                 node = new Node(node!.parent)
-              } else if (/L\d+$/.test(previousPath ?? '') && tagName === 'ProbFrac') {
+              } else if (
+                /L\d+$/.test(previousPath ?? '') &&
+                tagName === 'ProbFrac'
+              ) {
                 // That is, we go from a 'node' down to a new level
               }
 
@@ -160,7 +172,10 @@ async function loadModelFile(
               }
 
               if (tagName === 'ProbFrac') {
-                if (node === null) throw new APSError('<L1> is Missing from <Trunc2D_Cubic><BackGroundModel>')
+                if (node === null)
+                  throw new APSError(
+                    '<L1> is Missing from <Trunc2D_Cubic><BackGroundModel>',
+                  )
                 attrs['@_order'] = polygonOrder.toString(10)
                 attrs['@_parentId'] = node.id
 
@@ -194,9 +209,7 @@ async function loadModelFile(
         rootStore.$reset()
         rootStore.loadingMessage = 'Resetting the state...'
         await rootStore.fetch()
-        await useModelFileLoaderStore()
-          .populateGUI(json, fileName)
-
+        await useModelFileLoaderStore().populateGUI(json, fileName)
       } else {
         displayError(
           'The file you tried to open is not a valid APS model file and cannot be used\n' +
@@ -271,14 +284,15 @@ async function exportModelFile(): Promise<void> {
           btoa(exportedXMLString),
           response.paths,
         )
-        resultPromise.then(async (success: boolean): Promise<void> => {
-          if (success) {
-            displaySuccess(
-              `The model file was saved to ${response.paths?.model ?? '-'}`,
-            )
-          }
-        })
-          .catch(err => {
+        resultPromise
+          .then(async (success: boolean): Promise<void> => {
+            if (success) {
+              displaySuccess(
+                `The model file was saved to ${response.paths?.model ?? '-'}`,
+              )
+            }
+          })
+          .catch((err) => {
             displayError(err)
           })
       }

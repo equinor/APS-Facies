@@ -10,7 +10,10 @@ import { useFaciesGroupStore } from '@/stores/facies/groups'
 import { useGlobalFaciesStore } from '@/stores/facies/global'
 import { useParameterBlockedWellStore } from './blocked-well'
 import type { TruncationRule } from '@/utils/domain/truncationRule'
-import type { PolygonSerialization, PolygonSpecification } from '@/utils/domain/polygon/base'
+import type {
+  PolygonSerialization,
+  PolygonSpecification,
+} from '@/utils/domain/polygon/base'
 import type Polygon from '@/utils/domain/polygon/base'
 import { ref } from 'vue'
 
@@ -24,7 +27,8 @@ export const useParameterBlockedWellLogStore = defineStore(
       T extends Polygon,
       S extends PolygonSerialization,
       P extends PolygonSpecification,
-      RULE extends TruncationRule<T, S, P>>() {
+      RULE extends TruncationRule<T, S, P>,
+    >() {
       const zoneStore = useZoneStore()
 
       const parents: Parent[] = []
@@ -49,13 +53,15 @@ export const useParameterBlockedWellLogStore = defineStore(
           (store.available as (RULE | FaciesGroup | Facies)[])
             .filter((item) => item.isChildOf(parent))
             .flatMap((item) => store.remove(item as any)),
-        )
+        ),
       )
     }
 
     async function select(blockedWellLog: string | null = null) {
       if (blockedWellLog === '') {
-        console.warn('Setting blocked well log to an empty string; using null instead')
+        console.warn(
+          'Setting blocked well log to an empty string; using null instead',
+        )
         blockedWellLog = null
       }
 

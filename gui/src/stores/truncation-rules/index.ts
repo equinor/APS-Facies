@@ -1,18 +1,23 @@
 import { acceptHMRUpdate, defineStore } from 'pinia'
 import { useIdentifiedItems } from '@/stores/utils/identified-items'
-import {
-  CubicPolygon,
-  NonCubicPolygon,
-  OverlayPolygon,
-} from '@/utils/domain'
+import { CubicPolygon, NonCubicPolygon, OverlayPolygon } from '@/utils/domain'
 import { computed } from 'vue'
 import { getId, hasParents, makeTruncationRuleSpecification } from '@/utils'
 import { useZoneStore } from '@/stores/zones'
 import { useRegionStore } from '@/stores/regions'
 import { useCopyPasteStore } from '@/stores/copy-paste'
 import { useFaciesStore } from '@/stores/facies'
-import { deserializePolygons, hasEnoughFacies, minFacies, normalizeOrder, resolveParentReference } from './utils';
-import { Cubic, TruncationRule as BaseTruncationRule } from '@/utils/domain/truncationRule'
+import {
+  deserializePolygons,
+  hasEnoughFacies,
+  minFacies,
+  normalizeOrder,
+  resolveParentReference,
+} from './utils'
+import {
+  Cubic,
+  TruncationRule as BaseTruncationRule,
+} from '@/utils/domain/truncationRule'
 import type {
   InstantiatedTruncationRule,
   Facies,
@@ -33,7 +38,10 @@ import { useTruncationRulePresetStore } from './presets'
 import { useFaciesGroupStore } from '@/stores/facies/groups'
 import { useTruncationRuleTemplateTypeStore } from './templates/types'
 import { makeRule } from './templates/utils'
-import type { PolygonSerialization, PolygonSpecification } from '@/utils/domain/polygon/base'
+import type {
+  PolygonSerialization,
+  PolygonSpecification,
+} from '@/utils/domain/polygon/base'
 import type { TruncationRuleSerialization } from '@/utils/domain/truncationRule/base'
 import { getRelevant, isReady } from '@/stores/utils/helpers'
 import type { ID } from '@/utils/domain/types'
@@ -48,31 +56,41 @@ export interface RuleName {
   overlay: boolean
 }
 
-export function deserializeTruncationRule<S extends PolygonSerialization>(rule: TruncationRuleSerialization<S>, byId?: (field: ID) => GaussianRandomField) {
+export function deserializeTruncationRule<S extends PolygonSerialization>(
+  rule: TruncationRuleSerialization<S>,
+  byId?: (field: ID) => GaussianRandomField,
+) {
   if (!byId) {
     const gaussianRandomFieldStore = useGaussianRandomFieldStore()
     byId = gaussianRandomFieldStore.byId
   }
   return makeRule(rule.type, {
-        ...rule,
-        backgroundFields: rule.backgroundFields.map((field) =>
-          field ? byId!(field) : null,
-        ),
-        polygons: deserializePolygons(rule.polygons),
-        parent: resolveParentReference(rule.parent),
-      })
+    ...rule,
+    backgroundFields: rule.backgroundFields.map((field) =>
+      field ? byId!(field) : null,
+    ),
+    polygons: deserializePolygons(rule.polygons),
+    parent: resolveParentReference(rule.parent),
+  })
 }
 
 export const useTruncationRuleStore = defineStore('truncation-rules', () => {
   const store = useIdentifiedItems<InstantiatedTruncationRule>()
-  const { available, identifiedAvailable, addAvailable, removeAvailable } = store
+  const { available, identifiedAvailable, addAvailable, removeAvailable } =
+    store
 
   const current = computed(() => {
     const zoneStore = useZoneStore()
     const regionStore = useRegionStore()
-    return available.value.find((rule) =>
-      hasParents(rule, zoneStore.current! as Zone, regionStore.current as Region | null),
-    ) ?? null
+    return (
+      available.value.find((rule) =>
+        hasParents(
+          rule,
+          zoneStore.current! as Zone,
+          regionStore.current as Region | null,
+        ),
+      ) ?? null
+    )
   })
 
   const ready = computed(() => {
@@ -81,10 +99,11 @@ export const useTruncationRuleStore = defineStore('truncation-rules', () => {
       S extends PolygonSerialization,
       P extends PolygonSpecification,
       RULE extends BaseTruncationRule<T, S, P>,
-    >(rule: RULE) => {
+    >(
+      rule: RULE,
+    ) => {
       const copyPasteStore = useCopyPasteStore()
-      return !copyPasteStore.isPasting(rule.parent) &&
-      isReady(rule)
+      return !copyPasteStore.isPasting(rule.parent) && isReady(rule)
     }
   })
 
@@ -93,8 +112,11 @@ export const useTruncationRuleStore = defineStore('truncation-rules', () => {
     const regionStore = useRegionStore()
     return available.value.filter(
       (rule) =>
-        hasParents(rule, zoneStore.current! as Zone, regionStore.current as Region | null) &&
-        hasEnoughFacies(rule),
+        hasParents(
+          rule,
+          zoneStore.current! as Zone,
+          regionStore.current as Region | null,
+        ) && hasEnoughFacies(rule),
     )
   })
 
@@ -129,15 +151,19 @@ export const useTruncationRuleStore = defineStore('truncation-rules', () => {
   function fetch() {
     const templateStore = useTruncationRuleTemplateStore()
     templateStore.fetch()
-    useTruncationRulePresetStore()
-      .fetch()
+    useTruncationRulePresetStore().fetch()
   }
 
   function add<
     T extends Polygon,
     S extends PolygonSerialization,
     P extends PolygonSpecification,
-  >(rule: BaseTruncationRule<T, S, P> | TruncationRuleTemplateType | InstantiatedTruncationRule) {
+  >(
+    rule:
+      | BaseTruncationRule<T, S, P>
+      | TruncationRuleTemplateType
+      | InstantiatedTruncationRule,
+  ) {
     if (!(rule instanceof BaseTruncationRule)) {
       rule = makeRule(rule.type, rule)
     }
@@ -145,12 +171,19 @@ export const useTruncationRuleStore = defineStore('truncation-rules', () => {
   }
 
   function populate(
-    rules: TruncationRuleSerialization<BayfillPolygonSerialization | NonCubicPolygonSerialization | CubicPolygonSerialization | OverlayPolygonSerialization>[],
+    rules: TruncationRuleSerialization<
+      | BayfillPolygonSerialization
+      | NonCubicPolygonSerialization
+      | CubicPolygonSerialization
+      | OverlayPolygonSerialization
+    >[],
   ) {
     const gaussianRandomFieldStore = useGaussianRandomFieldStore()
 
     for (const rule of rules) {
-      addAvailable(deserializeTruncationRule(rule, gaussianRandomFieldStore.byId))
+      addAvailable(
+        deserializeTruncationRule(rule, gaussianRandomFieldStore.byId),
+      )
     }
   }
 
@@ -158,12 +191,8 @@ export const useTruncationRuleStore = defineStore('truncation-rules', () => {
     T extends Polygon,
     S extends PolygonSerialization,
     P extends PolygonSpecification,
-    RULE extends OverlayTruncationRule<T, S, P>
-  >(
-    rule: RULE,
-    polygon: T,
-    amount = 1,
-  ) {
+    RULE extends OverlayTruncationRule<T, S, P>,
+  >(rule: RULE, polygon: T, amount = 1) {
     for (const rulePolygon of rule.polygons) {
       if (
         !(rulePolygon instanceof CubicPolygon) &&
@@ -241,7 +270,14 @@ export const useTruncationRuleStore = defineStore('truncation-rules', () => {
     } else {
       throw new APSTypeError('Invalid type')
     }
-    increaseOrderByRelativeTo(rule as unknown as OverlayTruncationRule<OverlayPolygon | NonCubicPolygon | CubicPolygon, S, P>, polygon)
+    increaseOrderByRelativeTo(
+      rule as unknown as OverlayTruncationRule<
+        OverlayPolygon | NonCubicPolygon | CubicPolygon,
+        S,
+        P
+      >,
+      polygon,
+    )
     rule.addPolygon(polygon as unknown as T)
     if (rule instanceof Cubic) {
       normalizeOrder(rule, (polygon, order) => {
@@ -255,10 +291,7 @@ export const useTruncationRuleStore = defineStore('truncation-rules', () => {
     S extends PolygonSerialization,
     P extends PolygonSpecification,
     RULE extends OverlayTruncationRule<T, S, P>,
-  >(
-    rule: RULE,
-    polygon: T,
-  ) {
+  >(rule: RULE, polygon: T) {
     rule.removePolygon(polygon)
 
     if (polygon instanceof CubicPolygon) {
@@ -339,11 +372,7 @@ export const useTruncationRuleStore = defineStore('truncation-rules', () => {
     S extends PolygonSerialization,
     P extends PolygonSpecification,
     RULE extends BaseTruncationRule<T, S, P>,
-  >(
-    rule: RULE,
-    polygon: Polygon,
-    direction: number,
-  ) {
+  >(rule: RULE, polygon: Polygon, direction: number) {
     const other = rule.polygons.find(
       (p) => p.order === polygon.order + direction,
     )
@@ -354,7 +383,7 @@ export const useTruncationRuleStore = defineStore('truncation-rules', () => {
   }
 
   async function updateRealization<
-      T extends Polygon,
+    T extends Polygon,
     S extends PolygonSerialization,
     P extends PolygonSpecification,
     RULE extends BaseTruncationRule<T, S, P>,
@@ -395,7 +424,9 @@ export const useTruncationRuleStore = defineStore('truncation-rules', () => {
           ) as OverlayPolygon[]
           overlayPolygons
             .filter((p) => getId(p.field) === getId(field))
-            .forEach((p) => { p.field = null })
+            .forEach((p) => {
+              p.field = null
+            })
         }
       })
   }
@@ -405,11 +436,7 @@ export const useTruncationRuleStore = defineStore('truncation-rules', () => {
     S extends PolygonSerialization,
     P extends PolygonSpecification,
     RULE extends BaseTruncationRule<T, S, P>,
-  >(
-    rule: RULE,
-    index: number,
-    field: GaussianRandomField | null,
-  ) {
+  >(rule: RULE, index: number, field: GaussianRandomField | null) {
     if (index < 0 || index >= rule.backgroundFields.length) {
       throw new APSError(
         `The index (${index}) is outside the range of the background fields in the truncation rule with ID ${rule.id}`,
@@ -423,11 +450,7 @@ export const useTruncationRuleStore = defineStore('truncation-rules', () => {
     S extends PolygonSerialization,
     P extends PolygonSpecification,
     RULE extends BaseTruncationRule<T, S, P>,
-  >(
-    rule: RULE,
-    polygon: Polygon,
-    facies: Facies,
-  ) {
+  >(rule: RULE, polygon: Polygon, facies: Facies) {
     polygon.facies = facies
 
     if (facies && !facies.previewProbability) {
@@ -441,10 +464,13 @@ export const useTruncationRuleStore = defineStore('truncation-rules', () => {
     S extends PolygonSerialization,
     P extends PolygonSpecification,
     RULE extends OverlayTruncationRule<T, S, P>,
->(rule: RULE, value: boolean) {
+  >(rule: RULE, value: boolean) {
     const fieldStore = useGaussianRandomFieldStore()
     // If there are too few GRFs, add more
-    const availableFields = getRelevant(fieldStore.available as GaussianRandomField[], rule.parent)
+    const availableFields = getRelevant(
+      fieldStore.available as GaussianRandomField[],
+      rule.parent,
+    )
     if (availableFields.length <= rule.backgroundFields.length) {
       fieldStore.addEmptyField(rule.parent.zone, rule.parent.region)
     }
@@ -488,10 +514,8 @@ export const useTruncationRuleStore = defineStore('truncation-rules', () => {
   }
 
   function $reset() {
-    useTruncationRulePresetStore()
-      .$reset()
-    useTruncationRuleTemplateStore()
-      .$reset()
+    useTruncationRulePresetStore().$reset()
+    useTruncationRuleTemplateStore().$reset()
     store.$reset()
   }
 

@@ -87,10 +87,13 @@ async function updateAngle(
   value: MaybeFmuUpdatable | null,
 ): Promise<void> {
   if (value !== null)
-  item.angle = typeof value === "number" ? {
-    value,
-    updatable: false
-  } : value
+    item.angle =
+      typeof value === 'number'
+        ? {
+            value,
+            updatable: false,
+          }
+        : value
 }
 
 function isLast(polygon: NonCubicPolygon): boolean {

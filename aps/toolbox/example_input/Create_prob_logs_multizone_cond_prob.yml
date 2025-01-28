@@ -4,13 +4,13 @@ ProbLogs:
   GridModelName: GridModelFine
   BlockedWells: BW2
   FaciesLogName: FaciesLog
-  ZoneLogName:  Zone
+  ZoneLogName: Zone
   OutputPrefix: Prob_ex_1_yml
   ModellingFaciesPerZone:
-    1:  F1 F2    F4    F6
-    2:  F1    F3 F4
-    3:     F2    F4 F5
-    6:  F1       F4 F5
+    1: F1 F2    F4    F6
+    2: F1    F3 F4
+    3: F2    F4 F5
+    6: F1       F4 F5
   UseConditionalProbabilities: True
 
   CondProbMatrix:
