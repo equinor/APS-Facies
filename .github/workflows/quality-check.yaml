@@ -7,6 +7,15 @@ on:
   push:
 
 jobs:
+  pre-commit-hooks:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+      - uses: pre-commit/action@v3.0.1
+
   on-push:
     runs-on: ubuntu-22.04
     steps:
