@@ -6420,10 +6420,10 @@ vue@^3.4.20:
     "@vue/server-renderer" "3.4.20"
     "@vue/shared" "3.4.20"
 
-vuetify@^3.5.6:
-  version "3.5.6"
-  resolved "https://registry.yarnpkg.com/vuetify/-/vuetify-3.5.6.tgz#cdf8859ab3cc746c78f703db9ec4ea26f3d54757"
-  integrity sha512-PfKSnHaSEGoz1QNHZ2sutOYwmYxtBbxAaeRy0L0qtMWLkKtxheg0he/NX+lsP11I2LevQBj2AgeBYDMZ/oPkPQ==
+vuetify@^3.5.15:
+  version "3.6.3"
+  resolved "https://registry.yarnpkg.com/vuetify/-/vuetify-3.6.3.tgz#3818a9176198480302ec0aac359c47cb71a75f13"
+  integrity sha512-OBYYJYnNeUYA7kwrv8Rag1EBFbGWAQxJpp0s98U2KQ6SPU7MzzcrvNn7t69vcDbj7mR7Dcf9/jvFapfranXZvA==
 
 walker@^1.0.8:
   version "1.0.8"
