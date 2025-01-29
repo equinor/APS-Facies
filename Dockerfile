@@ -1,23 +1,26 @@
 # syntax = docker/dockerfile:1
 ARG RMS_IMAGE
-FROM node:20.11.0-alpine3.18 AS node
+FROM node:20.18.2-alpine3.21 AS node
 
 ENV CODE=/code
 ENV NODE_MODULES=$CODE/node_modules
 ENV TRUNCATION_RULES=src/stores/truncation-rules/templates/truncationRules.json
 
-FROM bitnami/nginx:1.25.2-debian-11-r46 AS nginx
+FROM bitnami/nginx:1.27.3-debian-12-r5 AS nginx
 
 FROM ${RMS_IMAGE} AS python
 # RMS 12.0 and earlier uses Python 3.6.1, but it is so old that I was unable to update the CA certificates,
 # and thus unable to download poetry
 
-ENV POETRY_VERSION=1.6.1
-
 WORKDIR /code
 ENV PATH="/root/.local/bin:$PATH"
 
-RUN roxenv pip install --user "poetry==$POETRY_VERSION"
+COPY .tool-versions ./
+RUN <<EOF
+#!/usr/bin/env bash
+POETRY_VERSION="$(cat .tool-versions|grep poetry | grep -o -E '([0-9]+\.?)+')"
+roxenv pip install --user "poetry==$POETRY_VERSION"
+EOF
 
 # This will overwrite RMS' installed packages in favor of those specified by us
 RUN roxenv poetry config virtualenvs.create false --local
