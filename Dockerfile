@@ -53,6 +53,11 @@ elif [[ $OS_ID == 'centos' ]]; then
     yum update -y
     yum install -y $@
   }
+elif [[ $OS_ID == 'rhel' ]]; then
+  install () {
+    dnf update -y
+    dnf install -y $@
+  }
 else
   echo "Unsupported OS ($OS_ID)" >/dev/stderr
   exit 1
