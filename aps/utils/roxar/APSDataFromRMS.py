@@ -40,7 +40,7 @@ class APSDataFromRMS:
             'Grid model name': '',
             'Zones': [],
             'Gauss field names': [],
-            'Zone and region pairs':  {},
+            'Zone and region pairs': {},
             'Horizon names': [],
         }
 
@@ -119,11 +119,31 @@ class APSDataFromRMS:
         return copy.copy(self.__data['Horizon names'])
 
     def getGridSize(self):
-        order = ['nx', 'ny', 'x_0', 'y_0', 'x size', 'y size', 'x inc', 'y inc', 'azimuth angle']
+        order = [
+            'nx',
+            'ny',
+            'x_0',
+            'y_0',
+            'x size',
+            'y size',
+            'x inc',
+            'y inc',
+            'azimuth angle',
+        ]
         return [self.__grid[key] for key in order]
 
     def getSurfaceSize(self):
-        order = ['nx', 'ny', 'x min', 'x max', 'y min', 'y max', 'x inc', 'y inc', 'rotation']
+        order = [
+            'nx',
+            'ny',
+            'x min',
+            'x max',
+            'y min',
+            'y max',
+            'x inc',
+            'y inc',
+            'rotation',
+        ]
         return [self.__surf[key] for key in order]
 
     def getGridZoneNames(self):
@@ -147,7 +167,9 @@ class APSDataFromRMS:
                 number_of_layer = item[2]
                 break
         if number_of_layer == 0:
-            raise ValueError(f'Zone number {zoneNumber} does not exist in grid model {self.grid_model_name()}')
+            raise ValueError(
+                f'Zone number {zoneNumber} does not exist in grid model {self.grid_model_name()}'
+            )
         return number_of_layer
 
     def getStartAndEndLayerInZone(self, zoneNumber):
@@ -266,7 +288,15 @@ class APSDataFromRMS:
         self.__data['Zone and region pairs'] = zoneAndRegionNumbers
 
         # Get keywords for variables that are float
-        keywords = ['XSize', 'YSize', 'AzimuthAngle', 'OrigoX', 'OrigoY', 'Xinc', 'Yinc']
+        keywords = [
+            'XSize',
+            'YSize',
+            'AzimuthAngle',
+            'OrigoX',
+            'OrigoY',
+            'Xinc',
+            'Yinc',
+        ]
         for key in keywords:
             self.__add_grid(key, 'float', gmObj)
 
@@ -308,7 +338,9 @@ class APSDataFromRMS:
         fTableObj = root.find('MainFaciesTable')
         faciesTable = None
         if fTableObj is not None:
-            faciesTable = APSMainFaciesTable(tree, modelFileName=inputFileName, debug_level=self.__debug_level)
+            faciesTable = APSMainFaciesTable(
+                tree, modelFileName=inputFileName, debug_level=self.__debug_level
+            )
         self.__faciesTable = faciesTable
 
     def __add_surfaces(self, kw, value_type, surface):
@@ -332,15 +364,21 @@ class APSDataFromRMS:
     def printData(self):
         print('Project name: ' + self.__data['Project name'])
         print('Project seed: ' + str(self.__data['Project seed']))
-        print('Project realisation number: ' + str(self.__data['Project realization number']))
+        print(
+            'Project realisation number: '
+            + str(self.__data['Project realization number'])
+        )
         print('Grid model name: ' + self.__data['Grid model name'])
         print('Grid zones:')
         for item in self.__data['Zones']:
             zoneName = item[1]
             zoneNumber = item[0]
             nLayers = item[2]
-            print('  Zone number: {0} Zone name: {1}  Number of layers: {2}'.format(str(zoneNumber), zoneName,
-                                                                                    str(nLayers)))
+            print(
+                '  Zone number: {0} Zone name: {1}  Number of layers: {2}'.format(
+                    str(zoneNumber), zoneName, str(nLayers)
+                )
+            )
         print('')
         print('Grid dimensions:')
         print('  NX:       ' + str(self.__grid['nx']))

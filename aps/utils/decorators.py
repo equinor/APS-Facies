@@ -41,8 +41,10 @@ def _root_path() -> Path:
 
 def output_version_information(func):
     plugin_root = _root_path()
-    if plugin_root.name != "pydist":
-        raise FileNotFoundError(f"Can not find plugin root 'pydist'. Found {plugin_root.name}")
+    if plugin_root.name != 'pydist':
+        raise FileNotFoundError(
+            f"Can not find plugin root 'pydist'. Found {plugin_root.name}"
+        )
 
     def get_content(file_name: str) -> str:
         try:
@@ -54,7 +56,9 @@ def output_version_information(func):
                 archive = ZipFile(plugin_file, 'r')
                 return archive.read(f'aps_gui/{file_name}').decode().strip()
             except Exception:
-                raise FileNotFoundError(f"Can not unzip and read plugin file with path {plugin_file}")
+                raise FileNotFoundError(
+                    f'Can not unzip and read plugin file with path {plugin_file}'
+                )
             finally:
                 try:
                     archive.close()
@@ -63,7 +67,6 @@ def output_version_information(func):
 
     @wraps(func)
     def decorator(config):
-
         if config.debug_level >= Debug.VERBOSE:
             print(f'Plugin running from: {plugin_root.parent}')
 
@@ -72,11 +75,12 @@ def output_version_information(func):
             toolbox_version = get_content('STUB_VERSION')
         except:
             toolbox_version = ' '
-        print(f"GUI version: {version}")
+        print(f'GUI version: {version}')
 
         if config.debug_level >= Debug.VERBOSE:
-            print(f"APS toolbox (help script) version: {toolbox_version}  ")
+            print(f'APS toolbox (help script) version: {toolbox_version}  ')
             commit = get_content('COMMIT')
-            print(f"Commit SHA: {commit}")
+            print(f'Commit SHA: {commit}')
         return func(config)
+
     return decorator

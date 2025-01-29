@@ -11,11 +11,12 @@
 <script
   setup
   lang="ts"
-  generic="T extends Polygon,
-  S extends PolygonSerialization,
-  P extends PolygonSpecification,
-  RULE extends TruncationRule<T, S, P>
-"
+  generic="
+    T extends Polygon,
+    S extends PolygonSerialization,
+    P extends PolygonSpecification,
+    RULE extends TruncationRule<T, S, P>
+  "
 >
 import type { GaussianRandomField } from '@/utils/domain'
 import OverlayTruncationRule from '@/utils/domain/truncationRule/overlay'

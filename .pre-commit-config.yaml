@@ -1,0 +1,40 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: check-yaml
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+      - id: mixed-line-ending
+        args:
+          - --fix=lf
+
+  - repo: local
+    hooks:
+      - id: prettier
+        name: Prettier.js
+        language: node
+        additional_dependencies:
+          - 'prettier@3.4.2'
+        entry: prettier --write
+        args:
+          - --config=gui/.prettierrc
+        types_or:
+          [
+            'javascript',
+            'vue',
+            'ts',
+            'html',
+            'css',
+            'sass',
+            'scss',
+            'json',
+            'yaml',
+          ]
+
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    # Ruff version.
+    rev: v0.9.3
+    hooks:
+      # Run the formatter.
+      - id: ruff-format

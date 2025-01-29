@@ -27,8 +27,11 @@ def define_variogram(variogram, azimuth_value_sim_box):
     # to get it correct in RMS.
     azimuth_in_gaussianfft = 90.0 - azimuth_value_sim_box
     args = [
-        variogram.ranges.main, variogram.ranges.perpendicular, variogram.ranges.vertical,
-        azimuth_in_gaussianfft, variogram.angles.dip,
+        variogram.ranges.main,
+        variogram.ranges.perpendicular,
+        variogram.ranges.vertical,
+        azimuth_in_gaussianfft,
+        variogram.angles.dip,
     ]
     if variogram_name == 'general_exponential':
         args.append(variogram.power)
@@ -38,10 +41,13 @@ def define_variogram(variogram, azimuth_value_sim_box):
 
 
 def run_simulations(
-        project, model_file='APS.xml', realisation=0,
-        is_shared=False, seed_file_log='seedLogFile.dat',
-        write_rms_parameters_for_qc_purpose=False,
-        fmu_mode=False,
+    project,
+    model_file='APS.xml',
+    realisation=0,
+    is_shared=False,
+    seed_file_log='seedLogFile.dat',
+    write_rms_parameters_for_qc_purpose=False,
+    fmu_mode=False,
 ):
     """
     Description: Run gauss simulations for the APS model i sequence
@@ -54,7 +60,6 @@ def run_simulations(
     fmu_with_residual_grf = aps_model.fmu_use_residual_fields
     if debug_level >= Debug.ON:
         print(f'- Read file: {model_file}')
-
 
     # When running in single processing mode, there will not be created
     # new start seeds in the RMS multi realization
@@ -94,7 +99,7 @@ def run_simulations(
     start_seed = get_project_realization_seed(project)
     gaussianfft.seed(start_seed)
     if debug_level >= Debug.VERY_VERBOSE:
-        print(f"--- Start seed value: {gaussianfft.seed()}")
+        print(f'--- Start seed value: {gaussianfft.seed()}')
 
     # Loop over all zones and simulate gauss fields
     all_zone_models = aps_model.sorted_zone_models
@@ -124,15 +129,17 @@ def run_simulations(
         if debug_level >= Debug.VERY_VERBOSE:
             start = grid_attributes.start_layers_per_zone[zone_index]
             end = grid_attributes.end_layers_per_zone[zone_index]
-            print(f'--- Grid layers: {num_layers} Start layer: {start + 1} End layer: {end}')
+            print(
+                f'--- Grid layers: {num_layers} Start layer: {start + 1} End layer: {end}'
+            )
 
         gauss_result_list_for_zone = []
         for gauss_field_name in gauss_field_names:
             field = zone_model.get_gaussian_field(gauss_field_name)
             if field is None:
                 raise KeyError(
-                    f"No Gaussian Random Field named {gauss_field_name}"
-                    f" is defined in zone {zone_number}"
+                    f'No Gaussian Random Field named {gauss_field_name}'
+                    f' is defined in zone {zone_number}'
                     f'{f", {region_number}" if region_number else "."}'
                 )
             use_residuals = True
@@ -143,19 +150,32 @@ def run_simulations(
             if use_residuals:
                 variogram = field.variogram
 
-                azimuth_value_sim_box = variogram.angles.azimuth - grid_attributes.sim_box_size.azimuth_angle
+                azimuth_value_sim_box = (
+                    variogram.angles.azimuth
+                    - grid_attributes.sim_box_size.azimuth_angle
+                )
 
                 if debug_level >= Debug.VERBOSE:
                     if region_number > 0:
-                        print(f'-- Simulate: {gauss_field_name}  for zone: {zone_number}  for region: {region_number}')
+                        print(
+                            f'-- Simulate: {gauss_field_name}  for zone: {zone_number}  for region: {region_number}'
+                        )
                     else:
-                        print(f'-- Simulate: {gauss_field_name}  for zone: {zone_number}')
+                        print(
+                            f'-- Simulate: {gauss_field_name}  for zone: {zone_number}'
+                        )
                 if debug_level >= Debug.VERY_VERBOSE:
-                    print(f'     Zone,region             : ({zone_number}, {region_number})')
+                    print(
+                        f'     Zone,region             : ({zone_number}, {region_number})'
+                    )
                     print(f'     Gauss field name        : {gauss_field_name}')
-                    print(f'     Variogram type          : {variogram.type.name.upper()}')
+                    print(
+                        f'     Variogram type          : {variogram.type.name.upper()}'
+                    )
                     print(f'     Main range              : {variogram.ranges.main}')
-                    print(f'     Perpendicular range     : {variogram.ranges.perpendicular}')
+                    print(
+                        f'     Perpendicular range     : {variogram.ranges.perpendicular}'
+                    )
                     print(f'     Vertical range          : {variogram.ranges.vertical}')
                     print(f'     Azimuth angle in sim box: {azimuth_value_sim_box}')
                     print(f'     Dip angle               : {variogram.angles.dip}')
@@ -170,24 +190,28 @@ def run_simulations(
                 sim_variogram = define_variogram(variogram, azimuth_value_sim_box)
 
                 if debug_level >= Debug.VERY_VERBOSE:
-                    nx_padding, ny_padding, nz_padding = gaussianfft.simulation_size(sim_variogram, nx, dx, ny, dy, nz, dz)
-                    print( '---  Grid dimensions with padding for simulation:')
+                    nx_padding, ny_padding, nz_padding = gaussianfft.simulation_size(
+                        sim_variogram, nx, dx, ny, dy, nz, dz
+                    )
+                    print('---  Grid dimensions with padding for simulation:')
                     print(f'     nx: {nx}   nx with padding: {nx_padding}')
                     print(f'     ny: {ny}   ny with padding: {ny_padding}')
                     print(f'     nz: {nz}   nz with padding: {nz_padding}')
 
                 # Simulate gauss field. Return numpy 1D vector in F order
-                gauss_vector = gaussianfft.simulate(sim_variogram, nx, dx, ny, dy, nz, dz)
+                gauss_vector = gaussianfft.simulate(
+                    sim_variogram, nx, dx, ny, dy, nz, dz
+                )
             else:
                 # No need to simulate gauss field, but set it to 0
                 if debug_level >= Debug.VERBOSE:
                     print(
-                        f"-- No simulation of: {gauss_field_name} "
-                        f"for zone: {zone_number},  region: {region_number}."
+                        f'-- No simulation of: {gauss_field_name} '
+                        f'for zone: {zone_number},  region: {region_number}.'
                     )
-                    print(f"-- Relative standard deviation is: {rel_std_dev}  < 0.001")
+                    print(f'-- Relative standard deviation is: {rel_std_dev}  < 0.001')
 
-                gauss_vector = np.zeros((nx*ny*nz), dtype=np.float32)
+                gauss_vector = np.zeros((nx * ny * nz), dtype=np.float32)
             gauss_result = np.reshape(gauss_vector, (nx, ny, nz), order='F')
             gauss_result_list_for_zone.append(gauss_result)
             if debug_level >= Debug.VERBOSE:
@@ -218,13 +242,16 @@ def run_simulations(
         APSProgressBar.increment()
 
         add_trends(
-            project, aps_model, zone_number, region_number,
+            project,
+            aps_model,
+            zone_number,
+            region_number,
             write_rms_parameters_for_qc_purpose=write_rms_parameters_for_qc_purpose,
             debug_level=debug_level,
             fmu_mode=fmu_mode,
             is_shared=is_shared,
             fmu_with_residual_grf=fmu_with_residual_grf,
-            fmu_add_trend_if_use_residual=False
+            fmu_add_trend_if_use_residual=False,
         )
         # End loop over gauss fields for one zone
 
@@ -237,7 +264,9 @@ def run_simulations(
         if seed_file_log.is_dir():
             seed_file_log = seed_file_log / 'seedLogFile.dat'
         with open(seed_file_log, 'a+', encoding='utf-8') as file:
-            file.write(f'RealNumber: {realisation}  StartSeed for this realization: {1 + gaussianfft.seed()}\n')
+            file.write(
+                f'RealNumber: {realisation}  StartSeed for this realization: {1 + gaussianfft.seed()}\n'
+            )
     if debug_level >= Debug.ON:
         print('- Finished simulation of gaussian fields for APS')
 
@@ -247,10 +276,12 @@ def run(project, **kwargs):
     seed_file_log = get_seed_log_file(**kwargs)
     fmu_mode = kwargs.get('fmu_mode', False)
     fmu_mode_only_param = kwargs.get('fmu_mode_only_param', False)
-    write_rms_parameters_for_qc_purpose = kwargs.get('write_rms_parameters_for_qc_purpose',False)
+    write_rms_parameters_for_qc_purpose = kwargs.get(
+        'write_rms_parameters_for_qc_purpose', False
+    )
     real_number = project.current_realisation
 
-    print(f'\nSimulation of gaussian fields for realisation number: {real_number+1}')
+    print(f'\nSimulation of gaussian fields for realisation number: {real_number + 1}')
 
     is_shared = fmu_mode or fmu_mode_only_param
 
@@ -261,5 +292,5 @@ def run(project, **kwargs):
         is_shared,
         seed_file_log,
         write_rms_parameters_for_qc_purpose=write_rms_parameters_for_qc_purpose,
-        fmu_mode=fmu_mode
+        fmu_mode=fmu_mode,
     )

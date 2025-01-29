@@ -1,4 +1,4 @@
-name: "Create a new release"
+name: 'Create a new release'
 
 on:
   push:
@@ -44,4 +44,4 @@ jobs:
         with:
           name: ${{ steps.version.outputs.version }}
           body: ${{ steps.body.outputs.body }}
-          artifacts: "*.plugin"
+          artifacts: '*.plugin'

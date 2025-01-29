@@ -21,10 +21,12 @@
         :hint="hint"
         :persistent-hint="persistentHint"
         :append-icon="appendIcon"
-        @update:model-value="(e) => {
-          v.fieldValue.$touch()
-          updateValue(e)
-        }"
+        @update:model-value="
+          (e) => {
+            v.fieldValue.$touch()
+            updateValue(e)
+          }
+        "
         @keydown.up="increase"
         @keydown.down="decrease"
         @click:append="(e: MouseEvent) => emit('click:append', e)"
@@ -186,8 +188,8 @@ const updatable = computed({
     return isEmpty(props.modelValue)
       ? defaultValue
       : props.modelValue instanceof FmuUpdatableValue
-      ? props.modelValue.updatable
-      : defaultValue
+        ? props.modelValue.updatable
+        : defaultValue
   },
   set: (value: boolean) => emitChange(value),
 })
@@ -216,20 +218,18 @@ const isFmuUpdatable = computed(
 const errors = computed<string[]>(() => {
   if (!v.value.fieldValue || props.ignoreErrors) return []
   if (!v.value.fieldValue.$dirty) return []
-  return (v.value.fieldValue.$errors.map(error => {
+  return v.value.fieldValue.$errors.map((error) => {
     switch (error.$validator) {
       case 'required':
         return 'Is required'
       case 'discrete':
         return 'Must be a whole number'
       case 'between':
-        return (
-        max.value === Infinity
+        return max.value === Infinity
           ? `Must be greater than ${min.value}`
           : min.value === -Infinity
-          ? `Must be smaller than ${max.value}`
-          : `Must be between [${min.value}, ${max.value}]`
-      )
+            ? `Must be smaller than ${max.value}`
+            : `Must be between [${min.value}, ${max.value}]`
       case 'strictlyGreater':
         return `Must be strictly greater than ${min.value}`
       case 'strictlySmaller':
@@ -237,7 +237,7 @@ const errors = computed<string[]>(() => {
       default:
         return error.$message as string
     }
-  }))
+  })
 })
 
 const checkboxSize = computed(() =>
@@ -273,9 +273,10 @@ function hasChanged(
 function emitChange(value: BigNumber | boolean | null): void {
   let payload: FmuUpdatableValue | number
   if (props.fmuUpdatable || hasOwnProperty(props.modelValue, 'value')) {
-    payload = typeof value === 'boolean'
-      ? new FmuUpdatableValue(Number(fieldValue.value), value)
-      : new FmuUpdatableValue(Number(value), updatable.value)
+    payload =
+      typeof value === 'boolean'
+        ? new FmuUpdatableValue(Number(fieldValue.value), value)
+        : new FmuUpdatableValue(Number(value), updatable.value)
   } else {
     payload = Number(value)
   }
@@ -316,12 +317,11 @@ function updateValue(event: BigNumber | string | InputEvent): void {
   } else if (value === '+') {
     value = ''
   } else {
-    numericValue =
-      math.bignumber(
-        (props.modelValue instanceof FmuUpdatableValue
+    numericValue = math.bignumber(
+      (props.modelValue instanceof FmuUpdatableValue
         ? props.modelValue.value
-        : props.modelValue
-      ) as number)
+        : props.modelValue) as number,
+    )
   }
   if (/^[+-]?\d+\.0*$/.test((value || '').toString())) {
     fieldValue.value = value
@@ -338,10 +338,16 @@ function updateValue(event: BigNumber | string | InputEvent): void {
   emitChange(numericValue)
 }
 
-function getValue(value: FmuUpdatableValue<T> | FmuUpdatable<T> | InternalValue): BigNumber | null {
+function getValue(
+  value: FmuUpdatableValue<T> | FmuUpdatable<T> | InternalValue,
+): BigNumber | null {
   if (value === null) return null
   if (isEmpty(value) && !isNumber(value)) return null
-  if (value instanceof FmuUpdatableValue || (typeof value === 'object' && 'value' in value)) value = value.value
+  if (
+    value instanceof FmuUpdatableValue ||
+    (typeof value === 'object' && 'value' in value)
+  )
+    value = value.value
   if (value === '-') value = 0
   if (typeof value === 'string') {
     value = math.bignumber(value)

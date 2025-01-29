@@ -9,4 +9,3 @@ The scripts are:
 - prob_cube_parameterization.py            Make linear combination of different sets of prob cubes. Useful in ERT for prob uncertainty.
 - copy_rms_param_to_ertbox_grid.py         Copy 3D parameters in RMS from geogrid to ERTBOX grid and vice versa. Extrapolation is also available.
 - redefine_zones_in_aps_model.py           If zone subdivision is changed after APS model is defined, this script can remap the zones and make updated model file for APS.
-

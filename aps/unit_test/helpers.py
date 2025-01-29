@@ -14,9 +14,7 @@ from aps.algorithms.truncation_rules.types import TruncationRule
 
 
 def getFaciesInTruncRule(
-        truncRule: TruncationRule,
-        truncRule2: TruncationRule,
-        faciesInTruncRule: List[str]
+    truncRule: TruncationRule, truncRule2: TruncationRule, faciesInTruncRule: List[str]
 ) -> None:
     # Global variable truncRule
     assert truncRule is not None
@@ -35,12 +33,12 @@ def getFaciesInTruncRule(
 
 
 def apply_truncations(
-        truncRule: TruncationRule,
-        faciesReferenceFile: str,
-        nGaussFields: int,
-        gaussFieldFiles: List[str],
-        faciesOutputFile: str,
-        debug_level: Debug = Debug.OFF
+    truncRule: TruncationRule,
+    faciesReferenceFile: str,
+    nGaussFields: int,
+    gaussFieldFiles: List[str],
+    faciesOutputFile: str,
+    debug_level: Debug = Debug.OFF,
 ) -> None:
     assert truncRule is not None
     assert faciesReferenceFile != ''
@@ -71,7 +69,10 @@ def apply_truncations(
         faciesCode, fIndx = truncRule.defineFaciesByTruncRule(alphaCoord)
         faciesReal.append(faciesCode)
     if debug_level >= Debug.ON:
-        print('Number of shifts in alpha values for numerical reasons: ' + str(truncRule.getNCountShiftAlpha()))
+        print(
+            'Number of shifts in alpha values for numerical reasons: '
+            + str(truncRule.getNCountShiftAlpha())
+        )
     writeFile(faciesOutputFile, faciesReal, nx, ny)
 
     # Compare the generated facies realization with the reference for this case
@@ -87,12 +88,12 @@ def apply_truncations(
 
 
 def apply_truncations_vectorized(
-        truncRule: TruncationRule,
-        faciesReferenceFile: str,
-        nGaussFields: int,
-        gaussFieldFiles: List[str],
-        faciesOutputFile: str,
-        debug_level: Debug = Debug.OFF
+    truncRule: TruncationRule,
+    faciesReferenceFile: str,
+    nGaussFields: int,
+    gaussFieldFiles: List[str],
+    faciesOutputFile: str,
+    debug_level: Debug = Debug.OFF,
 ) -> None:
     assert truncRule is not None
     assert faciesReferenceFile != ''
@@ -118,10 +119,15 @@ def apply_truncations_vectorized(
     for n in range(nGaussFields):
         alpha_vector = np.asarray(alphaFields[n])
         alphaCoord_vectors[:, n] = alpha_vector
-    faciesCode_vector, fIndx_vector = truncRule.defineFaciesByTruncRule_vectorized(alphaCoord_vectors)
+    faciesCode_vector, fIndx_vector = truncRule.defineFaciesByTruncRule_vectorized(
+        alphaCoord_vectors
+    )
 
     if debug_level >= Debug.ON:
-        print('Number of shifts in alpha values for numerical reasons: ' + str(truncRule.getNCountShiftAlpha()))
+        print(
+            'Number of shifts in alpha values for numerical reasons: '
+            + str(truncRule.getNCountShiftAlpha())
+        )
         print('facies realization:')
         print(faciesCode_vector)
         print(len(faciesCode_vector))
@@ -141,11 +147,11 @@ def apply_truncations_vectorized(
 
 
 def truncMapPolygons(
-        truncRule: TruncationRule,
-        truncRule2: TruncationRule,
-        faciesProb: List[float],
-        outPolyFile1: str,
-        outPolyFile2: str
+    truncRule: TruncationRule,
+    truncRule2: TruncationRule,
+    faciesProb: List[float],
+    outPolyFile1: str,
+    outPolyFile2: str,
 ) -> None:
     assert faciesProb is not None
     assert truncRule is not None
@@ -209,7 +215,9 @@ def assert_equal_image_content_files(source: str, reference: str) -> None:
     _assert_compare_files(source, reference, compare_image)
 
 
-def compare_image(source: Union[str, Image.Image], reference: Union[str, Image.Image]) -> bool:
+def compare_image(
+    source: Union[str, Image.Image], reference: Union[str, Image.Image]
+) -> bool:
     if isinstance(source, str):
         source = Image.open(source)
     if isinstance(reference, str):
@@ -217,7 +225,9 @@ def compare_image(source: Union[str, Image.Image], reference: Union[str, Image.I
     return ImageChops.difference(source, reference).getbbox() is None
 
 
-def _assert_compare_files(source: str, reference: str, func: Callable[[str, str], bool]) -> None:
+def _assert_compare_files(
+    source: str, reference: str, func: Callable[[str, str], bool]
+) -> None:
     print(f'Compare file: {source} and {reference}')
     check = func(source, reference)
     if check:

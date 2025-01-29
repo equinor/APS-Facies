@@ -2,14 +2,17 @@
 # -*- coding: utf-8 -*-
 from aps.utils.methods import get_run_parameters
 from aps.utils.roxar.fmu_tags import (
-    read_selected_fmu_variables,  set_all_as_fmu_updatable,  set_selected_as_fmu_updatable,
+    read_selected_fmu_variables,
+    set_all_as_fmu_updatable,
+    set_selected_as_fmu_updatable,
 )
 from aps.utils.io import write_status_file
 from aps.utils.aps_config import APSConfig
 
+
 def run(roxar=None, project=None, **kwargs):
     if project is None:
-        raise ValueError(f"project can not be None")
+        raise ValueError(f'project can not be None')
 
     APSConfig.init(project)
     params = get_run_parameters(**kwargs)
@@ -27,7 +30,9 @@ def run(roxar=None, project=None, **kwargs):
     print('tag all variables: {}'.format(tag_all_variables))
     if tag_all_variables:
         # Set all APS model parameters as FMU updatable
-        set_all_as_fmu_updatable(model_file, output_model_file, output_tagged_variables_file)
+        set_all_as_fmu_updatable(
+            model_file, output_model_file, output_tagged_variables_file
+        )
     else:
         # Read selected FMU variables
         fmu_variables = read_selected_fmu_variables(input_selected_fmu_variable_file)

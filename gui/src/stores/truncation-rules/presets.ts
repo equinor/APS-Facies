@@ -32,10 +32,7 @@ export const useTruncationRulePresetStore = defineStore(
       const currentRule = truncationRuleStore.current
       if (
         currentRule &&
-        (
-          _type !== type.value ||
-          _templateId !== templateId.value
-        )
+        (_type !== type.value || _templateId !== templateId.value)
       ) {
         truncationRuleStore.remove(currentRule)
       }
@@ -54,7 +51,6 @@ export const useTruncationRulePresetStore = defineStore(
           )
         }
         templateStore.createRule(templateId.value, type.value)
-
       }
     }
 

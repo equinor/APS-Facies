@@ -15,5 +15,3 @@ ShellCommand(command)
 
 command = "diff " + reference_uncertainty_parameter_file + " " + output_uncertainty_parameter_file + "> diff.tmp"
 ShellCommand(command)
-
-

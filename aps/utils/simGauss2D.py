@@ -9,17 +9,17 @@ from aps.utils.constants.simple import Debug, VariogramType
 
 
 def simGaussField(
-        iseed: int,
-        nx: int,
-        ny: int,
-        xsize: float,
-        ysize: float,
-        variogram_type: VariogramType,
-        range_major_axis: float,
-        range_minor_axis: float,
-        azimuth_angle: float,
-        power: Optional[float] = None,
-        debug_level: Debug = Debug.OFF
+    iseed: int,
+    nx: int,
+    ny: int,
+    xsize: float,
+    ysize: float,
+    variogram_type: VariogramType,
+    range_major_axis: float,
+    range_minor_axis: float,
+    azimuth_angle: float,
+    power: Optional[float] = None,
+    debug_level: Debug = Debug.OFF,
 ) -> np.ndarray:
     """
     Simulation of 2D Gaussian field for a grid with (nx,ny) grid cells and length and width (xsize, ysize).
@@ -64,7 +64,11 @@ def simGaussField(
 
     # Define variogram
     variogram_name = variogram_type.name.upper()
-    kwargs = {'main_range': range_major_axis, 'perp_range': range_minor_axis, 'azimuth': azimuth_angle}
+    kwargs = {
+        'main_range': range_major_axis,
+        'perp_range': range_minor_axis,
+        'azimuth': azimuth_angle,
+    }
     if variogram_type == VariogramType.GENERAL_EXPONENTIAL:
         assert power is not None
         kwargs['power'] = power
@@ -81,7 +85,9 @@ def simGaussField(
         coordinates = ['x', 'y', 'z']
         debug_info = 'Debug output: '
         for i in range(len(padding)):
-            debug_info += 'n{coordinate}_padding: {value}     '.format(coordinate=coordinates[i], value=padding[i])
+            debug_info += 'n{coordinate}_padding: {value}     '.format(
+                coordinate=coordinates[i], value=padding[i]
+            )
         print(debug_info.strip())
 
     # Have to remap the array to get it correct when plotting.

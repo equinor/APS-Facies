@@ -2,8 +2,8 @@ import { acceptHMRUpdate, defineStore } from 'pinia'
 import { useParameterNameProjectStore } from './names/project'
 import { useParameterNameWorkflowStore } from './names/workflow'
 import {
-    useParametersMaxFractionOfValuesOutsideToleranceStore,
-    useParametersToleranceOfProbabilityNormalisationStore,
+  useParametersMaxFractionOfValuesOutsideToleranceStore,
+  useParametersToleranceOfProbabilityNormalisationStore,
 } from './tolerance'
 import { useParameterBlockedWellStore } from '@/stores/parameters/blocked-well'
 import { useParameterBlockedWellLogStore } from '@/stores/parameters/blocked-well-log'
@@ -22,64 +22,59 @@ import { useParameterRmsTrendMapZoneStore } from '@/stores/parameters/rms-trend-
 
 export const useParameterStore = defineStore('parameters', () => {
   const stores = [
-      useParameterNameWorkflowStore(),
-      useParameterNameProjectStore(),
-      useParametersMaxFractionOfValuesOutsideToleranceStore(),
-      useParametersToleranceOfProbabilityNormalisationStore(),
+    useParameterNameWorkflowStore(),
+    useParameterNameProjectStore(),
+    useParametersMaxFractionOfValuesOutsideToleranceStore(),
+    useParametersToleranceOfProbabilityNormalisationStore(),
   ]
   async function fetch() {
-    await Promise.all(stores.map(store => store.fetch()))
+    await Promise.all(stores.map((store) => store.fetch()))
   }
 
   async function populate(parameters: ParameterStoreSerialization) {
-      const blockedWellStore = useParameterBlockedWellStore()
-      const blockedWellLogStore = useParameterBlockedWellLogStore()
-      await blockedWellStore.select(parameters.blockedWell.selected)
-      await blockedWellLogStore.select(parameters.blockedWellLog.selected)
+    const blockedWellStore = useParameterBlockedWellStore()
+    const blockedWellLogStore = useParameterBlockedWellLogStore()
+    await blockedWellStore.select(parameters.blockedWell.selected)
+    await blockedWellLogStore.select(parameters.blockedWellLog.selected)
 
-      useParameterDebugLevelStore()
-          .select(parameters.debugLevel.selected)
+    useParameterDebugLevelStore().select(parameters.debugLevel.selected)
 
-      useParametersMaxFractionOfValuesOutsideToleranceStore()
-          .setTolerance(parameters.maxAllowedFractionOfValuesOutsideTolerance.selected)
+    useParametersMaxFractionOfValuesOutsideToleranceStore().setTolerance(
+      parameters.maxAllowedFractionOfValuesOutsideTolerance.selected,
+    )
 
-      if (parameters.names.model.selected) {
-          useParameterNameModelStore()
-              .select(parameters.names.model.selected)
-      }
-      if (parameters.names.project.selected) {
-          useParameterNameProjectStore()
-              .select(parameters.names.project.selected)
-      }
-      if (parameters.names.workflow.selected) {
-          useParameterNameWorkflowStore()
-              .select(parameters.names.workflow.selected)
-      }
+    if (parameters.names.model.selected) {
+      useParameterNameModelStore().select(parameters.names.model.selected)
+    }
+    if (parameters.names.project.selected) {
+      useParameterNameProjectStore().select(parameters.names.project.selected)
+    }
+    if (parameters.names.workflow.selected) {
+      useParameterNameWorkflowStore().select(parameters.names.workflow.selected)
+    }
 
-      useParameterRealizationStore()
-          .select(parameters.realization.selected)
+    useParameterRealizationStore().select(parameters.realization.selected)
 
-      if (parameters.region.selected)
-      await useParameterRegionStore()
-          .select(parameters.region.selected)
+    if (parameters.region.selected)
+      await useParameterRegionStore().select(parameters.region.selected)
 
-      useParametersToleranceOfProbabilityNormalisationStore()
-          .setTolerance(parameters.toleranceOfProbabilityNormalisation.selected)
-      useParameterTransformTypeStore()
-          .select(parameters.transformType.selected)
+    useParametersToleranceOfProbabilityNormalisationStore().setTolerance(
+      parameters.toleranceOfProbabilityNormalisation.selected,
+    )
+    useParameterTransformTypeStore().select(parameters.transformType.selected)
 
-      if (parameters.zone.selected)
-      useParameterZoneStore()
-        .select(parameters.zone.selected)
+    if (parameters.zone.selected)
+      useParameterZoneStore().select(parameters.zone.selected)
 
-      if (parameters.grid.simulationBox) {
-          useParameterGridSimulationBoxesStore()
-              .populate(parameters.grid.simulationBox)
-      }
+    if (parameters.grid.simulationBox) {
+      useParameterGridSimulationBoxesStore().populate(
+        parameters.grid.simulationBox,
+      )
+    }
   }
 
   function $reset() {
-    [
+    ;[
       useParameterGridStore(),
       useParameterNameModelStore(),
       useParameterNameProjectStore(),
@@ -96,12 +91,11 @@ export const useParameterStore = defineStore('parameters', () => {
       useParametersToleranceOfProbabilityNormalisationStore(),
       useParameterTransformTypeStore(),
       useParameterZoneStore(),
-    ].forEach(store => store.$reset())
+    ].forEach((store) => store.$reset())
   }
 
   return { fetch, populate, $reset }
 })
-
 
 if (import.meta.hot) {
   import.meta.hot.accept(acceptHMRUpdate(useParameterStore, import.meta.hot))

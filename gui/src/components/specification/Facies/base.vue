@@ -34,13 +34,18 @@ const selected = computed({
 })
 
 const faciesOptions = computed<ListItem<Facies>[]>(() => {
-  return faciesStore.selected.map((facies) => ({
-    title: facies.alias,
-    value: facies,
-    props: {
-      disabled:
-        props.disable instanceof Function ? props.disable(facies) : props.disable,
-    }
-  }) as ListItem<Facies>)
+  return faciesStore.selected.map(
+    (facies) =>
+      ({
+        title: facies.alias,
+        value: facies,
+        props: {
+          disabled:
+            props.disable instanceof Function
+              ? props.disable(facies)
+              : props.disable,
+        },
+      }) as ListItem<Facies>,
+  )
 })
 </script>

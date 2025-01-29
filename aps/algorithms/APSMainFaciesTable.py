@@ -41,11 +41,14 @@ class Facies:
         return self._code
 
     @classmethod
-    def from_definition(cls, definition: Union[
-        FaciesRecord,
-        Tuple[str, int],
-        List[Union[str, int]],
-    ]) -> 'Facies':
+    def from_definition(
+        cls,
+        definition: Union[
+            FaciesRecord,
+            Tuple[str, int],
+            List[Union[str, int]],
+        ],
+    ) -> 'Facies':
         definition = FaciesRecord._make(definition)
         return cls(
             name=definition.Name,
@@ -135,7 +138,7 @@ class APSMainFaciesTable:
         facies_table: Optional[Dict[int, str]] = None,
         blocked_well=None,
         blocked_well_log=None,
-        debug_level: Debug = Debug.OFF
+        debug_level: Debug = Debug.OFF,
     ) -> None:
         self.__debug_level = debug_level
         self.__class_name = self.__class__.__name__
@@ -148,7 +151,9 @@ class APSMainFaciesTable:
         self.__facies_table = FaciesTable()
         if facies_table is not None:
             for code in facies_table.keys():
-                self.__facies_table.append(Facies(name=facies_table.get(code), code=int(code)))
+                self.__facies_table.append(
+                    Facies(name=facies_table.get(code), code=int(code))
+                )
 
         if ET_Tree is not None:
             # Search xml tree for model file to find the specified Main facies table
@@ -167,30 +172,33 @@ class APSMainFaciesTable:
         else:
             attr_blockedWell = obj.get('blockedWell')
             if attr_blockedWell is None:
-                raise ReadingXmlError(model_file_name=self.__model_file_name, keyword=kw)
+                raise ReadingXmlError(
+                    model_file_name=self.__model_file_name, keyword=kw
+                )
             else:
                 self.__blocked_well = attr_blockedWell
             attr_blockedWellLog = obj.get('blockedWellLog')
             if attr_blockedWellLog is None:
-                raise ReadingXmlError(model_file_name=self.__model_file_name, keyword=kw)
+                raise ReadingXmlError(
+                    model_file_name=self.__model_file_name, keyword=kw
+                )
             else:
                 self.__blocked_well_log = attr_blockedWellLog
             facies_table = obj
             for facies in facies_table.findall('Facies'):
                 self.__facies_table.append(
-                    Facies(
-                        name=facies.get('name'),
-                        code=int(facies.find('Code').text)
-                    )
+                    Facies(name=facies.get('name'), code=int(facies.find('Code').text))
                 )
             if not self.__facies_table:
                 raise ReadingXmlError(
                     keyword='Facies',
                     model_file_name=self.__model_file_name,
-                    parent_keyword='MainFaciesTable'
+                    parent_keyword='MainFaciesTable',
                 )
         if not self.__checkUniqueFaciesNamesAndCodes():
-            raise ValueError('The facies table has two or more facies with the same code and/or name.')
+            raise ValueError(
+                'The facies table has two or more facies with the same code and/or name.'
+            )
         return
 
     def __len__(self) -> int:
@@ -221,8 +229,7 @@ class APSMainFaciesTable:
             if facies_name == name:
                 return i
         raise ValueError(
-            'Can not find facies with name {} in facies table'
-            ''.format(facies_name)
+            'Can not find facies with name {} in facies table'.format(facies_name)
         )
 
     def add_facies(self, name: FaciesName, code: FaciesCode) -> None:
@@ -239,7 +246,10 @@ class APSMainFaciesTable:
 
     def XMLAddElement(self, root: Element) -> None:
         facies_table = Element('MainFaciesTable')
-        facies_table.attrib = {"blockedWell": self.__blocked_well, "blockedWellLog": self.__blocked_well_log}
+        facies_table.attrib = {
+            'blockedWell': self.__blocked_well,
+            'blockedWellLog': self.__blocked_well_log,
+        }
         root.append(facies_table)
         for facies in self.__facies_table:
             facies_element = Element('Facies', {'name': facies.name})
@@ -263,6 +273,10 @@ class APSMainFaciesTable:
                 c2 = self.__facies_table[j].code
                 if c1 == c2:
                     print('Error: In ' + self.__class_name)
-                    print('Error: Facies code: ' + str(c1) + ' is specified multiple times')
+                    print(
+                        'Error: Facies code: '
+                        + str(c1)
+                        + ' is specified multiple times'
+                    )
                     return False
         return True

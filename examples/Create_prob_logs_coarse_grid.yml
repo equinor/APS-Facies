@@ -7,8 +7,8 @@ ProbLogs:
   ZoneLogName: Zone
   OutputPrefix: Prob
   ModellingFaciesPerZone:
-    1:  F1 F2 F3 F4 F5 F6
-    2:  F1 F2 F3 F4 F5 F6
-    3:  F1 F2 F3 F4 F5 F6
-    4:  F1 F2 F3 F4 F5 F6
+    1: F1 F2 F3 F4 F5 F6
+    2: F1 F2 F3 F4 F5 F6
+    3: F1 F2 F3 F4 F5 F6
+    4: F1 F2 F3 F4 F5 F6
   UseConditionalProbabilities: False

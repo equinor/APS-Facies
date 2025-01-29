@@ -1,10 +1,13 @@
 import type TruncationRule from '@/utils/domain/truncationRule/base'
 import type Polygon from '@/utils/domain/polygon/base'
-import type { PolygonSerialization, PolygonSpecification } from '@/utils/domain/polygon/base'
+import type {
+  PolygonSerialization,
+  PolygonSpecification,
+} from '@/utils/domain/polygon/base'
 import type OverlayPolygon from '@/utils/domain/polygon/overlay'
 import type {
   OverlayPolygonSerialization,
-  OverlayPolygonSpecification
+  OverlayPolygonSpecification,
 } from '@/utils/domain/polygon/overlay'
 import { Bayfill } from '@/utils/domain'
 import type OverlayTruncationRule from '@/utils/domain/truncationRule/overlay'

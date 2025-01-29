@@ -9,9 +9,9 @@ from aps.toolbox import name_of_help_script
 # Define input parameters in dictionary.
 # Specification depends on which aps script is choosen.
 params = {
-    "project":      project,
-    "debug_level":  Debug.VERBOSE,
-    # Fill in parameters for the script 
+    'project': project,
+    'debug_level': Debug.VERBOSE,
+    # Fill in parameters for the script
 }
 
 name_of_help_script.run(params)

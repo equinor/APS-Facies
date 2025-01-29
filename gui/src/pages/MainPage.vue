@@ -1,7 +1,10 @@
 <template>
   <v-container fluid>
-    <v-row v-if="loading" class="d-flex align-content-center flex-column align-center">
-      <v-progress-circular :size="70" indeterminate/>
+    <v-row
+      v-if="loading"
+      class="d-flex align-content-center flex-column align-center"
+    >
+      <v-progress-circular :size="70" indeterminate />
       <span>{{ loadingMessage }}</span>
     </v-row>
     <v-row v-else>

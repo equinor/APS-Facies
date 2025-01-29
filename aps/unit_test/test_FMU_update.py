@@ -8,7 +8,10 @@ import pytest
 import os
 from aps.utils.constants.simple import Debug
 from aps.rms_jobs.updateAPSModelFromFMU import update_aps_model_from_fmu
-from aps.unit_test.test_createXMLModelFiles import get_apsmodel_with_no_fmu_markers, get_apsmodel_with_all_fmu_markers
+from aps.unit_test.test_createXMLModelFiles import (
+    get_apsmodel_with_no_fmu_markers,
+    get_apsmodel_with_all_fmu_markers,
+)
 
 
 @pytest.fixture(scope='module')
@@ -78,7 +81,6 @@ def read_fmu_attributes_file(file) -> Dict[str, str]:
 
 
 def test_case_with_no_fmu_markers_set():
-
     aps_model = get_apsmodel_with_no_fmu_markers()
 
     out_file = 'aps_model_with_no_fmu_markers.xml'
@@ -88,13 +90,14 @@ def test_case_with_no_fmu_markers_set():
     if os.path.isfile(out_file):
         os.remove(out_file)
 
-    aps_model.write_model(out_file, attributes_file_name=attributes_file, debug_level=Debug.OFF)
+    aps_model.write_model(
+        out_file, attributes_file_name=attributes_file, debug_level=Debug.OFF
+    )
 
     check_fmu_attributes_output_correlates_to_xml_output(out_file, attributes_file)
 
 
 def test_case_with_all_fmu_markers_set():
-
     aps_model = get_apsmodel_with_all_fmu_markers()
 
     out_file = 'aps_model_with_all_fmu_markers.xml'
@@ -109,7 +112,9 @@ def test_case_with_all_fmu_markers_set():
     aps_model.write_model(out_file, attributes_file, debug_level=Debug.OFF)
 
     check_fmu_attributes_output_correlates_to_xml_output(out_file, attributes_file)
-    check_expected_key_value_set_correlates_to_xml_output(out_file, expected_key_value_set_file)
+    check_expected_key_value_set_correlates_to_xml_output(
+        out_file, expected_key_value_set_file
+    )
 
 
 def check_fmu_attributes_output_correlates_to_xml_output(out_file, attributes_file):
@@ -119,27 +124,36 @@ def check_fmu_attributes_output_correlates_to_xml_output(out_file, attributes_fi
         values_from_generated_xml = read_values_from_xml_tree(ET.parse(out_file))
         key_set_from_xml = set(values_from_generated_xml.keys())
     if os.path.isfile(attributes_file):
-        values_from_generated_attributes_file = set(read_fmu_attributes_file(attributes_file).keys())
+        values_from_generated_attributes_file = set(
+            read_fmu_attributes_file(attributes_file).keys()
+        )
     print('Not in both:')
-    print(key_set_from_xml^values_from_generated_attributes_file)
-    assert len(key_set_from_xml.symmetric_difference(values_from_generated_attributes_file)) == 0
+    print(key_set_from_xml ^ values_from_generated_attributes_file)
+    assert (
+        len(
+            key_set_from_xml.symmetric_difference(values_from_generated_attributes_file)
+        )
+        == 0
+    )
 
 
-def check_expected_key_value_set_correlates_to_xml_output(out_file, expected_key_value_set_file):
+def check_expected_key_value_set_correlates_to_xml_output(
+    out_file, expected_key_value_set_file
+):
     values_from_generated_xml = read_values_from_xml_tree(ET.parse(out_file))
     fasit_key_values = read_fmu_attributes_file(expected_key_value_set_file)
     assert values_from_generated_xml == fasit_key_values
 
 
-def test_global_include_file_has_all_necessary_update_values(original_values, update_values):
-
+def test_global_include_file_has_all_necessary_update_values(
+    original_values, update_values
+):
     # This is testing that all fmu attributes that we expect
     # to test in this test is actually also represented in the test_global_include.ipl file
     assert set(original_values.keys()).issubset(set(update_values.keys()))
 
 
 def test_all_element_values_are_correctly_updated(original_values, update_values):
-
     update_aps_model_from_fmu(
         'testData_FMU/test_global_include.ipl',
         'testData_models/APS.xml',
@@ -157,5 +171,3 @@ def test_all_element_values_are_correctly_updated(original_values, update_values
         expected_value = update_values[key]
         found_value = new_values[key]
         assert expected_value == found_value
-
-

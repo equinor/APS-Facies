@@ -59,27 +59,30 @@ import { useTheme } from 'vuetify'
 import type { HeaderItem, VuetifyColumns } from '@/utils/typing'
 import type { Identifiable } from '@/utils/domain/bases/interfaces'
 
-const props = withDefaults(defineProps<{
-  modelValue: T[]
-  headers: HeaderItem[]
-  items: T[]
-  current?: ID | null
-  expanded?: T[]
-  loading?: boolean
-  loadingText?: string
-  noDataText?: string
-  selectDisabled?: boolean
-  selectError?: string
-}>(), {
-  current: undefined,
-  expanded: () => [],
-  loading: false,
-  loadingText: '$vuetify.dataIterator.loadingText',
-  noDataText: '$vuetify.noDataText',
-  selectDisabled: false,
-  type: Boolean,
-  selectError: undefined,
-})
+const props = withDefaults(
+  defineProps<{
+    modelValue: T[]
+    headers: HeaderItem[]
+    items: T[]
+    current?: ID | null
+    expanded?: T[]
+    loading?: boolean
+    loadingText?: string
+    noDataText?: string
+    selectDisabled?: boolean
+    selectError?: string
+  }>(),
+  {
+    current: undefined,
+    expanded: () => [],
+    loading: false,
+    loadingText: '$vuetify.dataIterator.loadingText',
+    noDataText: '$vuetify.noDataText',
+    selectDisabled: false,
+    type: Boolean,
+    selectError: undefined,
+  },
+)
 
 const emit = defineEmits<{
   (event: 'update:model-value', value: T[]): void
@@ -88,8 +91,8 @@ const emit = defineEmits<{
 }>()
 
 defineSlots<{
-  item(props: { item: T, isSelected: boolean, isCurrent: boolean }): void
-  'expanded-item'(props: { item: T, columns: VuetifyColumns }): void
+  item(props: { item: T; isSelected: boolean; isCurrent: boolean }): void
+  'expanded-item'(props: { item: T; columns: VuetifyColumns }): void
 }>()
 
 const theme = useTheme()

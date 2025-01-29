@@ -17,7 +17,7 @@ import { useConstantsFaciesColorsStore } from '@/stores/constants/facies-colors'
 import { isEmpty } from '@/utils'
 import { APSError } from '@/utils/domain/errors'
 import type { ID } from '@/utils/domain/types'
-import { displayWarning } from "@/utils/helpers/storeInteraction";
+import { displayWarning } from '@/utils/helpers/storeInteraction'
 
 export type FaciesGlobalStorePopulationData =
   CurrentIdentifiedStorePopulationData<GlobalFacies>
@@ -28,7 +28,14 @@ interface FaciesSpecification extends RmsFacies {
 
 export const useGlobalFaciesStore = defineStore('facies-global', () => {
   const store = useCurrentIdentifiedItems<GlobalFacies>()
-  const { identifiedAvailable, available, addAvailable, currentId, current, removeAvailable } = store
+  const {
+    identifiedAvailable,
+    available,
+    addAvailable,
+    currentId,
+    current,
+    removeAvailable,
+  } = store
 
   const loading = ref(false)
   const rmsFacies = ref([]) as Ref<RmsFacies[]>
@@ -53,7 +60,9 @@ export const useGlobalFaciesStore = defineStore('facies-global', () => {
       blockedWellLogStore.selected === null
     ) {
       if (warnIfInvalid) {
-        displayWarning('Could not fetch facies from RMS; blocked well (log) is not set')
+        displayWarning(
+          'Could not fetch facies from RMS; blocked well (log) is not set',
+        )
         return []
       }
       throw new APSError(
@@ -93,23 +102,29 @@ export const useGlobalFaciesStore = defineStore('facies-global', () => {
     for (const f of facies) {
       f.color = f.color ?? faciesColorStore.byCode(f.code - minFaciesCode)
     }
-    const existingFacies = available.value.reduce((mapping, facies) => ({
-      ...mapping,
-      [facies.code]: facies,
-    }), {} as Record<number, GlobalFacies>)
-    facies
-      .forEach(configuration => {
-        const existing = existingFacies[configuration.code]
-        if (!existing) {
-          available.value.push(new GlobalFacies(configuration as FaciesSpecification & {
-            color: Color // We add a color if one is not given
-          }))
-        } else {
-          // The global facies are first fetched when blocked well log is selected
-          // This is when we execute the logic for showing which facies are observed in RMS
-          Object.assign(existing, configuration)
-        }
-      })
+    const existingFacies = available.value.reduce(
+      (mapping, facies) => ({
+        ...mapping,
+        [facies.code]: facies,
+      }),
+      {} as Record<number, GlobalFacies>,
+    )
+    facies.forEach((configuration) => {
+      const existing = existingFacies[configuration.code]
+      if (!existing) {
+        available.value.push(
+          new GlobalFacies(
+            configuration as FaciesSpecification & {
+              color: Color // We add a color if one is not given
+            },
+          ),
+        )
+      } else {
+        // The global facies are first fetched when blocked well log is selected
+        // This is when we execute the logic for showing which facies are observed in RMS
+        Object.assign(existing, configuration)
+      }
+    })
   }
 
   function $reset() {
@@ -149,12 +164,13 @@ export const useGlobalFaciesStore = defineStore('facies-global', () => {
     observed,
   }: Partial<FaciesSpecification>) {
     if (isEmpty(code) || code < 0) {
-      code = Math.max(
-        0, // Avoid -infinity if there is no facies from RMS
-        ...(available.value as { code: number }[])
-          .concat(rmsFacies.value)
-          .map((f) => f.code),
-      ) + 1
+      code =
+        Math.max(
+          0, // Avoid -infinity if there is no facies from RMS
+          ...(available.value as { code: number }[])
+            .concat(rmsFacies.value)
+            .map((f) => f.code),
+        ) + 1
     }
     name = name ?? `F${code}`
 

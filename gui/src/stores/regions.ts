@@ -171,7 +171,7 @@ export function useRegionStoreSerialization(): RegionStoreSerialization {
   const regionStore = useRegionStore()
   return {
     use: regionStore.use,
-    current: regionStore.currentId
+    current: regionStore.currentId,
   }
 }
 

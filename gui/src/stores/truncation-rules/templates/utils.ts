@@ -11,16 +11,13 @@ import type {
   TruncationRuleTemplateFromJson,
 } from '.'
 import { getRelevant } from '@/stores/utils/helpers'
-import type {
-  Facies,
-  Parent,
-} from '@/utils/domain'
+import type { Facies, Parent } from '@/utils/domain'
 import {
   Bayfill,
   Cubic,
   CubicPolygon,
   NonCubic,
-  OverlayPolygon
+  OverlayPolygon,
 } from '@/utils/domain'
 import type GaussianRandomField from '@/utils/domain/gaussianRandomField'
 import { useGaussianRandomFieldStore } from '@/stores/gaussian-random-fields'
@@ -36,7 +33,10 @@ export function processFields(
 ): (GaussianRandomField | null)[] {
   const optionStore = useOptionStore()
   const fieldStore = useGaussianRandomFieldStore()
-  const currentParentFields = getRelevant(fieldStore.available as GaussianRandomField[], parent)
+  const currentParentFields = getRelevant(
+    fieldStore.available as GaussianRandomField[],
+    parent,
+  )
   if (optionStore.options.automaticAlphaFieldSelection) {
     return fieldChannelReferences
       .map((fieldChannelReference) => {
@@ -113,9 +113,12 @@ function findFacies(
   parent: Parent,
 ): Facies | null {
   const faciesStore = useFaciesStore()
-  const relevantFacies = getRelevant(faciesStore.available as Facies[], parent)
-    .sort((a, b) => a.name.localeCompare(b.name))
-  if (faciesReference.index >= 0) return relevantFacies[faciesReference.index] as Facies ?? null
+  const relevantFacies = getRelevant(
+    faciesStore.available as Facies[],
+    parent,
+  ).sort((a, b) => a.name.localeCompare(b.name))
+  if (faciesReference.index >= 0)
+    return (relevantFacies[faciesReference.index] as Facies) ?? null
 
   return (relevantFacies.find(({ name }) => name === faciesReference.name) ??
     null) as Facies | null
@@ -126,7 +129,10 @@ function findField(
   parent: Parent,
 ): GaussianRandomField | null {
   const fieldStore = useGaussianRandomFieldStore()
-  const relevantFields = getRelevant(fieldStore.available as GaussianRandomField[], parent)
+  const relevantFields = getRelevant(
+    fieldStore.available as GaussianRandomField[],
+    parent,
+  )
 
   return (relevantFields.find(({ name }) => name === fieldReference.name) ??
     relevantFields[fieldReference.index] ??
@@ -197,7 +203,9 @@ function processSettings(template: TruncationRuleTemplateFromJson) {
     template.type === 'cubic' ? template.settings.polygons : template.settings
 
   return template.polygons.map((polygon) => {
-    const setting = (settings as (CubicPolygonSetting | BayfillSetting | NonCubicSetting)[]).find(
+    const setting = (
+      settings as (CubicPolygonSetting | BayfillSetting | NonCubicSetting)[]
+    ).find(
       (setting) =>
         setting.polygon === ('name' in polygon ? polygon.name : polygon.order),
     )
@@ -264,11 +272,13 @@ const typeMapping = {
 }
 
 // From https://stackoverflow.com/questions/43481518/get-argument-types-for-function-class-constructor
-type FirstArgument<T> = T extends (arg1: infer U, ...args: any[]) => any ? U : any;
+type FirstArgument<T> = T extends (arg1: infer U, ...args: any[]) => any
+  ? U
+  : any
 
 export function makeRule<T extends TruncationRuleType>(
   type: T,
-  args: FirstArgument<ConstructorParameters<(typeof typeMapping)[T]>>
+  args: FirstArgument<ConstructorParameters<(typeof typeMapping)[T]>>,
 ) {
   const TruncationRule = typeMapping[type as keyof typeof typeMapping]
   if (!TruncationRule) {

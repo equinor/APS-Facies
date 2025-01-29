@@ -14,11 +14,12 @@
 <script
   setup
   lang="ts"
-  generic="T extends Polygon,
-  S extends PolygonSerialization,
-  P extends PolygonSpecification,
-  RULE extends TruncationRule<T, S, P>
-"
+  generic="
+    T extends Polygon,
+    S extends PolygonSerialization,
+    P extends PolygonSpecification,
+    RULE extends TruncationRule<T, S, P>
+  "
 >
 import type { ID } from '@/utils/domain/types'
 import type TruncationRule from '@/utils/domain/truncationRule/base'

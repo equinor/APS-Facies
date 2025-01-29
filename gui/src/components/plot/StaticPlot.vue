@@ -16,7 +16,14 @@ import { getDisabledOpacity } from '@/utils/helpers/simple'
 import { notEmpty } from '@/utils'
 import { DEFAULT_SIZE } from '@/config'
 import type { Optional } from '@/utils/typing'
-import type { Annotations, Config, Layout, LayoutAxis, PlotData, Shape } from 'plotly.js-dist-min'
+import type {
+  Annotations,
+  Config,
+  Layout,
+  LayoutAxis,
+  PlotData,
+  Shape,
+} from 'plotly.js-dist-min'
 import { ref, computed, onBeforeUnmount, onMounted, onBeforeMount } from 'vue'
 import PlotlyPlot from './PlotlyPlot.vue'
 
@@ -131,13 +138,12 @@ const __layout = computed<Partial<Layout>>(() => {
     /* eslint-disable-next-line @typescript-eslint/naming-convention */
     plot_bgcolor: 'rgba(0,0,0,0)',
     ...(props.svg && {
-      shapes: (props.dataDefinition as Partial<Shape>[])
-        .map(shape => {
-          return {
-            ...shape,
-            opacity,
-          } as Partial<Shape>
-        })
+      shapes: (props.dataDefinition as Partial<Shape>[]).map((shape) => {
+        return {
+          ...shape,
+          opacity,
+        } as Partial<Shape>
+      }),
     }),
     annotations: props.annotations,
   }

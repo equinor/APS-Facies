@@ -5,7 +5,11 @@
         <icon-button icon="add" @click="add" />
       </v-col>
       <v-col cols="2">
-        <floating-tooltip :disabled="canRemove" trigger="hover" v-tooltip="removeError ?? undefined">
+        <floating-tooltip
+          :disabled="canRemove"
+          trigger="hover"
+          v-tooltip="removeError ?? undefined"
+        >
           <icon-button icon="remove" :disabled="!canRemove" @click="remove" />
         </floating-tooltip>
       </v-col>
@@ -33,7 +37,9 @@ const faciesGlobalStore = useGlobalFaciesStore()
 
 const current = computed(() => faciesGlobalStore.current)
 const canRemove = computed(() =>
-  !!current.value ? !faciesStore.isFromRMS(current.value as GlobalFacies) : false,
+  !!current.value
+    ? !faciesStore.isFromRMS(current.value as GlobalFacies)
+    : false,
 )
 
 const removeError = computed(() => {

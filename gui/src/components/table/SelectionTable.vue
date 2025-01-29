@@ -8,7 +8,7 @@
     :no-data-text="_noDataText"
     v-model:current="currentId"
   >
-    <template #item="{ item, isCurrent }: { item: T, isCurrent: boolean }">
+    <template #item="{ item, isCurrent }: { item: T; isCurrent: boolean }">
       <td v-if="showName" class="text-start">
         {{ item.name }}
       </td>
@@ -42,7 +42,10 @@
 <script
   setup
   lang="ts"
-  generic="ItemType extends 'zone' | 'region', T extends ItemType extends 'zone' ? Zone : Region"
+  generic="
+    ItemType extends 'zone' | 'region',
+    T extends ItemType extends 'zone' ? Zone : Region
+  "
 >
 import BaseSelectionTable from '@/components/baseComponents/BaseSelectionTable.vue'
 import IconButton from '@/components/selection/IconButton.vue'
@@ -113,7 +116,9 @@ const items = computed<T[]>(() => {
       items = (zoneStore.current?.regions as T[]) ?? []
       break
     default:
-      throw new Error(`Invalid item-type; expected 'zone' or 'region', received '${props.itemType}'`)
+      throw new Error(
+        `Invalid item-type; expected 'zone' or 'region', received '${props.itemType}'`,
+      )
   }
   return items.sort((a, b) => a.code - b.code)
 })

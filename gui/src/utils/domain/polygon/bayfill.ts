@@ -1,6 +1,4 @@
-import type {
-  FmuUpdatable,
-} from '@/utils/domain/bases/fmuUpdatable'
+import type { FmuUpdatable } from '@/utils/domain/bases/fmuUpdatable'
 import FmuUpdatableValue from '@/utils/domain/bases/fmuUpdatable'
 import APSError from '@/utils/domain/errors/base'
 import APSTypeError from '@/utils/domain/errors/type'
@@ -11,26 +9,37 @@ import type {
 } from '@/utils/domain/polygon/base'
 import Polygon from '@/utils/domain/polygon/base'
 
-export const SlantFactorFaciesValues = ['Floodplain', 'Subbay', 'Bayhead Delta'] as const
-export const NonSlantFactorFaciesValues = ['Wave influenced Bayfill', 'Lagoon'] as const
+export const SlantFactorFaciesValues = [
+  'Floodplain',
+  'Subbay',
+  'Bayhead Delta',
+] as const
+export const NonSlantFactorFaciesValues = [
+  'Wave influenced Bayfill',
+  'Lagoon',
+] as const
 
-export type SlantFactorFacies = typeof SlantFactorFaciesValues[number]
+export type SlantFactorFacies = (typeof SlantFactorFaciesValues)[number]
 
-export type NonSlantFactorFacies = typeof NonSlantFactorFaciesValues[number]
+export type NonSlantFactorFacies = (typeof NonSlantFactorFaciesValues)[number]
 
 export type BayfillFacies = SlantFactorFacies | NonSlantFactorFacies
 
 export function hasBayfillName(name: string): name is BayfillFacies {
-  return ([...SlantFactorFaciesValues, ...NonSlantFactorFaciesValues] as const).includes(name as BayfillFacies)
+  return (
+    [...SlantFactorFaciesValues, ...NonSlantFactorFaciesValues] as const
+  ).includes(name as BayfillFacies)
 }
 
-export type SlantFactorArgs = ({
-  name: SlantFactorFacies
-  slantFactor: FmuUpdatable | number
-} | {
-  name: NonSlantFactorFacies
-  slantFactor?: null
-})
+export type SlantFactorArgs =
+  | {
+      name: SlantFactorFacies
+      slantFactor: FmuUpdatable | number
+    }
+  | {
+      name: NonSlantFactorFacies
+      slantFactor?: null
+    }
 
 export type BayfillPolygonArgs = PolygonArgs & SlantFactorArgs
 
@@ -44,8 +53,10 @@ export interface BayfillPolygonSpecification extends PolygonSpecification {
 
 export type BayfillPolygonSerialization = PolygonSerialization & SlantFactorArgs
 
-export function requireSlantFactor(name: BayfillFacies): name is SlantFactorFacies {
-  return (SlantFactorFaciesValues).includes(name as SlantFactorFacies)
+export function requireSlantFactor(
+  name: BayfillFacies,
+): name is SlantFactorFacies {
+  return SlantFactorFaciesValues.includes(name as SlantFactorFacies)
 }
 
 export default class BayfillPolygon extends Polygon {
@@ -101,7 +112,7 @@ export default class BayfillPolygon extends Polygon {
       ...({
         name: this.name,
         ...(this.slantFactor ? { slantFactor: this.slantFactor } : {}),
-      } as SlantFactorArgs)
+      } as SlantFactorArgs),
     }
   }
 }

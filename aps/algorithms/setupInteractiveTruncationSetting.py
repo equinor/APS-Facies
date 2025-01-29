@@ -55,14 +55,21 @@ def addCommandCubic(rules):
     name = input('Give a name for the new Cubic truncation setting: ')
     direction = input('Split direction for level 1  (H/V): ')
 
-    while direction != 'H' and direction != 'V' and direction != 'h' and direction != 'v':
+    while (
+        direction != 'H' and direction != 'V' and direction != 'h' and direction != 'v'
+    ):
         direction = input('Split direction for level 1  (H/V): ')
 
     nLevel1 = getInteger('Number of L1 polygons: ', minVal=2)
     nLevel2 = []
     nLevel3 = []
     for i in range(nLevel1):
-        m = getInteger('Number of L2 polygons this L1 polygon ({}, {}, {}) is split into:'.format(i + 1, 0, 0), minVal=0)
+        m = getInteger(
+            'Number of L2 polygons this L1 polygon ({}, {}, {}) is split into:'.format(
+                i + 1, 0, 0
+            ),
+            minVal=0,
+        )
         if m == 0:
             m = 1
         nLevel2.append(m)
@@ -72,7 +79,12 @@ def addCommandCubic(rules):
             if nLevel2[i] <= 1:
                 k = 1
             elif nLevel2[i] > 1:
-                k = getInteger('Number of L3 polygons this L2 polygon ({}, {}, {}) is split into:'.format(i + 1, j + 1, 0), minVal=0)
+                k = getInteger(
+                    'Number of L3 polygons this L2 polygon ({}, {}, {}) is split into:'.format(
+                        i + 1, j + 1, 0
+                    ),
+                    minVal=0,
+                )
                 if k == 0:
                     k = 1
             nLevel3[i].append(k)
@@ -89,17 +101,22 @@ def addCommandCubic(rules):
                 if nLevel3[i][j] == 1:
                     L3 = 0
 
-                fName = input('Facies name for polygon ({}, {}, {}): '. format(L1, L2, L3))
+                fName = input(
+                    'Facies name for polygon ({}, {}, {}): '.format(L1, L2, L3)
+                )
                 ok = False
                 while not ok:
                     probFrac_string = input(
                         'Probability fraction of facies {} in polygon ({}, {}, {}): '
-                        ''. format(fName, L1, L2, L3))
+                        ''.format(fName, L1, L2, L3)
+                    )
                     probFrac = float(probFrac_string)
                     if 0.0 <= probFrac <= 1.0:
                         ok = True
 
-                rules.addPolygonToTruncationRuleSettingsCubic(truncStructureCubic, fName, probFrac, L1, L2, L3)
+                rules.addPolygonToTruncationRuleSettingsCubic(
+                    truncStructureCubic, fName, probFrac, L1, L2, L3
+                )
 
     rules.addTruncationRuleSettingsCubic(name, truncStructureCubic)
 
@@ -107,11 +124,11 @@ def addCommandCubic(rules):
 def addCommandNonCubic(rules):
     name = input('Give a name for the new Non-Cubic truncation setting: ')
     text = 'Number of polygons: '
-    nPolygons = getInteger(text,minVal=2)
+    nPolygons = getInteger(text, minVal=2)
 
     truncStructureNonCubic = rules.initNewTruncationRuleSettingsNonCubic()
     for i in range(nPolygons):
-        fName = input('Facies name for polygon number {}: '. format(i + 1))
+        fName = input('Facies name for polygon number {}: '.format(i + 1))
 
         angle = 0.0
         probFrac = 1.0
@@ -139,7 +156,9 @@ def addCommandNonCubic(rules):
             except:
                 ok = False
 
-        rules.addPolygonToTruncationRuleSettingsNonCubic(truncStructureNonCubic, fName, angle, probFrac)
+        rules.addPolygonToTruncationRuleSettingsNonCubic(
+            truncStructureNonCubic, fName, angle, probFrac
+        )
 
     rules.addTruncationRuleSettingsNonCubic(name, truncStructureNonCubic)
 
@@ -150,30 +169,54 @@ def addCommandOverlay(rules):
     nGroups = getInteger(text, minVal=1)
     group_list = []
     for groupIndx in range(nGroups):
-        text = 'Number of polygons for group {}: '.format(str(groupIndx+1))
+        text = 'Number of polygons for group {}: '.format(str(groupIndx + 1))
         nPoly = getInteger(text, minVal=1)
         alphaList = []
         bgFaciesList = []
         for i in range(nPoly):
-            faciesName = input('Facies name for {} and polygon {}...............: '.format(groupIndx + 1, i + 1))
-            alphaName  = input('GRF name for {} and polygon {}..................: '.format(groupIndx + 1, i + 1))
-            text       = input('Probability fraction for {} and polygon {}......: '.format(groupIndx + 1, i + 1))
+            faciesName = input(
+                'Facies name for {} and polygon {}...............: '.format(
+                    groupIndx + 1, i + 1
+                )
+            )
+            alphaName = input(
+                'GRF name for {} and polygon {}..................: '.format(
+                    groupIndx + 1, i + 1
+                )
+            )
+            text = input(
+                'Probability fraction for {} and polygon {}......: '.format(
+                    groupIndx + 1, i + 1
+                )
+            )
             probFrac = float(text)
-            text       = input('Center point of interval for {} and polygon {}..: '.format(groupIndx + 1, i + 1))
+            text = input(
+                'Center point of interval for {} and polygon {}..: '.format(
+                    groupIndx + 1, i + 1
+                )
+            )
             centerPoint = float(text)
             alphaList = rules.addPolygonToAlphaList(
-                alphaName, faciesName, probFrac=probFrac, centerPoint=centerPoint, alphaList=alphaList
+                alphaName,
+                faciesName,
+                probFrac=probFrac,
+                centerPoint=centerPoint,
+                alphaList=alphaList,
             )
         text = ' Number of background facies for group {}'.format(groupIndx + 1)
         bgFacies = input('Background facies for group {} : '.format(groupIndx + 1))
         bgFaciesList.append(bgFacies)
-        group_list = rules.addOverlayGroupSettings(alphaList, bgFaciesList, overlayGroups=group_list)
+        group_list = rules.addOverlayGroupSettings(
+            alphaList, bgFaciesList, overlayGroups=group_list
+        )
 
     rules.addTruncationRuleSettingsOverlay(name, group_list)
 
 
 def addCommandCubicAndOverlay(rules):
-    name = input('Give a name for the new Cubic truncation setting with overlay facies: ')
+    name = input(
+        'Give a name for the new Cubic truncation setting with overlay facies: '
+    )
     cubicName = input('Name of Cubic setting: ')
 
     list_overlay_settings = rules.getListOfOverlaySettings(cubicName)
@@ -192,7 +235,9 @@ def addCommandCubicAndOverlay(rules):
 
 
 def addCommandNonCubicAndOverlay(rules):
-    name = input('Give a name for the new NonCubic truncation setting with overlay facies: ')
+    name = input(
+        'Give a name for the new NonCubic truncation setting with overlay facies: '
+    )
     nonCubicName = input('Name of NonCubic setting: ')
     list_overlay_settings = rules.getListOfOverlaySettings(nonCubicName)
     print('Overlay settings consistent with specified background facies setting.')
@@ -245,16 +290,16 @@ def addCommand(rules):
 def readCommand(rules):
     finished = False
     while not finished:
-            input_file_name = input('Specify filename or quit (q): ')
-            if input_file_name == 'q':
+        input_file_name = input('Specify filename or quit (q): ')
+        if input_file_name == 'q':
+            finished = True
+        else:
+            try:
+                rules.readFile(input_file_name)
+                print('')
                 finished = True
-            else:
-                try:
-                    rules.readFile(input_file_name)
-                    print('')
-                    finished = True
-                except (FileNotFoundError, IOError):
-                    print('Can not open or read the file {}'. format(input_file_name))
+            except (FileNotFoundError, IOError):
+                print('Can not open or read the file {}'.format(input_file_name))
 
 
 def printListOfSettings(settings_list):
@@ -358,13 +403,19 @@ def listCommand(rules):
                 settings_list_noncubic = rules.getListOfSettings(typeTrunc, nBG)
             else:
                 typeTrunc = 'CubicAndOverlay'
-                settings_list_cubic_overlay = rules.getListOfSettings(typeTrunc, nBG, nOL)
+                settings_list_cubic_overlay = rules.getListOfSettings(
+                    typeTrunc, nBG, nOL
+                )
 
                 typeTrunc = 'NonCubicAndOverlay'
-                settings_list_noncubic_overlay = rules.getListOfSettings(typeTrunc, nBG, nOL)
+                settings_list_noncubic_overlay = rules.getListOfSettings(
+                    typeTrunc, nBG, nOL
+                )
 
-            print('\nLists of truncation settings with {} background facies and {} overlay facies'
-                  ''.format(str(nBG), str(nOL)))
+            print(
+                '\nLists of truncation settings with {} background facies and {} overlay facies'
+                ''.format(str(nBG), str(nOL))
+            )
             if len(settings_list_cubic) > 0:
                 printListOfSettings(settings_list_cubic)
             if len(settings_list_noncubic) > 0:
@@ -402,10 +453,10 @@ def mapCommand(rules):
                 rules.createOverviewPlotCubic('Cubic_overview')
                 rules.createOverviewPlotNonCubic('NonCubic_overview')
         elif name in ['F', 'f']:
-            format = input("Change output format: ").lower()
-            if format not in ["svg", "png"]:
-                print("Unknown format. using PNG instead")
-                format = "png"
+            format = input('Change output format: ').lower()
+            if format not in ['svg', 'png']:
+                print('Unknown format. using PNG instead')
+                format = 'png'
             rules.setFormat(format)
 
         else:
@@ -415,16 +466,15 @@ def mapCommand(rules):
 def removeCommand(rules):
     finished = False
     while not finished:
-        name = input(
-            'Name of rule to remove: \n'
-            'Quit (Q): '
-        )
+        name = input('Name of rule to remove: \nQuit (Q): ')
 
         if name in ['Q', 'q', 'Quit', 'quit']:
             finished = True
         else:
             try:
-                rules.removeTruncationRuleSettings(name, removeDependentBG=True, removeDependentOL=True)
+                rules.removeTruncationRuleSettings(
+                    name, removeDependentBG=True, removeDependentOL=True
+                )
                 finished = True
             except:
                 finished = False

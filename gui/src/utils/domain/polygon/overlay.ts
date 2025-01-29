@@ -71,6 +71,8 @@ export default class OverlayPolygon extends Polygon {
   }
 }
 
-export function isOverlayPolygonSerialization(polygon: PolygonSerialization): polygon is OverlayPolygonSerialization {
+export function isOverlayPolygonSerialization(
+  polygon: PolygonSerialization,
+): polygon is OverlayPolygonSerialization {
   return polygon.overlay
 }

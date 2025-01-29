@@ -11,10 +11,10 @@ bitmap2rms:
   MissingCode: 9999900.000
   UseFaciesCode: False
   ColorCode:
-    1:  232
-    2:  113
-    3:   79
-    4:  251
+    1: 232
+    2: 113
+    3: 79
+    4: 251
   Files:
     - Input: examples/img/bitmap/B1.bmp
       Output: B1.irap

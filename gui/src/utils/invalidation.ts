@@ -1,15 +1,6 @@
 import type { Validation } from '@vuelidate/core'
-import type {
-  InjectionKey,
-  Ref,
-} from 'vue'
-import {
-  inject,
-  onBeforeUnmount,
-  onMounted,
-  provide,
-  reactive,
-} from 'vue'
+import type { InjectionKey, Ref } from 'vue'
+import { inject, onBeforeUnmount, onMounted, provide, reactive } from 'vue'
 
 const invalidationKey = Symbol(
   'Key for invalidation provide/inject.',

@@ -33,53 +33,53 @@ Example of model file:
     The keyword ZoneDepositionalAzimuthValues specify one angle per zone in degrees. If only one angle is specified but more than one
     zone number is specified in keyword SelectedZones, then the same angle is used for all these zones.
 """
+
 from aps.algorithms.defineFaciesProbMapDepTrend import DefineFaciesProbMapDep
 
 
 def run(kwargs):
     """
-        Create probability trend where probability is estimated from input facies parameter
-        for stripes ortogonal to the specified depositional direction.
+            Create probability trend where probability is estimated from input facies parameter
+            for stripes ortogonal to the specified depositional direction.
 
-        Usage alternatives:
-        - Specify input dictionary with name of model file where all input information is specified. See example 1.
-        - Specify input dictionary with all input information. See example 2.
+            Usage alternatives:
+            - Specify input dictionary with name of model file where all input information is specified. See example 1.
+            - Specify input dictionary with all input information. See example 2.
 
-Example 1:
+    Example 1:
 
-from aps.toolbox import define_facies_prob_map_dep_trend
-from aps.utils.constants.simple import Debug
+    from aps.toolbox import define_facies_prob_map_dep_trend
+    from aps.utils.constants.simple import Debug
 
-kwargs = {
-    "project": project,
-    "debug_level": Debug.VERBOSE,
-    "model_file_name": "examples/test_define_prob_map_dep_trend2.xml",
-}
-define_facies_prob_map_dep_trend(kwargs)
+    kwargs = {
+        "project": project,
+        "debug_level": Debug.VERBOSE,
+        "model_file_name": "examples/test_define_prob_map_dep_trend2.xml",
+    }
+    define_facies_prob_map_dep_trend(kwargs)
 
 
-Example 2:
+    Example 2:
 
-from aps.toolbox import define_facies_prob_map_dep_trend
-from aps.utils.constants.simple import Debug
+    from aps.toolbox import define_facies_prob_map_dep_trend
+    from aps.utils.constants.simple import Debug
 
-selected_zones = [1,2,3]
-zone_azimuth_values =[45.0,35.0,25.0]
-kwargs = {
-    "project": project,
-    "debug_level": Debug.VERBOSE,
-    "grid_model_name": "GridModelFine",
-    "zone_param_name": "Zone",
-    "facies_interpretation_param_name": "Deterministic_facies",
-    "prefix": "ProbTestDep1",
-    "selected_zones": selected_zones,
-    "zone_azimuth_values": zone_azimuth_values,
-    "resolution": 25,
-}
-define_facies_prob_map_dep_trend(kwargs)
+    selected_zones = [1,2,3]
+    zone_azimuth_values =[45.0,35.0,25.0]
+    kwargs = {
+        "project": project,
+        "debug_level": Debug.VERBOSE,
+        "grid_model_name": "GridModelFine",
+        "zone_param_name": "Zone",
+        "facies_interpretation_param_name": "Deterministic_facies",
+        "prefix": "ProbTestDep1",
+        "selected_zones": selected_zones,
+        "zone_azimuth_values": zone_azimuth_values,
+        "resolution": 25,
+    }
+    define_facies_prob_map_dep_trend(kwargs)
 
     """
     define_facies_trend = DefineFaciesProbMapDep(**kwargs)
     define_facies_trend.calculate_facies_probability_parameter()
     print('Finished running define_facies_prob_map_dep_trend')
-

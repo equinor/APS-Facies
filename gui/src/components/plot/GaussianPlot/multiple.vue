@@ -57,8 +57,8 @@ const someSimulated = computed(() =>
 onMounted(async () => {
   await Promise.all(
     props.value
-      .filter(field => !field.simulated)
-      .map(field => fieldStore.updateSimulation(field))
+      .filter((field) => !field.simulated)
+      .map((field) => fieldStore.updateSimulation(field)),
   )
 })
 

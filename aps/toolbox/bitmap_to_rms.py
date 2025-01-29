@@ -83,74 +83,75 @@ Usage:
       NOTE: It is important to note that xmin, ymin, xmax, ymax define coordinates for the pixels specified by the PixelInterval keyword.
 --------------------------------------------------------------------------------------"""
 
+
 def run(params):
-  """
-  Converts a 8-bit bitmap image file to RMS irap map format.
-  Usage:
-  - Specify a python disctionary with a model file containing all input. See example 1 for specification.
-  - Specify a python dictionary with all input. See example 2 for specification.
+    """
+      Converts a 8-bit bitmap image file to RMS irap map format.
+      Usage:
+      - Specify a python disctionary with a model file containing all input. See example 1 for specification.
+      - Specify a python dictionary with all input. See example 2 for specification.
 
-Example 1:
-from aps.toolbox import bitmap_to_rms
-from aps.utils.constants.simple import Debug
+    Example 1:
+    from aps.toolbox import bitmap_to_rms
+    from aps.utils.constants.simple import Debug
 
-params = {
-   "model_file_name": "examples/bitmap2rms_facies_codes2.xml",
-   "debug_level": Debug.VERBOSE,
-}
+    params = {
+       "model_file_name": "examples/bitmap2rms_facies_codes2.xml",
+       "debug_level": Debug.VERBOSE,
+    }
 
-bitmap_to_rms.run(params)
+    bitmap_to_rms.run(params)
 
 
-Example 2:
-from aps.toolbox import bitmap_to_rms
-from aps.utils.constants.simple import Debug
+    Example 2:
+    from aps.toolbox import bitmap_to_rms
+    from aps.utils.constants.simple import Debug
 
-params = {
-   "debug_level": Debug.VERBOSE,
-   "Coordinates": {
-      "xmin": 643400,
-      "xmax": 658400,
-      "ymin": 4343950,
-      "ymax": 4359800,
-   },
-   "PixelInterval": {
-      "nx": 1152,
-      "ny": 1152,
-      "Istart": 220,
-      "Iend":   770,
-      "Jstart": 550,
-      "Jend":   1100,
-   },
-   "ColorCodeMapping": {
-      1: 232,
-      2: 113,
-      3: 79,
-      4: 251,
-   },
-   "CropToPixelInterval": True,
-   "MissingCode": 9999900.000,
-   "UseFaciesCode": True,
-   "InputFileList":[
-      "examples/img/bitmap/B1.bmp",
-      "examples/img/bitmap/B2.bmp",
-      "examples/img/bitmap/B3.bmp",
-   ] ,
-   "OutputFileList": [
-      "B1_test2.irap",
-      "B2_test2.irap",
-      "B3_test2.irap",
-   ]
-}
+    params = {
+       "debug_level": Debug.VERBOSE,
+       "Coordinates": {
+          "xmin": 643400,
+          "xmax": 658400,
+          "ymin": 4343950,
+          "ymax": 4359800,
+       },
+       "PixelInterval": {
+          "nx": 1152,
+          "ny": 1152,
+          "Istart": 220,
+          "Iend":   770,
+          "Jstart": 550,
+          "Jend":   1100,
+       },
+       "ColorCodeMapping": {
+          1: 232,
+          2: 113,
+          3: 79,
+          4: 251,
+       },
+       "CropToPixelInterval": True,
+       "MissingCode": 9999900.000,
+       "UseFaciesCode": True,
+       "InputFileList":[
+          "examples/img/bitmap/B1.bmp",
+          "examples/img/bitmap/B2.bmp",
+          "examples/img/bitmap/B3.bmp",
+       ] ,
+       "OutputFileList": [
+          "B1_test2.irap",
+          "B2_test2.irap",
+          "B3_test2.irap",
+       ]
+    }
 
-bitmap_to_rms.run(params)
+    bitmap_to_rms.run(params)
 
-  """
-  debug_level = params['debug_level']
-  bitmap_converter = ConvertBitMapToRMS(params)
-  if debug_level >= Debug.ON:
-    bitmap_converter.printContents()
-  bitmap_converter.convert()
-  bitmap_converter.writeFile()
-  if debug_level >= Debug.ON:
-    print('Finished: run_convert_bitmap_to_rms')
+    """
+    debug_level = params['debug_level']
+    bitmap_converter = ConvertBitMapToRMS(params)
+    if debug_level >= Debug.ON:
+        bitmap_converter.printContents()
+    bitmap_converter.convert()
+    bitmap_converter.writeFile()
+    if debug_level >= Debug.ON:
+        print('Finished: run_convert_bitmap_to_rms')

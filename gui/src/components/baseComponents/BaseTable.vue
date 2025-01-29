@@ -18,9 +18,7 @@
     <template #headers="{ columns }">
       <tr>
         <th v-for="column in columns" :key="column.title">
-          <span
-            v-tooltip.botton="column.headerProps?.help"
-          >
+          <span v-tooltip.botton="column.headerProps?.help">
             {{ column.title }}
           </span>
         </th>
@@ -73,8 +71,8 @@ const props = withDefaults(defineProps<Props>(), {
 })
 
 defineSlots<{
-  item(args: { item: T, props?: Props }): void
-  'expanded-item'(args: { item: T, columns: VuetifyColumns }): void
+  item(args: { item: T; props?: Props }): void
+  'expanded-item'(args: { item: T; columns: VuetifyColumns }): void
 }>()
 
 const _headers = computed(() =>

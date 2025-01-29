@@ -14,6 +14,7 @@ def do_cprofile(func):
             return result
         finally:
             profile.print_stats(sort='time')
+
     return profiled_func
 
 
@@ -25,7 +26,7 @@ def get_number():
 def function_to_profile():
     sum_of_y = 0.0
     for x in get_number():
-        y= math.sqrt(x)
+        y = math.sqrt(x)
         sum_of_y += y
     return sum_of_y
 
@@ -33,5 +34,6 @@ def function_to_profile():
 # --------------- Test script ------------------------------------------
 if __name__ == '__main__':
     import math
+
     # perform profiling
     print(function_to_profile())

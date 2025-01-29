@@ -1,6 +1,11 @@
 import { acceptHMRUpdate, defineStore } from 'pinia'
-import ColorLibrary, { type ColorLibrarySpecification } from '@/utils/domain/colorLibrary'
-import { type Color, colorLibraries } from '@/utils/domain/facies/helpers/colors'
+import ColorLibrary, {
+  type ColorLibrarySpecification,
+} from '@/utils/domain/colorLibrary'
+import {
+  type Color,
+  colorLibraries,
+} from '@/utils/domain/facies/helpers/colors'
 import { computed } from 'vue'
 import type { ID } from '@/utils/domain/types'
 import { DEFAULT_COLOR_LIBRARY } from '@/config'
@@ -84,13 +89,18 @@ export const useConstantsFaciesColorsStore = defineStore(
       store.currentId.value = defaultLibrary.id
     }
 
-    function populate(newAvailable: ColorLibrarySpecification[], newCurrentId: ID | null) {
-      const { available} = store
-      const initializedAvailable = newAvailable.map(conf => new ColorLibrary(conf))
+    function populate(
+      newAvailable: ColorLibrarySpecification[],
+      newCurrentId: ID | null,
+    ) {
+      const { available } = store
+      const initializedAvailable = newAvailable.map(
+        (conf) => new ColorLibrary(conf),
+      )
       const newIdentifiedAvailable = identify(initializedAvailable)
-      const newCurrent = newCurrentId ?
-        newIdentifiedAvailable[newCurrentId] ??
-        newAvailable.find((lib) => lib.name === DEFAULT_COLOR_LIBRARY)
+      const newCurrent = newCurrentId
+        ? (newIdentifiedAvailable[newCurrentId] ??
+          newAvailable.find((lib) => lib.name === DEFAULT_COLOR_LIBRARY))
         : null
       if (available.value.length === 0) {
         fetch()
@@ -101,7 +111,9 @@ export const useConstantsFaciesColorsStore = defineStore(
         available.value = initializedAvailable
       }
       if (!newCurrent)
-        throw new APSError(`The color library called ${newCurrentId} does not exist`)
+        throw new APSError(
+          `The color library called ${newCurrentId} does not exist`,
+        )
 
       store.currentId.value = newCurrent.id
     }

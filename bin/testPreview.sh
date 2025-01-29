@@ -32,4 +32,3 @@ fi
 python  ${APS_SRC_PATH}/utils/testPreview.py
 
 echo 'Finished running testPreview'
-

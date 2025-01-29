@@ -27,7 +27,8 @@
       <v-card-text>
         <v-row>
           Paths are relative to the RMS project, which is currently located at
-          <pre>{{ projectPath }}</pre>.
+          <pre>{{ projectPath }}</pre>
+          .
         </v-row>
         <v-row>
           <file-selection
@@ -55,7 +56,9 @@
               label="FMU configuration template for probability distributions"
               :disabled="!_hasFmuUpdatableValues"
               :relative-to="projectPath"
-              @update:error="(err: boolean) => setInvalid('probabilityDistribution', err)"
+              @update:error="
+                (err: boolean) => setInvalid('probabilityDistribution', err)
+              "
             />
           </v-row>
         </div>
@@ -157,7 +160,7 @@ const hasErrors = computed(() => {
   if (!_hasFmuUpdatableValues.value) return invalid.value.model
 
   return (Object.keys(invalid.value) as (keyof Invalid)[])
-    .filter((key) => !(pathsState.value)[key].disabled)
+    .filter((key) => !pathsState.value[key].disabled)
     .some((key) => invalid.value[key])
 })
 
@@ -179,7 +182,7 @@ async function defaultPaths(): Promise<PathsState> {
     model: {
       path: `${projectPath.value}/${modelPath}/${model}`,
       disabled: false,
-  },
+    },
     fmuConfig: {
       path: `${projectPath.value}/${fmuParamPath}/${fmuConfig}`,
       disabled: false,

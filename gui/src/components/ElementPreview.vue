@@ -34,10 +34,7 @@
             <facies-realization v-if="rule" :value="rule" />
           </template>
         </v-expansion-panel>
-        <v-expansion-panel
-          value="gaussianRandomFields"
-          elevation="0"
-        >
+        <v-expansion-panel value="gaussianRandomFields" elevation="0">
           <template #title>
             <h3>Transformed Gaussian Random Fields</h3>
           </template>

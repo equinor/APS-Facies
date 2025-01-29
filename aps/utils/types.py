@@ -43,7 +43,7 @@ SeedLogFile = NewType('SeedLogFile', FilePath)
 
 
 ProjectName = NewType('ProjectName', str)
-ProjectPath= NewType('ProjectPath', str)
+ProjectPath = NewType('ProjectPath', str)
 FmuParameterListPath = NewType('FmuParameterListPath', str)
 XML = NewType('XML', str)
 TrendName = NewType('TrendName', str)

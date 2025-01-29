@@ -1,9 +1,11 @@
 import type { Color } from '@/utils/domain/facies/helpers/colors'
 
-export type ColorScale = string | {
-  value: number
-  color: Color
-}[]
+export type ColorScale =
+  | string
+  | {
+      value: number
+      color: Color
+    }[]
 
 export type ColorMapping = [number, Color][] | string
 

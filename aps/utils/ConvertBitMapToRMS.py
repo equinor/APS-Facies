@@ -67,6 +67,7 @@ Usage:
                        with color values. Find corresponding color values and facies
                        and then specify that using this keyword before running a second time.
 --------------------------------------------------------------------------------------"""
+
 import copy
 import xml.etree.ElementTree as ET
 import os
@@ -76,9 +77,21 @@ import numpy as np
 from PIL import Image
 
 from aps.utils.constants.simple import Debug
-from aps.utils.methods import get_colors, check_missing_keywords_dict, check_missing_keywords_list
-from aps.utils.ymlUtils import (get_text_value, get_bool_value,
-    get_float_value, get_dict, get_int_value, get_list, readYml)
+from aps.utils.methods import (
+    get_colors,
+    check_missing_keywords_dict,
+    check_missing_keywords_list,
+)
+from aps.utils.ymlUtils import (
+    get_text_value,
+    get_bool_value,
+    get_float_value,
+    get_dict,
+    get_int_value,
+    get_list,
+    readYml,
+)
+
 
 def isOneByteColor(c):
     try:
@@ -110,10 +123,30 @@ def writeIrapMap(fmap, xOrigo, yOrigo, xinc, yinc, angleInDegrees, outputFileNam
 
         xm = xOrigo + (nx - 1) * xinc
         ym = yOrigo + (ny - 1) * yinc
-        line = '  ' + str(xOrigo) + '  ' + str(xm) + '  ' + str(yOrigo) + '  ' + str(ym) + str('\n')
+        line = (
+            '  '
+            + str(xOrigo)
+            + '  '
+            + str(xm)
+            + '  '
+            + str(yOrigo)
+            + '  '
+            + str(ym)
+            + str('\n')
+        )
         file.write(line)
 
-        line = '  ' + str(nx) + '  ' + str(angleInDegrees) + '  ' + str(xOrigo) + '  ' + str(yOrigo) + str('\n')
+        line = (
+            '  '
+            + str(nx)
+            + '  '
+            + str(angleInDegrees)
+            + '  '
+            + str(xOrigo)
+            + '  '
+            + str(yOrigo)
+            + str('\n')
+        )
         file.write(line)
 
         line = ' 0   0   0   0   0   0   0 \n'
@@ -137,13 +170,13 @@ def writeIrapMap(fmap, xOrigo, yOrigo, xinc, yinc, angleInDegrees, outputFileNam
 
 
 class ConvertBitMapToRMS:
-    def __init__(self, params ):
-        self.__model_file_name =  params.get('model_file_name', None)
+    def __init__(self, params):
+        self.__model_file_name = params.get('model_file_name', None)
         debug_level = params.get('debug_level', Debug.OFF)
 
         # Internal variables,  not to be set here, but used in algorithm
         self.__faciesCode = []
-        self.__colorCode =[]
+        self.__colorCode = []
         self.__fmapFaciesList = []
         self.__fmapColorsList = []
 
@@ -154,16 +187,16 @@ class ConvertBitMapToRMS:
         else:
             # Check that all necessary parameters are set when not using model file
             required_kw_dict = {
-                "Coordinates": ["xmin", "xmax", "ymin", "ymax"],
-                "PixelInterval": ["nx", "ny", "Istart", "Jstart", "Iend", "Jend"],
+                'Coordinates': ['xmin', 'xmax', 'ymin', 'ymax'],
+                'PixelInterval': ['nx', 'ny', 'Istart', 'Jstart', 'Iend', 'Jend'],
             }
             required_kw_list = [
-                "ColorCodeMapping",
-                "CropToPixelInterval",
-                "MissingCode",
-                "UseFaciesCode",
-                "InputFileList",
-                "OutputFileList",
+                'ColorCodeMapping',
+                'CropToPixelInterval',
+                'MissingCode',
+                'UseFaciesCode',
+                'InputFileList',
+                'OutputFileList',
             ]
             check_missing_keywords_dict(params, required_kw_dict)
 
@@ -173,7 +206,7 @@ class ConvertBitMapToRMS:
                     if kw2 not in params[kw]:
                         missing_kw.append(kw2)
                 if len(missing_kw) > 0:
-                    raise ValueError(f"Missing sub keywords: {missing_kw} in {kw} ")
+                    raise ValueError(f'Missing sub keywords: {missing_kw} in {kw} ')
 
             check_missing_keywords_list(params, required_kw_list)
 
@@ -201,7 +234,6 @@ class ConvertBitMapToRMS:
             self.__xinc = (self.__xMax - self.__xOrigo) / mx
             self.__yinc = (self.__yMax - self.__yOrigo) / my
 
-
     def read_model_file(self, debug_level=Debug.OFF):
         # Check suffix of file for file type
         model_file = Path(self.__model_file_name)
@@ -211,11 +243,11 @@ class ConvertBitMapToRMS:
         elif suffix == 'xml':
             self.__read_model_file_xml(debug_level=debug_level)
         else:
-            raise ValueError(f"Model file name: {self.__model_file_name}  must be either 'xml' or 'yml' format")
-
+            raise ValueError(
+                f"Model file name: {self.__model_file_name}  must be either 'xml' or 'yml' format"
+            )
 
     def __read_model_file_yml(self, debug_level=Debug.OFF):
-
         if debug_level >= Debug.ON:
             print(f'Read file: {self.__model_file_name}')
 
@@ -224,15 +256,15 @@ class ConvertBitMapToRMS:
         kw = 'bitmap2rms'
         spec = spec_all[kw] if kw in spec_all else None
         if spec is None:
-            raise ValueError(f"Missing keyword: {kw} ")
+            raise ValueError(f'Missing keyword: {kw} ')
 
         coord = get_dict(spec, 'bitmap2rms', 'Coordinates')
-        text = get_text_value(coord, 'Coordinates','x')
+        text = get_text_value(coord, 'Coordinates', 'x')
         [xmin, xmax] = text.split()
         self.__xOrigo = float(xmin)
         self.__xMax = float(xmax)
-        text = get_text_value(coord, 'Coordinates','y')
-        [ymin,ymax] = text.split()
+        text = get_text_value(coord, 'Coordinates', 'y')
+        [ymin, ymax] = text.split()
         self.__yOrigo = float(ymin)
         self.__yMax = float(ymax)
 
@@ -251,30 +283,28 @@ class ConvertBitMapToRMS:
 
         if self.__iStart < 1 or self.__iEnd > self.__ny:
             raise ValueError(
-                f"Error: Pixel interval in y direction ({self.__iStart},{self.__iEnd}) "
-                f"is not within {1} and {self.__ny}"
+                f'Error: Pixel interval in y direction ({self.__iStart},{self.__iEnd}) '
+                f'is not within {1} and {self.__ny}'
             )
 
         if self.__jStart < 1 or self.__jEnd > self.__nx:
             raise ValueError(
-                f"Error: Pixel interval in y direction ({self.__jStart},{self.__jEnd}) "
-                f"is not within {1} and {self.__nx}"
+                f'Error: Pixel interval in y direction ({self.__jStart},{self.__jEnd}) '
+                f'is not within {1} and {self.__nx}'
             )
-
 
         self.__crop = get_bool_value(spec, 'CropToPixelInterval', True)
         use_facies_code = get_bool_value(spec, 'UseFaciesCode', False)
 
         if use_facies_code:
-
             self.__missingCode = get_float_value(spec, 'bitmap2rms', 'MissingCode')
 
             color_code_per_facies = get_dict(spec, 'bitmap2rms', 'ColorCode')
             facies_codes = list(color_code_per_facies.keys())
             color_codes = list(color_code_per_facies.values())
             if debug_level >= Debug.VERBOSE:
-                print(f"-- faciesCodes: {facies_codes} ")
-                print(f"-- colorcodes: {color_codes} ")
+                print(f'-- faciesCodes: {facies_codes} ')
+                print(f'-- colorcodes: {color_codes} ')
             if len(facies_codes) > 0:
                 self.__faciesCode = facies_codes
                 self.__colorCode = color_codes
@@ -284,10 +314,10 @@ class ConvertBitMapToRMS:
         self.__outputFileList = []
         for file_dict in file_dict_list:
             input_file = file_dict['Input']
-            output_file = file_dict ['Output']
+            output_file = file_dict['Output']
             if debug_level >= Debug.VERBOSE:
-                print(f"-- Input file: {input_file} ")
-                print(f"-- Output file: {output_file} ")
+                print(f'-- Input file: {input_file} ')
+                print(f'-- Output file: {output_file} ')
             self.__inputFileList.append(input_file)
             self.__outputFileList.append(output_file)
 
@@ -297,11 +327,10 @@ class ConvertBitMapToRMS:
         self.__yinc = (self.__yMax - self.__yOrigo) / my
 
     def __read_model_file_xml(self, debug_level=Debug.OFF):
-
         if debug_level >= Debug.ON:
             print(f'Read file: {self.__model_file_name}')
         if not os.path.exists(self.__model_file_name):
-            raise IOError(f"File {self.__model_file_name} does not exist")
+            raise IOError(f'File {self.__model_file_name} does not exist')
 
         tree = ET.parse(self.__model_file_name)
         self.__ET_Tree = tree
@@ -401,25 +430,45 @@ class ConvertBitMapToRMS:
 
         if self.__iStart < 1:
             raise ValueError(
-                'Error: Pixel interval in y direction ' + '(' + str(self.__iStart) + ',' + str(self.__iEnd) + ')'
+                'Error: Pixel interval in y direction '
+                + '('
+                + str(self.__iStart)
+                + ','
+                + str(self.__iEnd)
+                + ')'
                 ' is not within ' + str(1) + ' and ' + str(self.__ny)
             )
 
         if self.__jStart < 1:
             raise ValueError(
-                'Error: Pixel interval in x direction ' + '(' + str(self.__jStart) + ',' + str(self.__jEnd) + ')'
+                'Error: Pixel interval in x direction '
+                + '('
+                + str(self.__jStart)
+                + ','
+                + str(self.__jEnd)
+                + ')'
                 ' is not within ' + str(1) + ' and ' + str(self.__nx)
             )
 
         if self.__iEnd > self.__ny:
             raise ValueError(
-                'Error: Pixel interval in y direction ' + '(' + str(self.__iStart) + ',' + str(self.__iEnd) + ')'
+                'Error: Pixel interval in y direction '
+                + '('
+                + str(self.__iStart)
+                + ','
+                + str(self.__iEnd)
+                + ')'
                 ' is not within ' + str(1) + ' and ' + str(self.__ny)
             )
 
         if self.__jEnd > self.__nx:
             raise ValueError(
-                'Error: Pixel interval in x direction ' + '(' + str(self.__jStart) + ',' + str(self.__jEnd) + ')'
+                'Error: Pixel interval in x direction '
+                + '('
+                + str(self.__jStart)
+                + ','
+                + str(self.__jEnd)
+                + ')'
                 ' is not within ' + str(1) + ' and ' + str(self.__nx)
             )
 
@@ -454,7 +503,9 @@ class ConvertBitMapToRMS:
             colorCode = []
             for obj in root.findall(kw):
                 if obj is None:
-                    raise IOError(f"Error reading model file {self.__model_file_name}. Missing command: {kw}")
+                    raise IOError(
+                        f'Error reading model file {self.__model_file_name}. Missing command: {kw}'
+                    )
                 fCode = int(obj.get('facies'))
                 cCode = int(obj.text.strip())
                 faciesCode.append(fCode)
@@ -469,17 +520,23 @@ class ConvertBitMapToRMS:
         kw = 'Files'
         for obj in root.findall(kw):
             if obj is None:
-                raise IOError(f"Error reading model file {self.__model_file_name}. Missing command: {kw}")
+                raise IOError(
+                    f'Error reading model file {self.__model_file_name}. Missing command: {kw}'
+                )
             kw1 = 'Input'
             obj2 = obj.find(kw1)
             if obj2 is None:
-                raise IOError(f"Error reading model file {self.__model_file_name}. Missing command: {kw1}")
+                raise IOError(
+                    f'Error reading model file {self.__model_file_name}. Missing command: {kw1}'
+                )
             text = obj2.text
             self.__inputFileList.append(text.strip())
             kw2 = 'Output'
             obj3 = obj.find(kw2)
             if obj3 is None:
-                raise IOError(f"Error reading model file {self.__model_file_name}. Missing command: {kw2}")
+                raise IOError(
+                    f'Error reading model file {self.__model_file_name}. Missing command: {kw2}'
+                )
             text = obj3.text
             self.__outputFileList.append(text.strip())
 
@@ -505,8 +562,12 @@ class ConvertBitMapToRMS:
         print(' jEnd: ' + str(self.__iEnd))
         if np.abs((self.__xinc - self.__yinc) / self.__xinc) > 0.05:
             print('Warnings:')
-            print(' Pixel dimension (xinc, yinc) is different in x and y direction. Is this correct?')
-            print(' Or are there something wrong with the coordinates that are specified?')
+            print(
+                ' Pixel dimension (xinc, yinc) is different in x and y direction. Is this correct?'
+            )
+            print(
+                ' Or are there something wrong with the coordinates that are specified?'
+            )
 
         if self.nFacies > 0:
             print('')
@@ -514,7 +575,12 @@ class ConvertBitMapToRMS:
             print('')
             print('FaciesCode   ColorCode')
             for i in range(self.nFacies):
-                print('   ' + str(self.__faciesCode[i]) + '          ' + str(self.__colorCode[i]))
+                print(
+                    '   '
+                    + str(self.__faciesCode[i])
+                    + '          '
+                    + str(self.__colorCode[i])
+                )
 
     def convert(self):
         self.__fmapFacies = []
@@ -527,7 +593,7 @@ class ConvertBitMapToRMS:
                 if self.__model_file_name is not None:
                     path = Path(self.__model_file_name).parent / fileName
                 else:
-                    path = "./" + fileName
+                    path = './' + fileName
             im = Image.open(path)
 
             fmapColors = np.array(im)
@@ -551,7 +617,12 @@ class ConvertBitMapToRMS:
                     'Error: Number of pixel specified in grid definition is different from the number of pixels in the map\n'
                     '       Number of pixels in bitmap file: (nx,ny) = ({ncols}, {nrows})\n'
                     '       Number of pixels specified:      (nx,ny) = ({ncolSpecified}, {nrowSpecified})'
-                    ''.format(ncols=ncols, nrows=nrows, ncolSpecified=ncolSpecified, nrowSpecified=nrowSpecified)
+                    ''.format(
+                        ncols=ncols,
+                        nrows=nrows,
+                        ncolSpecified=ncolSpecified,
+                        nrowSpecified=nrowSpecified,
+                    )
                 )
 
             if self.__crop:
@@ -613,7 +684,9 @@ class ConvertBitMapToRMS:
         fmapNew = np.zeros((nrowsNew, ncolsNew))
         for j in range(ncolsNew):
             for i in range(nrowsNew):
-                ii = iiStart + i  # The grid counts the pixel in y direction from top to bottom
+                ii = (
+                    iiStart + i
+                )  # The grid counts the pixel in y direction from top to bottom
                 jj = jjStart + j
                 fmapNew[i, j] = fmap[ii, jj]
         return fmapNew
@@ -633,10 +706,28 @@ class ConvertBitMapToRMS:
             if self.nFacies == 0:
                 angleInDegrees = 0.0
                 print('Write file with color code as grid values.')
-                writeIrapMap(self.__fmapColorsList[n], xmin, ymin, self.__xinc, self.__yinc, angleInDegrees, fileName)
+                writeIrapMap(
+                    self.__fmapColorsList[n],
+                    xmin,
+                    ymin,
+                    self.__xinc,
+                    self.__yinc,
+                    angleInDegrees,
+                    fileName,
+                )
             else:
-                print('Write file with facies code as grid values for specified colors and missing code elsewhere.')
-                writeIrapMap(self.__fmapFaciesList[n], xmin, ymin, self.__xinc, self.__yinc, angleInDegrees, fileName)
+                print(
+                    'Write file with facies code as grid values for specified colors and missing code elsewhere.'
+                )
+                writeIrapMap(
+                    self.__fmapFaciesList[n],
+                    xmin,
+                    ymin,
+                    self.__xinc,
+                    self.__yinc,
+                    angleInDegrees,
+                    fileName,
+                )
             n += 1
 
     def testPlot(self):

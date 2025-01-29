@@ -29,7 +29,7 @@ export function attachRMSListeners() {
           let gridModel = match[1]
           // The resulting output may include a nested path (/-separated), while a grid model MAY have the '/' character
           const { available, select } = useGridModelStore()
-          const gridModelNames = available.map(model => model.name)
+          const gridModelNames = available.map((model) => model.name)
           for (const model of gridModelNames) {
             if (gridModel.includes(model)) {
               gridModel = model

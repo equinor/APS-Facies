@@ -5,23 +5,23 @@ services:
       target: aps
       args:
         - RMS_IMAGE
-#      target: truncation-rules
+    #      target: truncation-rules
     command:
-      - "roxenv"
-      - "poetry"
-      - "run"
-      - "python"
-      - "aps/api/app.py"
-      - "run"
-      - "--host"
-      - "0.0.0.0"
+      - 'roxenv'
+      - 'poetry'
+      - 'run'
+      - 'python'
+      - 'aps/api/app.py'
+      - 'run'
+      - '--host'
+      - '0.0.0.0'
     environment:
       FLASK_DEBUG: '1'
-      RMS_PROJECT_PATH: "${RMS_PROJECT_PATH}"
+      RMS_PROJECT_PATH: '${RMS_PROJECT_PATH}'
     volumes:
-    - './aps:/code/aps'
-    - './models/private:/private'
-    - './models/project:/project'
+      - './aps:/code/aps'
+      - './models/private:/private'
+      - './models/project:/project'
     env_file:
       - .env
 
@@ -33,9 +33,9 @@ services:
       NODE_ENV: development
       HOST: '0.0.0.0'
     volumes:
-    - './gui/src:/code/src'
-    - 'yarn-cache:/yarn'
-    - 'node-cache:/code/node_modules/.cache'
+      - './gui/src:/code/src'
+      - 'yarn-cache:/yarn'
+      - 'node-cache:/code/node_modules/.cache'
     env_file:
       - gui/.env
 
@@ -46,7 +46,7 @@ services:
     ports:
       - '8080:8080'
     volumes:
-    - './nginx/local.nginx:/opt/bitnami/nginx/conf/server_blocks/local.conf:ro'
+      - './nginx/local.nginx:/opt/bitnami/nginx/conf/server_blocks/local.conf:ro'
     depends_on:
       - web
       - api

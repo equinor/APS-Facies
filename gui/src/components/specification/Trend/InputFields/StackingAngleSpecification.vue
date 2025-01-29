@@ -2,14 +2,14 @@
   <div>
     <stacking-angle
       :value="value"
-      @update:error="(e: boolean) => invalid.angle =e"
+      @update:error="(e: boolean) => (invalid.angle = e)"
     />
     <item-selection
       v-model="stackingDirection"
       :items="availableStackingDirection"
       :constraints="{ required: true }"
       label="Stacking direction"
-      @update:error="(e: boolean) => invalid.type =e"
+      @update:error="(e: boolean) => (invalid.type = e)"
     />
   </div>
 </template>

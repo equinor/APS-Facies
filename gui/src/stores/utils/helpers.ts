@@ -12,7 +12,10 @@ import { useFaciesStore } from '@/stores/facies'
 import { useGaussianRandomFieldCrossSectionStore } from '@/stores/gaussian-random-fields/cross-sections'
 import { useGaussianRandomFieldStore } from '@/stores/gaussian-random-fields'
 import { useFaciesGroupStore } from '@/stores/facies/groups'
-import { deserializeTruncationRule, useTruncationRuleStore } from '@/stores/truncation-rules'
+import {
+  deserializeTruncationRule,
+  useTruncationRuleStore,
+} from '@/stores/truncation-rules'
 import type { DependentConfiguration } from '@/utils/domain/bases/zoneRegionDependent'
 import { hasParents } from '@/utils/domain/bases/zoneRegionDependent'
 import type { FaciesSerialization } from '@/utils/domain/facies/local'
@@ -25,13 +28,9 @@ export function usesAllFacies<
   S extends PolygonSerialization,
   P extends PolygonSpecification,
   RULE extends TruncationRule<T, S, P>,
->(
-  rule: RULE,
-): boolean {
+>(rule: RULE): boolean {
   const faciesStore = useFaciesStore()
-  const available = new Set(
-    faciesStore.selected.map(({ id }): ID => id),
-  )
+  const available = new Set(faciesStore.selected.map(({ id }): ID => id))
   const used = rule.polygons.reduce((facies, polygon): Set<ID> => {
     if (polygon.facies) {
       facies.add(polygon.facies.id)
@@ -74,8 +73,13 @@ export function removeOld(
   }
 }
 
-export function getRelevant<T extends Dependent>(available: T[], parent: Parent): T[] {
-  return available.filter(item => hasParents(item, parent.zone, parent.region))
+export function getRelevant<T extends Dependent>(
+  available: T[],
+  parent: Parent,
+): T[] {
+  return available.filter((item) =>
+    hasParents(item, parent.zone, parent.region),
+  )
 }
 
 export function getElements<S extends PolygonSerialization>(
@@ -114,7 +118,7 @@ export function getElements<S extends PolygonSerialization>(
               serialization.probabilityCube,
               serialization.previewProbability,
               serialization.id,
-              )
+            )
           },
           items: available,
         }
@@ -130,7 +134,7 @@ export function getElements<S extends PolygonSerialization>(
           remove,
           add: (serialization: FaciesGroupSerialization) => {
             add(
-              serialization.facies.map(id => byId(id) as Facies),
+              serialization.facies.map((id) => byId(id) as Facies),
               resolveParentReference(serialization.parent),
               serialization.id,
             )
@@ -151,7 +155,7 @@ export function getElements<S extends PolygonSerialization>(
           },
           items: available,
         }
-      })()
+      })(),
     },
   ].filter(({ name }): boolean => !exclude.includes(name))
 }

@@ -8,7 +8,12 @@ from warnings import warn
 from typing import Dict
 
 from aps.algorithms.APSModel import APSModel
-from aps.utils.constants.simple import Debug, ProbabilityTolerances, TransformType, ExtrapolationMethod
+from aps.utils.constants.simple import (
+    Debug,
+    ProbabilityTolerances,
+    TransformType,
+    ExtrapolationMethod,
+)
 from aps.utils.decorators import cached
 from aps.utils.fmu import get_export_location, is_initial_iteration
 from aps.utils.roxar._config_getters import get_debug_level
@@ -20,9 +25,9 @@ from aps.utils.check_rms_interactive_or_batch import check_rms_execution_mode
 
 
 def excepthook(type, value, traceback):
-    print(f"ERROR:")
-    print(f"Type:  {type.__name__}")
-    print(f"{value}")
+    print(f'ERROR:')
+    print(f'Type:  {type.__name__}')
+    print(f'{value}')
 
 
 class JobConfig:
@@ -31,7 +36,7 @@ class JobConfig:
         self.project = project
         migrated = self._migrate_state(config)
         if migrated['errors']:
-            warn(f"There was a problem migrating the state; {migrated['errors']}")
+            warn(f'There was a problem migrating the state; {migrated["errors"]}')
         self._config = migrated['state']
 
         # Traceback is on per default
@@ -52,14 +57,18 @@ class JobConfig:
 
     def initialize_progress_bar(self, aps_model: APSModel):
         estimated_number_of_steps = aps_model.estimate_progress_steps()
-        APSProgressBar.initialize_progress_bar(number_of_steps=estimated_number_of_steps)
+        APSProgressBar.initialize_progress_bar(
+            number_of_steps=estimated_number_of_steps
+        )
 
     def get_parameters(self, model_file):
         # Represents the ORIGINAL APS model
         aps_model = APSModel(model_file, debug_level=self.debug_level)
 
         # Check that zone parameter exists and if not, then create it
-        aps_model.check_or_create_zone_parameter(self.project, debug_level=self.debug_level)
+        aps_model.check_or_create_zone_parameter(
+            self.project, debug_level=self.debug_level
+        )
 
         # Keep only models for (zone,region) pairs with active cells
         aps_model.check_active_cells(self.project, debug_level=self.debug_level)
@@ -98,7 +107,7 @@ class JobConfig:
             'current_job_name': self.roxar.rms.get_running_job_name(),
             'export_fmu_config_files': self.export_fmu_config_files,
             'extrapolation_method': self.rms_param_trend_extrapolation_method,
-            'fmu_use_residual_fields': self.fmu_use_residual_fields
+            'fmu_use_residual_fields': self.fmu_use_residual_fields,
         }
 
     @property
@@ -108,13 +117,15 @@ class JobConfig:
         if export_error:
             return export_error
 
-        aps_model = APSModel.from_string(self.model, check_with_grid_model=True, project=self.project)
+        aps_model = APSModel.from_string(
+            self.model, check_with_grid_model=True, project=self.project
+        )
         if self.run_fmu_workflows:
             for zone_model in aps_model.zone_models:
                 if not zone_model.grid_layout:
                     return (
-                           f'The zone with code {zone_model.zone_number} does not have any conformity specified. '
-                           f'This is required, when running in ERT / AHM.'
+                        f'The zone with code {zone_model.zone_number} does not have any conformity specified. '
+                        f'This is required, when running in ERT / AHM.'
                     )
         # Check if APS model is consistent with grid model and has only zones defined in grid model
         ok, err_msg = self.check_zones(aps_model)
@@ -131,7 +142,9 @@ class JobConfig:
     @property
     def create_fmu_grid(self):
         # Create grid if in fmu ahm mode and grid does not exist or is specified to be created in GUI
-        return self.run_fmu_workflows and (self.fmu_grid_name not in self.project.grid_models)
+        return self.run_fmu_workflows and (
+            self.fmu_grid_name not in self.project.grid_models
+        )
 
     @property
     def export_ertbox_grid(self):
@@ -161,8 +174,7 @@ class JobConfig:
     @property
     def update_model_with_fmu_variables(self):
         return (
-                self._only_run_fmu_variables_update
-                or self.run_fmu_workflows
+            self._only_run_fmu_variables_update or self.run_fmu_workflows
         ) and self.global_variables_file
 
     @property
@@ -172,7 +184,7 @@ class JobConfig:
         #  It means that it should be checked if the ERT iteration is 0 or not.
         #  If no folder with iteration exists, the default is to return True which means to simulate and export GRF files.
         #  If folder with name 0 exist, also in this case return True.
-        #  If there exist a folder with name equal to an integer > 0, the return is False 
+        #  If there exist a folder with name equal to an integer > 0, the return is False
         #  since in this case ERT iteration is > 0 and APS must use the updated GRF coming from ERT.
         #  In this case the GRF's should be imported into APS instead.
         # If this is False:
@@ -211,7 +223,9 @@ class JobConfig:
                     return False
             else:
                 if self.debug_level >= Debug.ON:
-                    print('- APS is running in FMU mode for AHM and simulate GRF files and export to FMU')
+                    print(
+                        '- APS is running in FMU mode for AHM and simulate GRF files and export to FMU'
+                    )
                     if self.fmu_use_residual_fields:
                         print(
                             '- APS will only exchange the GRF residuals with ERT for GRF with trend'
@@ -238,12 +252,16 @@ class JobConfig:
 
     @property
     def _max_allowed_fraction_of_values_outside_tolerance(self):
-        return self._config['parameters']['maxAllowedFractionOfValuesOutsideTolerance']['selected']
+        return self._config['parameters']['maxAllowedFractionOfValuesOutsideTolerance'][
+            'selected'
+        ]
 
     @property
     def _tolerance_of_probability_normalisation(self):
         try:
-            return self._config['parameters']['toleranceOfProbabilityNormalisation']['selected']
+            return self._config['parameters']['toleranceOfProbabilityNormalisation'][
+                'selected'
+            ]
         except KeyError:
             # Some, older jobs may not be updated, and this "config.parameters.toleranceOfProbabilityNormalisation"
             # does not exist.
@@ -299,8 +317,10 @@ class JobConfig:
         return self.debug_level >= Debug.VERY_VERBOSE
 
     @property
-    def rms_param_trend_extrapolation_method(self): 
-        return ExtrapolationMethod(self._config['fmu']['customTrendExtrapolationMethod'])
+    def rms_param_trend_extrapolation_method(self):
+        return ExtrapolationMethod(
+            self._config['fmu']['customTrendExtrapolationMethod']
+        )
 
     def to_json(self):
         return json.dumps(self._config)
@@ -312,31 +332,47 @@ class JobConfig:
     def check_zones(self, aps_model: APSModel):
         if aps_model.zones_removed:
             current_job_name = self.roxar.rms.get_running_job_name()
-            print(f"Consistency error: Grid model has changed since the APS job {current_job_name} was created.")
-            print( "  Fix the problem using the following help script: APS_remap_zone_models.")
-            print( "  This script will take as input a YAML file specifying:")
-            print( "        1. The old APS model (exported to model file)")
-            print( "        2. Table of old zones and of new zones and a table defining the correspondence between them.")
-            print( "        3. The output will be a new APS model file having new zones and corresponding settings for the new zones.")
-            print( "  See the APS documentation of the help scripts on Equinor Wiki.")
-            print( "  The current job will be stopped since additional information is needed to remap the zone models from the old to the new grid model.")
+            print(
+                f'Consistency error: Grid model has changed since the APS job {current_job_name} was created.'
+            )
+            print(
+                '  Fix the problem using the following help script: APS_remap_zone_models.'
+            )
+            print('  This script will take as input a YAML file specifying:')
+            print('        1. The old APS model (exported to model file)')
+            print(
+                '        2. Table of old zones and of new zones and a table defining the correspondence between them.'
+            )
+            print(
+                '        3. The output will be a new APS model file having new zones and corresponding settings for the new zones.'
+            )
+            print('  See the APS documentation of the help scripts on Equinor Wiki.')
+            print(
+                '  The current job will be stopped since additional information is needed to remap the zone models from the old to the new grid model.'
+            )
             if current_job_name is not None:
-                err_message = f"Current grid model: {aps_model.grid_model_name}  has less number of zones than specified in the APS job: {current_job_name}. "
+                err_message = f'Current grid model: {aps_model.grid_model_name}  has less number of zones than specified in the APS job: {current_job_name}. '
             else:
-                err_message = f"Current grid model has less number of zones than specified in the APS job."
+                err_message = f'Current grid model has less number of zones than specified in the APS job.'
 
             if self.run_fmu_workflows:
                 self._config['fmu']['create']['value'] = True
                 if aps_model.fmu_ertbox_name in self.project.grid_models:
-                    fmu_ertbox_grid_model = self.project.grid_models[aps_model.fmu_ertbox_name]
-                    print(f"Warning: Will delete ERTBOX grid model: {aps_model.fmu_ertbox_name}. Must be created again.")
+                    fmu_ertbox_grid_model = self.project.grid_models[
+                        aps_model.fmu_ertbox_name
+                    ]
+                    print(
+                        f'Warning: Will delete ERTBOX grid model: {aps_model.fmu_ertbox_name}. Must be created again.'
+                    )
                     del fmu_ertbox_grid_model
 
             return False, err_message
         return True, None
 
     def check_and_update_simbox_thickness(self, model_file: str, aps_model: APSModel):
-        aps_model.check_and_update_simbox_thickness(self.project, debug_level=self.debug_level)
+        aps_model.check_and_update_simbox_thickness(
+            self.project, debug_level=self.debug_level
+        )
         aps_model.write_model(model_file)
 
 
@@ -346,5 +382,7 @@ def classify_job_configuration(roxar, project):
         def wrapper(config: dict):
             config = JobConfig(roxar, project, config)
             func(config)
+
         return wrapper
+
     return decorator

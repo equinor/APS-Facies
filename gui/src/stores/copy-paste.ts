@@ -11,10 +11,16 @@ import { Region, Zone } from '@/utils/domain'
 import type { ParentReference } from '@/utils/domain/bases/interfaces'
 import { acceptHMRUpdate, defineStore } from 'pinia'
 import { computed, ref } from 'vue'
-import type { Parent, DependentConfiguration } from '@/utils/domain/bases/zoneRegionDependent'
+import type {
+  Parent,
+  DependentConfiguration,
+} from '@/utils/domain/bases/zoneRegionDependent'
 import { getParentId } from '@/utils/domain/bases/zoneRegionDependent'
 import { useRegionStore } from './regions'
-import type { RegionSerialization, ZoneSerialization } from '@/utils/domain/zone'
+import type {
+  RegionSerialization,
+  ZoneSerialization,
+} from '@/utils/domain/zone'
 
 type IDMapping = Map<ID, ID>
 
@@ -39,9 +45,7 @@ function copyItems(
   parent: ParentReference,
   idMapping: IDMapping,
 ): void {
-  const items = element.items.filter((item): boolean =>
-    item.isChildOf(parent),
-  )
+  const items = element.items.filter((item): boolean => item.isChildOf(parent))
   items.forEach((item): void => {
     idMapping.set(item.id, uuidv4())
   })
@@ -122,17 +126,26 @@ export const useCopyPasteStore = defineStore('copy-paste', () => {
 
       removeOld(elements.toReversed(), targetParent)
       const serialization = giveNewIds(elements, source, targetParent)
-      const actionMapping = elements.reduce((mapping, element) => ({
-        ...mapping,
-        [element.name]: {
-          add: element.add,
-          remove: element.remove,
-        }
-      }), {} as Record<string, {add: (item: DependentConfiguration) => void, remove: (item: Dependent) => void}>)
+      const actionMapping = elements.reduce(
+        (mapping, element) => ({
+          ...mapping,
+          [element.name]: {
+            add: element.add,
+            remove: element.remove,
+          },
+        }),
+        {} as Record<
+          string,
+          {
+            add: (item: DependentConfiguration) => void
+            remove: (item: Dependent) => void
+          }
+        >,
+      )
       for (const [key, items] of Object.entries(JSON.parse(serialization))) {
-          (items as DependentConfiguration[]).forEach(
-            (item) => actionMapping[key].add(item)
-          )
+        ;(items as DependentConfiguration[]).forEach((item) =>
+          actionMapping[key].add(item),
+        )
       }
       setPasting(targetParent, false)
     }
@@ -157,7 +170,7 @@ export function useCopyPaseSerialization(): CopyPasteStoreSerialization {
   const copyPaseStore = useCopyPasteStore()
   const source = copyPaseStore.source
   return {
-    source: source ? source.toJSON() : null
+    source: source ? source.toJSON() : null,
   }
 }
 

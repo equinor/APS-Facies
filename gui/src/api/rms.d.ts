@@ -22,11 +22,28 @@ declare namespace rms {
   function onProjectChanged(func: (what: any) => void): void
   function onRunExecuted(func: () => void): void
   function onRunCompleted(func: (output: string, reason: string) => void): void
-  function chooseFile(mode: 'save' | 'load', filter = '', suggestion = ''): Promise<string>
-  function chooseDir(mode: 'save' | 'load', suggestion: string = ''): Promise<string | null>
+  function chooseFile(
+    mode: 'save' | 'load',
+    filter = '',
+    suggestion = '',
+  ): Promise<string>
+  function chooseDir(
+    mode: 'save' | 'load',
+    suggestion: string = '',
+  ): Promise<string | null>
   function createSelector(
     id: string,
-    collections: ('horizons' | 'wells' | 'trajectories' | 'points' | 'polylines' | 'surfaces' | 'properties' | 'grids' | 'blocked_wells')[],
+    collections: (
+      | 'horizons'
+      | 'wells'
+      | 'trajectories'
+      | 'points'
+      | 'polylines'
+      | 'surfaces'
+      | 'properties'
+      | 'grids'
+      | 'blocked_wells'
+    )[],
     single: boolean,
     selector?: Record<string, string>,
   ): Selector

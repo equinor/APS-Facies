@@ -38,7 +38,10 @@ type Props = {
 }
 const props = defineProps<Props>()
 const emit = defineEmits<{
-  (event: 'update:maxAllowedFractionOfValuesOutsideTolerance', value: number): void
+  (
+    event: 'update:maxAllowedFractionOfValuesOutsideTolerance',
+    value: number,
+  ): void
   (event: 'update:toleranceOfProbabilityNormalisation', value: number): void
 }>()
 

@@ -13,11 +13,9 @@ import { useZoneStore } from './zones'
 import { useCopyPasteStore } from './copy-paste'
 import type {
   CurrentIdentifiedStorePopulationData,
-  CurrentIdentifiedStoreSerialization
+  CurrentIdentifiedStoreSerialization,
 } from './utils/identified-items'
-import {
-  useCurrentIdentifiedItems,
-} from './utils/identified-items'
+import { useCurrentIdentifiedItems } from './utils/identified-items'
 import { useParameterRegionStore } from './parameters/region'
 import { useParameterBlockedWellStore } from './parameters/blocked-well'
 import { useParameterRmsTrendStore } from './parameters/rms-trend'
@@ -54,13 +52,16 @@ export const useGridModelStore = defineStore('grid-models', () => {
 
   const names = computed(() => available.value.map((model) => model.name))
 
-  async function select(gridModel: GridModel | ID | string, fetchSimbox: boolean | 'background' = true) {
+  async function select(
+    gridModel: GridModel | ID | string,
+    fetchSimbox: boolean | 'background' = true,
+  ) {
     const _gridModel =
       gridModel instanceof GridModel
         ? gridModel
         : isUUID(gridModel)
-        ? identifiedAvailable.value[gridModel]
-        : available.value.find((model) => model.name === gridModel)
+          ? identifiedAvailable.value[gridModel]
+          : available.value.find((model) => model.name === gridModel)
 
     if (!_gridModel)
       throw new APSTypeError(`The grid model, ${gridModel} does not exist`)
@@ -75,19 +76,21 @@ export const useGridModelStore = defineStore('grid-models', () => {
       await zoneStore.fetch()
 
       if (fetchSimbox === 'background') {
-        useParameterGridSimulationBoxesStore().updateSimulationBox(_gridModel)
+        useParameterGridSimulationBoxesStore()
+          .updateSimulationBox(_gridModel)
           .then(() => {
             // Explicitly let it run in the background, as it can take a while in some cases
             // and / or we don't relly need this information yet.
           })
       }
       const parameterStoresDependentOnGrid = getParameterStoresDependentOnGrid()
-      await Promise.all(
-          [
-              (fetchSimbox === true) && useParameterGridSimulationBoxesStore().updateSimulationBox(_gridModel),
-              ...parameterStoresDependentOnGrid.map((store) => store.fetch()),
-              ]
-      )
+      await Promise.all([
+        fetchSimbox === true &&
+          useParameterGridSimulationBoxesStore().updateSimulationBox(
+            _gridModel,
+          ),
+        ...parameterStoresDependentOnGrid.map((store) => store.fetch()),
+      ])
 
       const copyPasteStore = useCopyPasteStore()
       copyPasteStore.copy(null)
@@ -160,7 +163,8 @@ export const useGridModelStore = defineStore('grid-models', () => {
   }
 })
 
-export type GridModelStoreSerialization = CurrentIdentifiedStoreSerialization<GridModelSerialization>
+export type GridModelStoreSerialization =
+  CurrentIdentifiedStoreSerialization<GridModelSerialization>
 export function useGridModelStoreSerialization(): GridModelStoreSerialization {
   const gridModelStore = useGridModelStore()
   return {

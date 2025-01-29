@@ -9,7 +9,10 @@
     <template #item="{ item }">
       <tr :key="item.index">
         <td>
-          <background-group-facies-specification :value="item" :rule="value as RULE" />
+          <background-group-facies-specification
+            :value="item"
+            :rule="value as RULE"
+          />
         </td>
         <td>
           <polygon-table
@@ -17,7 +20,9 @@
             :value="item.polygons"
             :rule="value as OverlayTruncationRule<T, S, P>"
           />
-          <span v-else style="overflow-wrap: break-word">Select one, or more background facies</span>
+          <span v-else style="overflow-wrap: break-word"
+            >Select one, or more background facies</span
+          >
         </td>
       </tr>
     </template>
@@ -27,11 +32,14 @@
 <script
   setup
   lang="ts"
-  generic="T extends OverlayPolygon,
-  S extends PolygonSerialization,
-  P extends PolygonSpecification,
-  RULE extends OverlayTruncationRule<T, S, P> | InstantiatedOverlayTruncationRule
-"
+  generic="
+    T extends OverlayPolygon,
+    S extends PolygonSerialization,
+    P extends PolygonSpecification,
+    RULE extends
+      | OverlayTruncationRule<T, S, P>
+      | InstantiatedOverlayTruncationRule
+  "
 >
 import BaseTable from '@/components/baseComponents/BaseTable.vue'
 
@@ -41,7 +49,11 @@ import type {
   PolygonSpecification,
 } from '@/utils/domain/polygon/base'
 import type { ID } from '@/utils/domain/types'
-import type { Facies, InstantiatedOverlayTruncationRule, OverlayPolygon } from '@/utils/domain'
+import type {
+  Facies,
+  InstantiatedOverlayTruncationRule,
+  OverlayPolygon,
+} from '@/utils/domain'
 import type OverlayTruncationRule from '@/utils/domain/truncationRule/overlay'
 
 import BackgroundGroupFaciesSpecification from '@/components/specification/Facies/backgroundGroup.vue'
@@ -51,18 +63,14 @@ import { hasOwnProperty } from '@/utils/helpers'
 import { computed } from 'vue'
 import { useFaciesStore } from '@/stores/facies'
 
-function hasAvailableBackgroundFacies(
-  rule: RULE,
-): boolean {
+function hasAvailableBackgroundFacies(rule: RULE): boolean {
   const faciesStore = useFaciesStore()
   return faciesStore.available.some((facies) =>
     faciesStore.availableForBackgroundFacies(rule, facies as Facies),
   )
 }
 
-function allBackgroundPolygonsHasSomeFacies(
-  rule: RULE,
-): boolean {
+function allBackgroundPolygonsHasSomeFacies(rule: RULE): boolean {
   return rule.overlayPolygons.every(({ group }) =>
     group ? group.facies.length > 0 : true,
   )
@@ -93,10 +101,15 @@ const groups = computed(() => {
   return overlay
 })
 
-type Item = {id: ID, polygons: Array<OverlayPolygon>, index: number}
+type Item = { id: ID; polygons: Array<OverlayPolygon>; index: number }
 
-const idGroups = computed((): Array<Item> =>
-  groups.value.map(({ group, polygons }, index) => ({ id: group, polygons, index })),
+const idGroups = computed(
+  (): Array<Item> =>
+    groups.value.map(({ group, polygons }, index) => ({
+      id: group,
+      polygons,
+      index,
+    })),
 )
 
 const headers: HeaderItems = [

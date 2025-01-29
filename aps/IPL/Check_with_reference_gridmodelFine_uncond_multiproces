@@ -25,7 +25,7 @@ diff = refFaciesParam - inputFaciesParam
 
 GetMinMaxAvg(diff, minValue, maxValue, avgValue)
 
- 
+
 IF minValue <> 0 or maxValue <> 0 THEN
    Print("Difference test for ", paramName, " : Failed")
    Print("Min difference: ",minValue)

@@ -54,13 +54,13 @@ export const eventNames = [
   'plotly_webglcontextlost',
 ] as TEventName[] // We have more events then the @types know.
 
-const events = eventNames.map(eventName => ({
+const events = eventNames.map((eventName) => ({
   eventName,
   handler(context: ComponentInternalInstance) {
     return (...args: any[]) => {
       context.emit.apply(context, [eventName, ...args])
     }
-  }
+  },
 }))
 
 export default events

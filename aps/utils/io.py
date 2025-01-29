@@ -22,25 +22,24 @@ def write_status_file(status: bool, always: bool = False) -> None:
 
 
 def writeFile(
-        file_name: str,
-        a: Union[List[int], np.ndarray],
-        nx: int,
-        ny: int,
-        debug_level: Debug = Debug.ON,
+    file_name: str,
+    a: Union[List[int], np.ndarray],
+    nx: int,
+    ny: int,
+    debug_level: Debug = Debug.ON,
 ):
     print(f'Write file: {file_name}')
     # Choose an arbitrary heading
-    heading = f'''-996  {ny}  50.000000     50.000000
+    heading = f"""-996  {ny}  50.000000     50.000000
 637943.187500   678043.187500  4334008.000000  4375108.000000
  {nx}  0.000000   637943.187500  4334008.000000
 0     0     0     0     0     0     0
-'''
+"""
     _write_file(file_name, a, heading, debug_level)
 
 
 def readFile(
-        fileName: str,
-        debug_level: Debug = Debug.OFF
+    fileName: str, debug_level: Debug = Debug.OFF
 ) -> Tuple[np.ndarray, int, int]:
     if debug_level >= Debug.ON:
         print(f'Read file: {fileName}')
@@ -65,23 +64,23 @@ def readFile(
 
 
 def writeFileRTF(
-        file_name: str,
-        data: Union[List[int], np.ndarray],
-        dimensions: Tuple[int, int],
-        increments: Tuple[float, float],
-        x0: float,
-        y0: float,
-        debug_level=Debug.OFF
+    file_name: str,
+    data: Union[List[int], np.ndarray],
+    dimensions: Tuple[int, int],
+    increments: Tuple[float, float],
+    x0: float,
+    y0: float,
+    debug_level=Debug.OFF,
 ) -> None:
     nx, ny = dimensions
     dx, dy = increments
     # Write in Roxar text format
-    heading = f'''\
+    heading = f"""\
 -996  {ny}  {dx} {dy}
 {x0} {x0 + nx * dx} {y0} {y0 + ny * dy}
  {nx}  0.000000  {x0} {y0}
 0     0     0     0     0     0     0
-'''
+"""
     _write_file(file_name, data, heading, debug_level)
 
 
@@ -153,6 +152,7 @@ def ensure_folder_exists(seed_file_log: Path) -> None:
         seed_file_log = seed_file_log.parent
     if not seed_file_log.exists():
         from os import makedirs
+
         makedirs(seed_file_log)
 
 
@@ -169,7 +169,9 @@ class GlobalVariables:
         elif suffix in ['yaml', 'yml']:
             return 'yml'
         else:
-            raise NotImplementedError('{} is an unknown suffix, which cannot be read'.format(suffix))
+            raise NotImplementedError(
+                '{} is an unknown suffix, which cannot be read'.format(suffix)
+            )
 
     @classmethod
     def parse(cls, global_variables_file: Path) -> _GlobalVariables:
@@ -180,15 +182,17 @@ class GlobalVariables:
         elif suffix in ['yaml', 'yml']:
             return cls._read_yaml(global_variables_file)
         else:
-            raise NotImplementedError('{} is an unknown suffix, which cannot be read'.format(suffix))
+            raise NotImplementedError(
+                '{} is an unknown suffix, which cannot be read'.format(suffix)
+            )
 
     @staticmethod
     def _read_ipl(global_variables_file: Path) -> _GlobalVariables:
-        ''' Read global variables for APS from global IPL file.
-            Returns a list of aps parameter names and values.
-            IPL format does only support RMS project with one grid model (multizone grid)
-            with only one APS job.
-        '''
+        """Read global variables for APS from global IPL file.
+        Returns a list of aps parameter names and values.
+        IPL format does only support RMS project with one grid model (multizone grid)
+        with only one APS job.
+        """
 
         keywords = []
         with open(global_variables_file, 'r', encoding='utf-8') as file:
@@ -211,31 +215,31 @@ class GlobalVariables:
 
     @classmethod
     def _read_yaml(cls, global_variables_file: Path) -> _GlobalVariables:
-        ''' YAML format for global variables support RMS project with multiple grid models
-            where the grid models can be single-zone grid models or multi-zone grid models
-            and where each grid model may have multiple APS jobs where each job can have
-            their own set of APS model parameters to be updated by FMU.
-            Returns a dictionary of model parameter specification for each grid model
-            and each job for each grid model.
-            Example structure of the YAMLS file:
-            global:
-              APS:
-                  APS_job_1:
-                   APS_1_0_GF_GRF1_RESIDUAL_AZIMUTHANGLE: 100.0
-                   APS_1_0_GF_GRF1_TREND_AZIMUTH: 0.0
-                  APS_job_2:
-                   APS_1_0_GF_GRF1_RESIDUAL_AZIMUTHANGLE: 200.0
-                   APS_1_0_GF_GRF2_TREND_AZIMUTH: 80.0
+        """YAML format for global variables support RMS project with multiple grid models
+        where the grid models can be single-zone grid models or multi-zone grid models
+        and where each grid model may have multiple APS jobs where each job can have
+        their own set of APS model parameters to be updated by FMU.
+        Returns a dictionary of model parameter specification for each grid model
+        and each job for each grid model.
+        Example structure of the YAMLS file:
+        global:
+          APS:
+              APS_job_1:
+               APS_1_0_GF_GRF1_RESIDUAL_AZIMUTHANGLE: 100.0
+               APS_1_0_GF_GRF1_TREND_AZIMUTH: 0.0
+              APS_job_2:
+               APS_1_0_GF_GRF1_RESIDUAL_AZIMUTHANGLE: 200.0
+               APS_1_0_GF_GRF2_TREND_AZIMUTH: 80.0
 
-                  APS_job_3:
-                   APS_1_0_GF_GRF1_TREND_RELSTDDEV: 0.1
-                   APS_2_0_GF_GRF1_TREND_AZIMUTH: 0.0
-                   APS_3_0_GF_GRF1_RESIDUAL_MAINRANGE: 2000.0
-                  APS_job_3:
-                   APS_1_0_GF_GRF1_TREND_RELSTDDEV: 0.1
-                   APS_1_0_GF_GRF1_TREND_AZIMUTH: 0.0
-                   APS_2_0_GF_GRF1_RESIDUAL_AZIMUTHANGLE: 135.0
-       '''
+              APS_job_3:
+               APS_1_0_GF_GRF1_TREND_RELSTDDEV: 0.1
+               APS_2_0_GF_GRF1_TREND_AZIMUTH: 0.0
+               APS_3_0_GF_GRF1_RESIDUAL_MAINRANGE: 2000.0
+              APS_job_3:
+               APS_1_0_GF_GRF1_TREND_RELSTDDEV: 0.1
+               APS_1_0_GF_GRF1_TREND_AZIMUTH: 0.0
+               APS_2_0_GF_GRF1_RESIDUAL_AZIMUTHANGLE: 135.0
+        """
         all_variables = readYml(global_variables_file)
 
         global_variables = all_variables['global']
@@ -254,45 +258,45 @@ class GlobalVariables:
         return aps_variables
 
     @classmethod
-    def check_global_variables_yaml(cls,
-            global_variables_file: Path,
-            current_job_name: str) -> _GlobalVariables:
-        ''' YAML format for global variables support RMS project with multiple grid models
-            where the grid models can be single-zone grid models or multi-zone grid models
-            and where each grid model may have multiple APS jobs where each job can have
-            their own set of APS model parameters to be updated by FMU.
+    def check_global_variables_yaml(
+        cls, global_variables_file: Path, current_job_name: str
+    ) -> _GlobalVariables:
+        """YAML format for global variables support RMS project with multiple grid models
+        where the grid models can be single-zone grid models or multi-zone grid models
+        and where each grid model may have multiple APS jobs where each job can have
+        their own set of APS model parameters to be updated by FMU.
 
-            To ensure uniqueness of model parameters for ERT parameters in template config
-            files for FMU, the APS jobs specified in the global_master_config file and hence
-            in global_variables file in FMU must be unique also after their names are
-            made upper case. It is allowed to regenerate template ERT file for
-            existing job, but not to add new APS job to global_master_config file which
-            is equal to existing ones when making the names upper case.
+        To ensure uniqueness of model parameters for ERT parameters in template config
+        files for FMU, the APS jobs specified in the global_master_config file and hence
+        in global_variables file in FMU must be unique also after their names are
+        made upper case. It is allowed to regenerate template ERT file for
+        existing job, but not to add new APS job to global_master_config file which
+        is equal to existing ones when making the names upper case.
 
 
-            Example structure of the APS keyword in global master config YAML file:
-            global:
-              APS:
-                  APS_job_1:
-                   APS_1_0_GF_GRF1_RESIDUAL_AZIMUTHANGLE: value ~ <ert_param_name>
-                   APS_1_0_GF_GRF1_TREND_AZIMUTH: ~value  <ert_param_name>
+        Example structure of the APS keyword in global master config YAML file:
+        global:
+          APS:
+              APS_job_1:
+               APS_1_0_GF_GRF1_RESIDUAL_AZIMUTHANGLE: value ~ <ert_param_name>
+               APS_1_0_GF_GRF1_TREND_AZIMUTH: ~value  <ert_param_name>
 
-                  APS_job_2:
-                   APS_1_0_GF_GRF1_RESIDUAL_AZIMUTHANGLE: value ~ <ert_param_name>
-                   APS_1_0_GF_GRF2_TREND_AZIMUTH: value ~ <ert_param_name>
+              APS_job_2:
+               APS_1_0_GF_GRF1_RESIDUAL_AZIMUTHANGLE: value ~ <ert_param_name>
+               APS_1_0_GF_GRF2_TREND_AZIMUTH: value ~ <ert_param_name>
 
-                  APS_job_3:
-                   APS_1_0_GF_GRF1_TREND_RELSTDDEV: value ~ <ert_param_name>
-                   APS_2_0_GF_GRF1_TREND_AZIMUTH: value ~ <ert_param_name>
-                   APS_3_0_GF_GRF1_RESIDUAL_MAINRANGE: value ~ <ert_param_name>
+              APS_job_3:
+               APS_1_0_GF_GRF1_TREND_RELSTDDEV: value ~ <ert_param_name>
+               APS_2_0_GF_GRF1_TREND_AZIMUTH: value ~ <ert_param_name>
+               APS_3_0_GF_GRF1_RESIDUAL_MAINRANGE: value ~ <ert_param_name>
 
-            Note: Should not allow two APS job names that are equal
-            after transforming the name to upper case. If current job name is equal to one
-            used in global_master_config.yml file, it is OK to generate a new template ERT file
-            that can be used to replace the section in global_master_config.yml file for this job.
-            NOTE: The global_variables.yml file that is generated from global_master_config.yml is used
-            since this is an ordinary yaml file.
-        '''
+        Note: Should not allow two APS job names that are equal
+        after transforming the name to upper case. If current job name is equal to one
+        used in global_master_config.yml file, it is OK to generate a new template ERT file
+        that can be used to replace the section in global_master_config.yml file for this job.
+        NOTE: The global_variables.yml file that is generated from global_master_config.yml is used
+        since this is an ordinary yaml file.
+        """
         all_variables = readYml(global_variables_file)
         global_variables = all_variables['global']
         aps_variables = None
@@ -303,16 +307,16 @@ class GlobalVariables:
                     break
 
         if aps_variables is None:
-                # APS keyword does not exist in global_variables.yml file
-                # No name conflict
+            # APS keyword does not exist in global_variables.yml file
+            # No name conflict
             return True
 
         job_names = list(aps_variables.keys())
         uppercase_job_names = []
-        job_names_string = ""
+        job_names_string = ''
         for name in job_names:
             uppercase_job_names.append(name.upper())
-            job_names_string += f"    {name}\n"
+            job_names_string += f'    {name}\n'
         if current_job_name in job_names:
             # This job name already exist and has same name as current job. This is OK since
             # this will enable APS to re-generate a new version of the ERT template file that
@@ -322,11 +326,12 @@ class GlobalVariables:
         if current_job_name.upper() in uppercase_job_names:
             # Not OK since current job is different from the ones already used, but
             # converted to upper case letters, the job names are equal and not unique.
-            warn("\nWARNING:\n"
-                f"Will not create FMU template file for APS job:   {current_job_name}.\n"
-                "The job name in upper case letter is identical to other already defined APS jobs in "
-                f"the {global_variables_file} file:\n"
-                f"{job_names_string} "
+            warn(
+                '\nWARNING:\n'
+                f'Will not create FMU template file for APS job:   {current_job_name}.\n'
+                'The job name in upper case letter is identical to other already defined APS jobs in '
+                f'the {global_variables_file} file:\n'
+                f'{job_names_string} '
             )
             return False
         # The current job name is not used previously
@@ -341,8 +346,9 @@ class GlobalVariables:
         return True
 
 
-def write_string_to_file(file_name: str, content: str,
-    debug_level: Debug = Debug.OFF) -> None:
+def write_string_to_file(
+    file_name: str, content: str, debug_level: Debug = Debug.OFF
+) -> None:
     with open(file_name, 'w', encoding='utf-8') as file:
         file.write(content)
     if debug_level >= Debug.VERY_VERBOSE:

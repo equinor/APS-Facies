@@ -5,13 +5,10 @@ In our case, we some time want to toggle a tooltip if an element is disabled
 -->
 <template>
   <div
-    @mouseenter="() => isHovering = true"
-    @mouseleave="() => isHovering = false"
+    @mouseenter="() => (isHovering = true)"
+    @mouseleave="() => (isHovering = false)"
   >
-    <slot
-      name="default"
-      :is-hovering="isHovering"
-    />
+    <slot name="default" :is-hovering="isHovering" />
   </div>
 </template>
 
@@ -21,9 +18,6 @@ import { ref, defineSlots } from 'vue'
 const isHovering = ref(false)
 
 defineSlots<{
-  'default'(props: {
-    isHovering: boolean
-  }): void
+  'default'(props: { isHovering: boolean }): void
 }>()
-
 </script>

@@ -25,4 +25,3 @@ then
 fi
 
 python ${APS_SRC_PATH}/bitmap2rms_xml.py
-

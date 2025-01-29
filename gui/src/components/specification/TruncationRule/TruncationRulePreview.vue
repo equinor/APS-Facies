@@ -6,10 +6,7 @@
       </v-list-item-title>
     </template>
     <v-list-item-media>
-      <div
-        class="tr-preview"
-        :style="style"
-      >
+      <div class="tr-preview" :style="style">
         <v-row>
           <v-col>
             <v-row>
@@ -20,13 +17,15 @@
                 :style="style"
                 :alt="altText"
                 :src="imageUrl"
-                :max-height="DEFAULT_TRUNCATION_RULE_TEMPLATE_PREVIEW_SIZE.height"
+                :max-height="
+                  DEFAULT_TRUNCATION_RULE_TEMPLATE_PREVIEW_SIZE.height
+                "
                 :max-width="DEFAULT_TRUNCATION_RULE_TEMPLATE_PREVIEW_SIZE.width"
               />
             </v-row>
-          <v-row v-if="overlay">
-            <span>With overlay</span>
-          </v-row>
+            <v-row v-if="overlay">
+              <span>With overlay</span>
+            </v-row>
           </v-col>
         </v-row>
       </div>
@@ -58,7 +57,8 @@ const props = withDefaults(defineProps<Props>(), {
 })
 
 const imageUrl = computed(
-  () => `${window.location.origin}/public/truncation-rules/` +
+  () =>
+    `${window.location.origin}/public/truncation-rules/` +
     `${truncationRuleTypeNames[props.type]}/${props.value}.svg`,
 )
 

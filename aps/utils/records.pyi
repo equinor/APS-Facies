@@ -6,7 +6,6 @@ from aps.algorithms.APSGaussModel import GaussianFieldName
 from aps.utils.constants.simple import VariogramType
 from aps.utils.types import FaciesName, FaciesCode
 
-
 class VariogramRecord(NamedTuple):
     Name: GaussianFieldName
     Type: Union[str, VariogramType]
@@ -24,27 +23,23 @@ class VariogramRecord(NamedTuple):
     PowerFMUUpdatable: bool
 
 class TrendRecord(NamedTuple):
-     Name: GaussianFieldName
-     UseTrend: bool
-     Object: Optional[Trend3D]
-     RelStdev: float
-     RelStdevFMU: bool
-
+    Name: GaussianFieldName
+    UseTrend: bool
+    Object: Optional[Trend3D]
+    RelStdev: float
+    RelStdevFMU: bool
 
 class SeedRecord(NamedTuple):
     Name: GaussianFieldName
     Seed: int
 
-
 class FaciesRecord(NamedTuple):
     Name: FaciesName
     Code: FaciesCode
 
-
 class FaciesProbabilityRecord(NamedTuple):
     Name: str
     Probability: Union[str, float]
-
 
 class Probability:
     __slots__ = 'name', 'value'

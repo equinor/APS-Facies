@@ -60,7 +60,7 @@ export type FmuMaxDepthStoreSerialization = {
   minimum: number
 }
 
-export function useFmuMaxDepthStoreSerialization (): FmuMaxDepthStoreSerialization {
+export function useFmuMaxDepthStoreSerialization(): FmuMaxDepthStoreSerialization {
   const { maxDepth } = useFmuMaxDepthStore()
   return {
     value: maxDepth.value,

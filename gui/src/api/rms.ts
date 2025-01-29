@@ -13,17 +13,16 @@ import type {
   Job,
 } from '@/api/types'
 import type { TruncationRuleDescription } from '@/utils'
-import type {
-  GaussianRandomFieldSpecification,
-} from '@/utils/domain/gaussianRandomField'
+import type { GaussianRandomFieldSpecification } from '@/utils/domain/gaussianRandomField'
 import type { ZoneConfiguration } from '@/utils/domain/zone'
 import type { Optional } from '@/utils/typing'
 
 import { rms as mock } from './roxar'
 import type { PolygonSpecification } from '@/utils/domain/polygon/base'
 import type { ProbabilityCube } from '@/utils/domain/facies/local'
-const api =
-  (typeof rms !== 'undefined' ? rms.uipy : mock.uipy ) as { call: <T>(name: string, ...args: any[]) => Promise<T> }
+const api = (typeof rms !== 'undefined' ? rms.uipy : mock.uipy) as {
+  call: <T>(name: string, ...args: any[]) => Promise<T>
+}
 
 export default {
   projectName: (): Promise<string> => api.call('get_project_name'),
@@ -105,11 +104,13 @@ export default {
   simulateGaussianField: (
     field: GaussianRandomFieldSpecification,
   ): Promise<number[][]> => api.call('simulate_gaussian_field', field),
-  simulateRealization: <P extends PolygonSpecification,>(
+  simulateRealization: <P extends PolygonSpecification>(
     fields: GaussianRandomFieldSpecification[],
     truncationRule: TruncationRuleDescription<P>,
-  ): Promise<{ faciesMap: number[][]; fields: { name: string, data: number[][] }[] }> =>
-    api.call('simulate_realization', fields, truncationRule),
+  ): Promise<{
+    faciesMap: number[][]
+    fields: { name: string; data: number[][] }[]
+  }> => api.call('simulate_realization', fields, truncationRule),
   averageProbabilityCubes: (
     gridName: string,
     probabilityCubeParameters: string[],
@@ -150,7 +151,10 @@ export default {
     api.call('get_aps_fmu_config', useConfig),
   createAPSFmuConfigFile: (setApsFmuConfig: boolean): Promise<void> =>
     api.call('set_aps_fmu_config', setApsFmuConfig),
-  chooseDir: (mode: 'save' | 'load', suggestion = ''): Promise<string | null> =>
+  chooseDir: (
+    mode: 'save' | 'load',
+    suggestion = '',
+  ): Promise<string | null> =>
     typeof rms !== 'undefined'
       ? rms.chooseDir(mode, suggestion)
       : new Promise((resolve) => resolve(null)),

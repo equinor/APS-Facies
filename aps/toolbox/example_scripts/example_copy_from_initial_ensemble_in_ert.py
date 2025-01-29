@@ -14,28 +14,26 @@ import os
 from pathlib import Path
 
 
-
-
 def main():
     if len(sys.argv) != 3:
         print(
-            "Usage: copy_fields_from_initial_ensemble  <iter>  <initial_fields_folder>"
+            'Usage: copy_fields_from_initial_ensemble  <iter>  <initial_fields_folder>'
         )
-        raise IOError("Missing input")
+        raise IOError('Missing input')
 
     runpath = Path.cwd()
-    print(f"Path: {runpath}")
+    print(f'Path: {runpath}')
 
     iter = int(sys.argv[1])
     fields_folder = sys.argv[2]
-    initial_fields_folder = runpath.parent / "iter-0" / fields_folder
+    initial_fields_folder = runpath.parent / 'iter-0' / fields_folder
 
-    print(f"ES-MDA Iteration number: {iter} ")
+    print(f'ES-MDA Iteration number: {iter} ')
     if iter == 0:
         return
 
     initial_fields = [
-        f.name for f in initial_fields_folder.glob("*") if f.suffix == ".roff"
+        f.name for f in initial_fields_folder.glob('*') if f.suffix == '.roff'
     ]
     ert_fields = [field for field in initial_fields if (runpath / field).exists()]
 
@@ -43,17 +41,17 @@ def main():
         for field_name in initial_fields:
             ert_field = runpath / field_name
             if field_name in ert_fields:
-                print(f"Found ERT file {ert_field}. No need to do anything")
+                print(f'Found ERT file {ert_field}. No need to do anything')
                 continue
 
             print(
-                f"Found no ERT file for {field_name}. Copying file from {initial_fields_folder} into runpath"
+                f'Found no ERT file for {field_name}. Copying file from {initial_fields_folder} into runpath'
             )
-            prev_iter_field = runpath.parent / f"iter-0/rms/output/aps" / field_name
+            prev_iter_field = runpath.parent / f'iter-0/rms/output/aps' / field_name
             os.symlink(prev_iter_field, ert_field)
     else:
-        print(f"Found no ERT FIELDS for APS, stopping the script...")
+        print(f'Found no ERT FIELDS for APS, stopping the script...')
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()

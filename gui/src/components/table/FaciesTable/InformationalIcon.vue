@@ -1,10 +1,6 @@
 <template>
   <base-tooltip :message="active ? message : inactiveMessage">
-    <v-icon
-      v-if="hasIcon"
-      :color="color"
-      :icon="__icon"
-    />
+    <v-icon v-if="hasIcon" :color="color" :icon="__icon" />
   </base-tooltip>
 </template>
 
@@ -15,19 +11,22 @@ import type { ID } from '@/utils/domain/types'
 import { computed } from 'vue'
 import vuetify from '@/plugins/vuetify'
 
-const props = withDefaults(defineProps<{
-  value: GlobalFacies
-  icon: string
-  current?: ID | null
-  active?: boolean
-  message?: string
-  inactiveMessage?: string
-}>(), {
-  active: false,
-  current: null,
-  message: undefined,
-  inactiveMessage: undefined,
-})
+const props = withDefaults(
+  defineProps<{
+    value: GlobalFacies
+    icon: string
+    current?: ID | null
+    active?: boolean
+    message?: string
+    inactiveMessage?: string
+  }>(),
+  {
+    active: false,
+    current: null,
+    message: undefined,
+    inactiveMessage: undefined,
+  },
+)
 
 const __icon = computed(() => `$${props.icon}${!props.active ? 'Negated' : ''}`)
 

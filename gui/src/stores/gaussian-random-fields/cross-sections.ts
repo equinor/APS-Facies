@@ -6,7 +6,13 @@ import CrossSection, {
 } from '@/utils/domain/gaussianRandomField/crossSection'
 import { getId } from '@/utils'
 import type { ID } from '@/utils/domain/types'
-import type { GaussianRandomField, Parent, ParentReference, Region, Zone } from '@/utils/domain'
+import type {
+  GaussianRandomField,
+  Parent,
+  ParentReference,
+  Region,
+  Zone,
+} from '@/utils/domain'
 import type { Optional } from '@/utils/typing'
 import { useZoneStore } from '@/stores/zones'
 import { useRegionStore } from '@/stores/regions'
@@ -71,7 +77,7 @@ export const useGaussianRandomFieldCrossSectionStore = defineStore(
       },
       set: (value: CrossSection) => {
         store.current.value = value
-      }
+      },
     })
 
     function populate(sections: CrossSectionSerialization[]) {
@@ -92,7 +98,9 @@ export const useGaussianRandomFieldCrossSectionStore = defineStore(
       }
     }
 
-    function add(section: CrossSection | CrossSectionSerialization): CrossSection {
+    function add(
+      section: CrossSection | CrossSectionSerialization,
+    ): CrossSection {
       const parent = resolveParentReference(section.parent)
       const existing = byParent.value(parent)
       if (!existing) {
@@ -143,12 +151,13 @@ export const useGaussianRandomFieldCrossSectionStore = defineStore(
   },
 )
 
-export type GaussianRandomFieldCrossSectionStoreSerialization = AvailableOptionSerialization<CrossSectionSerialization>
+export type GaussianRandomFieldCrossSectionStoreSerialization =
+  AvailableOptionSerialization<CrossSectionSerialization>
 export function useGaussianRandomFieldCrossSectionStoreSerialization(): GaussianRandomFieldCrossSectionStoreSerialization {
-    const { available } = useGaussianRandomFieldCrossSectionStore()
-    return {
-        available: available.map(crossSection => crossSection.toJSON()),
-    }
+  const { available } = useGaussianRandomFieldCrossSectionStore()
+  return {
+    available: available.map((crossSection) => crossSection.toJSON()),
+  }
 }
 
 if (import.meta.hot) {

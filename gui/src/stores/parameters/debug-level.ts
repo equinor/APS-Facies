@@ -19,7 +19,9 @@ export const useParameterDebugLevelStore = defineStore(
       } else {
         // In relly old jobs, debug level may be undefined
         // also; trust, but verify
-        displayWarning(`Tried to set debug level to an illegal value (${level}); must be between 0 and 4`)
+        displayWarning(
+          `Tried to set debug level to an illegal value (${level}); must be between 0 and 4`,
+        )
       }
     }
 
@@ -28,9 +30,9 @@ export const useParameterDebugLevelStore = defineStore(
     }
 
     return {
-        level: selected, // For reasons unknown, pinia exposes `level`, even though `selected` is exported 🤷
-        select,
-        $reset,
+      level: selected, // For reasons unknown, pinia exposes `level`, even though `selected` is exported 🤷
+      select,
+      $reset,
     }
   },
 )

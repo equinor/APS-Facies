@@ -11,19 +11,21 @@ Validator = Callable[[Any, float], bool]
 
 
 def make_ranged_property(
-        name: str,
-        error_template: str,
-        minimum: Optional[Number] = None,
-        maximum: Optional[Number] = None,
-        additional_validator: Optional[Validator] = None,
-        show_given_value: bool = True,
-        full_name: Optional[str] = None,
-        strictly_less: bool = False,
-        strictly_greater: bool = False,
+    name: str,
+    error_template: str,
+    minimum: Optional[Number] = None,
+    maximum: Optional[Number] = None,
+    additional_validator: Optional[Validator] = None,
+    show_given_value: bool = True,
+    full_name: Optional[str] = None,
+    strictly_less: bool = False,
+    strictly_greater: bool = False,
 ) -> property:
     if additional_validator is None:
+
         def additional_validator(self, value):
             return True
+
     if full_name is None:
         full_name = name
     if minimum is None:
@@ -52,40 +54,45 @@ def make_ranged_property(
                     if value is None:
                         value = MinimumValues[name]
                 value = FmuProperty(value, updatable)
-            if (
-                    is_between(value.value, minimum, maximum, strictly_less, strictly_greater)
-                    and additional_validator(self, value)
-            ):
+            if is_between(
+                value.value, minimum, maximum, strictly_less, strictly_greater
+            ) and additional_validator(self, value):
                 setattr(self, '_' + name, value)
             else:
                 template = error_template
                 if show_given_value:
                     template += '({value} was given)'
                 raise ValueError(
-                    template.format(name=name, min=minimum, max=maximum, value=value.value, full_name=full_name)
+                    template.format(
+                        name=name,
+                        min=minimum,
+                        max=maximum,
+                        value=value.value,
+                        full_name=full_name,
+                    )
                 )
 
     return property(fget=Property.get, fset=Property.set)
 
 
 def is_between(
-        value: Number,
-        _min: Number,
-        _max: Number,
-        strictly_less: bool = False,
-        strictly_greater: bool = False
+    value: Number,
+    _min: Number,
+    _max: Number,
+    strictly_less: bool = False,
+    strictly_greater: bool = False,
 ) -> bool:
     return (
-            _min < value < _max
-            or _min == value and not strictly_greater
-            or _max == value and not strictly_less
+        _min < value < _max
+        or _min == value
+        and not strictly_greater
+        or _max == value
+        and not strictly_less
     )
 
 
 def _make_simple_property(
-        name: str,
-        check: Callable[[Any, Any], bool],
-        error_message: str
+    name: str, check: Callable[[Any, Any], bool], error_message: str
 ) -> property:
     class Property:
         __slots__ = '_' + name
@@ -112,16 +119,17 @@ def make_trend_property(name: str) -> property:
         return True
 
     return _make_simple_property(
-        name, is_model_and_rel_std_dev_set,
+        name,
+        is_model_and_rel_std_dev_set,
         'While trend is used, a trend model MUST be given, and the relative std.dev. must be given',
     )
 
 
 def make_angle_property(
-        name: str,
-        full_name: Optional[str] = None,
-        strictly_less: bool = False,
-        strictly_greater: bool = False,
+    name: str,
+    full_name: Optional[str] = None,
+    strictly_less: bool = False,
+    strictly_greater: bool = False,
 ) -> property:
     if full_name is None:
         full_name = name
@@ -130,23 +138,26 @@ def make_angle_property(
         'The {full_name} angle MUST be between {min}°, and {max}°.',
         full_name=full_name,
         strictly_less=strictly_less,
-        strictly_greater=strictly_greater
+        strictly_greater=strictly_greater,
     )
 
 
 def make_lower_bounded_property(
-        name: str,
-        additional_validator: Optional[Validator] = None,
-        full_name: Optional[str] = None,
-        strictly_greater: bool = False,
+    name: str,
+    additional_validator: Optional[Validator] = None,
+    full_name: Optional[str] = None,
+    strictly_greater: bool = False,
 ) -> property:
     if strictly_greater:
         error_template = '{name} MUST be strictly greater than 0'
     else:
         error_template = '{name} MUST be greater than, or equal to 0'
     return make_ranged_property(
-        name, error_template, additional_validator=additional_validator,
-        full_name=full_name, strictly_greater=strictly_greater
+        name,
+        error_template,
+        additional_validator=additional_validator,
+        full_name=full_name,
+        strictly_greater=strictly_greater,
     )
 
 
@@ -201,9 +212,7 @@ class CrossSection:
     types = CrossSectionType
 
     def __init__(
-            self,
-            type: Union[CrossSectionType, str],
-            relative_position: float
+        self, type: Union[CrossSectionType, str], relative_position: float
     ) -> None:
         self._type = None
         self._relative_position = None
@@ -225,7 +234,7 @@ class CrossSection:
                 raise ValueError(f'Invalid CrossSectionType ({value}')
         elif not isinstance(value, CrossSectionType):
             raise TypeError(
-                f'Invalid argument {value}. Must be of type \'str\', or \'CrossSectionType\', not {type(value)}'
+                f"Invalid argument {value}. Must be of type 'str', or 'CrossSectionType', not {type(value)}"
             )
         self._type = value
 
@@ -236,9 +245,7 @@ class CrossSection:
     @relative_position.setter
     def relative_position(self, value: float):
         if not is_between(value, 0, 1):
-            raise ValueError(
-                'The specified value must be in the interval [0.0, 1.0]'
-            )
+            raise ValueError('The specified value must be in the interval [0.0, 1.0]')
         self._relative_position = value
 
     @classmethod
@@ -248,7 +255,4 @@ class CrossSection:
             type_ = CrossSectionType[type_]
         elif not (isinstance(type_, CrossSectionType)):
             ValueError(f'Unknown cross section type {type_}')
-        return cls(
-            type=type_,
-            relative_position=kwargs.get('relativePosition', 0.5)
-        )
+        return cls(type=type_, relative_position=kwargs.get('relativePosition', 0.5))

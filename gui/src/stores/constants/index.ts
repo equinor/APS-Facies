@@ -24,16 +24,16 @@ export const useConstantsStore = defineStore('constants', () => {
 })
 
 export interface ConstantStoreSerialization {
-    faciesColors: CurrentIdentifiedStoreSerialization<ColorLibrarySerialization>
+  faciesColors: CurrentIdentifiedStoreSerialization<ColorLibrarySerialization>
 }
 export function useConstantStoreSerialization(): ConstantStoreSerialization {
-    const faciesColorsStore = useConstantsFaciesColorsStore()
-    return {
-        faciesColors: {
-            available: faciesColorsStore.available.map(library => library.toJSON()),
-            current: faciesColorsStore.currentId,
-        }
-    }
+  const faciesColorsStore = useConstantsFaciesColorsStore()
+  return {
+    faciesColors: {
+      available: faciesColorsStore.available.map((library) => library.toJSON()),
+      current: faciesColorsStore.currentId,
+    },
+  }
 }
 
 if (import.meta.hot) {

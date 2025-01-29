@@ -7,14 +7,22 @@ from aps.algorithms.trend import Point3DProperty
 
 test_data = [
     ((1, 1, 1), (1, 1, 1), (False, False, False)),
-    (((1, 1, 1), ), (1, 1, 1), (False, False, False)),
+    (((1, 1, 1),), (1, 1, 1), (False, False, False)),
     ([2, 3, 4], (2, 3, 4), (False, False, False)),
     (((0, 0, 0), (True, True, True)), (0, 0, 0), (True, True, True)),
     (([1, 2, 3], [True, False, True]), (1, 2, 3), (True, False, True)),
     # Instance of Point3DProperty
-    ((Point3DProperty((0, 0, 0)), ), (0, 0, 0), (False, False, False)),
+    ((Point3DProperty((0, 0, 0)),), (0, 0, 0), (False, False, False)),
     (Point3DProperty((0, 0, 0)), (0, 0, 0), (False, False, False)),
-    ((FmuProperty(0, False), FmuProperty(1, True), FmuProperty(3, True), ), (0, 1, 3), (False, True, True)),
+    (
+        (
+            FmuProperty(0, False),
+            FmuProperty(1, True),
+            FmuProperty(3, True),
+        ),
+        (0, 1, 3),
+        (False, True, True),
+    ),
 ]
 
 

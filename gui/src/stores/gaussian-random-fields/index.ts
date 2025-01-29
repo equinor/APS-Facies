@@ -6,12 +6,9 @@ import { defaultSimulationSettings, getId } from '@/utils'
 import type { ID } from '@/utils/domain/types'
 import type {
   GaussianRandomFieldSerialization,
-  GaussianRandomFieldSpecification
+  GaussianRandomFieldSpecification,
 } from '@/utils/domain/gaussianRandomField'
-import {
-  Trend,
-  Variogram,
-} from '@/utils/domain/gaussianRandomField'
+import { Trend, Variogram } from '@/utils/domain/gaussianRandomField'
 import { useZoneStore } from '@/stores/zones'
 import { useRegionStore } from '@/stores/regions'
 import { APSTypeError } from '@/utils/domain/errors'
@@ -20,7 +17,7 @@ import rms from '@/api/rms'
 import {
   type GaussianRandomFieldCrossSectionStoreSerialization,
   useGaussianRandomFieldCrossSectionStore,
-  useGaussianRandomFieldCrossSectionStoreSerialization
+  useGaussianRandomFieldCrossSectionStoreSerialization,
 } from './cross-sections'
 import { useIdentifiedItems } from '@/stores/utils/identified-items'
 import { useTruncationRuleStore } from '@/stores/truncation-rules'
@@ -50,8 +47,9 @@ export const useGaussianRandomFieldStore = defineStore(
     const selected = computed(() => {
       const parent = useRootStore().parent
 
-      return getRelevant(available.value, parent)
-        .sort((a, b) => (a.name > b.name ? 1 : -1))
+      return getRelevant(available.value, parent).sort((a, b) =>
+        a.name > b.name ? 1 : -1,
+      )
     })
 
     const simulationSettings = computed(() => {
@@ -69,10 +67,10 @@ export const useGaussianRandomFieldStore = defineStore(
               gridModel: {
                 use: false,
               },
-              crossSection: ({ type: 'IJ' } as CrossSection),
+              crossSection: { type: 'IJ' } as CrossSection,
               seed: -1,
             } as GaussianRandomField['settings'])
-        zone = zone || zoneStore.current as Zone
+        zone = zone || (zoneStore.current as Zone)
         const globalSettings = gridParameterStore.waiting
           ? defaultSimulationSettings()
           : {
@@ -102,7 +100,9 @@ export const useGaussianRandomFieldStore = defineStore(
     })
 
     const specification = computed(() => {
-      return (field: GaussianRandomField): GaussianRandomFieldSpecification => ({
+      return (
+        field: GaussianRandomField,
+      ): GaussianRandomFieldSpecification => ({
         name: field.name,
         variogram: field.variogram,
         trend: field.trend,
@@ -161,8 +161,8 @@ export const useGaussianRandomFieldStore = defineStore(
     ) {
       const zoneStore = useZoneStore()
       const regionStore = useRegionStore()
-      zone = zone ?? zoneStore.current as Zone
-      region = region ?? regionStore.current as Region | null
+      zone = zone ?? (zoneStore.current as Zone)
+      region = region ?? (regionStore.current as Region | null)
 
       if (!zone) throw new APSTypeError("Zone can't be null in empty field.")
 
@@ -244,10 +244,9 @@ export const useGaussianRandomFieldStore = defineStore(
       }
     }
 
-    function $reset () {
+    function $reset() {
       store.$reset()
-      useGaussianRandomFieldCrossSectionStore()
-        .$reset()
+      useGaussianRandomFieldCrossSectionStore().$reset()
     }
 
     return {
@@ -270,15 +269,16 @@ export const useGaussianRandomFieldStore = defineStore(
   },
 )
 
-export type GaussianRandomFieldStoreSerialization = AvailableOptionSerialization<GaussianRandomFieldSerialization> & {
+export type GaussianRandomFieldStoreSerialization =
+  AvailableOptionSerialization<GaussianRandomFieldSerialization> & {
     crossSections: GaussianRandomFieldCrossSectionStoreSerialization
-}
+  }
 export function useGaussianRandomFieldStoreSerialization(): GaussianRandomFieldStoreSerialization {
-    const fieldsStore = useGaussianRandomFieldStore()
-    return {
-        available: fieldsStore.available.map(field => field.toJSON()),
-        crossSections: useGaussianRandomFieldCrossSectionStoreSerialization()
-    }
+  const fieldsStore = useGaussianRandomFieldStore()
+  return {
+    available: fieldsStore.available.map((field) => field.toJSON()),
+    crossSections: useGaussianRandomFieldCrossSectionStoreSerialization(),
+  }
 }
 
 if (import.meta.hot) {

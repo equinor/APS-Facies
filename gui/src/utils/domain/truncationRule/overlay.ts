@@ -31,15 +31,13 @@ interface OverlayPolygonSpecification extends PolygonSpecification {
   over: string[]
 }
 
-export interface OverlaySpecification<
-  P extends PolygonSpecification,
-> extends TruncationRuleSpecification<P> {
+export interface OverlaySpecification<P extends PolygonSpecification>
+  extends TruncationRuleSpecification<P> {
   overlay: OverlayPolygonSpecification[] | null
 }
 
-export interface OverlaySerialization<
-  P extends PolygonSerialization,
-> extends TruncationRuleSerialization<P | OverlayPolygonSerialization> {
+export interface OverlaySerialization<P extends PolygonSerialization>
+  extends TruncationRuleSerialization<P | OverlayPolygonSerialization> {
   _useOverlay: boolean
 }
 
@@ -163,7 +161,9 @@ export function isOverlayTruncationRule<
   T extends Polygon,
   S extends PolygonSerialization,
   P extends PolygonSpecification,
-  RULE extends BaseTruncationRule<T, S, P>
->(rule: RULE | OverlayTruncationRule<T, S, P>): rule is OverlayTruncationRule<T, S, P> {
+  RULE extends BaseTruncationRule<T, S, P>,
+>(
+  rule: RULE | OverlayTruncationRule<T, S, P>,
+): rule is OverlayTruncationRule<T, S, P> {
   return 'overlay' in rule && !!rule.overlay
 }

@@ -22,9 +22,32 @@ def run():
     iseed = 9829292922888
     fileName = 'test1.dat'
     if variogramType == VariogramType.GENERAL_EXPONENTIAL:
-        gaussVector = simGaussField(iseed, nx, ny, xLength, yLength, variogramType, mainRange, perpRange, (90.0 - azimuth), power, debug_level)
+        gaussVector = simGaussField(
+            iseed,
+            nx,
+            ny,
+            xLength,
+            yLength,
+            variogramType,
+            mainRange,
+            perpRange,
+            (90.0 - azimuth),
+            power,
+            debug_level,
+        )
     else:
-        gaussVector = simGaussField(iseed, nx, ny, xLength, yLength, variogramType, mainRange, perpRange, (90.0 - azimuth), debug_level=debug_level)
+        gaussVector = simGaussField(
+            iseed,
+            nx,
+            ny,
+            xLength,
+            yLength,
+            variogramType,
+            mainRange,
+            perpRange,
+            (90.0 - azimuth),
+            debug_level=debug_level,
+        )
     x0 = 0.0
     y0 = 0.0
     writeFileRTF(fileName, gaussVector, nx, ny, dx, dy, x0, y0, debug_level)

@@ -1,11 +1,11 @@
 import { v5 as uuidv5 } from 'uuid'
 
-import type {
-  Named,
-  SimulationSettings,
-} from '@/utils/domain/bases/interfaces'
+import type { Named, SimulationSettings } from '@/utils/domain/bases/interfaces'
 
-import type { PolygonSerialization, PolygonSpecification } from '@/utils/domain/polygon/base'
+import type {
+  PolygonSerialization,
+  PolygonSpecification,
+} from '@/utils/domain/polygon/base'
 import type { TruncationRule } from '@/utils/domain/truncationRule'
 import type {
   TruncationRuleSpecification,
@@ -49,15 +49,17 @@ function simplify<
 >(specification: Spec, includeOverlay = true): Spec {
   return {
     ...specification,
-    polygons: specification.polygons
-      .map((polygon: P): P => {
-        return {
-          ...polygon,
-          facies: polygon.id,
-          fraction: 1,
-        }
-      }),
-    overlay: 'overlay' in specification && includeOverlay ? specification.overlay : null,
+    polygons: specification.polygons.map((polygon: P): P => {
+      return {
+        ...polygon,
+        facies: polygon.id,
+        fraction: 1,
+      }
+    }),
+    overlay:
+      'overlay' in specification && includeOverlay
+        ? specification.overlay
+        : null,
   }
 }
 
@@ -89,9 +91,7 @@ function makeSimplifiedTruncationRuleSpecification<
   S extends PolygonSerialization,
   P extends PolygonSpecification,
   RULE extends TruncationRule<T, S, P>,
->(
-  rule: RULE,
-): TruncationRuleDescription<P> {
+>(rule: RULE): TruncationRuleDescription<P> {
   return {
     type: rule.type,
     globalFaciesTable: (rule.backgroundPolygons as Polygon[]).map(
@@ -126,14 +126,13 @@ function makeGlobalFaciesTableSpecification<
   S extends PolygonSerialization,
   P extends PolygonSpecification,
   RULE extends TruncationRule<T, S, P>,
->(
-  rule: RULE,
-): GlobalFaciesSpecification[] {
+>(rule: RULE): GlobalFaciesSpecification[] {
   const faciesStore = useFaciesStore()
   const optionStore = useOptionStore()
 
-  const facies = faciesStore.selected.filter((facies) =>
-    !optionStore.options.filterZeroProbability ||
+  const facies = faciesStore.selected.filter(
+    (facies) =>
+      !optionStore.options.filterZeroProbability ||
       (!!facies.previewProbability && facies.previewProbability > 0),
   )
   const cumulativeProbability = facies.reduce(
@@ -173,9 +172,7 @@ function makeGaussianRandomFieldSpecification<
   S extends PolygonSerialization,
   P extends PolygonSpecification,
   RULE extends TruncationRule<T, S, P>,
->(
-  rule: RULE,
-): GaussianRandomFieldSpecification[] {
+>(rule: RULE): GaussianRandomFieldSpecification[] {
   return rule.fields.map((field): GaussianRandomFieldSpecification => {
     return {
       name: field.name,
@@ -191,9 +188,7 @@ function makeTruncationRuleSpecification<
   S extends PolygonSerialization,
   P extends PolygonSpecification,
   RULE extends TruncationRule<T, S, P>,
->(
-  rule: RULE,
-): TruncationRuleDescription<P> {
+>(rule: RULE): TruncationRuleDescription<P> {
   return {
     type: rule.type,
     globalFaciesTable: makeGlobalFaciesTableSpecification(rule),
@@ -222,7 +217,6 @@ function parentId({ zone, region }: Parent): ID {
 function sortAlphabetically<T extends Named>(arr: T[]): T[] {
   return Object.values(arr).sort((a, b): number => a.name.localeCompare(b.name))
 }
-
 
 const encodeState = (state: any): string => btoa(JSON.stringify(state))
 

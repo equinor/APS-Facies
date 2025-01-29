@@ -1,6 +1,4 @@
-import type {
-  FmuUpdatable,
-} from '@/utils/domain/bases/fmuUpdatable'
+import type { FmuUpdatable } from '@/utils/domain/bases/fmuUpdatable'
 import FmuUpdatableValue from '@/utils/domain/bases/fmuUpdatable'
 import type {
   PolygonArgs,

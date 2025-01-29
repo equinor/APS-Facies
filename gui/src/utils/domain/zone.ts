@@ -10,11 +10,20 @@ import SelectableItem, {
 
 type Regions = Identified<Region>
 
-export type ZoneConformOption = 'TopConform' | 'BaseConform' | 'Proportional' | null
+export type ZoneConformOption =
+  | 'TopConform'
+  | 'BaseConform'
+  | 'Proportional'
+  | null
 
-
-export function isValidConformity(gridLayout: string): gridLayout is Exclude<ZoneConformOption, null> {
-  const validGridLayout: ZoneConformOption[] = ['TopConform', 'BaseConform', 'Proportional']
+export function isValidConformity(
+  gridLayout: string,
+): gridLayout is Exclude<ZoneConformOption, null> {
+  const validGridLayout: ZoneConformOption[] = [
+    'TopConform',
+    'BaseConform',
+    'Proportional',
+  ]
   return (validGridLayout as string[]).includes(gridLayout)
 }
 

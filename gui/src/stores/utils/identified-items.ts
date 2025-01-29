@@ -20,10 +20,11 @@ export type IdentifiedItems<T extends Identifiable> = {
   $reset: () => void
 }
 
-export type CurrentIdentifiedItems<T extends Identifiable> = IdentifiedItems<T> & {
-  currentId: Ref<ID | null>
-  current: ComputedRef<T | null>
-}
+export type CurrentIdentifiedItems<T extends Identifiable> =
+  IdentifiedItems<T> & {
+    currentId: Ref<ID | null>
+    current: ComputedRef<T | null>
+  }
 
 export function useIdentifiedItems<
   T extends Identifiable,
@@ -61,7 +62,8 @@ export function useCurrentIdentifiedItems<
   T extends Identifiable,
 >(): CurrentIdentifiedItems<T> {
   const availableStore = useIdentifiedItems<T>()
-  const { available, identifiedAvailable, addAvailable, removeAvailable } = availableStore
+  const { available, identifiedAvailable, addAvailable, removeAvailable } =
+    availableStore
 
   const currentId = ref<ID | null>(null)
   const current = computed(() => {
@@ -89,4 +91,3 @@ export interface CurrentIdentifiedStoreSerialization<T extends Identifiable> {
   available: T[]
   current: ID | null
 }
-

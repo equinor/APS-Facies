@@ -115,67 +115,68 @@ Example of a model file:
  If more than one zone can use the same specification, multiple zone numbers can be specified with a space
  in between in this command.
 """
+
 from aps.algorithms.defineFaciesProbTrend import DefineFaciesProb
+
 
 def run(kwargs):
     """
-        Create facies probability trends from input facies 3D parameter.
+            Create facies probability trends from input facies 3D parameter.
 
-        Usage alternatives:
-        - Specify dictionary with model file name containing all input information. See example 1.
-        - Specify dictionary with all input information. See example 2.
+            Usage alternatives:
+            - Specify dictionary with model file name containing all input information. See example 1.
+            - Specify dictionary with all input information. See example 2.
 
-Example 1:
+    Example 1:
 
-from aps.toolbox import define_facies_prob_trend
-from aps.utils.constants.simple import Debug
+    from aps.toolbox import define_facies_prob_trend
+    from aps.utils.constants.simple import Debug
 
-kwargs = {
-    "project": project,
-    "debug_level": Debug.VERBOSE,
-    "model_file_name": "examples/test_define_facies_prob_trend2.xml",
-}
-define_facies_prob_trend(kwargs)
+    kwargs = {
+        "project": project,
+        "debug_level": Debug.VERBOSE,
+        "model_file_name": "examples/test_define_facies_prob_trend2.xml",
+    }
+    define_facies_prob_trend(kwargs)
 
-Example 2:
+    Example 2:
 
-from aps.toolbox import define_facies_prob_trend
-from aps.utils.constants.simple import Debug
+    from aps.toolbox import define_facies_prob_trend
+    from aps.utils.constants.simple import Debug
 
 
-selected_zones = [1,2,3]
-cond_prob_matrix = [
-    ["F1", "A", 0.8],
-    ["F2", "A", 0.1],
-    ["F3", "A", 0.1],
+    selected_zones = [1,2,3]
+    cond_prob_matrix = [
+        ["F1", "A", 0.8],
+        ["F2", "A", 0.1],
+        ["F3", "A", 0.1],
 
-    ["F1", "B", 0.0],
-    ["F2", "B", 1.0],
-    ["F3", "B", 0.0],
+        ["F1", "B", 0.0],
+        ["F2", "B", 1.0],
+        ["F3", "B", 0.0],
 
-    ["F1", "C", 0.1],
-    ["F2", "C", 0.2],
-    ["F3", "C", 0.7],
+        ["F1", "C", 0.1],
+        ["F2", "C", 0.2],
+        ["F3", "C", 0.7],
 
-    ["F1", "D", 0.1],
-    ["F2", "D", 0.2],
-    ["F3", "D", 0.7],
-]
-kwargs = {
-    "project": project,
-    "debug_level": Debug.VERBOSE,
-    "grid_model_name": "GridModelFine",
-    "zone_param_name": "Zone",
-    "facies_interpretation_param_name": "Deterministic_facies",
-    "prefix": "ProbTrendTest1",
-    "selected_zones": selected_zones,
-    "use_const_prob": False,
-    "cond_prob_matrix": cond_prob_matrix,
-}
-define_facies_prob_trend(kwargs)
+        ["F1", "D", 0.1],
+        ["F2", "D", 0.2],
+        ["F3", "D", 0.7],
+    ]
+    kwargs = {
+        "project": project,
+        "debug_level": Debug.VERBOSE,
+        "grid_model_name": "GridModelFine",
+        "zone_param_name": "Zone",
+        "facies_interpretation_param_name": "Deterministic_facies",
+        "prefix": "ProbTrendTest1",
+        "selected_zones": selected_zones,
+        "use_const_prob": False,
+        "cond_prob_matrix": cond_prob_matrix,
+    }
+    define_facies_prob_trend(kwargs)
 
     """
     define_facies_trend = DefineFaciesProb(**kwargs)
     define_facies_trend.calculate_facies_probability_parameter()
     print('Finished running defineFaciesProbTrend')
-

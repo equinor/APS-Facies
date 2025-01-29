@@ -6,16 +6,18 @@ import type { ID } from '@/utils/domain/types'
 import { getId, includes } from '@/utils'
 import { APSError } from '@/utils/domain/errors'
 import rms from '@/api/rms'
-import type { ZoneConfiguration, ZoneConformOption, ZoneSerialization } from '@/utils/domain/zone'
+import type {
+  ZoneConfiguration,
+  ZoneConformOption,
+  ZoneSerialization,
+} from '@/utils/domain/zone'
 import { useRegionStore } from './regions'
 import { useGaussianRandomFieldCrossSectionStore } from './gaussian-random-fields/cross-sections'
 import type {
   CurrentIdentifiedStorePopulationData,
   CurrentIdentifiedStoreSerialization,
 } from './utils/identified-items'
-import {
-  useCurrentIdentifiedItems,
-} from './utils/identified-items'
+import { useCurrentIdentifiedItems } from './utils/identified-items'
 import { useGridModelStore } from './grid-models'
 import { useTruncationRuleStore } from './truncation-rules'
 import { useFaciesStore } from './facies'
@@ -148,12 +150,13 @@ export const useZoneStore = defineStore('zones', () => {
   }
 })
 
-export type ZoneStoreSerialization = CurrentIdentifiedStoreSerialization<ZoneSerialization>
+export type ZoneStoreSerialization =
+  CurrentIdentifiedStoreSerialization<ZoneSerialization>
 
 export function useZoneStoreSerialization(): ZoneStoreSerialization {
   const zoneStore = useZoneStore()
   return {
-    available: zoneStore.available.map(zone => zone.toJSON()),
+    available: zoneStore.available.map((zone) => zone.toJSON()),
     current: zoneStore.currentId,
   }
 }

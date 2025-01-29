@@ -4,12 +4,12 @@ ProbLogs:
   GridModelName: GridModelFine
   BlockedWells: BW
   FaciesLogName: facies_log
-  ZoneLogName:  Zone
+  ZoneLogName: Zone
   OutputPrefix: Prob
   ModellingFaciesPerZone:
-    1:  Sand_A  Sand_B  Shale
-    2:  Sand_A  Sand_B  Shale
-    3:  Sand_A  Sand_B  Shale
+    1: Sand_A  Sand_B  Shale
+    2: Sand_A  Sand_B  Shale
+    3: Sand_A  Sand_B  Shale
 
   UseConditionalProbabilities: True
 

@@ -17,11 +17,12 @@
 <script
   setup
   lang="ts"
-  generic="T extends Polygon,
-  S extends PolygonSerialization,
-  P extends PolygonSpecification,
-  RULE extends TruncationRule<T, S, P>
-"
+  generic="
+    T extends Polygon,
+    S extends PolygonSerialization,
+    P extends PolygonSpecification,
+    RULE extends TruncationRule<T, S, P>
+  "
 >
 import IconButton from '@/components/selection/IconButton.vue'
 
@@ -62,16 +63,15 @@ const _canSimulateAllTrends = computed(
     ),
 )
 
-watch([
-  props.value,
-  parameterSimboxStore.waiting,
-], () => {
+watch([props.value, parameterSimboxStore.waiting], () => {
   _explanation.value = (() => {
     // Ensure `ready`, and `errorMessage` are executed every time there is a change in props.value
     // otherwise vue / pinia seem to have problems detecting that the result will change
     if (!props.value) return 'No truncation rule has been specified'
-    if (!usesAllFacies(props.value)) return 'More facies are selected, than are used'
-    if (parameterSimboxStore.waiting.value) return 'Computing simulation box size'
+    if (!usesAllFacies(props.value))
+      return 'More facies are selected, than are used'
+    if (parameterSimboxStore.waiting.value)
+      return 'Computing simulation box size'
     if (!_canSimulateAllTrends.value) {
       return `Some Gaussian Random Field uses a trend that cannot be simulated in the previewer (${TREND_NOT_IMPLEMENTED_PREVIEW_VISUALIZATION.reduce(
         (prev, curr: string) => `${prev}${prev ? ', ' : ''}'${curr}'`,

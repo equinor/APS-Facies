@@ -2,7 +2,8 @@
 from collections import namedtuple
 
 VariogramRecord = namedtuple(
-    'VariogramRecord', [
+    'VariogramRecord',
+    [
         'Name',
         'Type',
         'MainRange',
@@ -16,40 +17,19 @@ VariogramRecord = namedtuple(
         'VertRangeFMUUpdatable',
         'AzimuthAngleFMUUpdatable',
         'DipAngleFMUUpdatable',
-        'PowerFMUUpdatable'
-    ]
+        'PowerFMUUpdatable',
+    ],
 )
 
-SeedRecord = namedtuple(
-    'SeedRecord', [
-        'Name',
-        'Seed'
-    ]
-)
+SeedRecord = namedtuple('SeedRecord', ['Name', 'Seed'])
 
 TrendRecord = namedtuple(
-    'TrendRecord', [
-        'Name',
-        'UseTrend',
-        'Object',
-        'RelStdev',
-        'RelStdevFMU'
-    ]
+    'TrendRecord', ['Name', 'UseTrend', 'Object', 'RelStdev', 'RelStdevFMU']
 )
 
-FaciesRecord = namedtuple(
-    'FaciesRecord', [
-        'Name',
-        'Code'
-    ]
-)
+FaciesRecord = namedtuple('FaciesRecord', ['Name', 'Code'])
 
-FaciesProbabilityRecord = namedtuple(
-    'FaciesProbabilityRecord', [
-        'Name',
-        'Probability'
-    ]
-)
+FaciesProbabilityRecord = namedtuple('FaciesProbabilityRecord', ['Name', 'Probability'])
 
 
 class Probability:

@@ -20,7 +20,9 @@ class _Version:
         self.major = 0
 
         if not 1 <= len(version) <= 3:
-            raise ValueError(f'Not a valid semantic version ({version}). Should be major[.minor[.patch]]')
+            raise ValueError(
+                f'Not a valid semantic version ({version}). Should be major[.minor[.patch]]'
+            )
 
         if len(version) >= 3:
             self.patch = version[2]
@@ -29,7 +31,7 @@ class _Version:
         self.major = version[0]
 
     def __str__(self):
-        return f"{self.major}.{self.minor}.{self.patch}"
+        return f'{self.major}.{self.minor}.{self.patch}'
 
     def as_tuple(self):
         return self.major, self.minor, self.patch
@@ -46,7 +48,9 @@ class Migration:
         self.rms_data = rms_data
 
     def add_max_allowed_fraction_of_values_outside_tolerance(self, state: dict):
-        constants = self.rms_data.get_constant('max_allowed_fraction_of_values_outside_tolerance', 'tolerance')
+        constants = self.rms_data.get_constant(
+            'max_allowed_fraction_of_values_outside_tolerance', 'tolerance'
+        )
         state['parameters']['maxAllowedFractionOfValuesOutsideTolerance'] = {
             'selected': constants['tolerance']
         }
@@ -60,8 +64,7 @@ class Migration:
         grid_model = state['gridModels']['available'][grid_model_id]
         thicknesses = {
             zone['code']: zone['thickness']
-            for zone in
-            self.rms_data.get_zones(grid_model['name'])
+            for zone in self.rms_data.get_zones(grid_model['name'])
         }
         for zone in state['zones']['available'].values():
             zone['thickness'] = thicknesses[zone['code']]
@@ -90,8 +93,7 @@ class Migration:
     def add_has_dual_index_system(self, state: dict):
         mapping = {
             grid['name']: grid['hasDualIndexSystem']
-            for grid in
-            self.rms_data.get_grid_models()
+            for grid in self.rms_data.get_grid_models()
         }
         for grid_model in state['gridModels']['available'].values():
             grid_model['hasDualIndexSystem'] = mapping[grid_model['name']]
@@ -105,7 +107,7 @@ class Migration:
                 try:
                     code = int(code)
                 except Exception as e:
-                    warn(f"The given code, {code} could not be parsed as an integer")
+                    warn(f'The given code, {code} could not be parsed as an integer')
             item['code'] = code
 
         for facies in state['facies']['global']['available'].values():
@@ -118,7 +120,9 @@ class Migration:
         return state
 
     def add_tolerance_of_probability_normalisation(self, state: dict):
-        constant = self.rms_data.get_constant('max_allowed_deviation_before_error', 'tolerance')
+        constant = self.rms_data.get_constant(
+            'max_allowed_deviation_before_error', 'tolerance'
+        )
         state['parameters']['toleranceOfProbabilityNormalisation'] = {
             'selected': constant['tolerance']
         }
@@ -150,7 +154,6 @@ class Migration:
         }
         return state
 
-
     @staticmethod
     def add_field_export_format(state: dict):
         state['fmu']['fieldFileFormat'] = {
@@ -168,32 +171,44 @@ class Migration:
     def add_trend_map(self, state: dict):
         trend_map_zones_dict = self.rms_data.get_rms_trend_map_zones()
         state['parameters']['rmsTrendMapZones'] = {'available': trend_map_zones_dict}
-        for key in state['gaussianRandomFields']['available'] :
-            state['gaussianRandomFields']['available'] [key]['trend']['trendMapName'] = None
-            state['gaussianRandomFields']['available'] [key]['trend']['trendMapZone'] = None
+        for key in state['gaussianRandomFields']['available']:
+            state['gaussianRandomFields']['available'][key]['trend']['trendMapName'] = (
+                None
+            )
+            state['gaussianRandomFields']['available'][key]['trend']['trendMapZone'] = (
+                None
+            )
 
         return state
 
     @staticmethod
     def add_use_customized_fmu_directory_structure(state: dict):
         state['fmu']['useNonStandardFmu'] = {
-            'value':  False,
+            'value': False,
         }
         return state
 
     @staticmethod
     def add_check_export_ertbox_grid(state: dict):
         state['fmu']['exportErtBoxGrid'] = {
-            'value':  True,
+            'value': True,
         }
         return state
 
     @staticmethod
     def migrate_from_vuex_to_pinia(state: dict):
         for location in [
-            'constants.faciesColors', 'facies', 'facies.global', 'facies.groups', 'gaussianRandomFields',
-            'gaussianRandomFields.crossSections', 'gridModels', 'truncationRules', 'truncationRules.templates',
-            'truncationRules.templates.types', 'zones',
+            'constants.faciesColors',
+            'facies',
+            'facies.global',
+            'facies.groups',
+            'gaussianRandomFields',
+            'gaussianRandomFields.crossSections',
+            'gridModels',
+            'truncationRules',
+            'truncationRules.templates',
+            'truncationRules.templates.types',
+            'zones',
         ]:
             # FIXME: update regions as well
             # `available` is now a list of items, rather than an object
@@ -209,7 +224,8 @@ class Migration:
             for key in data.keys():
                 if key == 'showNameOrNumber':
                     data[key] = {
-                        zone_region: data[key][zone_region]['value'] for zone_region in ['zone', 'region']
+                        zone_region: data[key][zone_region]['value']
+                        for zone_region in ['zone', 'region']
                     }
                 else:
                     data[key] = data[key]['value']
@@ -234,10 +250,7 @@ class Migration:
             for grid_model in state['gridModels']['available']:
                 if grid_model['id'] == current:
                     current_grid_model_name = grid_model['name']
-            data['simulationBox'] = {
-                'rough': False,
-                'simulationBoxes': {}
-            }
+            data['simulationBox'] = {'rough': False, 'simulationBoxes': {}}
             # previously, we didn't store information on the estimation was rough or fine,
             # so we assume it is the default (rough)
             if current_grid_model_name:
@@ -277,7 +290,6 @@ class Migration:
 
     @staticmethod
     def add_possibly_missing_root_polygon_to_cubic_truncation_rules(state: dict):
-
         def new_root(id: Optional[str] = None, children: List[str] = None) -> dict:
             return {
                 'id': id or str(uuid4()),
@@ -297,30 +309,37 @@ class Migration:
                     polygons.append(new_root())
                 else:
                     polygon_lookup = {polygon['id']: polygon for polygon in polygons}
-                    background_polygons = [polygon for polygon in polygons if not polygon['overlay']]
+                    background_polygons = [
+                        polygon for polygon in polygons if not polygon['overlay']
+                    ]
                     polygon = sample(background_polygons, 1)[0]
 
-                    while polygon['parent'] is not None and polygon['parent'] in polygon_lookup:
+                    while (
+                        polygon['parent'] is not None
+                        and polygon['parent'] in polygon_lookup
+                    ):
                         polygon = polygon_lookup[polygon['parent']]
                     parent = polygon['parent']
                     if parent is not None:
                         # That is, there are references to a root that does not exist
                         # This was caused by a bug in the "simple" cubic truncation rule, where
                         # the root was not added
-                        polygons.append(new_root(
-                            id=parent,
-                            children=[child['id'] for child in background_polygons if child['parent'] == parent],
-                        ))
+                        polygons.append(
+                            new_root(
+                                id=parent,
+                                children=[
+                                    child['id']
+                                    for child in background_polygons
+                                    if child['parent'] == parent
+                                ],
+                            )
+                        )
         return state
 
     @property
     def migrations(self):
         return [
-            {
-                'from': '0.0.0',
-                'to': '1.0.0',
-                'up': self.attempt_upgrading_legacy_state
-            },
+            {'from': '0.0.0', 'to': '1.0.0', 'up': self.attempt_upgrading_legacy_state},
             {
                 'from': '1.0.0',
                 'to': '1.1.0',
@@ -329,7 +348,9 @@ class Migration:
             {
                 'from': '1.1.0',
                 'to': '1.2.0',
-                'up': lambda state: self.add_number_of_zones_to_grid(self.add_zone_thickness(state)),
+                'up': lambda state: self.add_number_of_zones_to_grid(
+                    self.add_zone_thickness(state)
+                ),
             },
             {
                 'from': '1.2.0',
@@ -364,7 +385,9 @@ class Migration:
             {
                 'from': '1.7.0',
                 'to': '1.8.0',
-                'up': lambda state: self.add_transform_type(self.add_export_fmu_config_file(state)),
+                'up': lambda state: self.add_transform_type(
+                    self.add_export_fmu_config_file(state)
+                ),
             },
             {
                 'from': '1.8.0',
@@ -401,23 +424,28 @@ class Migration:
                 'to': '1.14.0',
                 'up': self.migrate_from_vuex_to_pinia,
             },
-
         ]
 
     def get_migrations(self, from_version: str, to_version: Optional[str] = None):
         _migrations = [
-            migration for migration in self.migrations
+            migration
+            for migration in self.migrations
             if (
-                    (
-                            to_version is None
-                            or _Version(to_version) > _Version(migration['from'])
-                    )
-                    and _Version(from_version) < _Version(migration['to'])
+                (
+                    to_version is None
+                    or _Version(to_version) > _Version(migration['from'])
+                )
+                and _Version(from_version) < _Version(migration['to'])
             )
         ]
         return _migrations
 
-    def migrate(self, state: dict, from_version: Optional[str] = None, to_version: Optional[str] = None):
+    def migrate(
+        self,
+        state: dict,
+        from_version: Optional[str] = None,
+        to_version: Optional[str] = None,
+    ):
         errors = None
 
         if from_version is None:
@@ -430,11 +458,13 @@ class Migration:
 
         if get_debug_level(state) >= Debug.VERBOSE:
             if len(migrations) == 0:
-                print(f'-- State at latest version ({from_version}). No migration needed.')
+                print(
+                    f'-- State at latest version ({from_version}). No migration needed.'
+                )
             else:
                 if to_version is None:
                     to_version = self.migrations[-1]['to']
-                print(f"-- Migrating state from {from_version} to {to_version}")
+                print(f'-- Migrating state from {from_version} to {to_version}')
 
         try:
             for migration in migrations:
@@ -442,9 +472,9 @@ class Migration:
                 state['version'] = migration['to']
         except Exception as e:
             errors = e.__repr__()
-            print(f"Error: ")
+            print(f'Error: ')
             warn(errors)
-            raise KeyError(f"In migration:  {errors} ")
+            raise KeyError(f'In migration:  {errors} ')
         return {
             'state': state,
             'errors': errors,

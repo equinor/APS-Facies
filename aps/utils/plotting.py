@@ -6,8 +6,17 @@ from matplotlib import pyplot as plt
 from aps.utils.constants.simple import CrossSectionType
 
 
-def plot_gaussian_field(simulation, lengths=None, grid_dimensions=None, ax=None,
-                        plot_ticks=True, rotate_plot=False, azimuth_grid_orientation=None, grid_index_order='C', vertical_scale=1.0):
+def plot_gaussian_field(
+    simulation,
+    lengths=None,
+    grid_dimensions=None,
+    ax=None,
+    plot_ticks=True,
+    rotate_plot=False,
+    azimuth_grid_orientation=None,
+    grid_index_order='C',
+    vertical_scale=1.0,
+):
     if ax is None:
         ax = plt.subplot(1, 1, 1)
 
@@ -15,7 +24,9 @@ def plot_gaussian_field(simulation, lengths=None, grid_dimensions=None, ax=None,
         # Used for compatibility with 'testPreviewer'
         assert grid_dimensions is not None
         assert lengths is not None
-        alpha_realization = np.zeros(grid_dimensions[0] * grid_dimensions[1], np.float32)
+        alpha_realization = np.zeros(
+            grid_dimensions[0] * grid_dimensions[1], np.float32
+        )
         gauss_name = 'Not used'
         cross_section_type = CrossSectionType.IJ
         kwargs = _get_grid_kwargs(cross_section_type)
@@ -29,11 +40,15 @@ def plot_gaussian_field(simulation, lengths=None, grid_dimensions=None, ax=None,
         lengths = simulation.simulation_box_size
 
     # Reshape to a 2D matrix where first index is row, second index is column
-    alpha_map = resize_data_to_grid(alpha_realization, grid_dimensions, grid_index_order)
+    alpha_map = resize_data_to_grid(
+        alpha_realization, grid_dimensions, grid_index_order
+    )
 
     if rotate_plot:
         assert azimuth_grid_orientation is not None
-        alpha_map = scipy.ndimage.interpolation.rotate(alpha_map, azimuth_grid_orientation)
+        alpha_map = scipy.ndimage.interpolation.rotate(
+            alpha_map, azimuth_grid_orientation
+        )
 
     extent, size = get_plot_sizing(cross_section_type, lengths, vertical_scale)
     im = ax.imshow(alpha_map, extent=extent, **kwargs)
@@ -58,7 +73,9 @@ def _get_grid_kwargs(cross_section_type):
     elif cross_section_type in [CrossSectionType.IK, CrossSectionType.JK]:
         kwargs['origin'] = 'upper'
     else:
-        raise ValueError(f'The cross section type, {cross_section_type}, does not exist')
+        raise ValueError(
+            f'The cross section type, {cross_section_type}, does not exist'
+        )
     return kwargs
 
 
@@ -73,7 +90,9 @@ def get_grid_dimensions(cross_section_type, simulation):
         # JK
         grid_dimensions = (simulation.grid_size[1], simulation.grid_size[2])
     else:
-        raise ValueError('The cross section type, {}, does not exist'.format(cross_section_type))
+        raise ValueError(
+            'The cross section type, {}, does not exist'.format(cross_section_type)
+        )
     return grid_dimensions
 
 
@@ -89,16 +108,32 @@ def cross_plot(ax, gaussian_field, other):
 
 
 def plot_facies(
-        ax, fmap, nFacies, cmap, previewCrossSectionType,
-        lengths, plot_ticks=False, rotate_plot=False, azimuth_grid_orientation=None, vertical_scale=1.0,
+    ax,
+    fmap,
+    nFacies,
+    cmap,
+    previewCrossSectionType,
+    lengths,
+    plot_ticks=False,
+    rotate_plot=False,
+    azimuth_grid_orientation=None,
+    vertical_scale=1.0,
 ):
     facies_map = fmap
     if rotate_plot:
         assert azimuth_grid_orientation is not None
         facies_map = scipy.ndimage.interpolation.rotate(fmap, azimuth_grid_orientation)
 
-    kwargs = {'interpolation': 'none', 'aspect': 'equal', 'cmap': cmap, 'clim': (1, nFacies), 'origin': 'lower'}
-    extent, size = get_plot_sizing_facies(previewCrossSectionType, lengths, vertical_scale)
+    kwargs = {
+        'interpolation': 'none',
+        'aspect': 'equal',
+        'cmap': cmap,
+        'clim': (1, nFacies),
+        'origin': 'lower',
+    }
+    extent, size = get_plot_sizing_facies(
+        previewCrossSectionType, lengths, vertical_scale
+    )
     facies_plot = ax.imshow(facies_map, extent=extent, **kwargs)
     plt.axis(size)
     ax.set_title('Facies')

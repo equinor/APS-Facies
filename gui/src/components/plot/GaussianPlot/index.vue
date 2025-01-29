@@ -1,18 +1,8 @@
 <template>
-  <v-row
-    v-if="waiting"
-    justify="center"
-    align="center"
-  >
-    <v-col
-      cols="12"
-      align-self="center"
-    >
+  <v-row v-if="waiting" justify="center" align="center">
+    <v-col cols="12" align-self="center">
       <v-row justify="center">
-        <v-icon
-          size="x-large"
-          :icon="$vuetify.icons.aliases?.refreshSpinner"
-        />
+        <v-icon size="x-large" :icon="$vuetify.icons.aliases?.refreshSpinner" />
       </v-row>
       <v-row justify="center">
         <span>Computing simulation box size</span>
@@ -21,7 +11,9 @@
   </v-row>
   <static-plot
     v-else
-    v-tooltip.bottom="_disabled ? 'The field has changed since it was simulated' : undefined"
+    v-tooltip.bottom="
+      _disabled ? 'The field has changed since it was simulated' : undefined
+    "
     :data-definition="dataDefinition"
     :disabled="_disabled"
     :expand="expand"
@@ -49,7 +41,7 @@ type Props = {
   showScale?: boolean
   colorScale?: ColorScale
   expand?: boolean
-  size?: { width: number, height: number }
+  size?: { width: number; height: number }
   disabled?: boolean
 }
 const props = withDefaults(defineProps<Props>(), {
@@ -88,8 +80,7 @@ const _disabled = computed(
 watch(waiting, async () => {
   if (!waiting.value) {
     if (!props.value.simulated) {
-      await useGaussianRandomFieldStore()
-        .updateSimulation(props.value)
+      await useGaussianRandomFieldStore().updateSimulation(props.value)
     }
   }
 })

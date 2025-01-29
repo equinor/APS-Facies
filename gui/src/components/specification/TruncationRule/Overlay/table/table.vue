@@ -14,23 +14,32 @@
             :rule="props.rule"
             :group="item.group.id"
             hide-label
-            @input="(field: string|null) => updateField(item, field!)"
+            @input="(field: string | null) => updateField(item, field!)"
           />
         </td>
         <td>
           <overlay-facies-specification :value="item" :rule="props.rule" />
         </td>
         <td v-if="needFraction">
-          <polygon-fraction-field :value="item" :rule="props.rule as TruncationRule<T, S, P>" />
+          <polygon-fraction-field
+            :value="item"
+            :rule="props.rule as TruncationRule<T, S, P>"
+          />
         </td>
         <td>
           <fraction-field
             :model-value="item.center"
-            @update:model-value="(val: MaybeFmuUpdatable | null) => updateCenter(item, val)"
+            @update:model-value="
+              (val: MaybeFmuUpdatable | null) => updateCenter(item, val)
+            "
           />
         </td>
         <td>
-          <polygon-order :value="item" :rule="props.rule as OverlayTruncationRule<T, S, P>" overlay />
+          <polygon-order
+            :value="item"
+            :rule="props.rule as OverlayTruncationRule<T, S, P>"
+            overlay
+          />
         </td>
       </tr>
     </template>
@@ -40,11 +49,14 @@
 <script
   setup
   lang="ts"
-  generic="T extends OverlayPolygon,
-  S extends PolygonSerialization,
-  P extends PolygonSpecification,
-  RULE extends OverlayTruncationRule<T, S, P> | InstantiatedOverlayTruncationRule
-"
+  generic="
+    T extends OverlayPolygon,
+    S extends PolygonSerialization,
+    P extends PolygonSpecification,
+    RULE extends
+      | OverlayTruncationRule<T, S, P>
+      | InstantiatedOverlayTruncationRule
+  "
 >
 import type OverlayTruncationRule from '@/utils/domain/truncationRule/overlay'
 import FractionField from '@/components/selection/FractionField.vue'
@@ -111,10 +123,7 @@ const headers = computed<HeaderItems>(() => [
   },
 ])
 
-function updateField(
-  polygon: OverlayPolygon,
-  fieldId: ID,
-): void {
+function updateField(polygon: OverlayPolygon, fieldId: ID): void {
   const field = fieldStore.byId(fieldId)
   polygon.field = field ?? null
 }
@@ -123,10 +132,10 @@ function updateCenter(
   polygon: OverlayPolygon,
   value: MaybeFmuUpdatable | null,
 ): void {
-    if (value === null) {
-      throw new Error('Cannot set center to be empty')
-    }
-    polygon.center = value
+  if (value === null) {
+    throw new Error('Cannot set center to be empty')
+  }
+  polygon.center = value
 }
 </script>
 

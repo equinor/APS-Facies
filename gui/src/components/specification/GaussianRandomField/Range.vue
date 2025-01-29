@@ -7,7 +7,7 @@
       label="Parallel to Azimuth"
       unit="m"
       strictly-greater
-      @update:error="(e: boolean) => invalid.main = e"
+      @update:error="(e: boolean) => (invalid.main = e)"
     />
     <perpendicular-range
       :value="value"
@@ -16,7 +16,7 @@
       label="Normal to Azimuth"
       unit="m"
       strictly-greater
-      @update:error="(e: boolean) => invalid.perpendicular = e"
+      @update:error="(e: boolean) => (invalid.perpendicular = e)"
     />
     <vertical-range
       :value="value"
@@ -25,7 +25,7 @@
       label="Vertical (normal to dip)"
       unit="m"
       strictly-greater
-      @update:error="(e: boolean) => invalid.vertical = e"
+      @update:error="(e: boolean) => (invalid.vertical = e)"
     />
   </div>
 </template>

@@ -12,18 +12,24 @@
 <script
   setup
   lang="ts"
-  generic="T extends OverlayPolygon,
-  S extends PolygonSerialization,
-  P extends PolygonSpecification,
-  RULE extends OverlayTruncationRule<T, S, P> | InstantiatedOverlayTruncationRule
-"
+  generic="
+    T extends OverlayPolygon,
+    S extends PolygonSerialization,
+    P extends PolygonSpecification,
+    RULE extends
+      | OverlayTruncationRule<T, S, P>
+      | InstantiatedOverlayTruncationRule
+  "
 >
 import OverlayFaciesTable from './table/index.vue'
 import type {
   PolygonSerialization,
   PolygonSpecification,
 } from '@/utils/domain/polygon/base'
-import type { InstantiatedOverlayTruncationRule, OverlayPolygon } from '@/utils/domain'
+import type {
+  InstantiatedOverlayTruncationRule,
+  OverlayPolygon,
+} from '@/utils/domain'
 import type OverlayTruncationRule from '@/utils/domain/truncationRule/overlay'
 
 const props = defineProps<{ value: RULE }>()

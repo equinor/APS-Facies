@@ -1,7 +1,10 @@
 #!/bin/env python
 # -*- coding: utf-8 -*-
 from aps.algorithms.defineTruncationRule import DefineTruncationRule
-from aps.unit_test.helpers import assert_identical_files, assert_equal_image_content_files
+from aps.unit_test.helpers import (
+    assert_identical_files,
+    assert_equal_image_content_files,
+)
 
 
 def test_create_cubic_rules():
@@ -35,7 +38,9 @@ def test_create_cubic_rules():
             L1 = levels_per_polygon[0]
             L2 = levels_per_polygon[1]
             L3 = levels_per_polygon[2]
-            rules.addPolygonToTruncationRuleSettingsCubic(truncStructureCubic, fName, probFrac, L1, L2, L3)
+            rules.addPolygonToTruncationRuleSettingsCubic(
+                truncStructureCubic, fName, probFrac, L1, L2, L3
+            )
         nameBG = f'C0{i + 1}'
         rules.addTruncationRuleSettingsCubic(nameBG, truncStructureCubic)
 
@@ -72,7 +77,9 @@ def test_create_non_cubic_rules():
             fName = list_facies_per_polygon[j]
             probFrac = prob_frac_per_polygon[j]
             angle = angles_per_setting[j]
-            rules.addPolygonToTruncationRuleSettingsNonCubic(truncStructureNonCubic, fName, angle, probFrac)
+            rules.addPolygonToTruncationRuleSettingsNonCubic(
+                truncStructureNonCubic, fName, angle, probFrac
+            )
         nameBG = f'N0{i + 1}'
         rules.addTruncationRuleSettingsNonCubic(nameBG, truncStructureNonCubic)
 
@@ -113,26 +120,49 @@ def test_create_cubic_rules_with_overlay():
             L1 = levels_per_polygon[0]
             L2 = levels_per_polygon[1]
             L3 = levels_per_polygon[2]
-            rules.addPolygonToTruncationRuleSettingsCubic(truncStructureCubic, fName, probFrac, L1, L2, L3)
+            rules.addPolygonToTruncationRuleSettingsCubic(
+                truncStructureCubic, fName, probFrac, L1, L2, L3
+            )
         nameBG = f'C0{i + 1}'
         rules.addTruncationRuleSettingsCubic(nameBG, truncStructureCubic)
 
     list_nGroups_per_setting = [1, 2, 1, 3]
     list_nPoly_per_group_per_setting = [[1], [1, 1], [1], [1, 2, 1]]
-    list_bg_facies_per_group_per_setting = [[['F01']], [['F01'], ['F02']], [['F02']], [['F01'], ['F02'], ['F03']]]
+    list_bg_facies_per_group_per_setting = [
+        [['F01']],
+        [['F01'], ['F02']],
+        [['F02']],
+        [['F01'], ['F02'], ['F03']],
+    ]
     list_overlay_facies_per_polygon_per_group = [
-        [['S01']], [['S01'], ['S02']], [['S03']],
+        [['S01']],
+        [['S01'], ['S02']],
+        [['S03']],
         [['S01'], ['S01', 'S01'], ['S01']],
     ]
-    list_probFrac_per_polygon_per_group = [[[1.0]], [[1.0], [1.0]], [[1.0]], [[0.35], [0.30, 0.20], [0.15]]]
-    list_center_interval_per_polygon_per_group = [[[0.0]], [[0.0], [0.0]], [[0.5]], [[1.0], [0.0, 0.0], [0.0]]]
+    list_probFrac_per_polygon_per_group = [
+        [[1.0]],
+        [[1.0], [1.0]],
+        [[1.0]],
+        [[0.35], [0.30, 0.20], [0.15]],
+    ]
+    list_center_interval_per_polygon_per_group = [
+        [[0.0]],
+        [[0.0], [0.0]],
+        [[0.5]],
+        [[1.0], [0.0, 0.0], [0.0]],
+    ]
 
     for i in range(len(list_nGroups_per_setting)):
         nGroups = list_nGroups_per_setting[i]
         nPoly_per_group = list_nPoly_per_group_per_setting[i]
-        overlay_facies_per_polygon_per_group = list_overlay_facies_per_polygon_per_group[i]
+        overlay_facies_per_polygon_per_group = (
+            list_overlay_facies_per_polygon_per_group[i]
+        )
         probFrac_per_polygon_per_group = list_probFrac_per_polygon_per_group[i]
-        center_interval_per_polygon_per_group = list_center_interval_per_polygon_per_group[i]
+        center_interval_per_polygon_per_group = (
+            list_center_interval_per_polygon_per_group[i]
+        )
         bg_facies_per_group = list_bg_facies_per_group_per_setting[i]
         overlayGroups = []
         for j in range(nGroups):
@@ -147,9 +177,13 @@ def test_create_cubic_rules_with_overlay():
                 fName = overlay_facies_per_polygon[k]
                 probFrac = probFrac_per_polygon[k]
                 center_interval = center_interval_per_polygon[k]
-                alphaList = rules.addPolygonToAlphaList(grfName, fName, probFrac, center_interval, alphaList)
+                alphaList = rules.addPolygonToAlphaList(
+                    grfName, fName, probFrac, center_interval, alphaList
+                )
 
-            overlayGroups = rules.addOverlayGroupSettings(alphaList, bg_facies_list, overlayGroups)
+            overlayGroups = rules.addOverlayGroupSettings(
+                alphaList, bg_facies_list, overlayGroups
+            )
         nameOL = 'A0' + str(i + 1)
         rules.addTruncationRuleSettingsOverlay(nameOL, overlayGroups)
 
@@ -158,7 +192,9 @@ def test_create_cubic_rules_with_overlay():
         for j in range(len(list_nGroups_per_setting)):
             nameOL = 'A0' + str(j + 1)
             name = nameBG + '_' + nameOL
-            rules.addTruncationRuleSettingsCubicWithOverlay(name, nameBG, nameOL, replace=False)
+            rules.addTruncationRuleSettingsCubicWithOverlay(
+                name, nameBG, nameOL, replace=False
+            )
 
     outFile = 'Cubic_with_overlay_out.dat'
     reference_file = 'testData_trunc_settings/Cubic_with_overlay_reference.dat'
@@ -170,20 +206,22 @@ def test_create_cubic_rules_with_overlay():
     # Create plots and check them
     plotFileName = 'Created_truncation_maps_cubic'
     out_plot_file = plotFileName + '.png'
-    ref_plot_file = 'testData_trunc_settings/Created_truncation_maps_cubic_reference.png'
+    ref_plot_file = (
+        'testData_trunc_settings/Created_truncation_maps_cubic_reference.png'
+    )
 
     rules.createOverviewPlotCubic(plotFileName)
 
     # Compare with reference data
 
-
     plotFileName = 'Created_truncation_maps_cubic_overlay'
     out_plot_file = plotFileName + '.png'
-    ref_plot_file = 'testData_trunc_settings/Created_truncation_maps_cubic_overlay_reference.png'
+    ref_plot_file = (
+        'testData_trunc_settings/Created_truncation_maps_cubic_overlay_reference.png'
+    )
 
     rules.createOverviewPlotCubicWithOverlay(plotFileName)
     # Compare with reference data
-
 
 
 def test_write_read():
@@ -214,7 +252,6 @@ def test_create_plots():
     # Compare with reference data
 
 
-
 def run():
     # ---------  Main ----------
     print('Start test_defineTruncSetting')
@@ -222,7 +259,6 @@ def run():
     test_create_non_cubic_rules()
     test_create_cubic_rules_with_overlay()
     test_write_read()
-
 
 
 if __name__ == '__main__':

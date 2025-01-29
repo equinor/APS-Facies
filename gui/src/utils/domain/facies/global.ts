@@ -29,8 +29,8 @@ export default class GlobalFacies extends Discrete {
   public color: Color
   public alias: string
   // make fields writable
-  public declare name: string
-  public declare code: CODE
+  declare public name: string
+  declare public code: CODE
 
   public constructor({
     observed = null,

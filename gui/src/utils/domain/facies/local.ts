@@ -7,7 +7,6 @@ import type GlobalFacies from '@/utils/domain/facies/global'
 import type { ID, PROBABILITY } from '@/utils/domain/types'
 import type { Branded } from '@/utils/typing/simple'
 
-
 export type ProbabilityCube = Branded<string, 'ProbabilityCube'>
 
 export type FaciesConfiguration = DependentConfiguration & {

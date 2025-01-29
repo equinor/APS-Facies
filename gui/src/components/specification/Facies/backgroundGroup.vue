@@ -11,11 +11,12 @@
 <script
   setup
   lang="ts"
-  generic="T extends Polygon,
-  S extends PolygonSerialization,
-  P extends PolygonSpecification,
-  RULE extends OverlayTruncationRule<T, S, P>
-"
+  generic="
+    T extends Polygon,
+    S extends PolygonSerialization,
+    P extends PolygonSpecification,
+    RULE extends OverlayTruncationRule<T, S, P>
+  "
 >
 import type { Facies } from '@/utils/domain'
 import type FaciesGroup from '@/utils/domain/facies/group'
@@ -70,7 +71,7 @@ const facies = computed<ListItem<Facies>[]>(() =>
               facies,
             ) /* I.e. the user should be allowed to DESELECT an already selected facies */ &&
             !faciesStore.availableForBackgroundFacies(props.rule, facies),
-        }
+        },
       }
     }),
 )
@@ -83,7 +84,13 @@ function update(facies: Facies[]): void {
     truncationRuleStore.addPolygon(props.rule, { group, overlay: true })
   } else {
     if (facies.length === 0) {
-      truncationRuleStore.removePolygon(props.rule, props.rule.polygons.find(polygon => 'group' in polygon && polygon.group.id === group.value.id)!)
+      truncationRuleStore.removePolygon(
+        props.rule,
+        props.rule.polygons.find(
+          (polygon) =>
+            'group' in polygon && polygon.group.id === group.value.id,
+        )!,
+      )
     } else {
       faciesGroupStore.update(group.value, facies)
     }

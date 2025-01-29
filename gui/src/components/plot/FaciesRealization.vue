@@ -12,11 +12,12 @@
 <script
   setup
   lang="ts"
-  generic="T extends Polygon,
-  S extends PolygonSerialization,
-  P extends PolygonSpecification,
-  RULE extends TruncationRule<T, S, P>
-"
+  generic="
+    T extends Polygon,
+    S extends PolygonSerialization,
+    P extends PolygonSpecification,
+    RULE extends TruncationRule<T, S, P>
+  "
 >
 import type { PlotData } from 'plotly.js-dist-min'
 
@@ -25,7 +26,10 @@ import type { GlobalFacies, Polygon } from '@/utils/domain'
 import StaticPlot from '@/components/plot/StaticPlot.vue'
 import { computed } from 'vue'
 import type { TruncationRule } from '@/utils/domain/truncationRule'
-import type { PolygonSerialization, PolygonSpecification } from '@/utils/domain/polygon/base'
+import type {
+  PolygonSerialization,
+  PolygonSpecification,
+} from '@/utils/domain/polygon/base'
 import { useGlobalFaciesStore } from '@/stores/facies/global'
 
 function filterOnCode(data: number[][] | null, code: number): (1 | null)[][] {

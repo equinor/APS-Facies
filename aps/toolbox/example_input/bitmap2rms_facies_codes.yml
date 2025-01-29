@@ -1,7 +1,7 @@
 bitmap2rms:
   Coordinates:
-    x:  643400  658400
-    y:  4343950 4359800
+    x: 643400  658400
+    y: 4343950 4359800
 
   PixelInterval:
     nx: 1152
@@ -15,14 +15,13 @@ bitmap2rms:
   ColorCode:
     1: 232
     2: 113
-    3:  79
+    3: 79
     4: 251
 
   Files:
-    - Input:  examples/img/bitmap/B1.bmp
+    - Input: examples/img/bitmap/B1.bmp
       Output: B1.irap
-    - Input:  examples/img/bitmap/B2.bmp
+    - Input: examples/img/bitmap/B2.bmp
       Output: B2.irap
-    - Input:  examples/img/bitmap/B3.bmp
+    - Input: examples/img/bitmap/B3.bmp
       Output: B3.irap
-

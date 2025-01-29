@@ -10,7 +10,10 @@ import { getId } from '@/utils'
 import type { ID } from '@/utils/domain/types'
 import type { Identifiable } from '@/utils/domain/bases/interfaces'
 import { useFaciesStore } from '.'
-import type { FaciesGroupConfiguration, FaciesGroupSerialization } from '@/utils/domain/facies/group'
+import type {
+  FaciesGroupConfiguration,
+  FaciesGroupSerialization,
+} from '@/utils/domain/facies/group'
 import { resolveParentReference } from '@/stores/utils'
 import { APSError } from '@/utils/domain/errors'
 
@@ -18,8 +21,13 @@ export type FaciesGroupStorePopulationData =
   IdentifiedStorePopulationData<FaciesGroup>
 
 export const useFaciesGroupStore = defineStore('facies-groups', () => {
-  const { available, identifiedAvailable, addAvailable, removeAvailable, $reset } =
-    useIdentifiedItems<FaciesGroup>()
+  const {
+    available,
+    identifiedAvailable,
+    addAvailable,
+    removeAvailable,
+    $reset,
+  } = useIdentifiedItems<FaciesGroup>()
 
   const byId = computed(() => {
     return (id: ID | Identifiable) => identifiedAvailable.value[getId(id)]
@@ -76,7 +84,9 @@ export const useFaciesGroupStore = defineStore('facies-groups', () => {
       throw new Error(`The facies, ${facies}, has already been specified`)
     }
     if (!parent || !parent.zone) {
-      throw new Error(`The facies, ${facies}, does not belong to a given zone / region`)
+      throw new Error(
+        `The facies, ${facies}, does not belong to a given zone / region`,
+      )
     }
 
     const group = new FaciesGroup({

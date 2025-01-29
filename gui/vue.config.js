@@ -40,16 +40,16 @@ module.exports = {
       })
   },
   devServer: {
-    proxy: /* CODESPACE_NAME
+    /* CODESPACE_NAME
       ? */
-      isDocker
-        ? `${API_PROTOCOL}://${API_SERVER}:${API_PORT}`
-        : ({
+    proxy: isDocker
+      ? `${API_PROTOCOL}://${API_SERVER}:${API_PORT}`
+      : {
           '^/api': {
             target: 'http://localhost:5000/api',
             changeOrigin: true,
-          }
-        }),
+          },
+        },
     // The port in Codespaces is the one used by NginX, and not the dev server
     // The reason, is that it is that URL that the browser sees.
     host: CODESPACE_NAME

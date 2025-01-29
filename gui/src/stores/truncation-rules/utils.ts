@@ -21,10 +21,10 @@ import type { TruncationRuleTemplateFromJson } from './templates'
 import { useGaussianRandomFieldStore } from '@/stores/gaussian-random-fields'
 import type {
   OverlayPolygonArgs,
-  OverlayPolygonSerialization
+  OverlayPolygonSerialization,
 } from '@/utils/domain/polygon/overlay'
 import OverlayPolygon, {
-  isOverlayPolygonSerialization
+  isOverlayPolygonSerialization,
 } from '@/utils/domain/polygon/overlay'
 import { useFaciesGroupStore } from '@/stores/facies/groups'
 import NonCubicPolygon, {
@@ -35,24 +35,27 @@ import CubicPolygon, {
 } from '@/utils/domain/polygon/cubic'
 import BayfillPolygon, {
   type BayfillPolygonArgs,
-  hasBayfillName
+  hasBayfillName,
 } from '@/utils/domain/polygon/bayfill'
 import APSTypeError from '@/utils/domain/errors/type'
 import { getId } from '@/utils'
 import { useZoneStore } from '@/stores/zones'
 
-
-function getOverlayItems(rule: Parameters<typeof minFacies>[0]): ({
-  polygons: {
-    facies: {
-      name: string
-    }
-  }[]
-} | {
-  facies: string
-})[] | null {
-  if (rule instanceof OverlayTruncationRule)
-    return rule.specification.overlay
+function getOverlayItems(rule: Parameters<typeof minFacies>[0]):
+  | (
+      | {
+          polygons: {
+            facies: {
+              name: string
+            }
+          }[]
+        }
+      | {
+          facies: string
+        }
+    )[]
+  | null {
+  if (rule instanceof OverlayTruncationRule) return rule.specification.overlay
   if ('overlay' in rule && rule.overlay) {
     if ('items' in rule.overlay) {
       console.error(rule.overlay)
@@ -65,15 +68,12 @@ function getOverlayItems(rule: Parameters<typeof minFacies>[0]): ({
 }
 
 export function minFacies<
-    T extends Polygon,
-    S extends PolygonSerialization,
-    P extends PolygonSpecification,
-    RULE extends TruncationRule<T, S, P>,
+  T extends Polygon,
+  S extends PolygonSerialization,
+  P extends PolygonSpecification,
+  RULE extends TruncationRule<T, S, P>,
 >(
-  rule:
-    | RULE
-    | TruncationRuleTemplateType
-    | TruncationRuleTemplateFromJson,
+  rule: RULE | TruncationRuleTemplateType | TruncationRuleTemplateFromJson,
 ): number {
   let minFacies = 0
   const type = rule.type
@@ -84,7 +84,9 @@ export function minFacies<
   ) {
     if (rule.polygons) {
       const uniqueFacies = new Set(
-        (rule.polygons as Array<Polygon>).filter((p) => p.facies).map((p) => p.facies!.name),
+        (rule.polygons as Array<Polygon>)
+          .filter((p) => p.facies)
+          .map((p) => p.facies!.name),
       )
       const items = getOverlayItems(rule)
       if (items !== null && items !== undefined) {
@@ -109,15 +111,12 @@ export function minFacies<
 }
 
 export function hasEnoughFacies<
-    T extends Polygon,
-    S extends PolygonSerialization,
-    P extends PolygonSpecification,
-    RULE extends TruncationRule<T, S, P>,
+  T extends Polygon,
+  S extends PolygonSerialization,
+  P extends PolygonSpecification,
+  RULE extends TruncationRule<T, S, P>,
 >(
-  rule:
-    | RULE
-    | TruncationRuleTemplateType
-    | TruncationRuleTemplateFromJson,
+  rule: RULE | TruncationRuleTemplateType | TruncationRuleTemplateFromJson,
 ): boolean {
   const faciesStore = useFaciesStore()
   const numFacies = faciesStore.selected.length
@@ -142,9 +141,16 @@ export function usesAllFacies<
   )
 }
 
-type RealizedPolygon = BayfillPolygon | NonCubicPolygon | CubicPolygon | OverlayPolygon
+type RealizedPolygon =
+  | BayfillPolygon
+  | NonCubicPolygon
+  | CubicPolygon
+  | OverlayPolygon
 
-function addChildren(polygon: CubicPolygon, parsedPolygons: RealizedPolygon[]): void {
+function addChildren(
+  polygon: CubicPolygon,
+  parsedPolygons: RealizedPolygon[],
+): void {
   polygon.children = polygon.children.map((child): CubicPolygon => {
     const found = parsedPolygons.find(
       (polygon): boolean => polygon.id === getId(child),
@@ -160,7 +166,10 @@ function addChildren(polygon: CubicPolygon, parsedPolygons: RealizedPolygon[]): 
   })
 }
 
-function addParent(polygon: CubicPolygon, parsedPolygons: RealizedPolygon[]): void {
+function addParent(
+  polygon: CubicPolygon,
+  parsedPolygons: RealizedPolygon[],
+): void {
   const parent = parsedPolygons.find(
     (item): boolean => item.id === getId(polygon.parent),
   )
@@ -172,42 +181,48 @@ function addParent(polygon: CubicPolygon, parsedPolygons: RealizedPolygon[]): vo
   polygon.parent = parent as CubicPolygon
 }
 
-export type PartiallySpecifiedPolygonSpecification = (PolygonArgs | NonCubicPolygonArgs | CubicPolygonArgs | BayfillPolygonArgs) & {
+export type PartiallySpecifiedPolygonSpecification = (
+  | PolygonArgs
+  | NonCubicPolygonArgs
+  | CubicPolygonArgs
+  | BayfillPolygonArgs
+) & {
   facies: Facies | null
   field?: GaussianRandomField | null
   group?: FaciesGroup
 }
 
 export function makePolygonsFromSpecification<
-    S extends PartiallySpecifiedPolygonSpecification
+  S extends PartiallySpecifiedPolygonSpecification,
 >(polygons: S[]): RealizedPolygon[] {
   const parsedPolygons = polygons.map((polygon): RealizedPolygon => {
     if ('order' in polygon && 'facies' in polygon) {
       if ('angle' in polygon) {
         return new NonCubicPolygon(polygon)
       } else if (
-          ('children' in polygon && 'parent' in polygon) ||
-          // From a template
-          'level' in polygon
+        ('children' in polygon && 'parent' in polygon) ||
+        // From a template
+        'level' in polygon
       ) {
         // We implement the hierarchy in `organizeCubicPolygons`
         // we therefore set `parent` and `children` to be empty
         return new CubicPolygon({
           order: polygon.order,
-          parent: 'parent' in  polygon ? polygon.parent : null,
+          parent: 'parent' in polygon ? polygon.parent : null,
           facies: polygon.facies,
-          children: 'children' in polygon? polygon.children : [],
+          children: 'children' in polygon ? polygon.children : [],
           id: polygon.id,
           fraction: polygon.fraction,
         })
       } else if (
-          ('group' in polygon && 'field' in polygon) ||
-          ('overlay' in polygon && polygon.overlay)
+        ('group' in polygon && 'field' in polygon) ||
+        ('overlay' in polygon && polygon.overlay)
       ) {
         return new OverlayPolygon(polygon as OverlayPolygonArgs)
       } else if (
-          ('name' in polygon) && hasBayfillName(polygon.name as string)
-          // 'slantFactor' in polygon /* No all Bayfill polygons has slantFactor */
+        'name' in polygon &&
+        hasBayfillName(polygon.name as string)
+        // 'slantFactor' in polygon /* No all Bayfill polygons has slantFactor */
       ) {
         return new BayfillPolygon(polygon as BayfillPolygonArgs)
       } else {
@@ -229,27 +244,32 @@ export function makePolygonsFromSpecification<
   })
 }
 
-export function deserializePolygons<S extends PolygonSerialization | OverlayPolygonSerialization>(polygons: S[]) {
+export function deserializePolygons<
+  S extends PolygonSerialization | OverlayPolygonSerialization,
+>(polygons: S[]) {
   const faciesStore = useFaciesStore()
   const gaussianRandomFieldStore = useGaussianRandomFieldStore()
   const faciesGroupStore = useFaciesGroupStore()
-  const partiallyDefinedPolygons: PartiallySpecifiedPolygonSpecification[] = polygons.map((polygon) => {
+  const partiallyDefinedPolygons: PartiallySpecifiedPolygonSpecification[] =
+    polygons.map((polygon) => {
       const facies = polygon.facies ? faciesStore.byId(polygon.facies) : null
       if (isOverlayPolygonSerialization(polygon)) {
-        return ({
+        return {
           ...polygon,
           facies,
-          field: polygon.field ? gaussianRandomFieldStore.byId(polygon.field) : null,
+          field: polygon.field
+            ? gaussianRandomFieldStore.byId(polygon.field)
+            : null,
           group: faciesGroupStore.byId(polygon.group),
-        })
-      } else return ({
-        ...polygon,
-        facies,
-      } as PartiallySpecifiedPolygonSpecification)
+        }
+      } else
+        return {
+          ...polygon,
+          facies,
+        } as PartiallySpecifiedPolygonSpecification
     })
   return makePolygonsFromSpecification(partiallyDefinedPolygons)
 }
-
 
 export function resolveParentReference(
   parent: ParentReference | Parent,

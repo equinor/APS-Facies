@@ -2,7 +2,7 @@
   <base-selection-table
     v-model="selected"
     :current="currentId"
-    :items="(facies as GlobalFacies[])"
+    :items="facies as GlobalFacies[]"
     :expanded="expanded"
     :headers="headers"
     :loading="loading"
@@ -10,13 +10,13 @@
     :no-data-text="noDataText"
     :select-disabled="!canSelect"
     :select-error="selectFaciesError"
-    @update:current="value => currentId = value"
+    @update:current="(value) => (currentId = value)"
   >
     <template #item="{ item }">
       <facies-row
         :mode-value="item as GlobalFacies"
         :expanded="expanded as GlobalFacies[]"
-        @expanded="items => expanded = items"
+        @expanded="(items) => (expanded = items)"
       />
     </template>
     <template #expanded-item="{ item, columns }">
@@ -25,7 +25,7 @@
           <color-picker
             :model-value="item.color"
             :colors="availableColors"
-            @update:model-value="(color) => item.color = color"
+            @update:model-value="(color) => (item.color = color)"
           />
         </td>
       </tr>
@@ -76,7 +76,9 @@ const noDataText = computed(() =>
 )
 
 const facies = computed<GlobalFacies[]>(() =>
-  [...faciesGlobalStore.available as GlobalFacies[]].sort((a, b) => a.code - b.code)
+  [...(faciesGlobalStore.available as GlobalFacies[])].sort(
+    (a, b) => a.code - b.code,
+  ),
 )
 const parent = computed(() => rootStore.parent)
 
@@ -114,12 +116,13 @@ const headers = computed(() => [
 
 const selected = computed<GlobalFacies[]>({
   get: () => {
-    return (faciesGlobalStore.available as GlobalFacies[]).filter((globalFacies) =>
-      (faciesStore.available as Facies[]).some(
-        (localFacies: Facies) =>
-          hasCurrentParents(localFacies) &&
-          localFacies.facies.id === globalFacies.id,
-      ),
+    return (faciesGlobalStore.available as GlobalFacies[]).filter(
+      (globalFacies) =>
+        (faciesStore.available as Facies[]).some(
+          (localFacies: Facies) =>
+            hasCurrentParents(localFacies) &&
+            localFacies.facies.id === globalFacies.id,
+        ),
     ) as GlobalFacies[]
   },
   set: (value: GlobalFacies[]) => faciesStore.select(value, parent.value),
@@ -131,8 +134,5 @@ const selectFaciesError = computed(() => {
   return `A ${item} must be selected, before including a facies in the model`
 })
 
-const availableColors = computed(
-  () => colorStore.current?.colors ?? [],
-)
-
+const availableColors = computed(() => colorStore.current?.colors ?? [])
 </script>

@@ -13,11 +13,12 @@
 <script
   setup
   lang="ts"
-  generic="T extends Polygon,
+  generic="
+    T extends Polygon,
     S extends PolygonSerialization,
     P extends PolygonSpecification,
     RULE extends TruncationRule<T, S, P>
-"
+  "
 >
 import rms from '@/api/rms'
 
@@ -29,7 +30,10 @@ import type { PlotSpecification } from '@/utils/plotting'
 import { ref, watch } from 'vue'
 import type { TruncationRule } from '@/utils/domain/truncationRule'
 import type { Polygon } from '@/utils/domain'
-import type { PolygonSerialization, PolygonSpecification } from '@/utils/domain/polygon/base'
+import type {
+  PolygonSerialization,
+  PolygonSpecification,
+} from '@/utils/domain/polygon/base'
 import { useGlobalFaciesStore } from '@/stores/facies/global'
 import { useTruncationRuleStore } from '@/stores/truncation-rules'
 
@@ -52,22 +56,25 @@ watch(
     () => props.value,
     // Vue struggles with changes in class properties
     () => props.value.facies,
-    () => props.value.polygons.map(polygon => polygon.facies?.previewProbability),
+    () =>
+      props.value.polygons.map((polygon) => polygon.facies?.previewProbability),
   ],
   async () => {
     if (ruleStore.ready(props.value)) {
-
       disabled.value = false
       data.value = plotify(
-        await rms.truncationPolygons(makeTruncationRuleSpecification(props.value)),
+        await rms.truncationPolygons(
+          makeTruncationRuleSpecification(props.value),
+        ),
         faciesGlobalStore.selected,
       )
     } else {
       disabled.value = true
     }
-  }, {
+  },
+  {
     deep: true,
     immediate: true,
-  })
-
+  },
+)
 </script>

@@ -1,136 +1,148 @@
 #!/bin/env python
 # -*- coding: utf-8 -*-
-''' This module is used in FMU workflows to copy a continuous 3D parameter
-    from geomodel grid to ERTBOX grid and extrapolate values that are undefined
-    in ERTBOX grid. This functionality is used when the user wants to
-    use FIELD keywords for petrophysical properties in ERT in Assisted History Matching.
-'''
+"""This module is used in FMU workflows to copy a continuous 3D parameter
+from geomodel grid to ERTBOX grid and extrapolate values that are undefined
+in ERTBOX grid. This functionality is used when the user wants to
+use FIELD keywords for petrophysical properties in ERT in Assisted History Matching.
+"""
+
 import roxar
 import xml.etree.ElementTree as ET
 
 from pathlib import Path
 from aps.utils.constants.simple import (
-    Debug, Conform, ExtrapolationMethod,
+    Debug,
+    Conform,
+    ExtrapolationMethod,
 )
 from aps.rms_jobs.copy_rms_param_trend_to_fmu_grid import (
-        get_grid_model,
-        copy_from_geo_to_ertbox_grid)
+    get_grid_model,
+    copy_from_geo_to_ertbox_grid,
+)
 
 from aps.utils.ymlUtils import get_text_value, get_dict, get_bool_value, readYml
 from aps.utils.methods import check_missing_keywords_list
 from aps.utils.roxar.grid_model import get_zone_layer_numbering
-from aps.utils.roxar.generalFunctionsUsingRoxAPI import  set_continuous_3d_parameter_values_in_zone_region
+from aps.utils.roxar.generalFunctionsUsingRoxAPI import (
+    set_continuous_3d_parameter_values_in_zone_region,
+)
+
 
 def run(params, seed=12345):
     """
-        Copy 3D RMS parameters from geogrid to ERTBOX grid and optionally extrapolate and fill all ERTBOX grid cells.
-        Usage alternatives:
-        - Specify input as dictionary with model file containing all input. See example 1.
-        - Specify input as dictionary witl all input. See example 2.
+            Copy 3D RMS parameters from geogrid to ERTBOX grid and optionally extrapolate and fill all ERTBOX grid cells.
+            Usage alternatives:
+            - Specify input as dictionary with model file containing all input. See example 1.
+            - Specify input as dictionary witl all input. See example 2.
 
-Example 1:
+    Example 1:
 
-from aps.toolbox import copy_rms_param_to_ertbox_grid
-from aps.utils.constants.simple import Debug
+    from aps.toolbox import copy_rms_param_to_ertbox_grid
+    from aps.utils.constants.simple import Debug
 
-params ={
-    "project": project,
-    "model_file_name": "examples/resample_properties_to_ertbox.xml",
-    "debug_level": Debug.VERBOSE,
-}
-copy_rms_param_to_ertbox_grid.run(params)
+    params ={
+        "project": project,
+        "model_file_name": "examples/resample_properties_to_ertbox.xml",
+        "debug_level": Debug.VERBOSE,
+    }
+    copy_rms_param_to_ertbox_grid.run(params)
 
 
-Example 2:
+    Example 2:
 
-from aps.toolbox import copy_rms_param_to_ertbox_grid
-from aps.utils.constants.simple import Debug
-# NOTE: In the example below the geo grid has 6 zones while Ertbox grid has 1 zone
-#       The parameter names for geogrid is the same for each zone since it is a multizone grid
-#       and zone number + parameter name uniquely identify the field parameter.
-#       The key (integer numbers) in the two dicts refer to zone number in geogrid
-#       so for zone number 1 the Perm1 and Poro1 values in the Ertbox grid corresponds to
-#       the Perm and Poro values for zone number 1 in the geogrid.
-#
-#       When copying from geo to Ertbox grid there can be grid cells in Ertbox that does not
-#       correspond to any active grid cell value in the geo grid. To fill in some values for
-#       those grid cells, an extrapolation method is used. The reason for extrapolating is to
-#       avoid having undefined values in Ertbox since all cell values are used in ERT when updating
-#       field values. It is an advantage to avoid unrealistic values in ERT ensemble vector due to the 
-#       calculation of updated (analysis step in ERT) ensemble vectors to avoid making linear combinations
-#       of values for grid cells that may correspond to active grid cell in geogrid in one realization,
-#       but not for another realisation due to 3D grids varying from realisation to realisation.
-#
-#       When copying from Ertbox grid to geo grid, all grid cells in specified zones in the geo grid
-#       will correspond to a value in the Ertbox grid.
-params ={
-    "project": project,
-    "debug_level": Debug.ON,
-    "Mode": "from_geo_to_ertbox",
-    "GeoGridParameters": {
-        1: ["Perm", "Poro"],
-        2: ["Perm", "Poro"],
-        3: ["Perm", "Poro"],
-        4: ["Perm", "Poro"],
-        5: ["Perm", "Poro"],
-        6: ["Perm", "Poro"],
-    },
-    "ErtboxParameters": {
-        1: ["Perm1", "Poro1"],
-        2: ["Perm2", "Poro2"],
-        3: ["Perm3", "Poro3"],
-        4: ["Perm4", "Poro4"],
-        5: ["Perm5", "Poro5"],
-        6: ["Perm6", "Poro6"],
-    },
-    "Conformity": {
-        1: "TopConform",
-        2: "Proportional",
-        3: "BaseConform",
-        4: "TopConform",
-        5: "BaseConform",
-        6: "BaseConform",
-    },
+    from aps.toolbox import copy_rms_param_to_ertbox_grid
+    from aps.utils.constants.simple import Debug
+    # NOTE: In the example below the geo grid has 6 zones while Ertbox grid has 1 zone
+    #       The parameter names for geogrid is the same for each zone since it is a multizone grid
+    #       and zone number + parameter name uniquely identify the field parameter.
+    #       The key (integer numbers) in the two dicts refer to zone number in geogrid
+    #       so for zone number 1 the Perm1 and Poro1 values in the Ertbox grid corresponds to
+    #       the Perm and Poro values for zone number 1 in the geogrid.
+    #
+    #       When copying from geo to Ertbox grid there can be grid cells in Ertbox that does not
+    #       correspond to any active grid cell value in the geo grid. To fill in some values for
+    #       those grid cells, an extrapolation method is used. The reason for extrapolating is to
+    #       avoid having undefined values in Ertbox since all cell values are used in ERT when updating
+    #       field values. It is an advantage to avoid unrealistic values in ERT ensemble vector due to the
+    #       calculation of updated (analysis step in ERT) ensemble vectors to avoid making linear combinations
+    #       of values for grid cells that may correspond to active grid cell in geogrid in one realization,
+    #       but not for another realisation due to 3D grids varying from realisation to realisation.
+    #
+    #       When copying from Ertbox grid to geo grid, all grid cells in specified zones in the geo grid
+    #       will correspond to a value in the Ertbox grid.
+    params ={
+        "project": project,
+        "debug_level": Debug.ON,
+        "Mode": "from_geo_to_ertbox",
+        "GeoGridParameters": {
+            1: ["Perm", "Poro"],
+            2: ["Perm", "Poro"],
+            3: ["Perm", "Poro"],
+            4: ["Perm", "Poro"],
+            5: ["Perm", "Poro"],
+            6: ["Perm", "Poro"],
+        },
+        "ErtboxParameters": {
+            1: ["Perm1", "Poro1"],
+            2: ["Perm2", "Poro2"],
+            3: ["Perm3", "Poro3"],
+            4: ["Perm4", "Poro4"],
+            5: ["Perm5", "Poro5"],
+            6: ["Perm6", "Poro6"],
+        },
+        "Conformity": {
+            1: "TopConform",
+            2: "Proportional",
+            3: "BaseConform",
+            4: "TopConform",
+            5: "BaseConform",
+            6: "BaseConform",
+        },
 
-    "GridModelName": "GridModelFine",
-    "ZoneParam": "Zone",
-    "ERTBoxGridName": "ERTBOX",
-    "ExtrapolationMethod": "repeat",
-    "SaveActiveParam": True,
-    "AddNoiseToInactive": True,
-}
-copy_rms_param_to_ertbox_grid.run(params)
+        "GridModelName": "GridModelFine",
+        "ZoneParam": "Zone",
+        "ERTBoxGridName": "ERTBOX",
+        "ExtrapolationMethod": "repeat",
+        "SaveActiveParam": True,
+        "AddNoiseToInactive": True,
+    }
+    copy_rms_param_to_ertbox_grid.run(params)
 
     """
     project = params['project']
-    model_file_name = params.get('model_file_name',None)
+    model_file_name = params.get('model_file_name', None)
     if model_file_name is not None:
         # Read model file
-        params = read_model_file(model_file_name, debug_level=params.get('debug_level', Debug.OFF))
+        params = read_model_file(
+            model_file_name, debug_level=params.get('debug_level', Debug.OFF)
+        )
     # Check that necessary params are specified
     required_kw_list = [
-        "Mode",
-        "GridModelName", "ERTBoxGridName",
-        "ZoneParam", "Conformity","SaveActiveParam",
+        'Mode',
+        'GridModelName',
+        'ERTBoxGridName',
+        'ZoneParam',
+        'Conformity',
+        'SaveActiveParam',
     ]
     check_missing_keywords_list(params, required_kw_list)
     mode = params['Mode']
-    if params["debug_level"] == Debug.VERBOSE:
-        print(f"-- Realization number:  {project.current_realisation}")
+    if params['debug_level'] == Debug.VERBOSE:
+        print(f'-- Realization number:  {project.current_realisation}')
     if mode == 'from_geo_to_ertbox':
         # The names of the parameters in ertbox is automatically set to
         # <zone_name>_<param_name_from_geomodel> since it follows
         # the standard used in APS and therefore no need to specify
         # parameter names in ertbox.
-        required_kw_list.append("ExtrapolationMethod")
-        required_kw_list.append("GeoGridParameters")
+        required_kw_list.append('ExtrapolationMethod')
+        required_kw_list.append('GeoGridParameters')
         check_missing_keywords_list(params, required_kw_list)
         from_geogrid_to_ertbox(project, params, seed=seed)
     elif mode == 'from_ertbox_to_geo':
         # The name both in ertbox and in geogrid is required
         # here since no standard naming convention is required here.
         required_kw_list.append('ErtboxParameters')
-        required_kw_list.append("GeoGridParameters")
+        required_kw_list.append('GeoGridParameters')
         check_missing_keywords_list(params, required_kw_list)
         from_ertbox_to_geogrid(project, params)
 
@@ -152,8 +164,9 @@ def from_geogrid_to_ertbox(project, params, seed=12345):
     add_noise_to_inactive = params.get('AddNoiseToInactive', True)
 
     # Check type and existence of geogrid parameters
-    (continuous_type_param_dict, discrete_type_param_list) = \
-        check_geogrid_parameters(project, grid_model_name, param_names_geogrid_dict)
+    (continuous_type_param_dict, discrete_type_param_list) = check_geogrid_parameters(
+        project, grid_model_name, param_names_geogrid_dict
+    )
 
     # Some conversion
     conformity_dict = {}
@@ -161,10 +174,11 @@ def from_geogrid_to_ertbox(project, params, seed=12345):
         conformity_dict[znr] = Conform(conform_text)
     method = ExtrapolationMethod(method)
 
-
     geogrid_model, geogrid3D = get_grid_model(project, grid_model_name)
     if not zone_param_name in geogrid_model.properties:
-        raise ValueError(f"The parameter {zone_param_name} does not exist in {grid_model_name} .")
+        raise ValueError(
+            f'The parameter {zone_param_name} does not exist in {grid_model_name} .'
+        )
     zone_param = geogrid_model.properties[zone_param_name]
     zone_code_names = zone_param.code_names
 
@@ -178,63 +192,70 @@ def from_geogrid_to_ertbox(project, params, seed=12345):
         raise ValueError(
             f"Grid model for geomodel '{grid_model_name}' and "
             f"grid model for ERTBOX grid '{ertbox_grid_model_name}'  "
-            "have different grid index origin.\n"
+            'have different grid index origin.\n'
             "Use 'Eclipse grid standard' (upper left corner) as "
-            "common grid index origin (right-handed grid) in FMU projects using ERT."
+            'common grid index origin (right-handed grid) in FMU projects using ERT.'
         )
     if ertboxgrid_handedness != roxar.Direction.right:
         print("WARNING: ERTBOX grid should have 'Eclipse grid index origin'.")
-        print("         Use the grid index origin job in RMS to set this.")
-
+        print('         Use the grid index origin job in RMS to set this.')
 
     zone_dict = {}
-    zone_names_used =[] 
+    zone_names_used = []
     if debug_level >= Debug.ON:
         print(
-            f"\nCopy RMS 3D parameters from {grid_model_name} "
-            f"to {ertbox_grid_model_name} for zones:"
+            f'\nCopy RMS 3D parameters from {grid_model_name} '
+            f'to {ertbox_grid_model_name} for zones:'
         )
     if debug_level >= Debug.ON:
-        print("Continuous parameters:")
+        print('Continuous parameters:')
     for zone_number, zone_name in zone_code_names.items():
         if zone_number in param_names_geogrid_dict and zone_number in conformity_dict:
-            zone_dict[zone_name] = \
-                (zone_number, 0, conformity_dict[zone_number], continuous_type_param_dict[zone_number])
+            zone_dict[zone_name] = (
+                zone_number,
+                0,
+                conformity_dict[zone_number],
+                continuous_type_param_dict[zone_number],
+            )
             zone_names_used.append(zone_name)
             if debug_level >= Debug.ON:
-                print(f"  {zone_name}:  {continuous_type_param_dict[zone_number]} ")
+                print(f'  {zone_name}:  {continuous_type_param_dict[zone_number]} ')
 
     if debug_level >= Debug.ON:
-        print("Discrete parameters:")
+        print('Discrete parameters:')
         for p in discrete_type_param_list:
-            print(f" {p} ")
-
+            print(f' {p} ')
 
     copy_from_geo_to_ertbox_grid(
-            project,
-            grid_model_name,
-            ertbox_grid_model_name,
-            zone_dict,
-            method,
-            discrete_param_names=discrete_type_param_list,
-            debug_level=debug_level,
-            save_active_param=save_active_param,
-            add_noise_to_inactive=add_noise_to_inactive,
-            normalize_trend=False,
-            not_aps_workflow=True,
-            seed=seed)
+        project,
+        grid_model_name,
+        ertbox_grid_model_name,
+        zone_dict,
+        method,
+        discrete_param_names=discrete_type_param_list,
+        debug_level=debug_level,
+        save_active_param=save_active_param,
+        add_noise_to_inactive=add_noise_to_inactive,
+        normalize_trend=False,
+        not_aps_workflow=True,
+        seed=seed,
+    )
 
     if debug_level >= Debug.ON:
-        print(f"- Finished copy rms parameters from {grid_model_name} to {ertbox_grid_model_name} ")
+        print(
+            f'- Finished copy rms parameters from {grid_model_name} to {ertbox_grid_model_name} '
+        )
 
 
-def check_geogrid_parameters(project, grid_model_name:str, param_names_geogrid_dict: dict):
+def check_geogrid_parameters(
+    project, grid_model_name: str, param_names_geogrid_dict: dict
+):
     if grid_model_name in project.grid_models:
         grid_model = project.grid_models[grid_model_name]
     else:
-        raise ValueError(f"Grid model: {grid_model_name} does not exists.")
+        raise ValueError(f'Grid model: {grid_model_name} does not exists.')
     if grid_model.is_empty(project.current_realisation):
-        raise ValueError(f"Grid model: {grid_model.name} is empty.")
+        raise ValueError(f'Grid model: {grid_model.name} is empty.')
     properties = grid_model.properties
     continuous_type_param_dict = {}
     discrete_type_param_list = []
@@ -242,11 +263,15 @@ def check_geogrid_parameters(project, grid_model_name:str, param_names_geogrid_d
         continuous_type_param_list = []
         for pname in property_names:
             if pname not in properties:
-                raise ValueError(f"Grid parameter: {pname} does not exists for grid model: {grid_model.name}  ")
+                raise ValueError(
+                    f'Grid parameter: {pname} does not exists for grid model: {grid_model.name}  '
+                )
 
             prop = properties[pname]
             if prop.is_empty(project.current_realisation):
-                raise ValueError(f"Grid property: {pname} is empty for grid model: {grid_model.name}")
+                raise ValueError(
+                    f'Grid property: {pname} is empty for grid model: {grid_model.name}'
+                )
             if prop.type == roxar.GridPropertyType.continuous:
                 continuous_type_param_list.append(pname)
             elif prop.type == roxar.GridPropertyType.discrete:
@@ -254,8 +279,8 @@ def check_geogrid_parameters(project, grid_model_name:str, param_names_geogrid_d
                     discrete_type_param_list.append(pname)
             else:
                 raise ValueError(
-                    f"Grid parameter: {pname} for grid model: {grid_model.name} "
-                    f"has type: {prop.type} which is not implemented in this script."
+                    f'Grid parameter: {pname} for grid model: {grid_model.name} '
+                    f'has type: {prop.type} which is not implemented in this script.'
                 )
 
         continuous_type_param_dict[zone_number] = continuous_type_param_list
@@ -277,7 +302,6 @@ def from_ertbox_to_geogrid(project, params):
     for znr, conform_text in conformity_dict_input.items():
         conformity_dict[znr] = Conform(conform_text)
 
-
     # Create
     geogrid_model, grid3D = get_grid_model(project, grid_model_name)
     ertbox_grid_model, ertbox3D = get_grid_model(project, ertbox_grid_model_name)
@@ -289,15 +313,13 @@ def from_ertbox_to_geogrid(project, params):
         raise ValueError(
             f"Grid model for geomodel '{grid_model_name}' and "
             f"grid model for ERTBOX grid '{ertbox_grid_model_name}'  "
-            "have different grid index origin.\n"
+            'have different grid index origin.\n'
             "Use 'Eclipse grid standard' (upper left corner) as "
-            "common grid index origin (right-handed grid) in FMU projects using ERT."
+            'common grid index origin (right-handed grid) in FMU projects using ERT.'
         )
     if ertboxgrid_handedness != roxar.Direction.right:
         print("WARNING: ERTBOX grid should have 'Eclipse grid index origin'.")
-        print("         Use the grid index origin job in RMS to set this.")
-
-
+        print('         Use the grid index origin job in RMS to set this.')
 
     number_of_layers_per_zone_in_geo_grid, _, _ = get_zone_layer_numbering(grid3D)
     nx, ny, nz_ertbox = ertbox3D.simbox_indexer.dimensions
@@ -307,10 +329,10 @@ def from_ertbox_to_geogrid(project, params):
         param_names_geogrid_list = param_names_geogrid_dict[zone_number]
         param_names_ertbox_list = param_names_ertbox_dict[zone_number]
         if debug_level >= Debug.VERBOSE:
-            print(f"-- Zone number:  {zone_number}")
-            print(f"-- Conformity: {conformity}  ")
-            print(f"-- Copy from:  {param_names_ertbox_list}")
-            print(f"-- Copy to:    {param_names_geogrid_list}")
+            print(f'-- Zone number:  {zone_number}')
+            print(f'-- Conformity: {conformity}  ')
+            print(f'-- Copy from:  {param_names_ertbox_list}')
+            print(f'-- Copy to:    {param_names_geogrid_list}')
         nz_for_zone = number_of_layers_per_zone_in_geo_grid[zone_index]
         parameter_names_geo_grid = []
         parameter_values_geo_grid = []
@@ -319,7 +341,9 @@ def from_ertbox_to_geogrid(project, params):
             try:
                 rms_property = ertbox_grid_model.properties[param_name]
             except KeyError:
-                raise ValueError(f"The parameter: {param_name} does not exist or is empty for grid model: {ertbox_grid_model_name}")
+                raise ValueError(
+                    f'The parameter: {param_name} does not exist or is empty for grid model: {ertbox_grid_model_name}'
+                )
             values = rms_property.get_values(realisation=real_number)
             field_values = values.reshape(nx, ny, nz_ertbox)
             if conformity in [Conform.Proportional, Conform.TopConform]:
@@ -338,8 +362,10 @@ def from_ertbox_to_geogrid(project, params):
 
         # Update geogrid. Has often multiple zones
         if debug_level >= Debug.VERY_VERBOSE:
-            for name in  parameter_names_geo_grid:
-                print(f'--- Update parameter {name} for zone number {zone_number} in {geogrid_model}')
+            for name in parameter_names_geo_grid:
+                print(
+                    f'--- Update parameter {name} for zone number {zone_number} in {geogrid_model}'
+                )
 
         set_continuous_3d_parameter_values_in_zone_region(
             geogrid_model,
@@ -351,7 +377,10 @@ def from_ertbox_to_geogrid(project, params):
             switch_handedness=True,
         )
     if debug_level >= Debug.ON:
-        print(f"- Finished copy rms parameters from {ertbox_grid_model_name}  to {grid_model_name}.")
+        print(
+            f'- Finished copy rms parameters from {ertbox_grid_model_name}  to {grid_model_name}.'
+        )
+
 
 def read_model_file(model_file_name, debug_level=Debug.OFF):
     # Check suffix of file for file type
@@ -360,10 +389,11 @@ def read_model_file(model_file_name, debug_level=Debug.OFF):
     if suffix in ['yaml', 'yml']:
         param_dict = _read_model_file_yml(model_file_name, debug_level=debug_level)
     elif suffix == 'xml':
-            raise ValueError(f"No xml file format implemented for {__name__}   ")
+        raise ValueError(f'No xml file format implemented for {__name__}   ')
     else:
         raise ValueError(f"Model file name: {model_file_name}  must be 'yml' format")
     return param_dict
+
 
 def _read_model_file_yml(model_file_name, debug_level=Debug.OFF):
     print(f'Read model file: {model_file_name}')
@@ -372,32 +402,39 @@ def _read_model_file_yml(model_file_name, debug_level=Debug.OFF):
     kw_parent = 'Resample'
     spec = spec_all[kw_parent] if kw_parent in spec_all else None
     if spec is None:
-        raise ValueError(f"Missing keyword: {kw_parent} ")
+        raise ValueError(f'Missing keyword: {kw_parent} ')
 
-    valid_keywords =[
-        "Mode", "GridModelName", "ERTBoxGridName",
-        "ZoneParam", "GeoGridParameters", "ErtboxParameters",
-        "Conformity", "SaveActiveParam", "ExtrapolationMethod",
-        "AddNoiseToInactive"
-        ]
+    valid_keywords = [
+        'Mode',
+        'GridModelName',
+        'ERTBoxGridName',
+        'ZoneParam',
+        'GeoGridParameters',
+        'ErtboxParameters',
+        'Conformity',
+        'SaveActiveParam',
+        'ExtrapolationMethod',
+        'AddNoiseToInactive',
+    ]
     unknown_keys = []
     for key in list(spec.keys()):
         if key not in valid_keywords:
             unknown_keys.append(key)
     if len(unknown_keys) > 0:
-        print("Unknown keywords found:")
+        print('Unknown keywords found:')
         for key in unknown_keys:
-            print(f"  {key}")
-        print("Defined keywords are:")
+            print(f'  {key}')
+        print('Defined keywords are:')
         for key in valid_keywords:
-            print(f"  {key}")
-        raise KeyError("Unknown keywords are specified.")
-
+            print(f'  {key}')
+        raise KeyError('Unknown keywords are specified.')
 
     valid_strings = ['from_geo_to_ertbox', 'from_ertbox_to_geo']
     mode = get_text_value(spec, kw_parent, 'Mode', default='from_geo_to_ertbox')
     if mode not in valid_strings:
-        raise ValueError(f"The keyword 'Mode' must be followed by one of the keywords {valid_strings}  ") 
+        raise ValueError(
+            f"The keyword 'Mode' must be followed by one of the keywords {valid_strings}  "
+        )
     grid_model_name = get_text_value(spec, kw_parent, 'GridModelName')
     ertbox_grid_model_name = get_text_value(spec, kw_parent, 'ERTBoxGridName')
     zone_param_name = get_text_value(spec, kw_parent, 'ZoneParam')
@@ -416,8 +453,8 @@ def _read_model_file_yml(model_file_name, debug_level=Debug.OFF):
         ]
         if method_text not in valid_methods:
             raise ValueError(
-                f"Extrapolation method: {method_text} is unknown. Valid methods are:\n"
-                f"{valid_methods}"
+                f'Extrapolation method: {method_text} is unknown. Valid methods are:\n'
+                f'{valid_methods}'
             )
         method = ExtrapolationMethod(method_text)
 
@@ -434,31 +471,30 @@ def _read_model_file_yml(model_file_name, debug_level=Debug.OFF):
             text = str(param_list_ertbox_dict[key])
             param_names_ertbox_per_zone[key] = text.split()
 
-    conformity_text =  get_dict(spec, kw_parent, 'Conformity')
-    valid_conformities_list = ["Proportional", "TopConform", "BaseConform"]
+    conformity_text = get_dict(spec, kw_parent, 'Conformity')
+    valid_conformities_list = ['Proportional', 'TopConform', 'BaseConform']
     conformity_per_zone = {}
     for key in conformity_text:
         text_value = conformity_text[key]
         if text_value not in valid_conformities_list:
             raise ValueError(
-                f"Unknown comformity: {text_value}\n"
-                f"Valid specifications are: {valid_conformities_list} "
+                f'Unknown comformity: {text_value}\n'
+                f'Valid specifications are: {valid_conformities_list} '
             )
         conformity_per_zone[key] = Conform(text_value)
-
 
     save_active_param = get_bool_value(spec, 'SaveActiveParam', True)
     add_noise_to_inactive = get_bool_value(spec, 'AddNoiseToInactive', True)
 
-    param_dict ={
+    param_dict = {
         'Mode': mode,
         'GridModelName': grid_model_name,
-        'ERTBoxGridName':  ertbox_grid_model_name,
-        'ZoneParam':    zone_param_name,
-        'ExtrapolationMethod':    method,
-        'GeoGridParameters':  param_names_geo_per_zone,
-        'ErtboxParameters':  param_names_ertbox_per_zone,
-        'Conformity':    conformity_per_zone,
+        'ERTBoxGridName': ertbox_grid_model_name,
+        'ZoneParam': zone_param_name,
+        'ExtrapolationMethod': method,
+        'GeoGridParameters': param_names_geo_per_zone,
+        'ErtboxParameters': param_names_ertbox_per_zone,
+        'Conformity': conformity_per_zone,
         'SaveActiveParam': save_active_param,
         'AddNoiseToInactive': add_noise_to_inactive,
         'debug_level': debug_level,

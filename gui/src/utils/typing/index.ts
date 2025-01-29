@@ -2,7 +2,9 @@ import type { VDataTable } from 'vuetify/components'
 
 export type { Optional, Maybe } from '@/utils/typing/simple'
 
-export type VuetifyColumns = Parameters<VDataTable['$slots']['default']>[0]['columns']
+export type VuetifyColumns = Parameters<
+  VDataTable['$slots']['default']
+>[0]['columns']
 
 export interface HeaderItem {
   text: string
@@ -14,13 +16,17 @@ export interface HeaderItem {
   sortable?: boolean
 }
 
-export interface ListItem<T, AdditionalProps extends object = Record<string, unknown>> {
+export interface ListItem<
+  T,
+  AdditionalProps extends object = Record<string, unknown>,
+> {
   value?: T
   title: string
   props?: Partial<{
     disabled: boolean
     help: string
-  }> & AdditionalProps
+  }> &
+    AdditionalProps
 }
 
 export type HeaderItems = HeaderItem[]

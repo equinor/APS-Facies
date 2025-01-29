@@ -41,7 +41,10 @@ function includes<T extends Identifiable>(items: T[], item: T | ID): boolean {
   return items.map(getId).includes(getId(item))
 }
 
-function hasOwnProperty<T, K extends keyof T | string>(obj: T, val: K): boolean {
+function hasOwnProperty<T, K extends keyof T | string>(
+  obj: T,
+  val: K,
+): boolean {
   if (obj === null || obj === undefined) return false
   if (typeof obj !== 'object') return false
   return Object.prototype.hasOwnProperty.call(obj, val)

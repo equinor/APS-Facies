@@ -6,7 +6,7 @@
 
 <!--Add link(s) to any related GitHub issue(s)-->
 <!--If it closes any issues, write "Closes #123"-->
-* 
+*
 
 ### Related merge requests
 
@@ -23,4 +23,3 @@
   - [ ] I've updated docs if needed
 * [ ] **I'm adding a new feature**
   - [ ] I've updated the help directory with an example use of the feature
-

@@ -28,7 +28,7 @@ const available = computed<ListItem<GridModel>[]>(() =>
       help: grid.hasDualIndexSystem
         ? 'Grid models with reverse staircase faults, <br/> are not yet supported in ERT mode'
         : '',
-    }
+    },
   })),
 )
 

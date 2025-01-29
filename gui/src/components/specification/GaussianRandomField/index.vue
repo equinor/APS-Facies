@@ -60,7 +60,10 @@
 <script setup lang="ts">
 import cloneDeep from 'lodash/cloneDeep'
 
-import { isDevelopmentBuild, TREND_NOT_IMPLEMENTED_PREVIEW_VISUALIZATION } from '@/config'
+import {
+  isDevelopmentBuild,
+  TREND_NOT_IMPLEMENTED_PREVIEW_VISUALIZATION,
+} from '@/config'
 
 import { notEmpty } from '@/utils'
 
@@ -159,7 +162,9 @@ async function updateSimulation(renew = false): Promise<void> {
 
 async function openVisualizationSettings(): Promise<void> {
   if (!visualisationSettingsDialog.value) {
-    console.error("Could not open Visualization Settings, as Dialog component was not mounted.")  
+    console.error(
+      'Could not open Visualization Settings, as Dialog component was not mounted.',
+    )
     return
   }
   const { save, settings } = await visualisationSettingsDialog.value.open(

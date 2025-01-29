@@ -1,9 +1,5 @@
 <template>
-  <base-table
-    :headers="headers"
-    :items="polygons"
-    @input.stop
-  >
+  <base-table :headers="headers" :items="polygons" @input.stop>
     <template #item="{ item: polygon }">
       <tr>
         <td class="text-left">
@@ -64,7 +60,7 @@ function updateFactor(
   value: number | FmuUpdatable | null,
 ): void {
   if (requireSlantFactor(item.name)) {
-    if (typeof  value === 'number') {
+    if (typeof value === 'number') {
       value = new FmuUpdatableValue(value)
     }
     item.slantFactor = value

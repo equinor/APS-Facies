@@ -3,36 +3,61 @@ import { computed, reactive } from 'vue'
 import type { Parent, Zone, Region } from '@/utils/domain'
 import type { ZoneStoreSerialization } from './zones'
 import { useZoneStoreSerialization, useZoneStore } from './zones'
-import { type RegionStoreSerialization, useRegionStore, useRegionStoreSerialization } from './regions'
-import { type GridModelStoreSerialization, useGridModelStoreSerialization, useGridModelStore } from './grid-models'
-import { type OptionStoreSerialization, useOptionStoreSerialization, useOptionStore } from './options'
-import { type ConstantStoreSerialization, useConstantsStore, useConstantStoreSerialization } from './constants'
 import {
-  useTruncationRuleStore,
-} from './truncation-rules'
+  type RegionStoreSerialization,
+  useRegionStore,
+  useRegionStoreSerialization,
+} from './regions'
+import {
+  type GridModelStoreSerialization,
+  useGridModelStoreSerialization,
+  useGridModelStore,
+} from './grid-models'
+import {
+  type OptionStoreSerialization,
+  useOptionStoreSerialization,
+  useOptionStore,
+} from './options'
+import {
+  type ConstantStoreSerialization,
+  useConstantsStore,
+  useConstantStoreSerialization,
+} from './constants'
+import { useTruncationRuleStore } from './truncation-rules'
 import { useParameterStore } from './parameters'
 import { useFmuOptionStore } from './fmu/options'
-import {
-  useGlobalFaciesStore,
-} from './facies/global'
+import { useGlobalFaciesStore } from './facies/global'
 import migrate from './utils/migration'
-import { type CopyPasteStoreSerialization, useCopyPaseSerialization, useCopyPasteStore } from './copy-paste'
-import { type FmuStoreSerialization, useFmuStoreSerialization } from './fmu/serialization'
-import { type ParameterStoreSerialization, useParameterStoreSerialization } from './parameters/serialization';
+import {
+  type CopyPasteStoreSerialization,
+  useCopyPaseSerialization,
+  useCopyPasteStore,
+} from './copy-paste'
+import {
+  type FmuStoreSerialization,
+  useFmuStoreSerialization,
+} from './fmu/serialization'
+import {
+  type ParameterStoreSerialization,
+  useParameterStoreSerialization,
+} from './parameters/serialization'
 import { displayError } from '@/utils/helpers/storeInteraction'
 import { useConstantsFaciesColorsStore } from '@/stores/constants/facies-colors'
-import { type FaciesStoreSerialization, useFaciesStoreSerialization } from '@/stores/facies/serialization'
+import {
+  type FaciesStoreSerialization,
+  useFaciesStoreSerialization,
+} from '@/stores/facies/serialization'
 import { useFaciesStore } from '@/stores/facies'
 import { useFaciesGroupStore } from '@/stores/facies/groups'
 import {
   type GaussianRandomFieldStoreSerialization,
   useGaussianRandomFieldStore,
-  useGaussianRandomFieldStoreSerialization
+  useGaussianRandomFieldStoreSerialization,
 } from '@/stores/gaussian-random-fields'
 import { useGaussianRandomFieldCrossSectionStore } from '@/stores/gaussian-random-fields/cross-sections'
 import {
   type TruncationRuleStoreSerialization,
-  useTruncationRuleStoreSerialization
+  useTruncationRuleStoreSerialization,
 } from '@/stores/truncation-rules/serialization'
 import { useTruncationRulePresetStore } from '@/stores/truncation-rules/presets'
 import type { PanelStoreSerialization } from '@/stores/panels'
@@ -58,7 +83,6 @@ export type RootStoreSerialization = {
   options: OptionStoreSerialization
   // modelFileLoader,
   // modelFileExporter,
-
 }
 
 export const useRootStore = defineStore('root', () => {
@@ -70,7 +94,7 @@ export const useRootStore = defineStore('root', () => {
   const loading = computed(() => _loading.value)
   const loadingMessage = computed({
     get: () => _loading.message,
-    set: (message: string) => _loading.message = message
+    set: (message: string) => (_loading.message = message),
   })
   const mayLoadParameters = computed(() => !(_loaded.value || _loaded.loading))
 
@@ -87,7 +111,10 @@ export const useRootStore = defineStore('root', () => {
   const parent = computed<Parent>(() => {
     const zoneStore = useZoneStore()
     const regionStore = useRegionStore()
-    return { zone: zoneStore.current as Zone, region: regionStore.current as Region | null }
+    return {
+      zone: zoneStore.current as Zone,
+      region: regionStore.current as Region | null,
+    }
   })
 
   async function fetch() {
@@ -144,29 +171,26 @@ export const useRootStore = defineStore('root', () => {
       if (data.gridModels) {
         updateProgressMessage('grid models')
 
-        const gridModelStore = useGridModelStore();
-        gridModelStore.populate(data.gridModels.available);
+        const gridModelStore = useGridModelStore()
+        gridModelStore.populate(data.gridModels.available)
         if (data.gridModels.current) {
-          await gridModelStore.select(data.gridModels.current, false);
+          await gridModelStore.select(data.gridModels.current, false)
         }
       }
       if (data.parameters) {
         updateProgressMessage('parameters')
-        await useParameterStore()
-          .populate(data.parameters)
+        await useParameterStore().populate(data.parameters)
       }
       // Options
       if (data.options) {
         updateProgressMessage('options')
-        useOptionStore()
-            .populate(data.options)
+        useOptionStore().populate(data.options)
       }
 
       // FMU options
       if (data.fmu) {
         updateProgressMessage('FMU options')
-        useFmuOptionStore()
-            .populate(data.fmu)
+        useFmuOptionStore().populate(data.fmu)
       }
 
       // Zones
@@ -175,74 +199,66 @@ export const useRootStore = defineStore('root', () => {
         const { available, current } = data.zones
         const zoneStore = useZoneStore()
         zoneStore.populate(available)
-        if (
-          current &&
-          available.find((z) => z.id === current)
-        ) {
+        if (current && available.find((z) => z.id === current)) {
           zoneStore.setCurrentId(current)
         }
       }
 
       if (data.regions) {
         updateProgressMessage('regions')
-        useRegionStore()
-          .populate(data.regions)
+        useRegionStore().populate(data.regions)
       }
 
-    // Color Library
-    if (data.constants) {
-      const { faciesColors } = data.constants
+      // Color Library
+      if (data.constants) {
+        const { faciesColors } = data.constants
         updateProgressMessage('facies color pallet')
-      useConstantsFaciesColorsStore()
-          .populate(faciesColors.available, faciesColors.current);
-    }
+        useConstantsFaciesColorsStore().populate(
+          faciesColors.available,
+          faciesColors.current,
+        )
+      }
 
-    // Facies
-    if (data.facies) {
+      // Facies
+      if (data.facies) {
         updateProgressMessage('Facies')
-      const faciesStore = useFaciesStore()
-      useGlobalFaciesStore()
-          .populate(data.facies.global.available)
-      faciesStore
-          .populate(data.facies.available)
-      useFaciesGroupStore()
-          .populate(data.facies.groups.available)
-      faciesStore
-          .populateConstantProbability(data.facies.constantProbability)
-    }
+        const faciesStore = useFaciesStore()
+        useGlobalFaciesStore().populate(data.facies.global.available)
+        faciesStore.populate(data.facies.available)
+        useFaciesGroupStore().populate(data.facies.groups.available)
+        faciesStore.populateConstantProbability(data.facies.constantProbability)
+      }
 
-    // Gaussian Random Fields
-    if (data.gaussianRandomFields) {
-      updateProgressMessage('Gaussian Random Fields')
-      useGaussianRandomFieldCrossSectionStore()
-          .populate(data.gaussianRandomFields.crossSections.available)
-      useGaussianRandomFieldStore()
-          .populate(data.gaussianRandomFields.available)
-    }
+      // Gaussian Random Fields
+      if (data.gaussianRandomFields) {
+        updateProgressMessage('Gaussian Random Fields')
+        useGaussianRandomFieldCrossSectionStore().populate(
+          data.gaussianRandomFields.crossSections.available,
+        )
+        useGaussianRandomFieldStore().populate(
+          data.gaussianRandomFields.available,
+        )
+      }
 
-    // Truncation rules
-    if (data.truncationRules) {
-      updateProgressMessage('Truncation rules')
-      const { type, template } = data.truncationRules.preset
-      useTruncationRulePresetStore()
-          .populate(type, template)
-      useTruncationRuleStore()
-          .populate(data.truncationRules.available)
-    }
+      // Truncation rules
+      if (data.truncationRules) {
+        updateProgressMessage('Truncation rules')
+        const { type, template } = data.truncationRules.preset
+        useTruncationRulePresetStore().populate(type, template)
+        useTruncationRuleStore().populate(data.truncationRules.available)
+      }
 
-    // Reopen the different panels
-    if (data.panels) {
-      updateProgressMessage('opened panels')
-      usePanelStore()
-          .populate(data.panels)
-    }
+      // Reopen the different panels
+      if (data.panels) {
+        updateProgressMessage('opened panels')
+        usePanelStore().populate(data.panels)
+      }
 
-    // Make sure the available data is up to date
-    await refresh({
-      message: 'Refreshing data from RMS',
-      force: true,
-    })
-
+      // Make sure the available data is up to date
+      await refresh({
+        message: 'Refreshing data from RMS',
+        force: true,
+      })
     } catch (e) {
       displayError(String(e))
       console.error('failed', e)
@@ -281,8 +297,7 @@ export const useRootStore = defineStore('root', () => {
       useRegionStore,
       useZoneStore,
     ]) {
-      useStore()
-        .$reset()
+      useStore().$reset()
     }
   }
 
@@ -324,7 +339,6 @@ export function useStateSerialization(): RootStoreSerialization {
     // modelFileExporter,
   }
 }
-
 
 if (import.meta.hot) {
   import.meta.hot.accept(acceptHMRUpdate(useRootStore, import.meta.hot))

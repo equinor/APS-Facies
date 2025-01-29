@@ -1,12 +1,12 @@
-''' This module is used in FMU workflows to import gaussian field values from
-    disk into APS. Here we can assume that the project.current_realisation = 0 
-    always since FMU ONLY run with one realization in the RMS project and 
-    should have shared grid and shared parameters only. The grid model to be
-    created here should have same lateral grid size and grid increments and
-    same rotation. The number of layers is use defined, and the vertical
-    z increment can be arbitary. The purpose of the grid is to be a 3D array
-    to save the GRF values to be exchanged between ERT and APS.
-'''
+"""This module is used in FMU workflows to import gaussian field values from
+disk into APS. Here we can assume that the project.current_realisation = 0
+always since FMU ONLY run with one realization in the RMS project and
+should have shared grid and shared parameters only. The grid model to be
+created here should have same lateral grid size and grid increments and
+same rotation. The number of layers is use defined, and the vertical
+z increment can be arbitary. The purpose of the grid is to be a 3D array
+to save the GRF values to be exchanged between ERT and APS.
+"""
 
 import xtgeo
 
@@ -18,6 +18,7 @@ from aps.utils.constants.simple import Debug
 from aps.utils.roxar.grid_model import GridSimBoxSize
 from aps.utils.roxar.progress_bar import APSProgressBar
 from aps.utils.constants.simple import FlipDirectionXtgeo
+
 
 def get_grid_rotation(geometry):
     return geometry['avg_rotation']
@@ -31,11 +32,18 @@ def get_origin(geometry):
 def get_increments(geometry):
     return tuple(geometry[f'avg_d{axis}'] for axis in ('x', 'y', 'z'))
 
-def create_ertbox_grid_model(project, geo_grid_model_name: str,
-    fmu_simulation_grid_name: str, max_fmu_grid_layers: int, debug_level: Debug = Debug.OFF):
+
+def create_ertbox_grid_model(
+    project,
+    geo_grid_model_name: str,
+    fmu_simulation_grid_name: str,
+    max_fmu_grid_layers: int,
+    debug_level: Debug = Debug.OFF,
+):
     if project.current_realisation > 0:
-        raise ValueError(f'In RMS models to be used with a FMU loop in ERT,'
-                         'the grid and parameters should be shared and realisation = 1'
+        raise ValueError(
+            f'In RMS models to be used with a FMU loop in ERT,'
+            'the grid and parameters should be shared and realisation = 1'
         )
 
     print(f'-- Creating ERT simulation box: {fmu_simulation_grid_name}')
@@ -89,10 +97,10 @@ def create_ertbox_grid_model(project, geo_grid_model_name: str,
     x0, y0 = attributes.estimated_origo(flip=flip)
     z0 = 0.0
     if debug_level >= Debug.VERY_VERBOSE:
-      print(f'--- Simbox rotation origo: ({x0}, {y0})')
+        print(f'--- Simbox rotation origo: ({x0}, {y0})')
 
     dimension = (simbox_nx, simbox_ny, simbox_nz)
-    origin =(x0, y0, z0)
+    origin = (x0, y0, z0)
 
     increment = (xinc, yinc, zinc)
 
@@ -105,26 +113,30 @@ def create_ertbox_grid_model(project, geo_grid_model_name: str,
             increment=increment,
             flip=flip,
         )
-        simulation_grid.to_roxar(project, fmu_simulation_grid_name, project.current_realisation)
+        simulation_grid.to_roxar(
+            project, fmu_simulation_grid_name, project.current_realisation
+        )
     except:
         print(f'Error when creating grid model: {fmu_simulation_grid_name}')
         return False
     return True
 
+
 def run(
-        *,
-        project,
-        aps_model:                APSModel,
-        fmu_simulation_grid_name: str,
-        max_fmu_grid_layers:       int,
-        debug_level:              Debug,
-        **kwargs,
+    *,
+    project,
+    aps_model: APSModel,
+    fmu_simulation_grid_name: str,
+    max_fmu_grid_layers: int,
+    debug_level: Debug,
+    **kwargs,
 ):
-    create_ertbox_grid_model(project,
+    create_ertbox_grid_model(
+        project,
         aps_model.grid_model_name,
         fmu_simulation_grid_name,
         max_fmu_grid_layers,
-        debug_level=debug_level)
+        debug_level=debug_level,
+    )
 
     APSProgressBar.increment()
-

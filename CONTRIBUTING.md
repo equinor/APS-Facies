@@ -29,7 +29,7 @@ Install [asdf](https://asdf-vm.com/guide/getting-started.html#_3-install-asdf), 
 On macOS, you may have to set
 ```bash
 export PYTHON_CONFIGURE_OPTS="--enable-framework"
-export SYSTEM_VERSION_COMPAT=1 
+export SYSTEM_VERSION_COMPAT=1
 ```
 first, in order to make user Python is compiled / installed as a Framework, which is highly recommended to make matplotlib behave.
 
@@ -42,7 +42,7 @@ poetry install  # Installed via asdf
 make init
 ```
 ### Running locally
-Assuming you have containerized RMS 
+Assuming you have containerized RMS
 E.g. added all relevant files to a [RedHat Enterprise Linux](https://catalog.redhat.com/software/containers/rhel7/57ea8cee9c624c035f96f3af?architecture=amd64&image=65a671adb31b6e74ca7559c8) or compatible base image, and installed the necessary dependencies.
 This also assumes that the tool `roxenv` is available in the container's `PATH`.
 

@@ -40,7 +40,7 @@ describe('When reading from RMS', () => {
     { code: 3, name: 'F3', color: '#1e90ff' },
     { code: 4, name: 'F4', color: '#ffd700' },
     { code: 5, name: 'F5', color: '#9932cc' },
-  ] as { code: number, name: string, color: Color }[]
+  ] as { code: number; name: string; color: Color }[]
   const facies = rmsFacies.map((spec) => new GlobalFacies(spec))
 
   it('Should have unique IDs', () => {

@@ -21,19 +21,26 @@ def must_run_in_rms(func):
     def wrapper(*args, **kwargs):
         try:
             import roxar.rms
+
             try:
                 if roxar.__mock__:
-                    warn(f'{func.__name__} must be run in RMS, but the usage of a mock was detected.')
+                    warn(
+                        f'{func.__name__} must be run in RMS, but the usage of a mock was detected.'
+                    )
                     return None
             except AttributeError:
                 # This should mean, that we are running inside RMS
                 return func(*args, **kwargs)
         except ImportError:
-            warn(f'{func.__name__} must be run in RMS, but no \'roxar\' module was found.')
+            warn(
+                f"{func.__name__} must be run in RMS, but no 'roxar' module was found."
+            )
             return None
 
         return func(*args, **kwargs)
+
     return wrapper
+
 
 def get_rms_version() -> Optional[Version]:
     try:
@@ -61,7 +68,7 @@ def get_rgs_specific_python_package_paths() -> Optional[List[str]]:
 
     python_version = sys.version_info
     python_version = f'{python_version.major}.{python_version.minor}'
-    (major, minor, _)= get_rms_version().as_tuple()
+    (major, minor, _) = get_rms_version().as_tuple()
     rms_version = str(major) + '.' + str(minor)
     common_equinor_path = (
         '/prog/res/roxapi/x86_64_RH_{redhat_version}/matrix/{rms_version}/lib/python{python_version}/site-packages'
@@ -82,13 +89,19 @@ def get_common_python_packages_paths() -> List[str]:
     return rgs_paths + [path for path in sys.path if path.endswith('site-packages')]
 
 
-def import_module(name: str, dependencies: Optional[List[str]] = None, min_version: Optional[str] = None) -> None:
+def import_module(
+    name: str,
+    dependencies: Optional[List[str]] = None,
+    min_version: Optional[str] = None,
+) -> None:
     from aps.utils.roxar import get_common_python_packages_paths
+
     paths = get_common_python_packages_paths()
 
     import sys
     import importlib.util
     from pathlib import Path
+
     if dependencies is None:
         dependencies = []
 
