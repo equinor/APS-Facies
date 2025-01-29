@@ -4,19 +4,13 @@
 
 ### Related issues
 
-<!--Add link(s) to any related Gitlab issue(s)-->
+<!--Add link(s) to any related GitHub issue(s)-->
 <!--If it closes any issues, write "Closes #123"-->
 * 
 
 ### Related merge requests
 
 <!--Add link(s) to any related merge requests-->
-
-### Related cards
-
-<!--Add link(s) to any LeanKit cards that are of relevance-->
-<!--Example: https://sdstrh.leankit.com/card/\<CARD ID\>-->
-
 
 ### Checklist
 
