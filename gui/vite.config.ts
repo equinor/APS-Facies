@@ -24,6 +24,7 @@ export default defineConfig({
   ],
   resolve: {
     alias: {
+      // eslint-disable-next-line @typescript-eslint/naming-convention
       '@': resolve('src'),
     },
   },
@@ -33,6 +34,7 @@ export default defineConfig({
   },
   server: {
     proxy: /* CODESPACE_NAME? */ {
+      // eslint-disable-next-line @typescript-eslint/naming-convention
       '^/api': {
         target: 'http://localhost:5000/api',
         changeOrigin: true,

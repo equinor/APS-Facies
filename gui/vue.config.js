@@ -1,23 +1,23 @@
 'use strict'
-const LodashModuleReplacementPlugin = require('lodash-webpack-plugin')
+import LodashModuleReplacementPlugin from 'lodash-webpack-plugin'
 
 // Vue configurations
-const isProduction = process.env.NODE_ENV === 'production'
-const canParallelize = require('node:os').cpus().length > 1
-const isDocker = require('node:fs').existsSync('/.dockerenv')
+const isProduction = import.meta.env.NODE_ENV === 'production'
+const canParallelize = import('node:os').cpus().length > 1
+const isDocker = import('node:fs').existsSync('/.dockerenv')
 
 const assetsDir = 'static'
 
-const { CODESPACE_NAME } = process.env
-const API_PROTOCOL = process.env.VUE_APP_APS_PROTOCOL || 'http'
-const API_SERVER = process.env.VUE_APP_APS_SERVER || '127.0.0.1'
-const API_PORT = process.env.VUE_APP_APS_API_PORT || 5000
+const { CODESPACE_NAME } = import.meta.env
+const API_PROTOCOL = import.meta.env.VUE_APP_APS_PROTOCOL || 'http'
+const API_SERVER = import.meta.env.VUE_APP_APS_SERVER || '127.0.0.1'
+const API_PORT = import.meta.env.VUE_APP_APS_API_PORT || 5000
 
 /**
  * @type {import('@vue/cli-service').ProjectOptions}
  */
 
-module.exports = {
+export default {
   assetsDir: assetsDir,
   runtimeCompiler: !isProduction,
   productionSourceMap: false,

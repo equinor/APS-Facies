@@ -107,7 +107,7 @@ COPY gui/yarn.lock .
 
 # build / configuration files
 COPY gui/tsconfig.json .
-COPY gui/.eslintrc.js .
+COPY gui/eslint.config.js .
 COPY gui/.postcssrc.js .
 COPY gui/vite.config.ts .
 COPY gui/vue.config.js .
