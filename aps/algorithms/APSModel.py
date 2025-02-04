@@ -1131,6 +1131,33 @@ class APSModel:
                     gfAllZones.append(gf)
         return copy.copy(gfAllZones)
 
+    def getAllGaussFieldVariogramsUsed(self, job_name: str) -> str:
+        content = job_name + '\n'
+        for key, zoneModel in self.__zoneModelTable.items():
+            (zone_number, region_number) = key
+
+            gfNames = zoneModel.used_gaussian_field_names
+            for gfname in gfNames:
+                if self.__debug_level >= Debug.VERY_VERBOSE:
+                    print(
+                        f'--- Get variogram data for zone:{zone_number} region:{region_number} for {gfname}'
+                    )
+                content += (
+                    str(zone_number) + ' ' + str(region_number) + '  ' + gfname + '  '
+                )
+                variogram_type = zoneModel.getVariogramType(gfname)
+                main_range = zoneModel.getMainRange(gfname)
+                perp_range = zoneModel.getPerpRange(gfname)
+                main_range = zoneModel.getMainRange(gfname)
+                vert_range = zoneModel.getVertRange(gfname)
+                azimuth = zoneModel.getAzimuthAngle(gfname)
+                content += str(variogram_type) + '  '
+                content += str(main_range) + '  '
+                content += str(perp_range) + '  '
+                content += str(vert_range) + '  '
+                content += str(azimuth) + '\n'
+        return content
+
     @property
     def zone_parameter(self) -> str:
         return self.getZoneParamName()
@@ -1453,6 +1480,7 @@ class APSModel:
         attributes_file_name: Optional[FilePath] = None,
         param_file_name: Optional[FilePath] = None,
         probability_distribution_file_name: Optional[FilePath] = None,
+        variogram_output_file_name: Optional[FilePath] = None,
         current_job_name: Optional[str] = None,
         debug_level: Debug = Debug.OFF,
     ) -> None:
@@ -1464,6 +1492,17 @@ class APSModel:
         top = ET.Element('APSModel', {'version': self.__aps_model_version})
         root_updated = self.XMLAddElement(top, fmu_attributes)
         write_string_to_file(model_file_name, root_updated, debug_level=debug_level)
+        print(variogram_output_file_name)
+        if variogram_output_file_name is not None:
+            if current_job_name is None:
+                current_job_name = 'apsgui_job_name'
+            content = self.getAllGaussFieldVariogramsUsed(current_job_name)
+            write_string_to_file(
+                variogram_output_file_name,
+                content,
+                debug_level=debug_level,
+            )
+
         if len(fmu_attributes) == 0:
             return
         if attributes_file_name is not None:
