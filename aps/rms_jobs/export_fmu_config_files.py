@@ -41,7 +41,7 @@ def run(project, **kwargs):
         prob_name = job_name + aps_config.ert_config_probs_extension()
         ert_field_name = job_name + aps_config.ert_config_fields_extension()
         aps_fmuconfig_name = job_name + aps_config.fmu_master_config_extension()
-
+        variogram_file_name = job_name + '_variograms.txt'
         global_variables_file_path = aps_config.global_variables_file()
 
         # APS model file
@@ -70,6 +70,10 @@ def run(project, **kwargs):
         )
         ert_field_keyword_file_name = (
             aps_config.ert_model_dir_absolute() + '/' + ert_field_name
+        )
+
+        variogram_output_file_name = (
+            aps_config.ert_model_dir_absolute() + '/' + variogram_file_name
         )
 
         # Check that default directory exist for export of APS model file
@@ -108,6 +112,10 @@ def run(project, **kwargs):
                 print(
                     f'-- Use in ERT distribution config:       {probability_distribution_file_name}'
                 )
+            if variogram_output_file_name:
+                print(
+                    f'-- Use optionally in ERT with distance-based localisation:       {variogram_output_file_name}'
+                )
             if aps_model.fmu_mode == 'FIELDS':
                 print(
                     f'-- Use in ERT main config:               {ert_field_keyword_file_name}'
@@ -119,6 +127,7 @@ def run(project, **kwargs):
             attributes_file_name=param_file_name_alternative,
             param_file_name=param_file_name,
             probability_distribution_file_name=probability_distribution_file_name,
+            variogram_output_file_name=variogram_output_file_name,
             current_job_name=job_name,
             debug_level=debug_level,
         )
