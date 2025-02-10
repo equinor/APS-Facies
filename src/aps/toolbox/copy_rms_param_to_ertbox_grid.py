@@ -117,7 +117,7 @@ def run(params, seed=12345):
     if model_file_name is not None:
         # Read model file
         params = read_model_file(
-            model_file_name, debug_level=params.get('debug_level', Debug.OFF)
+            model_file_name, debug_level=params.get('debug_level', Debug.VERBOSE)
         )
     # Check that necessary params are specified
     required_kw_list = [
@@ -130,7 +130,7 @@ def run(params, seed=12345):
     ]
     check_missing_keywords_list(params, required_kw_list)
     mode = params['Mode']
-    if params['debug_level'] == Debug.VERY_VERBOSE:
+    if params['debug_level'] == Debug.VERBOSE:
         print(f'-- Realization number:  {project.current_realisation}')
     if mode == 'from_geo_to_ertbox':
         # The names of the parameters in ertbox is automatically set to
@@ -199,6 +199,7 @@ def from_geogrid_to_ertbox(project, params, seed=12345):
             "Use 'Eclipse grid standard' (upper left corner) as "
             'common grid index origin (right-handed grid) in FMU projects using ERT.'
         )
+
     if ertboxgrid_handedness != Direction.right:
         print("WARNING: ERTBOX grid should have 'Eclipse grid index origin'.")
         print('         Use the grid index origin job in RMS to set this.')
@@ -363,7 +364,7 @@ def from_ertbox_to_geogrid(project, params):
             parameter_values_geo_grid.append(field_values)
 
         # Update geogrid. Has often multiple zones
-        if debug_level >= Debug.VERY_VERBOSE:
+        if debug_level >= Debug.VERBOSE:
             for name in parameter_names_geo_grid:
                 print(
                     f'--- Update parameter {name} for zone number {zone_number} in {geogrid_model}'
