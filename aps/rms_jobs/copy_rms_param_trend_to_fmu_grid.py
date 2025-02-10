@@ -19,6 +19,7 @@ from aps.utils.constants.simple import (
 )
 from aps.utils.roxar.grid_model import get_zone_layer_numbering, get_zone_names
 from aps.utils.roxar.progress_bar import APSProgressBar
+from aps.utils.roxar.get_conformity_from_rms import check_grid_layout
 
 
 def get_grid_model(project, grid_model_name: str):
@@ -82,6 +83,12 @@ def get_trend_param_names_from_aps_model(
             continue
         zone_index = zone_number - 1
         zone_name = zone_names[zone_index]
+        check_grid_layout(
+            geo_grid_model_name,
+            zone_number,
+            zone_model.grid_layout,
+            debug_level=debug_level,
+        )
 
         number_layers = number_layers_per_zone[zone_number - 1]
 
@@ -609,7 +616,7 @@ def extrapolate_values_for_zone(
             )
         if add_noise_to_inactive:
             print(
-                f'-- Add random noise to undefined grid cells in ERTBOX on top of the extrapolated values'
+                '-- Add random noise to undefined grid cells in ERTBOX on top of the extrapolated values'
             )
 
     if add_noise_to_inactive:
@@ -723,7 +730,7 @@ def copy_parameters_for_zone(
     elif param_type == 'int':
         param_values_3d_all = ma.masked_all((nx, ny, nz), dtype=np.uint16)
     else:
-        raise ValueError(f"Parameter type must be 'float' or 'int' ")
+        raise ValueError("Parameter type must be 'float' or 'int' ")
     param_values_3d_all[i_indices, j_indices, k_indices] = param_values_active[
         zone_cell_numbers
     ]
@@ -933,7 +940,7 @@ def run(
     debug_level = kwargs['debug_level']
     trend_extrapolation_method = kwargs['extrapolation_method']
     zone_dict, use_rms_param_trend = get_trend_param_names_from_aps_model(
-        project, aps_model, ertbox_grid_model_name, debug_level=Debug.OFF
+        project, aps_model, ertbox_grid_model_name, debug_level=debug_level
     )
 
     # Independent of using custom trends or not we can save active parameter in ertbox
