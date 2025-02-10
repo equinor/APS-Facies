@@ -4,7 +4,6 @@ import collections
 import copy
 import xml.etree.ElementTree as ET
 from typing import List, Optional, Tuple, Union, Dict, TYPE_CHECKING
-from warnings import warn
 
 from aps.algorithms.APSMainFaciesTable import APSMainFaciesTable
 from aps.algorithms.APSZoneModel import APSZoneModel
@@ -690,7 +689,7 @@ class APSModel:
         without putting any data into the data structure.
         """
         if (not use_rms_uncertainty_table) and (not parameter_file_name):
-            raise IOError(f'Expect that a global variable file exists')
+            raise IOError('Expect that a global variable file exists')
         # Read XML model file
         tree = ET.parse(model_file_name)
         root = tree.getroot()
@@ -728,7 +727,7 @@ class APSModel:
 
                 if current_job_name is None:
                     print(
-                        f'NOTE: The APS parameters are not updated when running interactively'
+                        'NOTE: The APS parameters are not updated when running interactively'
                     )
                 else:
                     if len(keywords_defined_for_updating) > 0:
@@ -783,7 +782,7 @@ class APSModel:
             )
 
         # Set new values if keyword in global_variables file and in fmu tag in model file match
-        if (len(keywords_defined_for_updating) > 0) and (keywords_read != None):
+        if (len(keywords_defined_for_updating) > 0) and (keywords_read is not None):
             # Update the list of keywords in the model file with new values from FMU global_variables
             found_an_update = False
             for item in keywords_defined_for_updating:
@@ -800,7 +799,7 @@ class APSModel:
                 print(f'The APS parameters are updated for the job: {current_job_name}')
                 if debug_level >= Debug.VERBOSE:
                     print(
-                        f'   Parameter name                                   Original value   New value'
+                        '   Parameter name                                   Original value   New value'
                     )
             else:
                 # Should never occur
@@ -892,7 +891,7 @@ class APSModel:
                     keywords.append(item)
                 return keywords
 
-            except:
+            except KeyError:
                 # No parameter specified to be updated for the current APS job
                 return None
 
@@ -1594,7 +1593,7 @@ class APSModel:
         # Check if there are (zone_number, region_numbers) in the grid model without any specified APS model.
         if debug_level >= Debug.VERBOSE:
             print(
-                f'-- Check if there are zones with regions without any specified APS model.'
+                '-- Check if there are zones with regions without any specified APS model.'
             )
         list_of_undefined_zone_regions = []
         for zone_number in zone_param.code_names.keys():
@@ -1643,7 +1642,6 @@ class APSModel:
         grid3D = grid_model.get_grid(realisation_number)
         try:
             # Check for RMS14.1 and newer
-            simbox = grid3D.simbox
             # Is RMS14.1 or newer
             simbox_thickness_per_zone = get_simulation_box_thickness(grid3D)
             for key, zone_model in self.__zoneModelTable.items():
@@ -1654,7 +1652,7 @@ class APSModel:
                         f'--- Zone: {zone_number}  Simbox thickness:  {zone_model.sim_box_thickness}'
                     )
                 self.__zoneModelTable[key] = zone_model
-        except:
+        except KeyError:
             # Nothing done for older versions of RMS
             pass
 
@@ -1926,7 +1924,6 @@ class APSModel:
             print(
                 f'      Trend param extrapolation:  {self.__fmu_trend_param_extrapolation}'
             )
-
         if self.__fmu_mode != 'OFF':
             print(
                 f'     Update only residual GRF in ERT: {self.__fmu_use_residual_fields}'
