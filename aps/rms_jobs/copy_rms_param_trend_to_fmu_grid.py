@@ -17,7 +17,7 @@ from aps.utils.roxar.grid_model import (
 from aps.utils.roxar.progress_bar import APSProgressBar
 
 # The functionality to copy between geogrid and ertbox grid is now placed
-# in fmu.tools.rms function
+# in fmu.tools.rms function copy_rms_param
 # TODO: This will not work before fmu.tools has merged the copy_rms_param_to_ertbox_grid
 from fmu.tools.rms.copy_rms_param_to_ertbox_grid import (
     define_active_parameters_in_ertbox,
