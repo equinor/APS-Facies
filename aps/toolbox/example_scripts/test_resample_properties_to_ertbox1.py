@@ -2,15 +2,19 @@
 # to copy 3D parameters from geogrid to ertbox grid
 # and apply extrapolation if necessary in ertbox grid.
 
-from aps.toolbox import copy_rms_param_to_ertbox_grid
-from aps.utils.constants.simple import Debug
+# TODO: When fmu.tools is merged into komodo stable,
+# switch to fmu.tools and remove copy_rms_param_to_fmu_grid from aps.rms_jobs
 
-print(f'Run script: {copy_rms_param_to_ertbox_grid.__file__}  ')
+# from fmu.tools.rms import copy_rms_param
+
+from aps.rms_jobs.copy_rms_param_to_fmu_grid import run as copy_rms_param
+
+print(f'Run script: {copy_rms_param.__file__}  ')
 print('Copy 3D parameter from Geo grid to Ertbox grid')
 
 params = {
     'project': project,
-    'debug_level': Debug.ON,
+    'debug_level': 1,
     'Mode': 'from_geo_to_ertbox',
     'GeoGridParameters': {
         1: ['Perm', 'Poro'],
@@ -35,4 +39,4 @@ params = {
     'SaveActiveParam': True,
     'AddNoiseToInactive': True,
 }
-copy_rms_param_to_ertbox_grid.run(params, project.seed)
+copy_rms_param(params)

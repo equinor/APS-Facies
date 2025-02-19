@@ -1258,3 +1258,17 @@ def flip_grid_index_origo(values3d, ny):
     for j in range(ny):
         values3d_flipped[:, j, :] = values3d[:, ny - j - 1, :]
     return values3d_flipped
+
+
+def get_grid_model(project, grid_model_name: str):
+    """
+    For given grid model name, return grid_model and grid objects.
+    """
+    if grid_model_name not in project.grid_models:
+        raise ValueError(f'Grid model {grid_model_name} does not exist.')
+    grid_model = project.grid_models[grid_model_name]
+    real_number = project.current_realisation
+    if grid_model.is_empty(realisation=real_number):
+        raise ValueError(f'Grid model {grid_model_name} is empty. ')
+    grid = grid_model.get_grid(realisation=real_number)
+    return grid_model, grid
