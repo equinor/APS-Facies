@@ -192,6 +192,7 @@ class Conform(Enum):
     Proportional = 'Proportional'
     TopConform = 'TopConform'
     BaseConform = 'BaseConform'
+    Undefined = 'Undefined'
 
 
 class TransformType(IntEnum):
