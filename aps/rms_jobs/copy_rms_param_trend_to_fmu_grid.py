@@ -57,6 +57,7 @@ def get_trend_param_names_from_aps_model(
             geo_grid_model_name,
             zone_number,
             zone_model.grid_layout,
+            return_grid_layout=False,
             debug_level=debug_level,
         )
 

@@ -1,6 +1,6 @@
 from rmsapi.jobs import Job
 from aps.utils.constants.simple import Conform, Debug
-from typing import Optional
+from typing import Optional, Union
 
 
 def get_conformity(
@@ -87,8 +87,9 @@ def check_grid_layout(
     zone_number: int,
     grid_layout: Conform,
     aps_job_name: str = None,
+    return_grid_layout: bool = False,
     debug_level: Debug = Debug.OFF,
-) -> None:
+) -> Union[None, Conform]:
     job_names = get_job_name(grid_model_name)
     if job_names is None:
         if debug_level >= Debug.ON:
@@ -98,7 +99,7 @@ def check_grid_layout(
                 f' for zone number {zone_number}.'
             )
             print('      This grid is not created by an RMS grid building job.')
-        return
+        return None
 
     elif len(job_names) > 1:
         if debug_level >= Debug.ON:
@@ -111,7 +112,7 @@ def check_grid_layout(
             print('       Cannot know which one to use to check grid conformity.')
             print('       The jobs are:')
             print(f'       {job_names}')
-        return
+        return None
 
     rms_grid_job_name = job_names[0]
     zone_conformity_dict, boundary_is_sampled = get_conformity(
@@ -131,7 +132,7 @@ def check_grid_layout(
                 '        You must in APS gui choose the best of the three possible implemented conformities:'
             )
             print("         'Proportional', 'TopConform' or 'BaseConform')")
-        return
+        return None
 
     zone_name = zone_conformity_dict['zone_name']
     conformity = zone_conformity_dict['conformity']
@@ -153,25 +154,29 @@ def check_grid_layout(
             print("         'Proportional', 'TopConform' or 'BaseConform')")
 
             print()
-        return
+        return None
 
     if grid_layout != conformity:
         if aps_job_name is not None:
             aps_job_string = f"'APS job '{aps_job_name}'"
         else:
             aps_job_string = 'current APS job'
-        raise ValueError(
-            '\n'
-            f"  Specified zone conformity for zone '{zone_name}' is '{grid_layout}'\n"
-            f"  Grid model '{grid_model_name}' has different zone conformity: {conformity}\n"
-            f'  Change conformity setting in {aps_job_string} to match the correct one used in the grid model.'
-        )
+        if not return_grid_layout:
+            raise ValueError(
+                '\n'
+                f"  Specified zone conformity for zone '{zone_name}' is '{grid_layout}'\n"
+                f"  Grid model '{grid_model_name}' has different zone conformity: {conformity}\n"
+                f'  Change conformity setting in {aps_job_string} to match the correct one used in the grid model.'
+            )
+        else:
+            return conformity
+
     if debug_level >= Debug.VERY_VERBOSE:
         print(
             '--- Specified grid conformity in APS model '
             f"is consistent with the grid for zone '{zone_name}'"
         )
-    return
+    return conformity
 
 
 if __name__ == '__main__':
@@ -192,5 +197,6 @@ if __name__ == '__main__':
             zone_number,
             grid_layout,
             aps_job_name=aps_job_name,
+            return_grid_layout=False,
             debug_level=Debug.VERY_VERBOSE,
         )
