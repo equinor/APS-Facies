@@ -22,10 +22,11 @@ from aps.utils.roxar.rms_project_data import RMSData
 from aps.utils.aps_config import APSConfig
 from aps.utils.roxar.progress_bar import APSProgressBar
 from aps.utils.check_rms_interactive_or_batch import check_rms_execution_mode
+from aps.utils.roxar.get_conformity_from_rms import check_grid_layout
 
 
 def excepthook(type, value, traceback):
-    print(f'ERROR:')
+    print('ERROR:')
     print(f'Type:  {type.__name__}')
     print(f'{value}')
 
@@ -127,6 +128,14 @@ class JobConfig:
                         f'The zone with code {zone_model.zone_number} does not have any conformity specified. '
                         f'This is required, when running in ERT / AHM.'
                     )
+                else:
+                    check_grid_layout(
+                        aps_model.grid_model_name,
+                        zone_model.zone_number,
+                        zone_model.grid_layout,
+                        aps_job_name=self.roxar.rms.get_running_job_name(),
+                    )
+
         # Check if APS model is consistent with grid model and has only zones defined in grid model
         ok, err_msg = self.check_zones(aps_model)
         if not ok:
@@ -353,7 +362,7 @@ class JobConfig:
             if current_job_name is not None:
                 err_message = f'Current grid model: {aps_model.grid_model_name}  has less number of zones than specified in the APS job: {current_job_name}. '
             else:
-                err_message = f'Current grid model has less number of zones than specified in the APS job.'
+                err_message = 'Current grid model has less number of zones than specified in the APS job.'
 
             if self.run_fmu_workflows:
                 self._config['fmu']['create']['value'] = True
