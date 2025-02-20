@@ -3,7 +3,9 @@ from aps.utils.constants.simple import Conform, Debug
 from typing import Optional
 
 
-def get_conformity(grid_model_name: str, rms_grid_job_name: str) -> tuple[dict, bool]:
+def get_conformity(
+    grid_model_name: str, zone_number: int, rms_grid_job_name: str
+) -> tuple[dict, bool]:
     """Function to get conformity from the grid.
     Restrictions:
     - All horizons used are specified to be honored and not sampled.
@@ -12,8 +14,13 @@ def get_conformity(grid_model_name: str, rms_grid_job_name: str) -> tuple[dict, 
     - If the two above mentioned criteria is satisfied, it is possible
       to use the 'ConformalMode' list from rmsapi to get conformity status.
 
-    If restrictions above are not satisfied, the current function will return
-    undefined for the conformity for all zones.
+    If restrictions above are not satisfied, the current function will return:
+        - empty dict and not defined if 'Sample' is used
+        - dict with conformity assigned to 'Conform.UNDEFINED' for the zone
+          and is_defined = False if 'Surface' is reference and not 'Horizon'
+          for the zone this happens.
+    If everything is ok for all zones, the dict with conformity is assigned
+    and is_defined = True
     """
     owner_strings = ['Grid models', grid_model_name, 'Grid']
     type_string = 'Create Grid'
@@ -25,34 +32,41 @@ def get_conformity(grid_model_name: str, rms_grid_job_name: str) -> tuple[dict, 
     use_base_surface = arguments['UseBottomSurface']
     use_top_surface = arguments['UseTopSurface']
 
-    conformity_dict: dict[int, dict] = {}
-    is_defined = True
+    conform_dict: dict[int, dict] = {}
+    boundary_is_sampled = False
     # zone_number starts at 1
     if len(zone_names) > len(conformal_mode_list):
         # This indicates that some zone borders are calculated using 'Sample'
         # and not 'Honor'. In this case the conformal_mode_list no longer
         # match the modelling zones since sone zones are merged when
         # defining grid layout.
-        is_defined = False
-        return conformity_dict, is_defined
+        # return empty dict and is_defined = False
+        boundary_is_sampled = True
+        conform_dict = {
+            'zone_name': zone_names[zone_number - 1],
+            'conformity': Conform.Undefined,
+        }
+        return conform_dict, boundary_is_sampled
 
-    for zone_number, zone_name in enumerate(zone_names, start=1):
-        conform_mode = conformal_mode_list[zone_number - 1]
-        use_top_surf = use_top_surface[zone_number - 1]
-        use_base_surf = use_base_surface[zone_number - 1]
-        if use_top_surf or use_base_surf:
-            is_defined = False
-            return {}, is_defined
-        assert conform_mode in [0, 1, 2]
-        if conform_mode == 0:
-            conform = Conform.Proportional
-        elif conform_mode == 1:
-            conform = Conform.TopConform
-        else:
-            conform = Conform.BaseConform
+    conform_mode = conformal_mode_list[zone_number - 1]
+    use_top_surf = use_top_surface[zone_number - 1]
+    use_base_surf = use_base_surface[zone_number - 1]
+    assert conform_mode in [0, 1, 2]
+    if conform_mode == 0:
+        conform = Conform.Proportional
+    elif conform_mode == 1:
+        conform = Conform.TopConform
+    else:
+        conform = Conform.BaseConform
+    if use_top_surf or use_base_surf:
+        conform = Conform.Undefined
 
-        conformity_dict[zone_number] = {'zone_name': zone_name, 'conformity': conform}
-    return conformity_dict, is_defined
+    conform_dict = {
+        'zone_name': zone_names[zone_number - 1],
+        'conformity': conform,
+    }
+
+    return conform_dict, boundary_is_sampled
 
 
 def get_job_name(grid_model_name: str) -> Optional[str]:
@@ -100,8 +114,10 @@ def check_grid_layout(
         return
 
     rms_grid_job_name = job_names[0]
-    conformity_dict, is_defined = get_conformity(grid_model_name, rms_grid_job_name)
-    if not is_defined:
+    zone_conformity_dict, boundary_is_sampled = get_conformity(
+        grid_model_name, zone_number, rms_grid_job_name
+    )
+    if boundary_is_sampled:
         if debug_level >= Debug.ON:
             print('WARNING: ')
             print(
@@ -109,12 +125,27 @@ def check_grid_layout(
                 f"for the grid model '{grid_model_name}' is not implemented in APS."
             )
             print(
-                '        The implemented type of zone boundaries is defined by the option '
-                "'Honor' and not 'Sample'."
+                "        Only zone boundaries defined by option 'Honor' is implemented."
             )
             print(
-                '        The implemented grid conformities is defined by the '
-                "option 'Horizon' and not 'Surface'."
+                '        You must in APS gui choose the best of the three possible implemented conformities:'
+            )
+            print("         'Proportional', 'TopConform' or 'BaseConform')")
+        return
+
+    zone_name = zone_conformity_dict['zone_name']
+    conformity = zone_conformity_dict['conformity']
+
+    if conformity == Conform.Undefined:
+        if debug_level >= Debug.ON:
+            print('WARNING: ')
+            print(
+                f"        The grid definition in the job '{rms_grid_job_name}' "
+                f"for the grid model '{grid_model_name}' for zone {zone_name} "
+                'is not implemented in APS.'
+            )
+            print(
+                "        APS has only implemented conformities using option 'Horizon' and not 'Surface'."
             )
             print(
                 '        You must in APS gui choose the best of the three possible implemented conformities:'
@@ -124,9 +155,6 @@ def check_grid_layout(
             print()
         return
 
-    zone_conformity_dict = conformity_dict[zone_number]  # Zone number start at 1
-    zone_name = zone_conformity_dict['zone_name']
-    conformity = zone_conformity_dict['conformity']
     if grid_layout != conformity:
         if aps_job_name is not None:
             aps_job_string = f"'APS job '{aps_job_name}'"
