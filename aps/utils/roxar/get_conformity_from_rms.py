@@ -78,7 +78,7 @@ def check_grid_layout(
     job_names = get_job_name(grid_model_name)
     if job_names is None:
         if debug_level >= Debug.ON:
-            print('Warning: ')
+            print('WARNING: ')
             print(
                 f"      No automatic grid conformity check for '{grid_model_name}'"
                 f' for zone number {zone_number}.'
@@ -88,7 +88,7 @@ def check_grid_layout(
 
     elif len(job_names) > 1:
         if debug_level >= Debug.ON:
-            print('Warning:')
+            print('WARNING:')
             print(
                 f"        No automatic grid conformity check for '{grid_model_name}'"
                 f' for zone number {zone_number}.'
@@ -103,22 +103,24 @@ def check_grid_layout(
     conformity_dict, is_defined = get_conformity(grid_model_name, rms_grid_job_name)
     if not is_defined:
         if debug_level >= Debug.ON:
-            print('Warning: ')
+            print('WARNING: ')
             print(
-                f"        No automatic grid conformity check for '{grid_model_name}'."
-            )
-            print('        This type of grid conformity is not implemented.')
-            print(
-                f"        The grid building job  '{rms_grid_job_name}' is using 'Sample'"
+                f"        The grid definition in the job '{rms_grid_job_name}' "
+                f"for the grid model '{grid_model_name}' is not implemented in APS."
             )
             print(
-                "        for zone borders or 'Surface' and not 'Horizon' as top and/or base "
+                '        The implemented type of zone boundaries is defined by the option '
+                "'Honor' and not 'Sample'."
             )
-            print('        reference map.')
             print(
-                '        You must choose the best of the three possible implemented conformities:'
+                '        The implemented grid conformities is defined by the '
+                "option 'Horizon' and not 'Surface'."
+            )
+            print(
+                '        You must in APS gui choose the best of the three possible implemented conformities:'
             )
             print("         'Proportional', 'TopConform' or 'BaseConform')")
+
             print()
         return
 
