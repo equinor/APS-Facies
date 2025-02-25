@@ -113,7 +113,7 @@ def get_trend_param_names_from_aps_model(
         zone_dict[zone_name] = (
             zone_number,
             region_number,
-            zone_model.grid_layout,
+            zone_model.grid_layout.value,
             param_name_list,
         )
         if len(param_name_list) > 0:
