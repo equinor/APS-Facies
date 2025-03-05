@@ -1,7 +1,7 @@
 <template>
   <facies-specification
     :value="value"
-    :rule="rule as InstantiatedTruncationRule"
+    :rule="rule"
     :disable="(facies) => overlayFacies(facies)"
   />
 </template>
@@ -18,11 +18,7 @@
 >
 import FaciesSpecification from '@/components/specification/Facies/index.vue'
 
-import type {
-  Facies,
-  InstantiatedTruncationRule,
-  Polygon,
-} from '@/utils/domain'
+import type { Facies, Polygon } from '@/utils/domain'
 import type { TruncationRule } from '@/utils/domain/truncationRule'
 import type {
   PolygonSerialization,

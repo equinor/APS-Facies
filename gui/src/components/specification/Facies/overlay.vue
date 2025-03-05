@@ -1,7 +1,7 @@
 <template>
   <facies-specification
     :value="value"
-    :rule="rule as InstantiatedOverlayTruncationRule"
+    :rule="rule"
     :disable="(facies) => backgroundFacies(facies)"
   />
 </template>
@@ -10,7 +10,7 @@
   setup
   lang="ts"
   generic="
-    T extends Polygon,
+    T extends OverlayPolygon,
     S extends PolygonSerialization,
     P extends PolygonSpecification,
     RULE extends OverlayTruncationRule<T, S, P>
@@ -18,12 +18,7 @@
 >
 import FaciesSpecification from '@/components/specification/Facies/index.vue'
 
-import type {
-  InstantiatedOverlayTruncationRule,
-  OverlayPolygon,
-  Polygon,
-  Facies,
-} from '@/utils/domain'
+import type { OverlayPolygon, Facies } from '@/utils/domain'
 import type {
   PolygonSerialization,
   PolygonSpecification,

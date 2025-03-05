@@ -53,7 +53,7 @@ const disabled = computed(() => {
 const appendIcon = computed(() => {
   return disabled.value || props.rule.isPolygonFractionsNormalized(props.value)
     ? ''
-    : vuetify.icons.aliases.refresh
+    : (vuetify.icons.aliases.refresh as string)
 })
 
 function updateFactor(polygon: T, value: number): void {
