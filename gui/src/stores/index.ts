@@ -117,9 +117,12 @@ export const useRootStore = defineStore('root', () => {
     }
   })
 
-  async function fetch() {
+  async function fetch(message?: string) {
     if (!mayLoadParameters.value) return
 
+    if (message !== undefined) {
+      loadingMessage.value = message
+    }
     const wasLoading = _loading.value
     _loading.value = true
 
@@ -132,6 +135,7 @@ export const useRootStore = defineStore('root', () => {
 
     _loading.value = wasLoading
     _loaded.value = true
+    loadingMessage.value = ''
   }
 
   async function refresh(

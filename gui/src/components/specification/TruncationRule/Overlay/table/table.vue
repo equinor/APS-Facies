@@ -53,9 +53,7 @@
     T extends OverlayPolygon,
     S extends PolygonSerialization,
     P extends PolygonSpecification,
-    RULE extends
-      | OverlayTruncationRule<T, S, P>
-      | InstantiatedOverlayTruncationRule
+    RULE extends OverlayTruncationRule<T, S, P>
   "
 >
 import type OverlayTruncationRule from '@/utils/domain/truncationRule/overlay'
@@ -69,7 +67,6 @@ import type {
   PolygonSpecification,
 } from '@/utils/domain/polygon/base'
 import { TruncationRule } from '@/utils/domain/truncationRule'
-import type { InstantiatedOverlayTruncationRule } from '@/utils/domain'
 import BaseTable from '@/components/baseComponents/BaseTable.vue'
 import type OverlayPolygon from '@/utils/domain/polygon/overlay'
 import type { ID } from '@/utils/domain/types'

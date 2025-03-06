@@ -74,7 +74,7 @@ export default abstract class ZoneRegionDependent
     parent,
   }: DependentConfiguration) {
     super({ id })
-    zone = zone || parent.zone
+    zone = zone || parent?.zone
     region = region ?? parent?.region ?? null
     if (!zone) throw new Error("Missing 'zone', or 'parent.zone'")
     this.parent = {

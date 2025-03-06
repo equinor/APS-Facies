@@ -84,5 +84,5 @@ The GUI will automatically get these rules, when it is built.
    This will trigger the workflow in `.github/workflows/release.yml`, which will make a new release in GitHub, and build a production version of the plugin
 
 
-[^1]: Version 3.8 or greater
+[^1]: Version 3.11 or greater
 [^2]: Version 20.11 or greater

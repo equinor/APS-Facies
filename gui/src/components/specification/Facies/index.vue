@@ -9,15 +9,23 @@
 <script
   setup
   lang="ts"
-  generic="T extends Polygon, RULE extends InstantiatedTruncationRule"
+  generic="
+    T extends Polygon,
+    S extends PolygonSerialization,
+    P extends PolygonSpecification,
+    RULE extends TruncationRule<T, S, P>
+  "
 >
 import type Facies from '@/utils/domain/facies/local'
-import type Polygon from '@/utils/domain/polygon/base'
-import type { InstantiatedTruncationRule } from '@/utils/domain'
+import Polygon, {
+  type PolygonSerialization,
+  type PolygonSpecification,
+} from '@/utils/domain/polygon/base'
 
 import FaciesSpecificationBase from './base.vue'
 import { computed } from 'vue'
 import { useTruncationRuleStore } from '@/stores/truncation-rules'
+import type { TruncationRule } from '@/utils/domain/truncationRule'
 
 type Props = {
   value: T
