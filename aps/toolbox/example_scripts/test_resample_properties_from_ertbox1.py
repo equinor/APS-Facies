@@ -6,13 +6,13 @@
 # switch to fmu.tools and remove copy_rms_param_to_fmu_grid from aps.rms_jobs
 
 from fmu.tools.rms import copy_rms_param
-
+from aps.utils.constants.simple import Debug
 
 print(f'Run script: {copy_rms_param.__file__}  ')
 print('Copy 3D parameters from Ertbox grid to geo grid')
 params = {
     'project': project,
-    'debug_level': 1,
+    'debug_level': Debug.ON.value,
     'Mode': 'from_ertbox_to_geo',
     'GeoGridParameters': {
         1: ['PermFromErtbox', 'PoroFromErtbox'],

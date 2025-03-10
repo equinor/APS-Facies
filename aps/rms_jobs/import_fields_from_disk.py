@@ -29,7 +29,7 @@
 # (including the added trends for those that should have trends) is then copied back to the geomodel grid.
 
 from pathlib import Path
-from rmsapi import Direction
+from roxar import Direction
 
 import numpy as np
 import xtgeo
@@ -53,29 +53,6 @@ from aps.utils.aps_config import APSConfig
 from fmu.tools.rms.copy_rms_param_to_ertbox_grid import (
     extract_values_from_ertbox_grid_to_geogrid_simbox,
 )
-
-# def extract_values_from_fmu_grid_to_geogrid_simbox(
-#    field_values, zone, number_of_layers_in_geo_grid_zone
-# ):
-#    """Updates or replaces the input field_values for fmu grid to contain only the values
-#    that are used in the geomodel simbox. Use grid conformity definition
-#    to select layers from top of fmu ertbox grid or from bottom of ertbox grid.#
-#
-#    """
-#    nz = number_of_layers_in_geo_grid_zone
-#    conformity = zone.grid_layout
-#    if conformity is None:
-#        raise MissingConformityException(zone)
-#    if conformity in [Conform.Proportional, Conform.TopConform]:
-#        # Only get the top n cells of field_values
-#        field_values = field_values[:, :, :nz]
-#    elif conformity in [Conform.BaseConform]:
-#        # Get the bottom n cells of field_values
-#        field_values = field_values[:, :, -nz:]
-#    else:
-#        # One such case is 'mixed conform'
-#        raise NotImplementedError('{} is not supported'.format(conformity.name))
-#    return field_values
 
 
 def get_field_name(field_name, zone):

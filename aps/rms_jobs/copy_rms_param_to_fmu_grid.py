@@ -13,6 +13,7 @@ use FIELD keywords for petrophysical properties in ERT in Assisted History Match
 from aps.toolbox import copy_rms_param_to_ertbox_grid
 from aps.utils.constants.simple import ModelFileFormat
 from aps.utils.methods import get_specification_file, SpecificationType
+from aps.utils.constants.simple import Debug
 
 
 def run(project, **kwargs):
@@ -33,7 +34,7 @@ def run(project, **kwargs):
         'model_file_name': get_specification_file(
             _type=SpecificationType.RESAMPLE, _format=ModelFileFormat.YML, **kwargs
         ),
-        'debug_level': 2,
+        'debug_level': Debug.VERBOSE,
     }
 
     copy_rms_param_to_ertbox_grid.run(params)

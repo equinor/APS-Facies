@@ -1,5 +1,6 @@
+
 nodejs 20.18.2
-python 3.8.19
+python 3.9
 poetry 1.8.5
 yarn 1.22.22
 pre-commit 4.1.0

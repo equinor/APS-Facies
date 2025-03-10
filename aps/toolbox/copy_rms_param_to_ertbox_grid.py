@@ -6,7 +6,8 @@ in ERTBOX grid. This functionality is used when the user wants to
 use FIELD keywords for petrophysical properties in ERT in Assisted History Matching.
 """
 
-import rmsapi
+import roxar
+from roxar import Direction
 
 from pathlib import Path
 from aps.utils.constants.simple import (
@@ -25,6 +26,9 @@ from aps.utils.roxar.grid_model import get_zone_layer_numbering
 from aps.utils.roxar.generalFunctionsUsingRoxAPI import (
     set_continuous_3d_parameter_values_in_zone_region,
 )
+
+# TODO: When the stubs are removed, this function is no longe necessary since
+# this functionality is implemented in fmu.tools.rms.copy_rms_param
 
 
 def run(params, seed=12345):
@@ -113,7 +117,7 @@ def run(params, seed=12345):
     if model_file_name is not None:
         # Read model file
         params = read_model_file(
-            model_file_name, debug_level=params.get('debug_level', Debug.VERY_VERBOSE)
+            model_file_name, debug_level=params.get('debug_level', Debug.OFF)
         )
     # Check that necessary params are specified
     required_kw_list = [
@@ -195,7 +199,7 @@ def from_geogrid_to_ertbox(project, params, seed=12345):
             "Use 'Eclipse grid standard' (upper left corner) as "
             'common grid index origin (right-handed grid) in FMU projects using ERT.'
         )
-    if ertboxgrid_handedness != rmsapi.Direction.right:
+    if ertboxgrid_handedness != Direction.right:
         print("WARNING: ERTBOX grid should have 'Eclipse grid index origin'.")
         print('         Use the grid index origin job in RMS to set this.')
 
@@ -271,9 +275,9 @@ def check_geogrid_parameters(
                 raise ValueError(
                     f'Grid property: {pname} is empty for grid model: {grid_model.name}'
                 )
-            if prop.type == rmsapi.GridPropertyType.continuous:
+            if prop.type == roxar.GridPropertyType.continuous:
                 continuous_type_param_list.append(pname)
-            elif prop.type == rmsapi.GridPropertyType.discrete:
+            elif prop.type == roxar.GridPropertyType.discrete:
                 if pname not in discrete_type_param_list:
                     discrete_type_param_list.append(pname)
             else:
@@ -316,7 +320,7 @@ def from_ertbox_to_geogrid(project, params):
             "Use 'Eclipse grid standard' (upper left corner) as "
             'common grid index origin (right-handed grid) in FMU projects using ERT.'
         )
-    if ertboxgrid_handedness != rmsapi.Direction.right:
+    if ertboxgrid_handedness != roxar.Direction.right:
         print("WARNING: ERTBOX grid should have 'Eclipse grid index origin'.")
         print('         Use the grid index origin job in RMS to set this.')
 
