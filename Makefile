@@ -18,7 +18,7 @@ ifeq ($(CURRENT_OS),Linux)
 NUMBER_OF_PROCESSORS := $(shell cat /proc/cpuinfo | grep processor | wc -l)
 TAR := tar
 SED := sed
-MATPLOTLIB_BACKEND ?= tkAgg
+MATPLOTLIB_BACKEND ?= Agg
 else  # Darwin
 NUMBER_OF_PROCESSORS := $(shell sysctl -n hw.ncpu)
 TAR := gtar
