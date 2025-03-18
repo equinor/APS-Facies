@@ -64,13 +64,10 @@ from aps.utils.types import (
     GridName,
     RegionParameter,
     TrendParameter,
-    TrendMapName,
-    TrendMapZone,
     ProbabilityCubeParameter,
     RealizationParameter,
     GridSize,
     ZoneNumber,
-    SimulationBoxOrigin,
     RegionNumber,
     Average,
     XML,
@@ -366,7 +363,7 @@ class RMSData:
         zone_number: ZoneNumber,
         region_parameter: Optional[RegionParameter] = None,
         region_number: Optional[RegionNumber] = None,
-        debug_level=Debug.VERBOSE,
+        debug_level=Debug.VERY_VERBOSE,
     ) -> Dict[ProbabilityCubeParameter, Average]:
         # Ensure not duplicated parameter names for probability cubes
         param_names = list(set(probability_cube_parameters))
@@ -376,9 +373,11 @@ class RMSData:
         realisation_number = self.project.current_realisation
         grid_model = self.project.grid_models[grid_model_name]
         # get zone_values and region_values
-        zone_values = create_zone_parameter(
+        zone_param = create_zone_parameter(
             grid_model, realization_number=realisation_number
-        ).get_values(realisation_number)
+        )
+        zone_values = zone_param.get_values(realisation_number)
+        zone_code_names = zone_param.code_names
         if region_parameter:
             region_values, _ = getDiscrete3DParameterValues(
                 grid_model, region_parameter, realisation_number
@@ -391,9 +390,11 @@ class RMSData:
             param_names,
             zone_values,
             zone_number,
+            zone_code_names,
             region_values,
             region_number,
             realisation_number,
+            debug_level=debug_level,
         )
         if debug_level >= Debug.VERBOSE:
             if region_values is not None:
@@ -560,7 +561,7 @@ class RMSData:
     ) -> bool:
         try:
             model = decode_model(encoded_xml)
-        except Exception as e:
+        except Exception:
             return False
         model.dump(
             name=model_path,
@@ -573,7 +574,7 @@ class RMSData:
     def has_fmu_updatable_values(encoded_xml):
         try:
             model = decode_model(encoded_xml)
-        except Exception as e:
+        except Exception:
             return False
         return model.has_fmu_updatable_values
 

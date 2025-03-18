@@ -104,11 +104,22 @@ def find_defined_cells(
     return cell_index_defined
 
 
+def check_for_nan(ndarray, array_name):
+    # Check for NaN values
+    nan_mask = np.isnan(ndarray)
+    number_of_nan = np.sum(nan_mask)
+    if number_of_nan > 0:
+        print(f'Error: Found NaN in {array_name}')
+        print(f'Error: Number of NaN found: {number_of_nan}')
+        raise ValueError(f'NaN found in {array_name}')
+
+
 def average_of_property_inside_zone_region(
     grid_model,
     parameter_names,
     zone_values,
     zone_number,
+    zone_code_names,
     region_values=None,
     region_number=0,
     realization_number=0,
@@ -125,15 +136,46 @@ def average_of_property_inside_zone_region(
     Returns a dictionary with parameter name as key and average as value.
     """
     cell_index_defined = find_defined_cells(
-        zone_values, zone_number, region_values, region_number, debug_level=Debug.OFF
+        zone_values, zone_number, region_values, region_number
     )
-    return {
-        name: calc_average(
-            cell_index_defined,
-            values=getContinuous3DParameterValues(grid_model, name, realization_number),
+    if len(cell_index_defined) == 0:
+        print('ERROR:')
+        print(
+            f'Zone number {zone_number} specified in the GUI '
+            'has no active cells with this zone number in '
+            f"the zone parameter '{GridModelConstants.ZONE_NAME}'."
         )
-        for name in parameter_names
-    }
+        print(
+            'There is probably a mismatch between the zone number in the GUI and zone values '
+            'for the active grid cells in the zone parameter.'
+        )
+        print(
+            'A possible fix is to delete the zone parameter and let APS automatically re-create it.'
+        )
+        print(
+            'This situation can happen if the zone parameter was originally created for '
+            'a multi-zone grid but later split into single zone '
+        )
+        print('grids while still keeping the original zone values.')
+        print('\n')
+        print(f"Available zone numbers in '{GridModelConstants.ZONE_NAME}':")
+        for key, name in zone_code_names.items():
+            print(f'  {key}   {name}')
+
+        raise ValueError(
+            'Mismatch between specified zone number in GUI and in zone parameter'
+        )
+
+    check_for_nan(cell_index_defined, 'cell_index_defined')
+
+    average_dict = {}
+    for name in parameter_names:
+        values = getContinuous3DParameterValues(grid_model, name, realization_number)
+        check_for_nan(values, name)
+        average_dict[name] = calc_average(
+            cell_index_defined, values=values, debug_level=debug_level
+        )
+    return average_dict
 
 
 def calcStatisticsFor3DParameter(
@@ -482,7 +524,7 @@ def get_simulation_box_thickness(
             thickness_per_zone[zone_number] = simbox_increments[zindx] * nlayer
         if debug_level >= Debug.VERBOSE:
             print(
-                f'-- Get simbox thickness using Roxar API for RMS version 14.1.0 or later'
+                '-- Get simbox thickness using Roxar API for RMS version 14.1.0 or later'
             )
             if debug_level >= Debug.VERY_VERBOSE:
                 for zone_number, value in thickness_per_zone.items():
@@ -499,7 +541,7 @@ def get_simulation_box_thickness(
             max_number_of_selected_cells=max_number_of_selected_cells,
         )
         if debug_level >= Debug.VERBOSE:
-            print(f'-- Get simbox thickness by estimating it from the grid')
+            print('-- Get simbox thickness by estimating it from the grid')
             if debug_level >= Debug.VERY_VERBOSE:
                 for zone_number, value in thickness_per_zone.items():
                     print(f'--- Zone: {zone_number} sim box thickness: {value}')
