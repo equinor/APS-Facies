@@ -7,7 +7,7 @@ use FIELD keywords for petrophysical properties in ERT in Assisted History Match
 """
 
 import roxar
-import xml.etree.ElementTree as ET
+from roxar import Direction
 
 from pathlib import Path
 from aps.utils.constants.simple import (
@@ -26,6 +26,9 @@ from aps.utils.roxar.grid_model import get_zone_layer_numbering
 from aps.utils.roxar.generalFunctionsUsingRoxAPI import (
     set_continuous_3d_parameter_values_in_zone_region,
 )
+
+# TODO: When the stubs are removed, this function is no longe necessary since
+# this functionality is implemented in fmu.tools.rms.copy_rms_param
 
 
 def run(params, seed=12345):
@@ -127,7 +130,7 @@ def run(params, seed=12345):
     ]
     check_missing_keywords_list(params, required_kw_list)
     mode = params['Mode']
-    if params['debug_level'] == Debug.VERBOSE:
+    if params['debug_level'] == Debug.VERY_VERBOSE:
         print(f'-- Realization number:  {project.current_realisation}')
     if mode == 'from_geo_to_ertbox':
         # The names of the parameters in ertbox is automatically set to
@@ -171,11 +174,11 @@ def from_geogrid_to_ertbox(project, params, seed=12345):
     # Some conversion
     conformity_dict = {}
     for znr, conform_text in conformity_dict_input.items():
-        conformity_dict[znr] = Conform(conform_text)
-    method = ExtrapolationMethod(method)
+        conformity_dict[znr] = Conform(conform_text).value
+    method = ExtrapolationMethod(method).value
 
     geogrid_model, geogrid3D = get_grid_model(project, grid_model_name)
-    if not zone_param_name in geogrid_model.properties:
+    if zone_param_name not in geogrid_model.properties:
         raise ValueError(
             f'The parameter {zone_param_name} does not exist in {grid_model_name} .'
         )
@@ -196,7 +199,7 @@ def from_geogrid_to_ertbox(project, params, seed=12345):
             "Use 'Eclipse grid standard' (upper left corner) as "
             'common grid index origin (right-handed grid) in FMU projects using ERT.'
         )
-    if ertboxgrid_handedness != roxar.Direction.right:
+    if ertboxgrid_handedness != Direction.right:
         print("WARNING: ERTBOX grid should have 'Eclipse grid index origin'.")
         print('         Use the grid index origin job in RMS to set this.')
 
@@ -300,7 +303,7 @@ def from_ertbox_to_geogrid(project, params):
     # Some conversion
     conformity_dict = {}
     for znr, conform_text in conformity_dict_input.items():
-        conformity_dict[znr] = Conform(conform_text)
+        conformity_dict[znr] = Conform(conform_text).value
 
     # Create
     geogrid_model, grid3D = get_grid_model(project, grid_model_name)
@@ -346,14 +349,14 @@ def from_ertbox_to_geogrid(project, params):
                 )
             values = rms_property.get_values(realisation=real_number)
             field_values = values.reshape(nx, ny, nz_ertbox)
-            if conformity in [Conform.Proportional, Conform.TopConform]:
+            if conformity in [Conform.Proportional.value, Conform.TopConform.value]:
                 # Only get the top n cells of field_values
                 field_values = field_values[:, :, :nz_for_zone]
-            elif conformity in [Conform.BaseConform]:
+            elif conformity in [Conform.BaseConform.value]:
                 # Get the bottom n cells of field_values
                 field_values = field_values[:, :, -nz_for_zone:]
             else:
-                raise NotImplementedError(f'{conformity.value} is not supported')
+                raise NotImplementedError(f'{conformity} is not supported')
 
             # Field names and corresponding values to update the geo grid with
             param_name_geo = param_names_geogrid_list[index]
@@ -456,7 +459,7 @@ def _read_model_file_yml(model_file_name, debug_level=Debug.OFF):
                 f'Extrapolation method: {method_text} is unknown. Valid methods are:\n'
                 f'{valid_methods}'
             )
-        method = ExtrapolationMethod(method_text)
+        method = ExtrapolationMethod(method_text).value
 
     param_list_geogrid_dict = get_dict(spec, kw_parent, 'GeoGridParameters')
     param_names_geo_per_zone = {}
@@ -481,7 +484,7 @@ def _read_model_file_yml(model_file_name, debug_level=Debug.OFF):
                 f'Unknown comformity: {text_value}\n'
                 f'Valid specifications are: {valid_conformities_list} '
             )
-        conformity_per_zone[key] = Conform(text_value)
+        conformity_per_zone[key] = Conform(text_value).value
 
     save_active_param = get_bool_value(spec, 'SaveActiveParam', True)
     add_noise_to_inactive = get_bool_value(spec, 'AddNoiseToInactive', True)

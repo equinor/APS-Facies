@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "aps-gui"
-version = "1.3.6"
+version = "1.5.1"
 description = ""
 authors = [
     "Oddvar Lia <olia@equinor.com>",
@@ -9,7 +9,7 @@ authors = [
 ]
 
 [tool.poetry.dependencies]
-python = "^3.11"
+python = "^3.9"
 matplotlib = "^3.6.0"
 numpy = "^1.19.5"
 Pillow = "^10.3.0"
@@ -17,6 +17,7 @@ scipy = "^1.10.0"
 xtgeo = "^4.3.3"
 PyYAML = "^6.0"
 gaussianfft = "^1.1.2"
+fmu-tools = "^1.20.0"
 
 [tool.poetry.dev-dependencies]
 pytest = "^6.2.5"
