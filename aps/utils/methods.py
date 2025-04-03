@@ -74,7 +74,7 @@ def get_selected_zones(
     for znr in zone_numbers:
         if znr <= 0:
             raise ValueError(
-                f'List of selected zone numbers must have positive integer values'
+                'List of selected zone numbers must have positive integer values'
             )
     return zone_numbers
 
@@ -330,7 +330,9 @@ def get_run_parameters(**kwargs) -> dict:
     }
 
 
-def calc_average(cell_index_defined: List[int], values: List[float]) -> float:
+def calc_average(
+    cell_index_defined: List[int], values: List[float], debug_level: Debug = Debug.OFF
+) -> float:
     """
     Calculates average of the values array.
     Input:
@@ -340,7 +342,10 @@ def calc_average(cell_index_defined: List[int], values: List[float]) -> float:
     Output:
             average  - average value
     """
-    return np.average(values[cell_index_defined])
+    average, number_of_elements = np.average(values[cell_index_defined], returned=True)
+    if debug_level >= Debug.VERY_VERBOSE:
+        print(f'--- Average: {average}  Number of elements: {number_of_elements}')
+    return average
 
 
 def get_workflow_name() -> WorkflowName:
@@ -390,7 +395,7 @@ def get_cond_prob_dict(
     for key in input_cond_table:
         # Check syntax
         try:
-            prob = float(input_cond_table[key])
+            float(input_cond_table[key])
         except ValueError:
             err_list.append(
                 f"Specified probability '{input_cond_table[key]}'  is not a float number for '{key}'\n"
@@ -438,10 +443,10 @@ def get_cond_prob_dict(
                 conditional_prob_facies[new_key] = input_cond_table[key]
 
     if len(err_list) != 0:
-        print(f'Errors found:\n')
+        print('Errors found:\n')
         for err in err_list:
             print(f' {err}  ')
         print('\n')
-        raise ValueError(f'Errors found in specification of conditional probabilities.')
+        raise ValueError('Errors found in specification of conditional probabilities.')
 
     return conditional_prob_facies
