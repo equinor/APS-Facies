@@ -3,10 +3,9 @@
 JRIV/OLIA
 """
 
-import numpy as np
-import xtgeo
 from aps.algorithms.APSModel import APSModel
 from aps.utils.roxar.sample_map_to_grid import trend_map_to_grid_param
+from aps.utils.constants.simple import Debug
 
 
 def run(*, project, zone_number, **kwargs):

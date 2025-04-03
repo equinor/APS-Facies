@@ -35,7 +35,6 @@ from aps.utils.constants.simple import (
     CrossSectionType,
     Direction,
     TrendParameter,
-    GridModelConstants,
 )
 
 from aps.utils.containers import FmuAttribute
@@ -53,6 +52,7 @@ from aps.utils.xmlUtils import (
     get_fmu_value_from_xml,
     get_origin_type_from_model_file,
 )
+from fmu.tools.rms.zone_mapping import ZoneMapping
 
 
 def required_parameters(_type: TrendType) -> List[TrendParameter]:
@@ -162,7 +162,7 @@ class Trend3D:
             trend_rule_xml, 'directionStacking', modelFile=model_file_name
         )
         if debug_level >= Debug.VERY_VERBOSE:
-            print(f'--- Trend parameters:')
+            print('--- Trend parameters:')
             print(f'---   Azimuth:        {azimuth}')
             print(f'---   Stacking angle: {stacking_angle}')
             print(f'---   Stacking type:  {stacking_direction}')
@@ -374,6 +374,7 @@ class Trend3D:
 
         # Using simbox indexer
         grid_3d = grid_model.get_grid(realization_number)
+        zone_mapping = ZoneMapping(grid_model, grid_3d, real_number=realization_number)
         grid_indexer = grid_3d.simbox_indexer
         (nx, ny, nz) = grid_indexer.dimensions
 
@@ -407,22 +408,16 @@ class Trend3D:
         else:
             cell_center_points = grid_3d.get_cell_centers(cell_index_defined)
 
-        zonation = grid_indexer.zonation
-        layer_ranges = zonation[zone_number - 1]
+        start_layer, end_layer = zone_mapping.get_start_end_layer_for_zone_number(
+            zone_number
+        )
         # In simbox there is only one interval of layers per zone and they
         # come after each other and layer numbering increases downwards
-        start_layer = np.infty
-        end_layer = -np.infty
-        for layer in layer_ranges:
-            if start_layer > layer[0]:
-                start_layer = layer[0]
-            if end_layer < layer[-1]:
-                end_layer = layer[-1]
 
         # Set start and end layer for this zone
         self._start_layer = start_layer
         self._end_layer = end_layer
-        num_layers_in_zone = sum(len(layer) for layer in layer_ranges)
+        num_layers_in_zone = zone_mapping.number_of_layers_for_zone_number(zone_number)
         zinc = sim_box_thickness / num_layers_in_zone
         if debug_level >= Debug.VERY_VERBOSE:
             print(f'---  In {self._class_name}')
@@ -533,7 +528,7 @@ class Trend3D:
             max_value = values_rescaled.max()
             minmax_difference = max_value - min_value
         else:
-            raise ValueError(f'Trend has no active cells')
+            raise ValueError('Trend has no active cells')
         return minmax_difference, values_rescaled
 
     def createTrendFor2DProjection(

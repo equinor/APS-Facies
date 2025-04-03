@@ -167,10 +167,9 @@ from aps.utils.roxar.grid_model import (
     getContinuous3DParameterValues,
     getDiscrete3DParameterValues,
     find_defined_cells,
-    create_zone_parameter,
 )
 from aps.utils.checks import check_probability_values, check_probability_normalisation
-from aps.utils.methods import check_missing_keywords_list, check_missing_keywords_dict
+from aps.utils.methods import check_missing_keywords_list
 
 
 class NormalisationError(ValueError):
@@ -183,7 +182,7 @@ def run(params):
     """
     project = params.get('project', None)
     if project is None:
-        raise ValueError(f"Missing specification of the project variable in 'params' ")
+        raise ValueError("Missing specification of the project variable in 'params' ")
 
     real_number = project.current_realisation
     print(
@@ -334,13 +333,13 @@ def check_and_normalize_probabilities_for_APS(
 
         if not overwrite:
             parameter_name = parameter_name + '_norm'
-        zone_number_list = []
+        zone_index_list = []
         is_shared = grid_model.shared
         update_successful = set_continuous_3d_parameter_values(
             grid_model,
             parameter_name,
             parameter_values,
-            zone_number_list,
+            zone_index_list,
             realization_number,
             is_shared=is_shared,
         )

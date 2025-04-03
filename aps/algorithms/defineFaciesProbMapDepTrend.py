@@ -12,6 +12,7 @@ from aps.utils.constants.simple import Debug
 from aps.algorithms.defineFacies import BaseDefineFacies
 from aps.utils.exceptions.xml import MissingKeyword
 from aps.utils.xmlUtils import getIntCommand
+from fmu.tools.rms.zone_mapping import ZoneMapping
 
 
 class DefineFaciesProbMapDep(BaseDefineFacies):
@@ -74,7 +75,7 @@ class DefineFaciesProbMapDep(BaseDefineFacies):
             self._zone_azimuth_values = zone_azimuth_values
             if len(self._zone_azimuth_values) != len(self._selected_zone_numbers):
                 raise ValueError(
-                    f'Number of selected zones must match number of azimuth values'
+                    'Number of selected zones must match number of azimuth values'
                 )
             self._resolution = resolution
 
@@ -95,6 +96,7 @@ class DefineFaciesProbMapDep(BaseDefineFacies):
         grid_model = self.project.grid_models[self.grid_model_name]
         is_shared = grid_model.shared
         grid_3d = grid_model.get_grid(real_number)
+        zone_mapping = ZoneMapping(grid_model, grid_3d, real_number=real_number)
         indexer = grid_3d.simbox_indexer
         dim_i, dim_j, _ = indexer.dimensions
         [zone_values, _] = getDiscrete3DParameterValues(
@@ -114,12 +116,10 @@ class DefineFaciesProbMapDep(BaseDefineFacies):
         stripe_number = np.zeros(len(zone_values), np.float32)
 
         # Go through zone by zone and compute deposition average
-        for idx in range(len(self.selected_zone_numbers)):
-            # selected_zone_numbers have zone numbers starting at 1
-            # zone_index must start at 0
-            zone_index = self.selected_zone_numbers[idx] - 1
+        for ii, zone_number in enumerate(self.selected_zone_numbers):
+            zone_index = zone_mapping.get_zone_index_for_zone_number(zone_number)
             if self.debug_level >= Debug.ON:
-                print('Zone number: ', zone_index + 1)
+                print('- Zone number: ', zone_number)
             if zone_index in indexer.zonation:
                 layer_ranges = indexer.zonation[zone_index]
                 lr = layer_ranges[0]
@@ -130,8 +130,8 @@ class DefineFaciesProbMapDep(BaseDefineFacies):
                 cell_corners = grid_3d.get_cell_corners(cell_nums)
                 cell_centers = grid_3d.get_cell_centers(cell_nums)
 
-                # Normal vector to azimuth
-                az = self.zone_azimuth_values[idx]
+                # Normal vector to azimuth (one for each zone_number)
+                az = self.zone_azimuth_values[ii]
                 alpha = az + 90
                 if alpha > 360:
                     alpha = alpha - 360
@@ -191,15 +191,16 @@ class DefineFaciesProbMapDep(BaseDefineFacies):
         # Write the calculated probabilities for the selected zones to 3D parameter
         # If the 3D parameter exist in advance, only the specified zones will be altered
         # while grid cell values for other zones are unchanged.
-        # selected zone numbers must count from 0 here.
-        selected_zone_numbers_zero_indexed = [
-            znr - 1 for znr in self.selected_zone_numbers
-        ]
+        zone_indices_for_selected_zone_numbers = []
+        for zone_number in self.selected_zone_numbers:
+            zone_index = zone_mapping.get_zone_index_for_zone_number(zone_number)
+            zone_indices_for_selected_zone_numbers.append(zone_index)
+
         set_continuous_3d_parameter_values(
             grid_model,
             'stripeNumber',
             stripe_number,
-            selected_zone_numbers_zero_indexed,
+            zone_indices_for_selected_zone_numbers,
             real_number,
             is_shared=is_shared,
         )
@@ -214,7 +215,7 @@ class DefineFaciesProbMapDep(BaseDefineFacies):
                     grid_model,
                     parameter_name,
                     probabilities[:, facies_idx],
-                    selected_zone_numbers_zero_indexed,
+                    zone_indices_for_selected_zone_numbers,
                     real_number,
                     is_shared=is_shared,
                 )

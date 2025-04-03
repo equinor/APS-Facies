@@ -7,14 +7,13 @@ import numpy as np
 from warnings import warn
 
 from aps.utils.exceptions.general import raise_error
-from aps.utils.io import print_debug_information, print_error
 from aps.utils.roxar.grid_model import (
     get3DParameter,
     modify_selected_grid_cells,
     update_code_names,
 )
 from aps.utils.constants.simple import Debug
-
+from fmu.tools.rms.zone_mapping import ZoneMapping
 import roxar
 from roxar import Direction
 
@@ -45,7 +44,7 @@ def set_continuous_3d_parameter_values(
     grid_model,
     parameter_name,
     input_values,
-    zone_numbers=None,
+    zone_indices=None,
     realisation_number=0,
     is_shared=False,
     debug_level=Debug.OFF,
@@ -57,7 +56,7 @@ def set_continuous_3d_parameter_values(
            input_values    - A numpy array of length equal to the number of active cells and with continuous values.
                            Only the grid cells belonging to the specified zones are updated even though the values array
                            contain values for all active cells.
-           zone_numbers - A list of integer values that are zone numbers (counted from 0).
+           zone_indices    - A list of integer values that are zone indices (counted from 0).
                             If the list is empty or has all zones included in the list,
                             then grid cells in all zones are updated.
            realisation_number    - Realisation number counted from 0 for the parameter to get.
@@ -91,7 +90,7 @@ def set_continuous_3d_parameter_values(
             grid_model,
             input_values,
             parameter_name,
-            zone_numbers,
+            zone_indices,
             is_shared,
             realisation_number,
         )
@@ -117,7 +116,7 @@ def set_continuous_3d_parameter_values(
 
         current_values = p.get_values(realisation_number)
         current_values = modify_selected_grid_cells(
-            grid_model, zone_numbers, realisation_number, current_values, input_values
+            grid_model, zone_indices, realisation_number, current_values, input_values
         )
         p.set_values(current_values, realisation_number)
 
@@ -128,7 +127,7 @@ def set_continuous_3d_parameter_values_in_zone(
     grid_model,
     parameter_names,
     input_values_for_zones,
-    zone_number,
+    zone_index,
     realisation_number=0,
     is_shared=False,
     debug_level=Debug.OFF,
@@ -146,7 +145,7 @@ def set_continuous_3d_parameter_values_in_zone(
                                      numpy.float32. Only the grid cells belonging to the specified zone are updated,
                                      and error is raised if the number of grid cells for the zone doesn't match
                                      the size of the input array.
-           zoneNumber    - The zone number (counted from 0 in the input)
+           zone_index             - The zone index (counted from 0 in the input). Zone index refer to zone in grid.
            realisation_number    - Realisation number counted from 0 for the parameter to get.
            is_shared      - Is set to true or false if the parameter is to be set to shared or non-shared.
            debug_level   - (value 0,1,2 or 3) and specify how much info is to be printed to screen.
@@ -162,20 +161,12 @@ def set_continuous_3d_parameter_values_in_zone(
 
     # Check if the parameter is defined and create new if not existing
     grid = grid_model.get_grid(realisation_number)
+    zone_mapping = ZoneMapping(grid_model, grid, real_number=realisation_number)
 
     # Find grid layers for the zone
     indexer = grid.simbox_indexer
-    zonation = indexer.zonation
-    layer_ranges = zonation[zone_number]
     nx, ny, nz = indexer.dimensions
-    start_layer = nz
-    end_layer = 0
-    for layer_range in layer_ranges:
-        for layer in layer_range:
-            if start_layer > layer:
-                start_layer = layer
-            if end_layer < layer:
-                end_layer = layer
+    start_layer, end_layer = zone_mapping.get_start_end_layer_for_zone_index(zone_index)
     end_layer = end_layer + 1
     start = (0, 0, start_layer)
     end = (nx, ny, end_layer)
@@ -189,7 +180,7 @@ def set_continuous_3d_parameter_values_in_zone(
             'Input array with values has different dimensions than the grid model:\n'
             f'Grid model nx: {nx}  Input array nx: {nx_in}\n'
             f'Grid model ny: {ny}  Input array ny: {ny_in}\n'
-            f'Grid model nLayers for zone {zone_number} is: {num_layers}    Input array nz: {nz_in}'
+            f'Grid model nLayers for zone with index {zone_index} is: {num_layers}    Input array nz: {nz_in}'
         )
 
     defined_cell_indices = indexer.get_indices(zone_cell_numbers)
@@ -279,7 +270,7 @@ def set_continuous_3d_parameter_values_in_zone_region(
     grid_model,
     parameter_names,
     input_values_for_zones,
-    zone_number,
+    zone_index,
     region_number=0,
     region_parameter_name=None,
     realisation_number=0,
@@ -303,7 +294,7 @@ def set_continuous_3d_parameter_values_in_zone_region(
                                      numpy.float32. Only the grid cells belonging to the specified zone are updated,
                                      and error is raised if the number of grid cells for the zone doesn't match
                                      the size of the input array.
-           zone_number    - The zone number (counted from 1 in the input)
+           zone_index    - The zone index is referring to zone in grid
            regionNumber  - The region number for the grid cells to be updated.
            region_parameter_name - The name of the 3D grid parameter containing a discrete 3D parameter with region numbers
            realisation_number    - Realisation number counted from 0 for the parameter to get.
@@ -312,7 +303,6 @@ def set_continuous_3d_parameter_values_in_zone_region(
                            (0 - almost nothing, 3 - also some debug info)
     """
 
-    function_name = set_continuous_3d_parameter_values_in_zone_region.__name__
     # Check if specified grid model exists and is not empty
     if grid_model.is_empty(realisation_number):
         print(
@@ -322,6 +312,9 @@ def set_continuous_3d_parameter_values_in_zone_region(
 
     # Check if the parameter is defined and create new if not existing
     grid = grid_model.get_grid(realisation_number)
+    zone_mapping = ZoneMapping(
+        grid_model, grid, real_number=realisation_number, fmu_mode=fmu_mode
+    )
 
     # Find grid layers for the zone
     indexer = grid.simbox_indexer
@@ -331,7 +324,14 @@ def set_continuous_3d_parameter_values_in_zone_region(
         ijk_handedness = indexer.handedness
 
     nx, ny, nz = indexer.dimensions
-    end_layer, start_layer = get_layer_range(indexer, zone_number, fmu_mode)
+    if fmu_mode and len(indexer.zonation) != 1:
+        raise ValueError(
+            'While in FMU / ERT mode, the ERTBOX grid must have EXACTLY 1 zone'
+        )
+
+    start_layer, end_layer = zone_mapping.get_start_end_layer_for_zone_index(zone_index)
+    end_layer = end_layer + 1
+    zone_name = zone_mapping.get_zone_name_for_zone_index(zone_index)
     start = (0, 0, start_layer)
     end = (nx, ny, end_layer)
     zone_cell_numbers = indexer.get_cell_numbers_in_range(start, end)
@@ -344,7 +344,7 @@ def set_continuous_3d_parameter_values_in_zone_region(
             'Input array with values has different dimensions than the grid model:\n'
             f'Grid model nx: {nx}  Input array nx: {nx_in}\n'
             f'Grid model ny: {ny}  Input array ny: {ny_in}\n'
-            f'Grid model nLayers for zone {zone_number} is: {num_layers}    Input array nz: {nz_in}'
+            f'Grid model nLayers for zone index {zone_index} is: {num_layers}    Input array nz: {nz_in}'
         )
     use_regions = False
     if region_parameter_name is None or len(region_parameter_name) == 0 or fmu_mode:
@@ -436,31 +436,9 @@ def set_continuous_3d_parameter_values_in_zone_region(
             ]
 
         property_param.set_values(current_values, realisation_number)
-
+        if debug_level >= Debug.VERY_VERBOSE:
+            print(f'--- Updated zone: {zone_name} for parameter: {parameter_name}')
     return True
-
-
-def get_layer_range(indexer, zone_number, fmu_mode=False):
-    _, _, nz = indexer.dimensions
-    if fmu_mode:
-        if len(indexer.zonation) == 1:
-            layer_ranges = indexer.zonation[0]
-        else:
-            raise ValueError(
-                'While in FMU / ERT mode, the grid must have EXACTLY 1 zone'
-            )
-    else:
-        layer_ranges = indexer.zonation[
-            zone_number - 1
-        ]  # Zonation is 0-indexed, while zone numbers are 1-indexed
-    start_layer = nz
-    end_layer = 0
-    for layer_range in layer_ranges:
-        if start_layer > layer_range.start:
-            start_layer = layer_range.start
-        if end_layer < layer_range.stop:
-            end_layer = layer_range.stop
-    return end_layer, start_layer
 
 
 def update_continuous_3d_parameter_values(
@@ -503,7 +481,6 @@ def update_continuous_3d_parameter_values(
     if input_values is None:
         return
 
-    function_name = update_continuous_3d_parameter_values.__name__
     # Check if specified grid model exists and is not empty
     if grid_model.is_empty(realisation_number):
         raise ValueError(
@@ -566,7 +543,7 @@ def set_discrete_3d_parameter_values(
     parameter_name,
     input_values,
     code_names,
-    zone_numbers=None,
+    zone_indices=None,
     realisation_number=0,
     is_shared=False,
     debug_level=Debug.OFF,
@@ -578,7 +555,7 @@ def set_discrete_3d_parameter_values(
            input_values    - A numpy array of length equal to the number of active cells and with continuous values.
                            Only the grid cells belonging to the specified zones are updated even though the values array
                            contain values for all active cells.
-           zone_numbers - A list of integer values that are zone numbers (counted from 0). If the list is empty or has
+           zone_indices   - A list of integer values that are zone indices (counted from 0). If the list is empty or has
                           all zones included in the list, then grid cells in all zones are updated.
            code_names     - A dictionary with code names and code values for the discrete parameter values of the form as
                            in the example:
@@ -620,7 +597,7 @@ def set_discrete_3d_parameter_values(
             grid_model,
             input_values,
             parameter_name,
-            zone_numbers,
+            zone_indices,
             is_shared,
             realisation_number,
             code_names,
@@ -647,7 +624,7 @@ def set_discrete_3d_parameter_values(
             )
         current_values = p.get_values(realisation_number)
         current_values = modify_selected_grid_cells(
-            grid_model, zone_numbers, realisation_number, current_values, input_values
+            grid_model, zone_indices, realisation_number, current_values, input_values
         )
         p.set_values(current_values, realisation_number)
 
@@ -673,7 +650,7 @@ def _create_property(
     grid_model,
     values,
     parameter_name,
-    zone_numbers,
+    zone_indices,
     is_shared,
     realisation_number,
     code_names=None,
@@ -685,7 +662,7 @@ def _create_property(
     p = grid_model.properties.create(parameter_name, property_type, dtype)
     current_values = np.zeros(len(values), dtype)
     current_values = modify_selected_grid_cells(
-        grid_model, zone_numbers, realisation_number, current_values, values
+        grid_model, zone_indices, realisation_number, current_values, values
     )
     p.set_values(current_values, realisation_number)
     p.set_shared(is_shared, realisation_number)
@@ -741,7 +718,6 @@ def update_discrete_3d_parameter_values(
     :param debug_level: Specify how much info is to be printed to screen. (0 - almost nothing output to screen, 3 - much output to screen)
 
     """
-    function_name = update_discrete_3d_parameter_values.__name__
     # Check if specified grid model exists and is not empty
     if grid_model.is_empty(realisation_number):
         raise ValueError(

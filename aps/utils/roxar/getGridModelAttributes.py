@@ -7,11 +7,12 @@ This script will read grid dimensions of the grid for the specified grid model i
 
 from xml.etree.ElementTree import Element
 
-from aps.utils.roxar.grid_model import GridAttributes, get_zone_names
+from aps.utils.roxar.grid_model import GridAttributes
 from aps.algorithms.APSModel import APSModel
 from aps.utils.constants.simple import Debug
 from aps.utils.methods import get_run_parameters
 from aps.utils.xmlUtils import prettify
+from fmu.tools.rms.zone_mapping import ZoneMapping
 
 
 def writeXMLFileGridDimensions(
@@ -31,10 +32,12 @@ def writeXMLFileGridDimensions(
             f'Could not find grid model with name: {gridModelName} in RMS project'
         )
     # Get the grid
-    grid = gridModel.get_grid()
-    zone_names = get_zone_names(gridModel)
+    grid = gridModel.get_grid(project.current_realisation)
+    zone_mapping = ZoneMapping(
+        grid_model, grid, real_number=project.current_realisation
+    )
     # Get Grid attributes
-    grid_attributes = GridAttributes(grid, zone_names)
+    grid_attributes = GridAttributes(grid, zone_mapping)
 
     nx, ny, nz = grid_attributes.dimensions
     nx_simbox, ny_simbox, nz_simbox = grid_attributes.sim_box_size.simbox_dimensions

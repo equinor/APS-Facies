@@ -12,12 +12,10 @@ from aps.utils.constants.simple import (
     TrendType,
 )
 from aps.utils.roxar.grid_model import (
-    get_zone_layer_numbering,
-    get_zone_names,
     get_grid_model,
 )
 from aps.utils.roxar.progress_bar import APSProgressBar
-
+from fmu.tools.rms.zone_mapping import ZoneMapping
 
 # The functionality to copy between geogrid and ertbox grid is now placed
 # in fmu.tools.rms function copy_rms_param
@@ -41,8 +39,10 @@ def get_trend_param_names_from_aps_model(
     geo_grid_model_name = aps_model.grid_model_name
     geogrid_model, geogrid = get_grid_model(project, geo_grid_model_name)
     _, ertboxgrid = get_grid_model(project, ertbox_grid_model_name)
-    zone_names = get_zone_names(geogrid_model)
-    number_layers_per_zone, _, _ = get_zone_layer_numbering(geogrid)
+
+    zone_mapping = ZoneMapping(
+        geogrid_model, geogrid, real_number=project.current_realisation
+    )
     nz_ertbox = ertboxgrid.simbox_indexer.dimensions[2]
     real_number = project.current_realisation
 
@@ -51,11 +51,12 @@ def get_trend_param_names_from_aps_model(
     use_rms_param_trend = False
     all_zone_models = aps_model.sorted_zone_models
     for key, zone_model in all_zone_models.items():
-        zone_number, region_number = key
+        (zone_number, region_number) = key
         if not aps_model.isSelected(zone_number, region_number):
             continue
-        zone_index = zone_number - 1
-        zone_name = zone_names[zone_index]
+
+        zone_name = zone_mapping.get_zone_name_for_zone_number(zone_number)
+        number_layers = zone_mapping.number_of_layers_for_zone_number(zone_number)
 
         # Only check that zone_model.grid_layout is
         # consistent with the grid.
@@ -66,14 +67,12 @@ def get_trend_param_names_from_aps_model(
         job_name = rmsapi.rms.get_running_job_name()
         check_grid_layout(
             geo_grid_model_name,
-            zone_number,
+            zone_name,
             zone_model.grid_layout.value,
             aps_job_name=job_name,
             return_grid_layout=False,
             debug_level=debug_level,
         )
-
-        number_layers = number_layers_per_zone[zone_number - 1]
 
         if number_layers > nz_ertbox:
             raise ValueError(
@@ -160,6 +159,13 @@ def run(
         project, aps_model, ertbox_grid_model_name, debug_level=debug_level
     )
 
+    # Get zone mapping
+    geogrid_model = project.grid_models[geo_grid_model_name]
+    geogrid = geogrid_model.get_grid(project.current_realisation)
+    zone_mapping = ZoneMapping(
+        geogrid_model, geogrid, real_number=project.current_realisation
+    )
+
     # Independent of using custom trends or not we can save active parameter in ertbox
     # corresponding to the geomodel zone.
     if save_active_param_to_ertbox:
@@ -168,6 +174,7 @@ def run(
             geo_grid_model_name,
             ertbox_grid_model_name,
             zone_dict,
+            zone_mapping,
             debug_level=int(debug_level),
         )
 

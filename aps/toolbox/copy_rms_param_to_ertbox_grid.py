@@ -22,11 +22,10 @@ from aps.rms_jobs.copy_rms_param_trend_to_fmu_grid import (
 
 from aps.utils.ymlUtils import get_text_value, get_dict, get_bool_value, readYml
 from aps.utils.methods import check_missing_keywords_list
-from aps.utils.roxar.grid_model import get_zone_layer_numbering
 from aps.utils.roxar.generalFunctionsUsingRoxAPI import (
     set_continuous_3d_parameter_values_in_zone_region,
 )
-
+from fmu.tools.rms.zone_mapping import ZoneMapping
 # TODO: When the stubs are removed, this function is no longe necessary since
 # this functionality is implemented in fmu.tools.rms.copy_rms_param
 
@@ -307,6 +306,7 @@ def from_ertbox_to_geogrid(project, params):
 
     # Create
     geogrid_model, grid3D = get_grid_model(project, grid_model_name)
+    zone_mapping = ZoneMapping(geogrid_model, grid3D, real_number=real_number)
     ertbox_grid_model, ertbox3D = get_grid_model(project, ertbox_grid_model_name)
 
     # Check grid index origin
@@ -324,10 +324,8 @@ def from_ertbox_to_geogrid(project, params):
         print("WARNING: ERTBOX grid should have 'Eclipse grid index origin'.")
         print('         Use the grid index origin job in RMS to set this.')
 
-    number_of_layers_per_zone_in_geo_grid, _, _ = get_zone_layer_numbering(grid3D)
     nx, ny, nz_ertbox = ertbox3D.simbox_indexer.dimensions
     for zone_number in param_names_geogrid_dict:
-        zone_index = zone_number - 1
         conformity = conformity_dict[zone_number]
         param_names_geogrid_list = param_names_geogrid_dict[zone_number]
         param_names_ertbox_list = param_names_ertbox_dict[zone_number]
@@ -336,7 +334,7 @@ def from_ertbox_to_geogrid(project, params):
             print(f'-- Conformity: {conformity}  ')
             print(f'-- Copy from:  {param_names_ertbox_list}')
             print(f'-- Copy to:    {param_names_geogrid_list}')
-        nz_for_zone = number_of_layers_per_zone_in_geo_grid[zone_index]
+        nz_for_zone = zone_mapping.number_of_layers_for_zone_number(zone_number)
         parameter_names_geo_grid = []
         parameter_values_geo_grid = []
 
@@ -369,12 +367,12 @@ def from_ertbox_to_geogrid(project, params):
                 print(
                     f'--- Update parameter {name} for zone number {zone_number} in {geogrid_model}'
                 )
-
+        zone_index = zone_mapping.get_zone_index_for_zone_number(zone_number)
         set_continuous_3d_parameter_values_in_zone_region(
             geogrid_model,
             parameter_names_geo_grid,
             parameter_values_geo_grid,
-            zone_number,
+            zone_index,
             realisation_number=project.current_realisation,
             is_shared=geogrid_model.shared,
             switch_handedness=True,

@@ -29,7 +29,11 @@ from aps.utils.xmlUtils import (
     create_node,
 )
 from aps.utils.io import GlobalVariables, write_string_to_file
-from aps.utils.roxar.grid_model import create_zone_parameter, find_defined_cells
+from aps.utils.roxar.grid_model import (
+    create_zone_parameter,
+    find_defined_cells,
+)
+from fmu.tools.rms.zone_mapping import ZoneMapping
 
 if TYPE_CHECKING:
     from roxar import Project
@@ -503,17 +507,17 @@ class APSModel:
 
         # Get the number of zones of the current modelling grid if a check to compare
         # the grid model with the specified zones in the APS model is to be done.
-        number_of_zones_in_grid = None
+        zone_mapping = None
         if check_with_grid_model:
             if self.grid_model_name not in project.grid_models:
                 raise ValueError(f'Grid model {self.grid_model_name} does not exist.')
             grid_model = project.grid_models[self.grid_model_name]
             if grid_model.is_empty(project.current_realisation):
                 raise ValueError(f'Grid model {self.grid_model_name} is empty.')
-            zonation = grid_model.get_grid(
-                project.current_realisation
-            ).simbox_indexer.zonation
-            number_of_zones_in_grid = len(zonation.keys())
+            grid = grid_model.get_grid(project.current_realisation)
+            zone_mapping = ZoneMapping(
+                grid_model, grid, real_number=project.current_realisation
+            )
 
         # Read all zones for models specifying main level facies
         # --- ZoneModels ---
@@ -545,13 +549,12 @@ class APSModel:
                 )
             region_number = get_region_number(zone)
 
-            if check_with_grid_model and zone_number > number_of_zones_in_grid:
-                # Skip this zone since it does not exist in grid model
-                print(
-                    f'Warning: Skip zone models with zone_number = {zone_number} due to mismatch with {self.grid_model_name}'
+            if check_with_grid_model and not zone_mapping.is_zone_number_defined(
+                zone_number
+            ):
+                raise ValueError(
+                    f'The zone number {zone_number} is not found in zone parameter: {GridModelConstants.ZONE_NAME} '
                 )
-                self.__zones_removed = True
-                continue
 
             # The model is identified by the combination (zoneNumber, regionNumber)
             zoneModelKey = (zone_number, region_number)
@@ -882,6 +885,8 @@ class APSModel:
         else:
             # YAML file with more general possibility for parameter specification
             aps_dict = GlobalVariables.parse(global_variables_file)
+            if aps_dict is None:
+                return None
 
             # Find the model parameters for the current aps job
             try:
@@ -1633,6 +1638,7 @@ class APSModel:
         simbox thickness for the current realisation of the grid.
         """
         from aps.utils.roxar.grid_model import get_simulation_box_thickness
+        from fmu.tools.rms.zone_mapping import ZoneMapping
 
         if debug_level >= Debug.VERBOSE:
             print(f'-- Get simbox thickness for grid model {self.grid_model_name}')
@@ -1640,10 +1646,13 @@ class APSModel:
         grid_model = project.grid_models[self.grid_model_name]
         realisation_number = project.current_realisation
         grid3D = grid_model.get_grid(realisation_number)
+        zone_mapping = ZoneMapping(grid_model, grid3D, real_number=realisation_number)
         try:
             # Check for RMS14.1 and newer
             # Is RMS14.1 or newer
-            simbox_thickness_per_zone = get_simulation_box_thickness(grid3D)
+            simbox_thickness_per_zone = get_simulation_box_thickness(
+                grid3D, zone_mapping
+            )
             for key, zone_model in self.__zoneModelTable.items():
                 (zone_number, _) = key
                 zone_model.sim_box_thickness = simbox_thickness_per_zone[zone_number]

@@ -1,6 +1,6 @@
 #!/bin/python
 from aps.rms_jobs.create_simulation_grid import run as run_create_grid
-from aps.utils.roxar.grid_model import GridSimBoxSize
+
 from aps.algorithms.APSModel import APSModel
 from aps.utils.constants.simple import Debug
 

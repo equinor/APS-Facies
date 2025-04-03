@@ -4,7 +4,6 @@ import os
 from abc import ABCMeta, abstractmethod
 from contextlib import contextmanager
 from collections import defaultdict
-from warnings import warn
 from typing import (
     Dict,
     Tuple,
@@ -18,8 +17,6 @@ from typing import (
 from pathlib import Path
 
 import numpy as np
-import xtgeo
-from xtgeo.grid3d import GridProperty
 
 from roxar import Project
 from roxar.grids import Grid3D, GridModel
@@ -31,41 +28,13 @@ from aps.utils.constants.simple import OriginType, Debug, TrendType, GridModelCo
 from aps.utils.decorators import cached
 from aps.utils.exceptions.zone import MissingConformityException
 from aps.utils.aps_config import APSConfig
-
+from fmu.tools.rms.zone_mapping import ZoneMapping
 
 if TYPE_CHECKING:
     from typing import Literal
 
     # Literal was introduced in Python 3.8
     Handedness = Literal['left', 'right']
-
-
-def create_get_property(
-    project: Project,
-    aps_model: Optional[Union[APSModel, str]],
-) -> Callable[[str, Optional[str]], GridProperty]:
-    def get_property(name, grid_name=None):
-        if grid_name is None:
-            if aps_model is None:
-                raise ValueError(
-                    "'aps_model' must be given, if 'grid_name' is not given"
-                )
-            grid_name = _get_grid_name(aps_model)
-        properties = project.grid_models[grid_name].properties
-        if name in properties:
-            if properties[name].is_empty(project.current_realisation):
-                raise ValueError(
-                    f'The parameter {name} is empty in grid model {grid_name}'
-                )
-        else:
-            raise ValueError(
-                f'The parameter  {name} does not exist in grid model {grid_name}'
-            )
-        return xtgeo.gridproperty_from_roxar(
-            project, grid_name, name, project.current_realisation
-        )
-
-    return get_property
 
 
 def get_top_location() -> Path:
@@ -112,7 +81,7 @@ def is_initial_iteration_check_file(debug_level: Debug = Debug.OFF) -> bool:
             iterfolder = folder
             break
     if iterfolder == -1:
-        print(f'Warning: When running ERT version < 5.0 specify a forward model')
+        print('Warning: When running ERT version < 5.0 specify a forward model')
         print('         creating a directory with name equal to iteration number.')
         print('         If folder does not exists, APS will assume iteration = 0.')
 
@@ -135,6 +104,13 @@ def get_grid(
     return project.grid_models[_get_grid_name(aps_model)].get_grid(
         project.current_realisation
     )
+
+
+def get_zone_mapping(project: Project, aps_model: Union[APSModel, str]) -> ZoneMapping:
+    grid_model = project.grid_models[_get_grid_name(aps_model)]
+    grid = grid_model.get_grid(project.current_realisation)
+    zone_mapping = ZoneMapping(grid_model, grid, project.current_realisation)
+    return zone_mapping
 
 
 def _get_grid_name(arg: Union[str, APSModel]) -> str:
@@ -183,15 +159,7 @@ class SimBoxDependentUpdate(UpdateModel, metaclass=ABCMeta):
         super().__init__(**kwargs)
         self.project = project
         self.ert_grid_name = fmu_simulation_grid_name
-
-    @property
-    @cached
-    def layers_in_geo_model_zones(self) -> List[int]:
-        grid = get_grid(self.project, self.aps_model)
-        layers = []
-        for zonation, *reverse in grid.grid_indexer.zonation.values():
-            layers.append(zonation.stop - zonation.start)
-        return layers
+        self.zone_mapping = get_zone_mapping(self.project, self.aps_model)
 
     @property
     @cached
@@ -437,7 +405,9 @@ class UpdateSimBoxThicknessInZones(SimBoxDependentUpdate):
 
     def before(self):
         for zone_model in self.zone_models:
-            nz_geo_grid = self.layers_in_geo_model_zones[zone_model.zone_number - 1]
+            nz_geo_grid = self.zone_mapping.number_of_layers_for_zone_number(
+                zone_model.zone_number
+            )
             zone_model.sim_box_thickness = (
                 zone_model.sim_box_thickness * self.nz_fmu_box / nz_geo_grid
             )
@@ -452,7 +422,9 @@ class UpdateRelativeSizeForEllipticConeTrend(TrendUpdate):
         self, zone_model: APSZoneModel, field_model: GaussianField
     ) -> None:
         nz_fmu_box = self.nz_fmu_box
-        nz_geo_grid = self.layers_in_geo_model_zones[zone_model.zone_number - 1]
+        nz_geo_grid = self.zone_mapping.number_of_layers_for_zone_number(
+            zone_model.zone_number
+        )
         original_relative_size = self.get_original_value(zone_model, field_model)
         if zone_model.grid_layout in [Conform.Proportional, Conform.TopConform]:
             fmu_relative_size = original_relative_size / (
@@ -503,11 +475,9 @@ class UpdateRelativePositionOfTrends(TrendUpdate):
         self, zone_model: APSZoneModel, field_model: GaussianField
     ) -> None:
         nz_fmu = self.nz_fmu_box
-        indexer = get_grid(self.project, self.aps_model.grid_model_name).simbox_indexer
-
-        zonation, *_reverse = indexer.zonation[zone_model.zone_number - 1]
-        nz_zone = zonation.stop - zonation.start
-
+        nz_zone = self.zone_mapping.number_of_layers_for_zone_number(
+            zone_model.zone_number
+        )
         trend = field_model.trend.model
         if self.has_appropriate_trend(field_model):
             z_original = float(trend.origin.z)

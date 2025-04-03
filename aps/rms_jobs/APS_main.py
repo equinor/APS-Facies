@@ -461,23 +461,21 @@ def run(
                 alpha_all = gf_all_alpha[gf_name]
                 if not use_CDF_transform:
                     if debug_level >= Debug.VERBOSE:
-                        print(f'-- Transformation type:  Empiric')
+                        print('-- Transformation type:  Empiric')
 
                     alpha_all = transform_empiric(
                         cell_index_defined, gauss_field_values_all, alpha_all
                     )
                 elif has_trend_in_gauss_field:
                     if debug_level >= Debug.VERBOSE:
-                        print(f'-- Transformation type:  Empiric since GRF has trend')
+                        print('-- Transformation type:  Empiric since GRF has trend')
 
                     alpha_all = transform_empiric(
                         cell_index_defined, gauss_field_values_all, alpha_all
                     )
                 else:
                     if debug_level >= Debug.VERBOSE:
-                        print(
-                            f'-- Transformation type:  Cumulative normal distribution'
-                        )
+                        print('-- Transformation type:  Cumulative normal distribution')
 
                     alpha_all = transform_CDF(
                         cell_index_defined, gauss_field_values_all, alpha_all
@@ -497,9 +495,6 @@ def run(
                         cell_index_defined,
                         realization_number,
                         variable_name_extension='transf',
-                        use_regions=use_regions,
-                        zone_number=zone_number,
-                        region_number=region_number,
                         debug_level=debug_level,
                     )
 

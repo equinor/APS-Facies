@@ -24,6 +24,7 @@ from aps.utils.roxar.progress_bar import APSProgressBar
 from aps.utils.check_rms_interactive_or_batch import check_rms_execution_mode
 
 from fmu.tools.rms.copy_rms_param_to_ertbox_grid import check_grid_layout
+from fmu.tools.rms.zone_mapping import ZoneMapping
 
 
 def excepthook(type, value, traceback):
@@ -130,9 +131,17 @@ class JobConfig:
                         f'This is required, when running in ERT / AHM.'
                     )
                 else:
+                    grid_model = self.project.grid_models[aps_model.grid_model_name]
+                    grid = grid_model.get_grid(self.project.current_realisation)
+                    zone_mapping = ZoneMapping(
+                        grid_model, grid, self.project.current_realisation
+                    )
+                    zone_name = zone_mapping.get_zone_name_for_zone_number(
+                        zone_model.zone_number
+                    )
                     check_grid_layout(
                         aps_model.grid_model_name,
-                        zone_model.zone_number,
+                        zone_name,
                         zone_model.grid_layout.value,
                         aps_job_name=self.roxar.rms.get_running_job_name(),
                         return_grid_layout=False,

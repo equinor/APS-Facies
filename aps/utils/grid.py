@@ -11,9 +11,6 @@ def update_rms_parameter(
     cell_index_defined,
     realization_number,
     variable_name_extension=None,
-    use_regions=False,
-    zone_number=0,
-    region_number=0,
     debug_level=Debug.OFF,
     is_shared=False,
 ):
