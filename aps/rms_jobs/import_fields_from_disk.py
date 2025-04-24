@@ -37,8 +37,6 @@ import xtgeo
 from aps.algorithms.APSModel import APSModel
 from aps.utils.constants.simple import Debug
 from aps.utils.roxar.grid_model import (
-    create_zone_parameter,
-    get_zone_layer_numbering,
     getContinuous3DParameterValues,
     GridSimBoxSize,
     flip_grid_index_origo,
@@ -53,6 +51,7 @@ from aps.utils.aps_config import APSConfig
 from fmu.tools.rms.copy_rms_param_to_ertbox_grid import (
     extract_values_from_ertbox_grid_to_geogrid_simbox,
 )
+from fmu.tools.rms.zone_mapping import ZoneMapping
 
 
 def get_field_name(field_name, zone):
@@ -170,7 +169,9 @@ def run(project, model_file, geo_grid_name, load_dir=None, **kwargs):
             f'is empty for realization {project.current_realisation}.'
         )
     grid3D = geo_grid_model.get_grid(project.current_realisation)
-    number_of_layers_per_zone_in_geo_grid, _, _ = get_zone_layer_numbering(grid3D)
+    zone_mapping = ZoneMapping(
+        geo_grid_model, grid3D, real_number=project.current_realisation
+    )
     attributes = GridSimBoxSize(grid3D, debug_level=debug_level)
     handedness = attributes.handedness
 
@@ -186,14 +187,6 @@ def run(project, model_file, geo_grid_name, load_dir=None, **kwargs):
     if file_format.upper() == 'GRDECL':
         xtgeo_fmu_grid = xtgeo.grid_from_roxar(project, fmu_grid_name)
 
-    # Get zone parameter for geomodel grid if it exist.
-    # Create it if non-existing. Fill it if empty.
-    zone_property = create_zone_parameter(
-        geo_grid_model,
-        realization_number=project.current_realisation,
-        set_shared=geo_grid_model.shared,
-    )
-    zone_names = zone_property.code_names
     region_names = None
     region_param_name = None
     if aps_model.use_regions:
@@ -209,11 +202,10 @@ def run(project, model_file, geo_grid_name, load_dir=None, **kwargs):
             aps_model,
             fmu_grid_model,
             geo_grid_model,
-            zone_names,
+            zone_mapping,
             load_dir,
             file_format,
             xtgeo_fmu_grid,
-            number_of_layers_per_zone_in_geo_grid,
             region_names=region_names,
             region_param_name=region_param_name,
             debug_level=debug_level,
@@ -224,11 +216,10 @@ def run(project, model_file, geo_grid_name, load_dir=None, **kwargs):
             aps_model,
             fmu_grid_model,
             geo_grid_model,
-            zone_names,
+            zone_mapping,
             load_dir,
             file_format,
             xtgeo_fmu_grid,
-            number_of_layers_per_zone_in_geo_grid,
             handedness=handedness,
             region_names=region_names,
             region_param_name=region_param_name,
@@ -243,11 +234,10 @@ def import_and_update_ertbox_and_geogrid(
     aps_model: APSModel,
     fmu_grid_model,
     geo_grid_model,
-    zone_names: dict,
+    zone_mapping: ZoneMapping,
     load_dir: Path,
     file_format: str,
     xtgeo_fmu_grid: xtgeo.Grid,
-    number_of_layers_per_zone_in_geo_grid: list,
     region_names: dict = None,
     region_param_name: str = None,
     debug_level: Debug = Debug.OFF,
@@ -255,7 +245,7 @@ def import_and_update_ertbox_and_geogrid(
     # Loop over all zones defined in aps model
     for zone in aps_model.zone_models:
         if aps_model.isSelected(zone.zone_number, zone.region_number):
-            zone_name = zone_names[zone.zone_number]
+            zone_name = zone_mapping.get_zone_name_for_zone_number(zone.zone_number)
             region_name = ''
             if region_names:
                 region_name = region_names[zone.region_number]
@@ -267,7 +257,7 @@ def import_and_update_ertbox_and_geogrid(
             parameter_values_geo_grid = []
 
             # Get the sub set of values from fmu grid that should be mapped into geogrid for the current zone
-            nz_layers = number_of_layers_per_zone_in_geo_grid[zone.zone_number - 1]
+            nz_layers = zone_mapping.number_of_layers_for_zone_number(zone.zone_number)
             for full_field_name in zone.gaussian_fields_in_truncation_rule:
                 field_name = field_name_from_full_name(
                     full_field_name, zone_name, region_name=region_name
@@ -325,12 +315,12 @@ def import_and_update_ertbox_and_geogrid(
                     print(
                         f'--- Load parameter {name} from file into {fmu_grid_model.name}'
                     )
-            zone_number_fmu_grid = 1
+            zone_index_fmu_grid = 0
             set_continuous_3d_parameter_values_in_zone_region(
                 fmu_grid_model,
                 parameter_names_fmu_grid,
                 parameter_values_fmu_grid,
-                zone_number_fmu_grid,
+                zone_index_fmu_grid,
                 realisation_number=project.current_realisation,
                 is_shared=fmu_grid_model.shared,
             )
@@ -346,12 +336,12 @@ def import_and_update_ertbox_and_geogrid(
                         print(
                             f'--- Update parameter {name} for zone number {zone.zone_number} in {geo_grid_model.name}'
                         )
-
+            zone_index = zone_mapping.get_zone_index_for_zone_number(zone.zone_number)
             set_continuous_3d_parameter_values_in_zone_region(
                 geo_grid_model,
                 parameter_names_geo_grid,
                 parameter_values_geo_grid,
-                zone.zone_number,
+                zone_index,
                 zone.region_number,
                 region_parameter_name=region_param_name,
                 realisation_number=project.current_realisation,
@@ -364,11 +354,10 @@ def import_and_update_ertbox_and_geogrid_with_residuals(
     aps_model: APSModel,
     fmu_grid_model,
     geo_grid_model,
-    zone_names: dict,
+    zone_mapping: ZoneMapping,
     load_dir: Path,
     file_format: str,
     xtgeo_fmu_grid: xtgeo.Grid,
-    number_of_layers_per_zone_in_geo_grid: list,
     handedness=Direction.right,
     region_names: dict = None,
     region_param_name: str = None,
@@ -382,7 +371,7 @@ def import_and_update_ertbox_and_geogrid_with_residuals(
 
     for zone in aps_model.zone_models:
         if aps_model.isSelected(zone.zone_number, 0):
-            zone_name = zone_names[zone.zone_number]
+            zone_name = zone_mapping.get_zone_name_for_zone_number(zone.zone_number)
             region_name = ''
             if aps_model.use_regions:
                 region_name = region_names[zone.region_number]
@@ -393,8 +382,7 @@ def import_and_update_ertbox_and_geogrid_with_residuals(
             parameter_values_geo_grid = []
 
             # Get the sub set of values from fmu grid that should be mapped into geogrid for the current zone
-            nz_layers = number_of_layers_per_zone_in_geo_grid[zone.zone_number - 1]
-
+            nz_layers = zone_mapping.number_of_layers_for_zone_number(zone.zone_number)
             for full_field_name in zone.gaussian_fields_in_truncation_rule:
                 field_name = field_name_from_full_name(
                     full_field_name, zone_name, region_name=region_name
@@ -438,12 +426,12 @@ def import_and_update_ertbox_and_geogrid_with_residuals(
                     print(
                         f'--- Load parameter {name} from file into {fmu_grid_model.name}'
                     )
-            zone_number_fmu_grid = 1
+            zone_index_fmu_grid = 0
             set_continuous_3d_parameter_values_in_zone_region(
                 fmu_grid_model,
                 parameter_names_fmu_grid,
                 parameter_values_fmu_grid,
-                zone_number_fmu_grid,
+                zone_index_fmu_grid,
                 realisation_number=project.current_realisation,
                 is_shared=fmu_grid_model.shared,
             )
@@ -494,12 +482,12 @@ def import_and_update_ertbox_and_geogrid_with_residuals(
                         print(
                             f'-- Update parameter {name} for zone number {zone.zone_number} in {geo_grid_model.name}'
                         )
-
+            zone_index = zone_mapping.get_zone_index_for_zone_number(zone.zone_number)
             set_continuous_3d_parameter_values_in_zone_region(
                 geo_grid_model,
                 parameter_names_geo_grid,
                 parameter_values_geo_grid,
-                zone.zone_number,
+                zone_index,
                 zone.region_number,
                 region_parameter_name=region_param_name,
                 realisation_number=project.current_realisation,

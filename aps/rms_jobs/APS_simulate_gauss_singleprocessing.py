@@ -9,15 +9,16 @@ import numpy as np
 from aps.algorithms.APSModel import APSModel
 from aps.utils.constants.simple import Debug
 from aps.utils.io import ensure_folder_exists
-from aps.utils.methods import get_specification_file, get_debug_level
+from aps.utils.methods import get_specification_file
 from aps.utils.roxar.generalFunctionsUsingRoxAPI import (
     set_continuous_3d_parameter_values_in_zone_region,
     get_project_realization_seed,
 )
-from aps.utils.roxar.grid_model import GridAttributes, get_zone_names
+from aps.utils.roxar.grid_model import GridAttributes
 from aps.utils.roxar.progress_bar import APSProgressBar
 from aps.utils.methods import get_seed_log_file
 from aps.utils.trend import add_trends
+from fmu.tools.rms.zone_mapping import ZoneMapping
 
 
 def define_variogram(variogram, azimuth_value_sim_box):
@@ -71,23 +72,32 @@ def run_simulations(
     # before calling the current script.
 
     grid_model = project.grid_models[aps_model.grid_model_name]
-    zone_names = get_zone_names(grid_model)
+    grid = grid_model.get_grid(realisation)
+
+    zone_mapping = ZoneMapping(
+        grid_model,
+        grid,
+        real_number=project.current_realisation,
+        fmu_mode=fmu_mode,
+        debug_level=debug_level.value,
+    )
+    if debug_level >= Debug.VERY_VERBOSE:
+        print(
+            f'--- ZoneMapping zones in grid:  {zone_mapping.get_zone_names_from_grid()}'
+        )
+        print(
+            f'--- ZoneMapping zones in param:  {zone_mapping.get_zone_names_from_param()}'
+        )
+    grid_attributes = GridAttributes(grid, zone_mapping, debug_level=debug_level)
+    number_of_zones = zone_mapping.get_number_of_zones_in_grid()
     if fmu_mode:
         # Ensure that the grid is shared and the realisation number
         # is 1 and that there are only one zone and one region.
         if realisation > 1:
             raise ValueError('The realisation number must be 1 in FMU mode.')
-        grid = grid_model.get_grid(realisation)
-        # Get grid dimensions
-        grid_attributes = GridAttributes(grid, zone_names, debug_level=Debug.OFF)
-        num_layers_per_zone = grid_attributes.num_layers_per_zone
-        if len(num_layers_per_zone) != 1:
+
+        if number_of_zones != 1:
             raise ValueError('The ERTBOX grid can only have 1 zone')
-    else:
-        grid = grid_model.get_grid(realisation)
-        # Get grid dimensions
-        grid_attributes = GridAttributes(grid, zone_names, debug_level=debug_level)
-        num_layers_per_zone = grid_attributes.num_layers_per_zone
 
     nx, ny, nz = grid_attributes.simbox_dimensions
 
@@ -108,14 +118,21 @@ def run_simulations(
         if not aps_model.isSelected(zone_number, region_number):
             continue
         gauss_field_names = zone_model.gaussian_fields_in_truncation_rule
-        # Add zone names / number, if FMU
+
+        # The zone number must be converted to zone index, but zone_number is used to report
+        # to log file. This is because we want to handle two cases, normal
+        # case with geogrid and special case with ERTBOX grid
+        zone_index = None
         if fmu_mode:
-            assert len(num_layers_per_zone) == 1
+            # Only one zone is expected in ERTBOX grid
             zone_index = 0
+            assert zone_mapping.get_number_of_zones_in_grid() == 1
+
+            num_layers = zone_mapping.number_of_layers_for_zone_index(zone_index)
         else:
-            # Zone index is counted from 0 while zone number from 1
-            zone_index = zone_number - 1
-        num_layers = num_layers_per_zone[zone_index]
+            # For geomodel grid handle zones normally
+            zone_index = zone_mapping.get_zone_index_for_zone_number(zone_number)
+            num_layers = zone_mapping.number_of_layers_for_zone_number(zone_number)
 
         # Calculate grid cell size in z direction
         nz = num_layers
@@ -127,10 +144,9 @@ def run_simulations(
             else:
                 print(f'- Zone: {zone_number}   Region: {region_number}  ')
         if debug_level >= Debug.VERY_VERBOSE:
-            start = grid_attributes.start_layers_per_zone[zone_index]
-            end = grid_attributes.end_layers_per_zone[zone_index]
+            start, end = zone_mapping.get_start_end_layer_for_zone_index(zone_index)
             print(
-                f'--- Grid layers: {num_layers} Start layer: {start + 1} End layer: {end}'
+                f'--- Grid layers: {num_layers} Start layer: {start + 1} End layer: {end + 1}'
             )
 
         gauss_result_list_for_zone = []
@@ -230,7 +246,7 @@ def run_simulations(
             grid_model,
             gauss_field_names,
             gauss_result_list_for_zone,
-            zone_number,
+            zone_index,
             region_number=region_number,
             region_parameter_name=aps_model.region_parameter,
             realisation_number=realisation,

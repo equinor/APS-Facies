@@ -263,9 +263,6 @@ def add_trends_to_field(
             gauss_field_values_all,
             cell_index_defined,
             realization_number,
-            use_regions=use_regions,
-            zone_number=zone_number,
-            region_number=region_number,
             debug_level=debug_level,
             is_shared=is_shared,
         )
@@ -279,9 +276,6 @@ def add_trends_to_field(
             cell_index_defined,
             realization_number,
             variable_name_extension='residual',
-            use_regions=use_regions,
-            zone_number=zone_number,
-            region_number=region_number,
             debug_level=debug_level,
             is_shared=is_shared,
         )
@@ -296,9 +290,6 @@ def add_trends_to_field(
             cell_index_defined,
             realization_number,
             variable_name_extension='trend',
-            use_regions=use_regions,
-            zone_number=zone_number,
-            region_number=region_number,
             debug_level=debug_level,
             is_shared=is_shared,
         )

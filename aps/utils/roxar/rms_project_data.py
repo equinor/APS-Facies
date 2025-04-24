@@ -38,7 +38,6 @@ from aps.utils.constants.simple import (
     OriginType,
     ProbabilityTolerances,
     CrossSectionType,
-    GridModelConstants,
 )
 from aps.utils.debug import parse_dot_master
 from aps.utils.exceptions.xml import ApsXmlError
@@ -52,6 +51,7 @@ from aps.utils.roxar.grid_model import (
     GridSimBoxSize,
     get_zone_names,
 )
+from fmu.tools.rms.zone_mapping import ZoneMapping
 from aps.utils.facies_map import create_facies_map
 from aps.utils.roxar.migrations import Migration
 from aps.utils.roxar.progress_bar import APSProgressBar
@@ -248,12 +248,10 @@ class RMSData:
         self, grid_model_name: GridName, rough: bool = False
     ) -> dict:
         grid = self.get_grid(grid_model_name)
+        grid_model = self.get_grid_model(grid_model_name)
+        zone_mapping = ZoneMapping(grid_model, grid)
         sim_box_attributes = GridSimBoxSize(grid)
-        kwargs = {}
-        if rough:
-            kwargs['max_number_of_selected_cells'] = 10
-
-        sim_box_z_length = get_simulation_box_thickness(grid, **kwargs)
+        sim_box_z_length = get_simulation_box_thickness(grid, zone_mapping)
         return {
             'size': {
                 'x': sim_box_attributes.x_length,
@@ -287,22 +285,20 @@ class RMSData:
     def get_zones(self, grid_model_name: GridName) -> List[dict]:
         grid = self.get_grid(grid_model_name)
         grid_model = self.get_grid_model(grid_model_name)
-        zone_names = get_zone_names(grid_model)
-        if len(zone_names) == 0:
-            name = GridModelConstants.ZONE_NAME
-            warn(
-                f"No zone parameter with name '{name}' found. Create zone parameter from grid."
-            )
-            create_zone_parameter(grid_model)
-            zone_names = get_zone_names(grid_model)
+        zone_mapping = ZoneMapping(grid_model, grid, self.project.current_realisation)
+
+        # Get existing zone parameter or create a new one if not existing
+        nzones = zone_mapping.get_number_of_zones_in_grid()
         zones = []
-        for key, zonations in grid.simbox_indexer.zonation.items():
-            zonation, *_reverse = zonations
+        for zone_index in range(nzones):
+            zone_name = zone_mapping.get_zone_name_for_zone_index(zone_index)
+            zone_number = zone_mapping.get_zone_number_for_zone_index(zone_index)
+            nlayers = zone_mapping.number_of_layers_for_zone_index(zone_index)
             zones.append(
                 {
-                    'code': key + 1,
-                    'name': zone_names[key],
-                    'thickness': zonation.stop - zonation.start,
+                    'code': zone_number,
+                    'name': zone_name,
+                    'thickness': nlayers,
                 }
             )
         return zones

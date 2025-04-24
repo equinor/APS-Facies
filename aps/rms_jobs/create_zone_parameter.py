@@ -1,16 +1,10 @@
 from aps.algorithms.APSModel import APSModel
 from aps.utils.constants.simple import GridModelConstants, Debug
-from aps.utils.roxar.grid_model import create_zone_parameter, get_zone_names
+from aps.utils.roxar.grid_model import (
+    create_zone_parameter,
+)
 from roxar import GridPropertyType
-
-
-def get_zone_number_from_grid(grid_model, realization_number):
-    zonations = grid_model.get_grid(realization_number).simbox_indexer.zonation
-    return [key + 1 for key in zonations.keys()]
-
-
-def get_zone_names_from_grid(grid_model, realization_number):
-    return grid_model.get_grid(realization_number).zone_names
+from fmu.tools.rms.zone_mapping import ZoneMapping
 
 
 def get_codes_from_zone_param(grid_model, realization_number):
@@ -32,6 +26,8 @@ def run(project, aps_model: APSModel, debug_level, **kwargs):
     grid_model = project.grid_models[aps_model.grid_model_name]
     set_shared = grid_model.shared
     realization_number = project.current_realisation
+    grid = grid_model.get_grid(realization_number)
+    zone_mapping = ZoneMapping(grid_model, grid, real_number=realization_number)
     zone_parameter_name = GridModelConstants.ZONE_NAME
     if debug_level >= Debug.VERBOSE:
         print(f'-- Checking to see whether {zone_parameter_name} must be created')
@@ -40,20 +36,10 @@ def run(project, aps_model: APSModel, debug_level, **kwargs):
         codes = get_codes_from_zone_param(grid_model, realization_number)
         if len(codes) > 0:
             # The zone parameter exist for this realization
-            zone_numbers_from_grid = get_zone_number_from_grid(
-                grid_model, realization_number
-            )
-            zone_names_from_grid = get_zone_names_from_grid(
-                grid_model, realization_number
-            )
-            zone_names_from_param = get_zone_names(grid_model)
-            if set(zone_numbers_from_grid) != set(codes):
-                raise ValueError(
-                    f'There is a mismatch between the zone numbers as defined in {zone_parameter_name} '
-                    f'({codes}), and in the zones for the grid: {zone_numbers_from_grid}).\n'
-                    f'A solution to this, is to delete the {zone_parameter_name} property '
-                    f'from {aps_model.grid_model_name}.'
-                )
+            zone_names_from_grid = zone_mapping.get_zone_names_from_grid()
+            zone_names_from_param_dict = zone_mapping.get_zone_names_from_param()
+            zone_names_from_param = list(zone_names_from_param_dict.values())
+
             if zone_names_from_grid != zone_names_from_param:
                 print(
                     f'NOTE:\n'

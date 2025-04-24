@@ -2,8 +2,6 @@
 # -*- coding: utf-8 -*-
 import copy
 import numpy as np
-import xml.etree.ElementTree as ET
-from pathlib import Path
 from typing import List
 from aps.utils.roxar.generalFunctionsUsingRoxAPI import (
     set_continuous_3d_parameter_values,
@@ -14,10 +12,10 @@ from aps.utils.roxar.grid_model import (
 )
 from aps.algorithms.defineFacies import BaseDefineFacies
 from aps.utils.constants.simple import Debug
-from aps.utils.exceptions.xml import MissingKeyword
 from aps.utils.methods import get_cond_prob_dict
 from aps.utils.xmlUtils import getIntCommand
-from aps.utils.ymlUtils import get_text_value, get_bool_value, get_dict
+from aps.utils.ymlUtils import get_bool_value, get_dict
+from fmu.tools.rms.zone_mapping import ZoneMapping
 
 
 class DefineFaciesProb(BaseDefineFacies):
@@ -62,7 +60,7 @@ class DefineFaciesProb(BaseDefineFacies):
         # Check that parameters are specified
         if not self._use_const_prob:
             if len(self.probability_matrix) == 0:
-                raise ValueError(f'Missing specification of: CondProbMatrix')
+                raise ValueError('Missing specification of: CondProbMatrix')
 
     def _read_model_from_xml_root(self, debug_level: Debug = Debug.OFF):
         self._use_const_prob = (
@@ -144,6 +142,8 @@ class DefineFaciesProb(BaseDefineFacies):
         real_number = self.project.current_realisation
         grid_model = self.project.grid_models[self.grid_model_name]
         is_shared = grid_model.shared
+        grid = grid_model.get_grid(real_number)
+        zone_mapping = ZoneMapping(grid_model, grid, real_number=real_number)
 
         [zone_values, _] = getDiscrete3DParameterValues(
             grid_model, self.zone_param_name, real_number
@@ -240,14 +240,18 @@ class DefineFaciesProb(BaseDefineFacies):
                         f'Update parameter: {parameter_name} for zones '
                         f'{" ".join(str(zone_number) for zone_number in self.selected_zone_numbers)}:'
                     )
-                zone_number_list_zero_indexed = [
-                    znr - 1 for znr in self.selected_zone_numbers
-                ]
+                zone_index_list = []
+                for zone_number in self.selected_zone_numbers:
+                    zone_index = zone_mapping.get_zone_index_for_zone_number(
+                        zone_number
+                    )
+                    zone_index_list.append(zone_index)
+
                 success = set_continuous_3d_parameter_values(
                     grid_model,
                     parameter_name,
                     probability_values,
-                    zone_number_list_zero_indexed,
+                    zone_index_list,
                     real_number,
                     is_shared=is_shared,
                     debug_level=self.debug_level,
@@ -264,9 +268,11 @@ class DefineFaciesProb(BaseDefineFacies):
             # input (intepreted) facies realization is used as facies names for the probability cubes.
 
             # Create a new array with 0 probabilities for this facies
-            zone_number_list_zero_indexed = [
-                znr - 1 for znr in self.selected_zone_numbers
-            ]
+            zone_index_list = []
+            for zone_number in self.selected_zone_numbers:
+                zone_index = zone_mapping.get_zone_index_for_zone_number(zone_number)
+                zone_index_list.append(zone_index)
+
             probability_values = np.zeros(len(zone_values), np.float32)
 
             for code, facies_name in code_names_facies.items():
@@ -303,7 +309,7 @@ class DefineFaciesProb(BaseDefineFacies):
                     grid_model,
                     parameter_name,
                     probability_values,
-                    zone_number_list_zero_indexed,
+                    zone_index_list,
                     real_number,
                     is_shared=is_shared,
                     debug_level=self.debug_level,
