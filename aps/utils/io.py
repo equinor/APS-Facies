@@ -94,16 +94,16 @@ def _write_file(file_name, data, heading, debug_level):
         text += str(point) + '  '
         count += 1
         if count >= 5:
+            text = text.strip()
             text += '\n'
             output += text
             count = 0
             text = ''
+    text = text.strip()
     if count > 0:
         output += text + '\n'
     with open(file_name, 'w', encoding='utf-8') as file:
         file.write(output)
-    if debug_level >= Debug.ON:
-        print(f'Write file: {file_name}')
 
 
 def print_debug_information(function_name: str, text: str) -> None:
