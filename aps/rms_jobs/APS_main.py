@@ -316,7 +316,9 @@ def run(
     if debug_level >= Debug.VERBOSE:
         print(f'-- Get RMS zone parameter: {GridModelConstants.ZONE_NAME}')
     zone_param = create_zone_parameter(
-        grid_model, realization_number=realization_number
+        grid_model,
+        realization_number=realization_number,
+        must_exist=True,
     )
     zone_values = zone_param.get_values(realization_number)
 

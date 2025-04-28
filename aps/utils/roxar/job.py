@@ -72,6 +72,7 @@ class JobConfig:
         aps_model.check_or_create_zone_parameter(
             self.project, debug_level=self.debug_level
         )
+        zone_code_names = aps_model.get_zone_code_names(self.project)
 
         # Keep only models for (zone,region) pairs with active cells
         aps_model.check_active_cells(self.project, debug_level=self.debug_level)
@@ -98,6 +99,7 @@ class JobConfig:
             'rms_grid_name': aps_model.grid_model_name,
             'fmu_export_location': get_export_location(),
             'aps_model': aps_model,
+            'zone_code_names_geogrid': zone_code_names,
             'use_constant_probabilities': aps_model.use_constant_probability,
             'workflow_name': self.roxar.rms.get_running_workflow_name(),
             'seed_log_file': None,

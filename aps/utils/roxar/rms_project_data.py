@@ -370,7 +370,8 @@ class RMSData:
         grid_model = self.project.grid_models[grid_model_name]
         # get zone_values and region_values
         zone_param = create_zone_parameter(
-            grid_model, realization_number=realisation_number
+            grid_model,
+            realization_number=realisation_number,
         )
         zone_values = zone_param.get_values(realisation_number)
         zone_code_names = zone_param.code_names
@@ -459,7 +460,8 @@ class RMSData:
         # Get zone parameter. If non-existing create it.
         # If existing but empty, fill it with values
         zone_param = create_zone_parameter(
-            grid_model, realization_number=self.project.current_realisation
+            grid_model,
+            realization_number=self.project.current_realisation,
         )
         zone_values = zone_param.get_values(self.project.current_realisation)
 

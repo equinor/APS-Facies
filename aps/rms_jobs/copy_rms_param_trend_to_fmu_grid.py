@@ -176,6 +176,7 @@ def run(
             zone_dict,
             zone_mapping,
             debug_level=int(debug_level),
+            not_aps_workflow=False,
         )
 
     if save_region_param_to_ertbox:

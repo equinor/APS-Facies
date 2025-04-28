@@ -903,6 +903,14 @@ class APSModel:
         # End read file
         return keywords
 
+    def get_zone_code_names(self, project):
+        zone_param = create_zone_parameter(
+            project.grid_models[self.__rmsGridModelName],
+            GridModelConstants.ZONE_NAME,
+            realization_number=project.current_realisation,
+        )
+        return copy.copy(zone_param.code_names)
+
     # ----- Properties ----
     @property
     def debug_level(self) -> Debug:
@@ -1554,6 +1562,7 @@ class APSModel:
             grid_model,
             name=GridModelConstants.ZONE_NAME,
             realization_number=realisation_number,
+            must_exist=True,
         )
         zone_values = zone_param.get_values(realisation_number)
         all_zone_models = self.sorted_zone_models

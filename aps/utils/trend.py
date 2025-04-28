@@ -7,6 +7,7 @@ from aps.utils.roxar.grid_model import (
 )
 from aps.utils.roxar.progress_bar import APSProgressBar
 from aps.utils.simulation import initialize_rms_parameters
+from aps.utils.methods import rescale_trend
 
 
 def add_trend_to_gauss_field(
@@ -18,6 +19,7 @@ def add_trend_to_gauss_field(
     gauss_field_name,
     gauss_field_values,
     cell_index_defined,
+    cell_index_active_in_ertbox=None,
     gauss_field_trend_values=None,
     gauss_field_residual_values=None,
     fmu_mode=False,
@@ -58,46 +60,189 @@ def add_trend_to_gauss_field(
             print(f'--- Trend type: {trend_type}')
 
     sim_box_thickness = zone_model.sim_box_thickness
-    # trend_values contain trend values for the cells belonging to the set defined by cell_index_defined
-    minmax_difference, trend_values = trend_model.createTrend(
-        grid_model,
-        realization_number,
-        cell_index_defined,
-        zone_number=1 if fmu_mode else zone_number,
-        sim_box_thickness=sim_box_thickness,
-        project=project,
-        keep_temporary_trend_param=fmu_mode,
-        debug_level=debug_level,
-    )
 
-    # Calculate trend plus residual for the cells defined by cell_index_defined
-    # and replace the residual values by trend + residual in array: gauss_field_values
-    sigma = rel_std_dev * minmax_difference
-    residual_values = gauss_field_values[cell_index_defined]
-    val = trend_values + sigma * residual_values
+    if fmu_mode:
+        # Calculate minmax difference of trend value in the whole ertbox
+        # and minmax difference of trend value only for grid cells in ertbox
+        # corresponding to geogrid cells (active cells in ertbox)
+
+        # whole ertbox (which has only one zone with number 1)
+        (
+            minmax_difference_ertbox,
+            min_value_ertbox,
+            max_value_ertbox,
+            trend_values_ertbox,
+        ) = trend_model.createTrend(
+            grid_model,
+            realization_number,
+            cell_index_defined,
+            zone_number=1,
+            sim_box_thickness=sim_box_thickness,
+            project=project,
+            keep_temporary_trend_param=fmu_mode,
+        )
+
+        # only the active cells in ertbox
+        (
+            minmax_difference_active,
+            min_value_active,
+            max_value_active,
+            trend_values_active,
+        ) = trend_model.createTrend(
+            grid_model,
+            realization_number,
+            cell_index_active_in_ertbox,
+            zone_number=1,
+            sim_box_thickness=sim_box_thickness,
+            project=project,
+            keep_temporary_trend_param=fmu_mode,
+        )
+
+        # Normalize trend in ertbox grid such that active values are between 0 and 1
+        rescaled_trend_values = rescale_trend(
+            trend_values_ertbox, min_value_active, max_value_active
+        )
+
+        # Std.dev is (max_trend - min_trend) * rel_std_dev
+        # but here (max_trend - min_trend) for active grid cells is 1 after normalization
+        sigma = rel_std_dev
+
+        # Calculate trend plus residual for the cells defined by cell_index_defined
+        # and replace the residual values by trend + residual in array: gauss_field_values
+        residual_values = gauss_field_values[cell_index_defined]
+        field_values_with_trend = rescaled_trend_values + sigma * residual_values
+
+        if debug_level >= Debug.VERY_VERBOSE:
+            # For QC output, normalize trend using active grid cells
+            # in ertbox grid. Should be between 0 and 1
+
+            rescaled_trend_values_active = rescale_trend(
+                trend_values_active, min_value_active, max_value_active
+            )
+            min_rescaled_trend_active = rescaled_trend_values_active.min()
+            max_rescaled_trend_active = rescaled_trend_values_active.max()
+            minmax_difference_rescaled_active = (
+                max_rescaled_trend_active - min_rescaled_trend_active
+            )
+
+            # Min max of rescaled trend in whole ertbox grid
+            min_rescaled_trend_ertbox = rescaled_trend_values.min()
+            max_rescaled_trend_ertbox = rescaled_trend_values.max()
+            minmax_difference_rescaled_ertbox = (
+                max_rescaled_trend_ertbox - min_rescaled_trend_ertbox
+            )
+
+            print(f'--- Ertbox grid: {grid_model_name}')
+            print(f'---   Number of grid cells for this grid:{len(cell_index_defined)}')
+            print(
+                f'---   Number of active grid cells (cells corresponding to a geogrid cell):{len(cell_index_active_in_ertbox)}'
+            )
+            print(f'---   SimBoxThickness = {sim_box_thickness}')
+            print(f'---   Sigma = {sigma}')
+            print(
+                f'---   Trend minmax_difference of active cells before normalization: {minmax_difference_active}'
+            )
+            print(
+                f'---   Trend minmax_difference of active cells after normalization:  {minmax_difference_rescaled_active}'
+            )
+
+            print(
+                f'---   Trend minmax_difference of all cells in ertbox before normalization: {minmax_difference_ertbox}'
+            )
+            print(
+                f'---   Trend minmax_difference of all cells in ertbox after normalization:  {minmax_difference_rescaled_ertbox}'
+            )
+
+            print(
+                f'---   Min trend, max trend of active cells before normalization:  {min_value_active} {max_value_active}'
+            )
+            print(
+                f'---   Min trend, max trend of active cells after normalization:   {min_rescaled_trend_active} {max_rescaled_trend_active}'
+            )
+
+            print(
+                f'---   Min trend, max trend of all cells in ertbox before normalization:  {min_value_ertbox} {max_value_ertbox}'
+            )
+            print(
+                f'---   Min trend, max trend of all cells in ertbox after normalization:   {min_rescaled_trend_ertbox} {max_rescaled_trend_ertbox}'
+            )
+
+            print(
+                f'---   Residual min,max of all ertbox cells:    {sigma * residual_values.min()} {sigma * residual_values.max()}'
+            )
+            # select only active cells
+            residual_selected = residual_values[cell_index_active_in_ertbox]
+            print(
+                f'---   Residual min,max of active ertbox cells: {sigma * residual_selected.min()} {sigma * residual_selected.max()}'
+            )
+
+            print(
+                f'---   Trend + residual min,max of all cells:        {field_values_with_trend.min()}  {field_values_with_trend.max()}'
+            )
+            # select only active cells
+            selected = field_values_with_trend[cell_index_active_in_ertbox]
+            print(
+                f'---   Trend + residual min,max of all active cells: {selected.min()}  {selected.max()}'
+            )
+
+    else:
+        # Calculate minmax difference of trend value in geogrid for defined grid cells
+        (
+            minmax_difference_geogrid,
+            min_value_geogrid,
+            max_value_geogrid,
+            trend_values_geogrid,
+        ) = trend_model.createTrend(
+            grid_model,
+            realization_number,
+            cell_index_defined,
+            zone_number=zone_number,
+            sim_box_thickness=sim_box_thickness,
+            project=project,
+            keep_temporary_trend_param=fmu_mode,
+            debug_level=debug_level,
+        )
+        # Normalize trend in geogrid zone to be between 0 and 1
+        rescaled_trend_values = rescale_trend(
+            trend_values_geogrid, min_value_geogrid, max_value_geogrid
+        )
+        sigma = rel_std_dev
+
+        # Calculate trend plus residual for the cells defined by cell_index_defined
+        # and replace the residual values by trend + residual in array: gauss_field_values
+        residual_values = gauss_field_values[cell_index_defined]
+        field_values_with_trend = rescaled_trend_values + sigma * residual_values
+
+        if debug_level >= Debug.VERY_VERBOSE:
+            print(f'--- Geogrid:  {grid_model_name}')
+            print(
+                f'---   Number of active grid cells for this zone:{len(cell_index_defined)}'
+            )
+            print(
+                f'---   Trend minmax_difference of active cells = {minmax_difference_geogrid}'
+            )
+            print(f'---   Sigma = {sigma}')
+            print(
+                f'---   Min trend, max trend before rescaling: {min_value_geogrid}  {max_value_geogrid}'
+            )
+            print(
+                f'---   Min trend, max trend after rescaling: {rescaled_trend_values.min()}  {rescaled_trend_values.max()}'
+            )
+            print(
+                f'---   Residual min,max: {sigma * residual_values.min()}  {sigma * residual_values.max()}'
+            )
+            print(
+                f'---   Trend + residual min,max: {field_values_with_trend.min()}  {field_values_with_trend.max()}'
+            )
 
     # Update array values for the selected grid cells
     if gauss_field_trend_values is not None:
-        gauss_field_trend_values[cell_index_defined] = trend_values
+        gauss_field_trend_values[cell_index_defined] = rescaled_trend_values
 
     if gauss_field_residual_values is not None:
         gauss_field_residual_values[cell_index_defined] = residual_values
 
-    gauss_field_values[cell_index_defined] = val
-
-    if debug_level >= Debug.VERY_VERBOSE:
-        print(f'--- Number of active cells:{len(cell_index_defined)} ')
-        print(f'--- Trend minmax_difference = {minmax_difference}')
-        print(f'--- SimBoxThickness = {sim_box_thickness}')
-        print(f'--- RelStdDev = {rel_std_dev}')
-        print(f'--- Sigma = {sigma}')
-        print(
-            f'--- Min trend, max trend    :  {trend_values.min()}  {trend_values.max()}'
-        )
-        print(
-            f'--- Residual min,max        :  {sigma * residual_values.min()}  {sigma * residual_values.max()}'
-        )
-        print(f'--- Trend + residual min,max:  {val.min()}  {val.max()}')
+    gauss_field_values[cell_index_defined] = field_values_with_trend
 
     # Updated versions of these are returned
     return gauss_field_values, gauss_field_trend_values, gauss_field_residual_values
@@ -108,6 +253,7 @@ def add_trends(
     aps_model,
     zone_number,
     region_number=0,
+    active_cells_in_ertbox=None,
     write_rms_parameters_for_qc_purpose=False,
     debug_level=Debug.OFF,
     fmu_mode=False,
@@ -133,15 +279,30 @@ def add_trends(
             fmu_with_residual_grf=fmu_with_residual_grf,
         )
     )
+    # This is active cells in geogrid if fmu_mode=False
+    # and all grid cells in ERTBOX if fmu_mode is True
     cell_index_defined = get_defined_cells(
         project,
         aps_model,
         grid_model,
         region_number,
         zone_number,
-        debug_level,
-        fmu_mode,
+        fmu_mode=fmu_mode,
     )
+
+    cell_index_active_in_ertbox = None
+    if fmu_mode:
+        # This is active cells in ERTBOX
+        cell_index_active_in_ertbox = get_defined_cells(
+            project,
+            aps_model,
+            grid_model,
+            region_number,
+            zone_number,
+            active_cells_in_ertbox=active_cells_in_ertbox,
+            use_active_cells_in_ertbox=True,
+            fmu_mode=fmu_mode,
+        )
 
     for gf_name in gf_names_for_zone:
         if gf_name in gf_names_for_truncation_rule:
@@ -163,7 +324,8 @@ def add_trends(
                     realization_number,
                     region_number,
                     zone_number,
-                    debug_level,
+                    cell_index_active_in_ertbox=cell_index_active_in_ertbox,
+                    debug_level=debug_level,
                     fmu_mode=fmu_mode,
                     is_shared=is_shared,
                     fmu_with_residual_grf=fmu_with_residual_grf,
@@ -179,6 +341,8 @@ def get_defined_cells(
     grid_model,
     region_number,
     zone_number,
+    active_cells_in_ertbox=None,
+    use_active_cells_in_ertbox=False,
     debug_level=Debug.OFF,
     fmu_mode=False,
 ):
@@ -201,13 +365,23 @@ def get_defined_cells(
             grid_model, aps_model.region_parameter, realization_number
         )
     zone_values = zone_param.get_values(realization_number)
-    return find_defined_cells(
-        zone_values,
-        zone_number,
-        region_values,
-        region_number,
-        debug_level=Debug.OFF,
-    )
+    if not use_active_cells_in_ertbox:
+        cell_index_defined = find_defined_cells(
+            zone_values,
+            zone_number,
+            region_values,
+            region_number,
+        )
+    else:
+        cell_index_defined = find_defined_cells(
+            zone_values,
+            zone_number,
+            region_values,
+            region_number,
+            active_cells_in_ertbox=active_cells_in_ertbox,
+            use_active_cells_in_ertbox=use_active_cells_in_ertbox,
+        )
+    return cell_index_defined
 
 
 def add_trends_to_field(
@@ -222,6 +396,7 @@ def add_trends_to_field(
     realization_number,
     region_number,
     zone_number,
+    cell_index_active_in_ertbox=None,
     debug_level=Debug.OFF,
     fmu_mode=False,
     is_shared=False,
@@ -243,10 +418,11 @@ def add_trends_to_field(
         gf_name,
         gauss_field_values_all,
         cell_index_defined,
-        gauss_field_trend_values_all,
-        gauss_field_residual_values_all,
-        fmu_mode,
-        debug_level,
+        cell_index_active_in_ertbox=cell_index_active_in_ertbox,
+        gauss_field_trend_values=gauss_field_trend_values_all,
+        gauss_field_residual_values=gauss_field_residual_values_all,
+        fmu_mode=fmu_mode,
+        debug_level=debug_level,
     )
 
     # Write back to RMS project:

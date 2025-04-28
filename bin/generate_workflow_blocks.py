@@ -149,7 +149,7 @@ def excepthook(type, value, traceback):
 
 def get_traceback_setting():
     # Traceback setting on/off if errors are raised
-    value = _get_value(APS_TRACEBACK, False)
+    value = _get_value(APS_TRACEBACK, True)
     if isinstance(value, bool):
         return value
     if value == '0' or value == 'False':

@@ -48,7 +48,13 @@ def get_zone_code(code_names: dict, zone_name: str):
 
 
 def find_defined_cells(
-    zone_values, zone_number, region_values=None, region_number=0, debug_level=Debug.OFF
+    zone_values,
+    zone_number,
+    region_values=None,
+    region_number=0,
+    active_cells_in_ertbox=None,
+    use_active_cells_in_ertbox=False,
+    debug_level=Debug.OFF,
 ):
     """
     For specified zone_number, identify which cells belongs to this zone.
@@ -58,6 +64,8 @@ def find_defined_cells(
                         number of active cells (physical cells) in the whole 3D grid.
     :param zone_number:  The zone number (counting from 1) that is used to define which cells to be selected.
     :param region_number: The region number (counting from 1) that is used to define which cells to be selected.
+    :active_cells_in_ertbox: Vector with 1 in grid cells in ERTBOX where the grid cells
+                        corresponds to an active grid cell in geogrid and 0 else.
     :param debug_level: Debug level
     :returns:  cell_index_defined
         WHERE
@@ -69,44 +77,55 @@ def find_defined_cells(
     """
     num_cells_total = len(zone_values)
 
-    if region_number is not None and region_number > 0:
-        if num_cells_total != len(region_values):
-            raise ValueError(
-                f'Zone number: {zone_number}  Region number: {region_number}.\n'
-                f'Number of grid cells with this zone number: {num_cells_total}\n'
-                f'Number of grid cells with this region number: {len(region_values)}'
-            )
+    if not use_active_cells_in_ertbox:
+        if region_number is not None and region_number > 0:
+            if num_cells_total != len(region_values):
+                raise ValueError(
+                    f'Zone number: {zone_number}  Region number: {region_number}.\n'
+                    f'Number of grid cells with this zone number: {num_cells_total}\n'
+                    f'Number of grid cells with this region number: {len(region_values)}'
+                )
 
-        # Use both zone number and region number to define selected cells
-        # The numpy vector operation below is equivalent to the
-        # following code:
-        #        for i in range(num_cells_total):
-        #            if zone_values[i] == zone_number and region_values[i] == region_number:
-        #                cell_index_defined_list.append(i)
+            # Use both zone number and region number to define selected cells
+            index_array = np.arange(num_cells_total, dtype=np.uint64)
+            cell_index_defined = index_array[
+                (zone_values == zone_number) & (region_values == region_number)
+            ]
+            if debug_level >= Debug.VERY_VERBOSE:
+                print(
+                    f'--- In find_defined_cells: Number of active cells for current '
+                    f'(zone_number, region_number)=({zone_number} ,{region_number}): {len(cell_index_defined)}'
+                )
+        else:
+            # Only zone number is used to define selected cells
+            # The numpy vector operation below is equivalent to the
+            # following code:
+            #        for i in range(num_cells_total):
+            #            if zone_values[i] == zone_number:
+            #                cell_index_defined_list.append(i)
+            index_array = np.arange(num_cells_total, dtype=np.uint64)
+            cell_index_defined = index_array[zone_values == zone_number]
+            if debug_level >= Debug.VERY_VERBOSE:
+                print(f'--- In find_defined_cells: Zone:{zone_number}')
+                print(f'--- Number of active cells for the grid: {num_cells_total}')
+                print(
+                    f'--- Number of active cells for current zone: {len(cell_index_defined)}'
+                )
+
+    else:
+        # Use both zone number and active_cells to define selected cells
+        assert len(active_cells_in_ertbox) > 0
         index_array = np.arange(num_cells_total, dtype=np.uint64)
         cell_index_defined = index_array[
-            (zone_values == zone_number) & (region_values == region_number)
+            (zone_values == zone_number) & (active_cells_in_ertbox == 1)
         ]
-        if debug_level >= Debug.VERY_VERBOSE:
-            print(
-                f'--- In find_defined_cells: Number of active cells for current '
-                f'(zone_number, region_number)=({zone_number} ,{region_number}): {len(cell_index_defined)}'
-            )
-    else:
-        # Only zone number is used to define selected cells
-        # The numpy vector operation below is equivalent to the
-        # following code:
-        #        for i in range(num_cells_total):
-        #            if zone_values[i] == zone_number:
-        #                cell_index_defined_list.append(i)
-        index_array = np.arange(num_cells_total, dtype=np.uint64)
-        cell_index_defined = index_array[zone_values == zone_number]
         if debug_level >= Debug.VERY_VERBOSE:
             print(f'--- In find_defined_cells: Zone:{zone_number}')
             print(f'--- Number of active cells for the grid: {num_cells_total}')
             print(
                 f'--- Number of active cells for current zone: {len(cell_index_defined)}'
             )
+
     return cell_index_defined
 
 
@@ -1216,11 +1235,12 @@ class GridAttributes:
 
 def create_zone_parameter(
     grid_model,
-    name=GridModelConstants.ZONE_NAME,
-    realization_number=0,
-    set_shared=False,
-    debug_level=Debug.OFF,
-    create_new=False,
+    name: str = GridModelConstants.ZONE_NAME,
+    realization_number: int = 0,
+    set_shared: bool = False,
+    debug_level: Debug = Debug.OFF,
+    create_new: bool = False,
+    must_exist: bool = False,
 ):
     """Description:
     Creates zone parameter for specified grid model with specified name if the zone parameter
@@ -1241,15 +1261,20 @@ def create_zone_parameter(
                 )
 
         if zone_parameter.is_empty(realisation=realization_number) or create_new:
-            if debug_level >= Debug.VERBOSE:
-                if not create_new:
-                    print(
-                        f'-- Zone parameter is empty. Assign values to: {zone_parameter.name}'
-                    )
-            # Fill the parameter with zone values, but don't change the code_names
-            values, _ = _zone_parameter_values(grid3d)
-            zone_parameter.set_values(values, realisation=realization_number)
+            if not must_exist:
+                if debug_level >= Debug.VERBOSE:
+                    if not create_new:
+                        print(
+                            f'-- Zone parameter is empty. Assign values to: {zone_parameter.name}'
+                        )
+                # Fill the parameter with zone values, but don't change the code_names
+                values, _ = _zone_parameter_values(grid3d)
+                zone_parameter.set_values(values, realisation=realization_number)
+            else:
+                raise ValueError(f'Zone parameter  {name} can not be empty')
     else:
+        if must_exist:
+            raise ValueError(f'Zone parameter {name} must exist')
         if debug_level >= Debug.ON:
             print(f'- Create zone parameter with name {name}')
         # Create zone parameter connected to the grid model
@@ -1319,3 +1344,22 @@ def get_grid_model(project, grid_model_name: str):
         raise ValueError(f'Grid model {grid_model_name} is empty. ')
     grid = grid_model.get_grid(realisation=real_number)
     return grid_model, grid
+
+
+def get_active_cells(
+    project, zone_name: str, grid_model, debug_level: Debug = Debug.OFF
+):
+    """
+    This function is used for ertbox grid to get the parameter for active cells
+    for a given zone_name  where zone_name is a zone name in geogrid.
+    """
+    param_name = 'aps_' + zone_name + '_active'
+    if param_name not in grid_model.properties:
+        raise KeyError(
+            f'Active parameter: {param_name} is expected to exist in grid {grid_model.name}'
+        )
+
+    active_param = grid_model.properties[param_name]
+    if debug_level >= Debug.VERY_VERBOSE:
+        print(f'--- Get active values from {param_name} in {grid_model.name}')
+    return active_param.get_values(realisation=project.current_realisation)

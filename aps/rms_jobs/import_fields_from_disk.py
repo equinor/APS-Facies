@@ -40,6 +40,7 @@ from aps.utils.roxar.grid_model import (
     getContinuous3DParameterValues,
     GridSimBoxSize,
     flip_grid_index_origo,
+    get_active_cells,
 )
 from aps.utils.roxar.generalFunctionsUsingRoxAPI import (
     set_continuous_3d_parameter_values_in_zone_region,
@@ -381,6 +382,10 @@ def import_and_update_ertbox_and_geogrid_with_residuals(
             parameter_values_fmu_grid = []
             parameter_values_geo_grid = []
 
+            active_cells_in_ertbox = get_active_cells(
+                project, zone_name, fmu_grid_model, debug_level=debug_level
+            )
+
             # Get the sub set of values from fmu grid that should be mapped into geogrid for the current zone
             nz_layers = zone_mapping.number_of_layers_for_zone_number(zone.zone_number)
             for full_field_name in zone.gaussian_fields_in_truncation_rule:
@@ -441,6 +446,7 @@ def import_and_update_ertbox_and_geogrid_with_residuals(
                 aps_model,
                 zone.zone_number,
                 zone.region_number,
+                active_cells_in_ertbox=active_cells_in_ertbox,
                 write_rms_parameters_for_qc_purpose=False,
                 debug_level=debug_level,
                 fmu_mode=True,

@@ -518,18 +518,14 @@ class Trend3D:
             values_in_selected_cells = self._trendValueCalculation_vectorized(
                 parameters_for_trend_calc, x_vec, y_vec, k_vec, zinc
             )
-        if len(values_in_selected_cells) > 0:
-            min_value = values_in_selected_cells.min()
-            max_value = values_in_selected_cells.max()
-            minmax_difference = max_value - min_value
-            values_rescaled = (values_in_selected_cells - min_value) / minmax_difference
-
-            min_value = values_rescaled.min()
-            max_value = values_rescaled.max()
-            minmax_difference = max_value - min_value
-        else:
+        if not len(values_in_selected_cells) > 0:
             raise ValueError('Trend has no active cells')
-        return minmax_difference, values_rescaled
+
+        min_value = values_in_selected_cells.min()
+        max_value = values_in_selected_cells.max()
+        minmax_difference = max_value - min_value
+
+        return minmax_difference, min_value, max_value, values_in_selected_cells
 
     def createTrendFor2DProjection(
         self,

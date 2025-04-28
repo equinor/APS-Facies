@@ -10,13 +10,6 @@ The main purpose of this script is to run a job that is equvalent to running the
 without the need for the GUI. Main application is to test new functionality not yet made avaiable through the GUI.
 """
 
-import json
-from base64 import b64decode
-from functools import wraps
-from warnings import warn
-
-from typing import Dict
-
 from aps.algorithms.APSModel import APSModel
 from aps.utils.constants.simple import (
     Debug,
@@ -24,12 +17,8 @@ from aps.utils.constants.simple import (
     TransformType,
     ExtrapolationMethod,
 )
-from aps.utils.decorators import cached
 from aps.utils.fmu import get_export_location
-from aps.utils.roxar._config_getters import get_debug_level
-from aps.utils.roxar.migrations import Migration
-from aps.utils.roxar.rms_project_data import RMSData
-from aps.utils.methods import get_specification_file, get_debug_level
+from aps.utils.methods import get_specification_file
 
 from aps.rms_jobs.APS_main import run as run_truncation
 from aps.rms_jobs.APS_normalize_prob_cubes import run as run_normalization
@@ -47,10 +36,7 @@ from aps.rms_jobs.export_fmu_config_files import run as run_export_fmu_config_fi
 from aps.rms_jobs.copy_rms_param_trend_to_fmu_grid import (
     run as run_copy_rms_param_trend_to_fmu_grid,
 )
-from aps.utils.decorators import loggable, output_version_information
 from aps.utils.fmu import fmu_aware_model_file
-from aps.utils.io import create_temporary_model_file
-from aps.utils.roxar.job import JobConfig, classify_job_configuration
 from aps.utils.aps_config import APSConfig
 import roxar.rms
 
@@ -141,6 +127,7 @@ def get_parameters(**kwargs):
 
     # Check that zone parameter exists and if not, then create it
     aps_model.check_or_create_zone_parameter(project, debug_level=debug_level)
+    zone_code_names = aps_model.get_zone_code_names(project)
 
     # Keep only models for (zone,region) pairs with active cells
     aps_model.check_active_cells(project, debug_level=debug_level)
@@ -159,6 +146,7 @@ def get_parameters(**kwargs):
         'rms_grid_name': aps_model.grid_model_name,
         'fmu_export_location': get_export_location(),
         'aps_model': aps_model,
+        'zone_code_names_geogrid': zone_code_names,
         'use_constant_probabilities': aps_model.use_constant_probability,
         'workflow_name': roxar.rms.get_running_workflow_name(),
         'seed_log_file': None,
@@ -179,8 +167,6 @@ def get_parameters(**kwargs):
 
 def run(**kwargs_input):
     kwargs = get_parameters(**kwargs_input)
-    project = kwargs['project']
-    debug_level = kwargs['debug_level']
     model_file = kwargs['model_file']
     aps_model = kwargs['aps_model']
 
@@ -216,6 +202,9 @@ def run(**kwargs_input):
     print('Finished')
 
 
-# if __name__ == "__main__":
-#    model_file = "APS.xml"
-#    run(project, model_file)
+if __name__ == '__main__':
+    kwargs = {
+        'project': project,
+        'model_file_name': 'APS.xml',
+    }
+    run(**kwargs)

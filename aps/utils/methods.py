@@ -450,3 +450,12 @@ def get_cond_prob_dict(
         raise ValueError('Errors found in specification of conditional probabilities.')
 
     return conditional_prob_facies
+
+
+def rescale_trend(values, v0, v1):
+    # Shift and rescale values
+    assert v1 > v0
+    assert len(values) > 0
+    d = v1 - v0
+    values_rescaled = (values - v0) / d
+    return values_rescaled

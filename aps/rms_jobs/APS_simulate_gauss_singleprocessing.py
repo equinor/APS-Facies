@@ -14,7 +14,7 @@ from aps.utils.roxar.generalFunctionsUsingRoxAPI import (
     set_continuous_3d_parameter_values_in_zone_region,
     get_project_realization_seed,
 )
-from aps.utils.roxar.grid_model import GridAttributes
+from aps.utils.roxar.grid_model import GridAttributes, get_active_cells
 from aps.utils.roxar.progress_bar import APSProgressBar
 from aps.utils.methods import get_seed_log_file
 from aps.utils.trend import add_trends
@@ -49,6 +49,7 @@ def run_simulations(
     seed_file_log='seedLogFile.dat',
     write_rms_parameters_for_qc_purpose=False,
     fmu_mode=False,
+    zone_code_names_geogrid=None,
 ):
     """
     Description: Run gauss simulations for the APS model i sequence
@@ -79,7 +80,6 @@ def run_simulations(
         grid,
         real_number=project.current_realisation,
         fmu_mode=fmu_mode,
-        debug_level=debug_level.value,
     )
     if debug_level >= Debug.VERY_VERBOSE:
         print(
@@ -121,14 +121,20 @@ def run_simulations(
 
         # The zone number must be converted to zone index, but zone_number is used to report
         # to log file. This is because we want to handle two cases, normal
-        # case with geogrid and special case with ERTBOX grid
+        # case with geogrid and special case with ERTBOX grid.
+        # active_cells is used to define which cells in ERTBOX
+        # to use when calculating min-max trend value
         zone_index = None
+        active_cells_in_ertbox = None
         if fmu_mode:
             # Only one zone is expected in ERTBOX grid
             zone_index = 0
             assert zone_mapping.get_number_of_zones_in_grid() == 1
-
+            zone_name_geogrid = zone_code_names_geogrid[zone_number]
             num_layers = zone_mapping.number_of_layers_for_zone_index(zone_index)
+            active_cells_in_ertbox = get_active_cells(
+                project, zone_name_geogrid, grid_model, debug_level=debug_level
+            )
         else:
             # For geomodel grid handle zones normally
             zone_index = zone_mapping.get_zone_index_for_zone_number(zone_number)
@@ -137,12 +143,11 @@ def run_simulations(
         # Calculate grid cell size in z direction
         nz = num_layers
         dz = zone_model.sim_box_thickness / nz
-
         if debug_level >= Debug.ON:
             if region_number == 0:
-                print(f'- Zone: {zone_number}')
+                print(f'- Zone number: {zone_number}')
             else:
-                print(f'- Zone: {zone_number}   Region: {region_number}  ')
+                print(f'- Zone number: {zone_number}  Region number: {region_number}')
         if debug_level >= Debug.VERY_VERBOSE:
             start, end = zone_mapping.get_start_end_layer_for_zone_index(zone_index)
             print(
@@ -262,6 +267,7 @@ def run_simulations(
             aps_model,
             zone_number,
             region_number,
+            active_cells_in_ertbox=active_cells_in_ertbox,
             write_rms_parameters_for_qc_purpose=write_rms_parameters_for_qc_purpose,
             debug_level=debug_level,
             fmu_mode=fmu_mode,
@@ -292,6 +298,7 @@ def run(project, **kwargs):
     seed_file_log = get_seed_log_file(**kwargs)
     fmu_mode = kwargs.get('fmu_mode', False)
     fmu_mode_only_param = kwargs.get('fmu_mode_only_param', False)
+    zone_code_names_geogrid = kwargs.get('zone_code_names_geogrid', None)
     write_rms_parameters_for_qc_purpose = kwargs.get(
         'write_rms_parameters_for_qc_purpose', False
     )
@@ -309,4 +316,5 @@ def run(project, **kwargs):
         seed_file_log,
         write_rms_parameters_for_qc_purpose=write_rms_parameters_for_qc_purpose,
         fmu_mode=fmu_mode,
+        zone_code_names_geogrid=zone_code_names_geogrid,
     )
