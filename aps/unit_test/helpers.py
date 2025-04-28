@@ -40,12 +40,13 @@ def apply_truncations(
     faciesOutputFile: str,
     debug_level: Debug = Debug.OFF,
 ) -> None:
+    print('In apply_truncations')
     assert truncRule is not None
     assert faciesReferenceFile != ''
     nGaussFieldsInModel = truncRule.getNGaussFieldsInModel()
     if debug_level >= Debug.ON:
-        print('nGaussFieldsInModel: ' + str(nGaussFieldsInModel))
-        print('nGaussFields: ' + str(nGaussFields))
+        print('  nGaussFieldsInModel: ' + str(nGaussFieldsInModel))
+        print('  nGaussFields: ' + str(nGaussFields))
     assert nGaussFieldsInModel == nGaussFields
     alphaFields = []
     fileName = gaussFieldFiles[0]
@@ -57,8 +58,8 @@ def apply_truncations(
         alphaFields.append(a)
         assert nValues == len(alphaFields[n])
     if debug_level >= Debug.ON:
-        print('nValues: ' + str(nValues))
-        print('nx,ny,nx*ny: ' + str(nx) + ' ' + str(ny) + ' ' + str(nx * ny))
+        print('  nValues: ' + str(nValues))
+        print('  nx,ny,nx*ny: ' + str(nx) + ' ' + str(ny) + ' ' + str(nx * ny))
     alphaCoord = {}
     faciesReal = []
     # Loop through the Gaussian field array in c-index ordering
@@ -70,21 +71,21 @@ def apply_truncations(
         faciesReal.append(faciesCode)
     if debug_level >= Debug.ON:
         print(
-            'Number of shifts in alpha values for numerical reasons: '
+            '  Number of shifts in alpha values for numerical reasons: '
             + str(truncRule.getNCountShiftAlpha())
         )
     writeFile(faciesOutputFile, faciesReal, nx, ny)
 
     # Compare the generated facies realization with the reference for this case
-    check = compare(faciesOutputFile, faciesReferenceFile)
-    print(f'Compare file: {faciesReferenceFile} and file: {faciesOutputFile}')
+    check = compare(faciesOutputFile, faciesReferenceFile, verbose=False)
+    print(f'  Compare file: {faciesReferenceFile} and file: {faciesOutputFile}')
     if check is False:
         fileName = faciesReferenceFile + '_' + faciesOutputFile + '.tmp'
         os.rename(faciesOutputFile, fileName)
-        print('Write file: {}'.format(fileName))
-        raise ValueError('Error: Files are different')
+        print('  Write file: {}'.format(fileName))
+        raise ValueError('  Error: Files are different')
     elif debug_level >= Debug.ON:
-        print('Files are equal: OK')
+        print('  Files are equal: OK')
 
 
 def apply_truncations_vectorized(
@@ -95,12 +96,13 @@ def apply_truncations_vectorized(
     faciesOutputFile: str,
     debug_level: Debug = Debug.OFF,
 ) -> None:
+    print('In apply_truncations_vectorized')
     assert truncRule is not None
     assert faciesReferenceFile != ''
     nGaussFieldsInModel = truncRule.getNGaussFieldsInModel()
     if debug_level >= Debug.ON:
-        print('nGaussFieldsInModel: ' + str(nGaussFieldsInModel))
-        print('nGaussFields: ' + str(nGaussFields))
+        print('  nGaussFieldsInModel: ' + str(nGaussFieldsInModel))
+        print('  nGaussFields: ' + str(nGaussFields))
     assert nGaussFieldsInModel == nGaussFields
     alphaFields = []
     fileName = gaussFieldFiles[0]
@@ -112,8 +114,8 @@ def apply_truncations_vectorized(
         alphaFields.append(a)
         assert nValues == len(alphaFields[n])
     if debug_level >= Debug.ON:
-        print('nValues: ' + str(nValues))
-        print('nx,ny,nx*ny: ' + str(nx) + ' ' + str(ny) + ' ' + str(nx * ny))
+        print('  nValues: ' + str(nValues))
+        print('  nx,ny,nx*ny: ' + str(nx) + ' ' + str(ny) + ' ' + str(nx * ny))
     alphaCoord_vectors = np.zeros((nValues, nGaussFields), np.float32)
     # Loop through the Gaussian field array in c-index ordering
     for n in range(nGaussFields):
@@ -123,27 +125,23 @@ def apply_truncations_vectorized(
         alphaCoord_vectors
     )
 
-    if debug_level >= Debug.ON:
+    if debug_level >= Debug.VERBOSE:
         print(
-            'Number of shifts in alpha values for numerical reasons: '
+            '  Number of shifts in alpha values for numerical reasons: '
             + str(truncRule.getNCountShiftAlpha())
         )
-        print('facies realization:')
-        print(faciesCode_vector)
-        print(len(faciesCode_vector))
-    print(faciesOutputFile)
     writeFile(faciesOutputFile, faciesCode_vector, nx, ny)
 
     # Compare the generated facies realization with the reference for this case
     check = compare(faciesOutputFile, faciesReferenceFile)
-    print(f'Compare file: {faciesReferenceFile} and file: {faciesOutputFile}')
+    print(f'  Compare file: {faciesReferenceFile} and file: {faciesOutputFile}')
     if check is False:
         fileName = f'{faciesReferenceFile}_{faciesOutputFile}.tmp'
         os.rename(faciesOutputFile, fileName)
-        print(f'Write file: {fileName}')
-        raise ValueError('Error: Files are different')
+        print(f'  Write file: {fileName}')
+        raise ValueError('  Error: Files are different')
     elif debug_level >= Debug.ON:
-        print('Files are equal: OK')
+        print('  Files are equal: OK')
 
 
 def truncMapPolygons(
@@ -168,13 +166,14 @@ def truncMapPolygons(
     writePolygons(outPolyFile2, polygons)
 
     # Compare the original xml file created in createTrunc and the xml file written by interpretXMLModelFileAndWrite
+    print('In truncMapPolygons')
     check = compare(outPolyFile1, outPolyFile2)
-    print(f'Compare file: {outPolyFile1} and file: {outPolyFile2}')
+    print(f'  Compare file: {outPolyFile1} and file: {outPolyFile2}')
     assert check is True
     if check is False:
-        raise ValueError('Error: Files are different')
+        raise ValueError('  Error: Files are different')
     else:
-        print('Files are equal: OK')
+        print('  Files are equal: OK')
 
 
 def writePolygons(fileName: str, polygons: Any, debug_level: Debug = Debug.OFF) -> None:

@@ -47,10 +47,6 @@ def interpretXMLModelFileAndWrite(
     truncRuleName = trRule[0].tag
     print('Truncation rule: ' + truncRuleName)
 
-    # Get number of required Gauss fields
-    nGaussFields = int(trRule[0].get('nGFields'))
-    # print('Number of gauss fields required for truncation rule: ' + str(nGaussFields))
-
     mainFaciesTable = APSMainFaciesTable(facies_table=fTable)
 
     # Create truncation rule object from input data, not read from file
@@ -150,6 +146,7 @@ def initialize_write_read(
     #    truncRule.writeContentsInDataStructure()
     # Read the previously written file as and XML file and write it out again to a new file
     # Global variable truncRule2
+    print('In initialize_write_read')
     truncRuleB = interpretXMLModelFileAndWrite(
         inputFile,
         file2,
@@ -161,13 +158,14 @@ def initialize_write_read(
     )
 
     # Compare the original xml file created in createTrunc and the xml file written by interpretXMLModelFileAndWrite
+    print('  Compare xml file created with xml written')
     check = filecmp.cmp(file1, file2)
-    print('Compare file: {} and file: {}'.format(file1, file2))
+    print(f'  Compare file: {file1} and file: {file2}')
     assert check is True
     if not check:
-        raise ValueError('Error: Files are different')
+        raise ValueError('  Error: Files are different')
     else:
-        print('Files are equal: OK')
+        print('  Files are equal: OK')
     return truncRuleA, truncRuleB
 
 
@@ -179,7 +177,6 @@ def getClassName(truncRule):
 
 
 def test_Trunc2DAngle():
-    nCase = 9
     start = 1
     end = 9
     for testCase in range(start, end + 1):
@@ -277,8 +274,6 @@ def test_case_3():
     overlayGroup = [alphaList, backgroundList]
     overlayGroups.append(overlayGroup)
 
-    faciesProb = [0.3, 0.2, 0.3, 0.1, 0.1]
-    faciesReferenceFile = get_facies_reference_file_path(3)
     run(
         fTable={1: 'F1', 2: 'F2', 3: 'F3', 4: 'F4', 5: 'F5'},
         faciesInZone=['F2', 'F3', 'F1', 'F5', 'F4'],
