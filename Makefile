@@ -105,7 +105,6 @@ endif
 PYTHON ?= $(RUN) python3
 PIP ?= $(PYTHON) -m pip
 PY.TEST := $(RUN) python -m pytest
-SAFETY_CHECK := $(POETRY) check
 FLASK := $(RUN) flask
 REQUIREMENTS.TXT := $(POETRY) export --dev --format 'requirements.txt'
 
@@ -387,9 +386,6 @@ copy-source:
 
 check-node-dependencies:
 	$(YARN) outdated
-
-safety-check:
-	$(POETRY) check
 
 check-node-dependencies-for-vulnerabilities:
 	$(YARN) run improved-yarn-audit --fail-on-missing-exclutions  --ignore-dev-deps
