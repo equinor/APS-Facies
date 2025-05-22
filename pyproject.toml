@@ -24,7 +24,6 @@ pytest = "^6.2.5"
 graphviz = "^0.19.1"
 mypy = "^0.931"
 Flask = "^3.0.0"
-gunicorn = "^22.0.0"
 python-dotenv = "^0.19.2"
 typing-extensions = "^4.12.2"
 

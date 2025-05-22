@@ -482,16 +482,6 @@ web-install-dev: $(PACKAGE.JSON)
 package.json:
 	$(YARN) install --dev --frozen-lockfile
 
-
-run-api-gunicorn:
-	gunicorn --workers 8 \
-	         --chdir $(CODE_DIR)/aps/api \
-	         --bind $(VUE_APP_APS_SERVER):$(VUE_APP_APS_API_PORT) \
-	         --timeout 1200 \
-	         --graceful-timeout 1200 \
-	         --reload \
-	         app:app
-
 api-start: run-rms.uipy-mock
 
 run-rms.uipy-mock: matplotlibrc
