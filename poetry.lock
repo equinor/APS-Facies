@@ -425,7 +425,6 @@ files = [
 [package.dependencies]
 blinker = ">=1.9"
 click = ">=8.1.3"
-
 importlib-metadata = {version = ">=3.6", markers = "python_version < \"3.10\""}
 itsdangerous = ">=2.2"
 Jinja2 = ">=3.1.2"
@@ -452,13 +451,13 @@ Six = "*"
 
 [[package]]
 name = "fmu-tools"
-version = "1.20.2"
+version = "1.21.0"
 description = "Library for various tools and scripts within Fast Model Update"
 optional = false
 python-versions = ">=3.9"
 files = [
-    {file = "fmu_tools-1.20.2-py3-none-any.whl", hash = "sha256:eb757714c9fc5908063fe9751d4133c19e9db99e8443214453aa2d70838809ec"},
-    {file = "fmu_tools-1.20.2.tar.gz", hash = "sha256:da942998413db913277bd2ff0078e35a0ee0b0c9d51f522cfc7446a18f8a5216"},
+    {file = "fmu_tools-1.21.0-py3-none-any.whl", hash = "sha256:dbbb5df408176ff816bb2d0ed4320fa205a99b6113327085a5c3734c0a2f0718"},
+    {file = "fmu_tools-1.21.0.tar.gz", hash = "sha256:93efc2526d7da25576697aa515c5f09533cf7db715a46a3ce7d0cbf965874089"},
 ]
 
 [package.dependencies]
@@ -2621,4 +2620,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.9"
-content-hash = "e07138ad52f7898a427c617a7a2b4f96e19f16c4a445d2ed15fc30ee081476f8"
+content-hash = "4f5006ad4ac4bafc0089d955600e00900f7d9616fc1c967fe0c4d255b5523d83"
