@@ -132,26 +132,6 @@ INFO.XML := $(WEB_DIR)/static/info.xml
 
 MKDIR := mkdir -p
 
-DEPLOYMENT_USER := cicd_aps
-DEPLOYMENT_PATH := /project/res/APSGUI/releases
-DEPLOY_SERVER ?= tr-linrgsn019.tr.statoil.no
-
-REMOTE_RGS_DEVELOP := /project/res/APSGUI/DevelopmentBranch/APSGUI
-REMOTE_RGS_MASTER := /project/res/APSGUI/MasterBranch
-
-RGS_EXEC := ssh $(DEPLOYMENT_USER)@$(DEPLOY_SERVER)
-RGS_UPDATE_APS := git pull \
- && rm -rf workflow \
- && mkdir -p workflow/pythoncomp/ \
- && touch workflow/.master \
- && USE_TEMORARY_DIR=no \
- APS_PROJECT_DIR=$(pwd) \
- ./bin/initialize-project.sh workflow/ \
- && mv workflow/pythoncomp/* workflow \
- && rm -rf workflow/pythoncomp \
-           workflow/.master \
-           aps_workflows
-
 PROJECT_LOCATION_ROOT ?= $(CODE_DIR)/models
 define LOCAL_SETTINGS_JSON
 {
@@ -538,26 +518,6 @@ run-rms.uipy-mock: matplotlibrc
 		run \
 		--port=$(VUE_APP_APS_API_PORT) \
 		--host=$(VUE_APP_APS_SERVER)
-
-# TODO: Add versioning to the plugin file
-deploy:
-	$(eval $@_PLUGIN := $(shell cat $(DEPLOY_VERSION_PATH) || echo $(PLUGIN_BIN)))
-	cd $(CODE_DIR) && \
-	rsync -avz \
-	      --rsh=ssh \
-	      $($@_PLUGIN) $(DEPLOYMENT_USER)@$(DEPLOY_SERVER):$(DEPLOYMENT_PATH)/$($@_PLUGIN)
-
-update-remote-develop:
-	$(RGS_EXEC) 'cd $(REMOTE_RGS_DEVELOP) && $(RGS_UPDATE_APS)'
-
-update-remote-master:
-	$(RGS_EXEC) 'cd $(REMOTE_RGS_MASTER) && $(RGS_UPDATE_APS)'
-
-# Get the plugin name from the file $(DEPLOY_VERSION_PATH), not from $(PLUGIN_BIN)
-deploy-stable: deploy
-	$(eval $@_PLUGIN := $(shell cat $(DEPLOY_VERSION_PATH)))
-	cd $(CODE_DIR) && \
-	ssh $(DEPLOYMENT_USER)@$(DEPLOY_SERVER) ln -s $(DEPLOYMENT_PATH)/$($@_PLUGIN) $(DEPLOYMENT_PATH)/stable/$(PLUGIN_NAME).$(APS_VERSION).plugin
 
 
 print-%  : ; @echo $($*)
