@@ -1537,21 +1537,6 @@ typing = ["typing-extensions"]
 xmp = ["defusedxml"]
 
 [[package]]
-name = "piprot"
-version = "0.9.11"
-description = "How rotten are your requirements?"
-optional = false
-python-versions = "*"
-files = [
-    {file = "piprot-0.9.11.tar.gz", hash = "sha256:db48a26789a370149309e6585eac4ad1cc1dd239d834463a7df7cde01e2b396b"},
-]
-
-[package.dependencies]
-requests = "*"
-requests-futures = "*"
-six = "*"
-
-[[package]]
 name = "pluggy"
 version = "1.5.0"
 description = "plugin and hook calling mechanisms for python"
@@ -1763,23 +1748,6 @@ urllib3 = ">=1.21.1,<3"
 [package.extras]
 socks = ["PySocks (>=1.5.6,!=1.5.7)"]
 use-chardet-on-py3 = ["chardet (>=3.0.2,<6)"]
-
-[[package]]
-name = "requests-futures"
-version = "1.0.2"
-description = "Asynchronous Python HTTP for Humans."
-optional = false
-python-versions = "*"
-files = [
-    {file = "requests_futures-1.0.2-py2.py3-none-any.whl", hash = "sha256:a3534af7c2bf670cd7aa730716e9e7d4386497554f87792be7514063b8912897"},
-    {file = "requests_futures-1.0.2.tar.gz", hash = "sha256:6b7eb57940336e800faebc3dab506360edec9478f7b22dc570858ad3aa7458da"},
-]
-
-[package.dependencies]
-requests = ">=1.2.0"
-
-[package.extras]
-dev = ["Werkzeug (>=3.0.6)", "black (>=24.3.0,<25.0.0)", "build (>=0.7.0)", "docutils (<=0.20.1)", "greenlet (<=2.0.2)", "greenlet (>=3.0.0)", "isort (>=5.11.4)", "pyflakes (>=2.2.0)", "pytest (>=6.2.5)", "pytest-cov (>=3.0.0)", "pytest-httpbin (>=2.0.0)", "readme-renderer[rst] (>=26.0)", "twine (>=3.4.2)"]
 
 [[package]]
 name = "resfo"
@@ -2371,4 +2339,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.9"
-content-hash = "f5a029ee5ccb16fe684368befc66800839ada33a3b1e9ea6f671b3707bdf7514"
+content-hash = "f0f06c5160f0d18c48afeb656cfa39af8a0e574530df14fca17e8c1f025c147c"

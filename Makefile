@@ -105,7 +105,6 @@ endif
 PYTHON ?= $(RUN) python3
 PIP ?= $(PYTHON) -m pip
 PY.TEST := $(RUN) python -m pytest
-PIPROT := $(RUN) piprot
 SAFETY_CHECK := $(POETRY) check
 FLASK := $(RUN) flask
 REQUIREMENTS.TXT := $(POETRY) export --dev --format 'requirements.txt'
@@ -385,9 +384,6 @@ copy-source:
 	cd $(CODE_DIR)
 	$(TAR) --exclude-vcs-ignore \
 	    -cvzf code.tar.gz .
-
-check-requirements:
-	$(POETRY) lock --dev --requirements | $(PIPROT) --outdated -
 
 check-node-dependencies:
 	$(YARN) outdated

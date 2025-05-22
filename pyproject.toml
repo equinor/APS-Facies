@@ -22,7 +22,6 @@ fmu-tools = "^1.21.0"
 [tool.poetry.dev-dependencies]
 pytest = "^6.2.5"
 graphviz = "^0.19.1"
-piprot = "^0.9.11"
 mypy = "^0.931"
 Flask = "^3.0.0"
 Flask-Cors = "^3.0.10"
