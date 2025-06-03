@@ -5,7 +5,10 @@
         <section-title>{{ title }}</section-title>
         <v-expansion-panel
           value="faciesProbability"
-          v-tooltip.bottom-start="!hasFacies && 'No Facies has been selected'"
+          v-tooltip.bottom-start="{
+            content: !hasFacies && 'No Facies has been selected',
+            disabled: hasFacies,
+          }"
           :disabled="!hasFacies"
           elevation="0"
         >
@@ -18,9 +21,10 @@
         </v-expansion-panel>
         <v-expansion-panel
           value="truncationRule"
-          v-tooltip.bottom="
-            !hasEnoughFacies && 'Too few Facies has been selected'
-          "
+          v-tooltip.bottom="{
+            content: !hasEnoughFacies && 'Too few Facies has been selected',
+            disabled: hasEnoughFacies,
+          }"
           :disabled="!hasEnoughFacies"
           elevation="0"
         >
