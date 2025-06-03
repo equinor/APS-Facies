@@ -1385,7 +1385,7 @@ Background facies:
                         & (alphaValue <= self._highAlphaInGroup[groupIndx][i])
                     )
                     set_overlay_facies_index = (
-                        set_overlay_facies_index == False
+                        set_overlay_facies_index == False  # noqa: E712 We are filtering an array
                     ) & inside_truncation_interval
                     index_vector[set_overlay_facies_index] = (
                         self._overlayFaciesIndxInGroup[groupIndx][i]
