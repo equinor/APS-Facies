@@ -1,6 +1,6 @@
 import functools
 from random import sample
-from typing import Optional, List
+from typing import List, Optional
 from uuid import uuid4
 from warnings import warn
 
@@ -106,7 +106,7 @@ class Migration:
             if isinstance(code, str):
                 try:
                     code = int(code)
-                except Exception as e:
+                except Exception:
                     warn(f'The given code, {code} could not be parsed as an integer')
             item['code'] = code
 
@@ -472,7 +472,7 @@ class Migration:
                 state['version'] = migration['to']
         except Exception as e:
             errors = e.__repr__()
-            print(f'Error: ')
+            print('Error: ')
             warn(errors)
             raise KeyError(f'In migration:  {errors} ')
         return {

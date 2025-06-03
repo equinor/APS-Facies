@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 import aps.toolbox.check_and_normalise_probability as check_and_normalise_probability
 from aps.utils.constants.simple import Debug, ProbabilityTolerances
-from aps.utils.methods import get_specification_file, get_debug_level
+from aps.utils.methods import get_specification_file
 from aps.utils.roxar.progress_bar import APSProgressBar
 
 

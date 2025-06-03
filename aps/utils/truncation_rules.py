@@ -1,16 +1,16 @@
 # -*- coding: utf-8 -*-
-from typing import List, Union, Dict, Any
+from enum import Enum
+from typing import Any, Dict, List, Union
 
 import numpy as np
-from enum import Enum
 
+from aps.algorithms.APSMainFaciesTable import APSMainFaciesTable, Facies
+from aps.algorithms.properties import FmuProperty
 from aps.algorithms.truncation_rules import (
+    Trunc2D_Angle,
     Trunc2D_Cubic,
     Trunc3D_bayfill,
-    Trunc2D_Angle,
 )
-from aps.algorithms.properties import FmuProperty
-from aps.algorithms.APSMainFaciesTable import APSMainFaciesTable, Facies
 from aps.utils.constants.simple import Debug
 from aps.utils.types import FaciesName
 

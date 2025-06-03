@@ -5,6 +5,7 @@ JRIV/OLIA
 
 import numpy as np
 import xtgeo
+
 from aps.utils.constants.simple import Debug, GridModelConstants
 
 

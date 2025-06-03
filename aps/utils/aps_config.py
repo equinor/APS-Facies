@@ -1,11 +1,11 @@
 #!/bin/env python
 # -*- coding: utf-8 -*-
-import os.path
 import copy
-
+import os.path
 from pathlib import Path
-from aps.utils.ymlUtils import readYml
+
 from aps.utils.constants.simple import Debug
+from aps.utils.ymlUtils import readYml
 
 
 class APSConfig:
@@ -338,7 +338,7 @@ if __name__ == '__main__':
     print(f'aps_ert_config_prob_extension:  {aps_config.ert_config_probs_extension()}')
     print(' ')
 
-    print(f'Config: ')
+    print('Config: ')
     for key, value in config.items():
         if isinstance(value, dict):
             print(f'{key}:')

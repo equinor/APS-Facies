@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-from aps.utils.ConvertBitMapToRMS import ConvertBitMapToRMS
 from aps.utils.constants.simple import Debug
+from aps.utils.ConvertBitMapToRMS import ConvertBitMapToRMS
 
 long_help = """-------------------------------------------------------------------------------------
 Converts a bitmap (8-bit) image file to a RMS irap map format file.

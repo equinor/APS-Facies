@@ -5,20 +5,19 @@ from pathlib import Path
 
 import gaussianfft
 import numpy as np
+from fmu.tools.rms.zone_mapping import ZoneMapping
 
 from aps.algorithms.APSModel import APSModel
 from aps.utils.constants.simple import Debug
 from aps.utils.io import ensure_folder_exists
-from aps.utils.methods import get_specification_file
+from aps.utils.methods import get_seed_log_file, get_specification_file
 from aps.utils.roxar.generalFunctionsUsingRoxAPI import (
-    set_continuous_3d_parameter_values_in_zone_region,
     get_project_realization_seed,
+    set_continuous_3d_parameter_values_in_zone_region,
 )
 from aps.utils.roxar.grid_model import GridAttributes
 from aps.utils.roxar.progress_bar import APSProgressBar
-from aps.utils.methods import get_seed_log_file
 from aps.utils.trend import add_trends
-from fmu.tools.rms.zone_mapping import ZoneMapping
 
 
 def define_variogram(variogram, azimuth_value_sim_box):

@@ -1,6 +1,6 @@
-from warnings import warn
 from functools import total_ordering
 from typing import Union
+from warnings import warn
 
 
 @total_ordering

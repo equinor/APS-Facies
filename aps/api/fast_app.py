@@ -1,7 +1,5 @@
-from werkzeug.serving import run_with_reloader
-
 from gevent.pywsgi import WSGIServer
-
+from werkzeug.serving import run_with_reloader
 
 from aps.api.app import app
 

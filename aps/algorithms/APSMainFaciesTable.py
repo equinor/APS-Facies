@@ -1,14 +1,13 @@
 #!/bin/env python
 # -*- coding: utf-8 -*-
-from typing import NewType, Union, Tuple, List, Optional, Dict
-from xml.etree.ElementTree import Element, ElementTree
-
 import copy
+from typing import Dict, List, Optional, Tuple, Union
+from xml.etree.ElementTree import Element, ElementTree
 
 from aps.utils.constants.simple import Debug
 from aps.utils.exceptions.xml import ReadingXmlError
 from aps.utils.records import FaciesRecord
-from aps.utils.types import FaciesName, FaciesCode
+from aps.utils.types import FaciesCode, FaciesName
 
 
 class Facies:

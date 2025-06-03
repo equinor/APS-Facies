@@ -3,7 +3,6 @@
 from aps.algorithms.defineTruncationRule import DefineTruncationRule
 from aps.unit_test.helpers import (
     assert_identical_files,
-    assert_equal_image_content_files,
 )
 
 

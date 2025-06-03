@@ -1,85 +1,85 @@
 #!/bin/env python
 # -*- coding: utf-8 -*-
 import json
+from base64 import b64decode
 from enum import Enum
 from pathlib import Path
-from typing import Callable, Dict, Type, Optional, List, Union
+from typing import Callable, Dict, List, Optional, Type, Union
 from warnings import warn
 
 import numpy as np
-from base64 import b64decode
-
-from roxar import Project, GridPropertyType
+from fmu.tools.rms.zone_mapping import ZoneMapping
+from roxar import GridPropertyType, Project
 from roxar.grids import (
+    BlockedWells,
+    BlockedWellsSet,
     Grid3D,
     GridModel,
     Property,
-    BlockedWells,
-    BlockedWellsSet,
 )
+
 from aps.algorithms.APSGaussModel import (
-    GaussianField,
-    Variogram,
-    Ranges,
     Angles,
-    Trend,
-    GaussianFieldSimulationSettings,
+    GaussianField,
     GaussianFieldSimulation,
+    GaussianFieldSimulationSettings,
+    Ranges,
+    Trend,
+    Variogram,
 )
 from aps.algorithms.APSModel import APSModel
 from aps.algorithms.properties import CrossSection
 from aps.rms_jobs.create_simulation_grid import create_ertbox_grid_model
+from aps.utils.aps_config import APSConfig
 from aps.utils.constants.simple import (
-    VariogramType,
-    MinimumValues,
-    MaximumValues,
-    TrendType,
+    CrossSectionType,
+    Debug,
     Direction,
+    MaximumValues,
+    MinimumValues,
     OriginType,
     ProbabilityTolerances,
-    CrossSectionType,
+    TrendType,
+    VariogramType,
 )
 from aps.utils.debug import parse_dot_master
 from aps.utils.exceptions.xml import ApsXmlError
+from aps.utils.facies_map import create_facies_map
 from aps.utils.numeric import flip_if_necessary
 from aps.utils.roxar.generalFunctionsUsingRoxAPI import get_project_dir
 from aps.utils.roxar.grid_model import (
-    get_simulation_box_thickness,
-    average_of_property_inside_zone_region,
-    getDiscrete3DParameterValues,
-    create_zone_parameter,
     GridSimBoxSize,
+    average_of_property_inside_zone_region,
+    create_zone_parameter,
+    get_simulation_box_thickness,
     get_zone_names,
+    getDiscrete3DParameterValues,
 )
-from fmu.tools.rms.zone_mapping import ZoneMapping
-from aps.utils.facies_map import create_facies_map
 from aps.utils.roxar.migrations import Migration
 from aps.utils.roxar.progress_bar import APSProgressBar
 from aps.utils.truncation_rules import make_truncation_rule
 from aps.utils.types import (
+    XML,
+    Average,
+    DirectionName,
+    FmuParameterListPath,
+    GridModelName,
+    GridName,
+    GridSize,
+    OriginTypeName,
+    ProbabilityCubeParameter,
     ProjectName,
     ProjectPath,
-    FmuParameterListPath,
-    WorkflowName,
-    GridName,
-    RegionParameter,
-    TrendParameter,
-    ProbabilityCubeParameter,
     RealizationParameter,
-    GridSize,
-    ZoneNumber,
     RegionNumber,
-    Average,
-    XML,
-    VariogramName,
+    RegionParameter,
     TrendName,
-    DirectionName,
-    OriginTypeName,
-    GridModelName,
+    TrendParameter,
+    VariogramName,
+    WorkflowName,
+    ZoneNumber,
 )
 from aps.utils.xmlUtils import prettify
-from aps.utils.constants.simple import Debug
-from aps.utils.aps_config import APSConfig
 
 
 def empty_if_none(func: Callable) -> Callable:

@@ -2,13 +2,13 @@
 from aps.toolbox.create_redefined_blocked_facies_log import (
     run as run_redefine_blocked_facies_logs,
 )
-from aps.utils.methods import (
-    get_debug_level,
-    get_specification_file,
-    SpecificationType,
-    get_model_file_format,
-)
 from aps.utils.constants.simple import Debug
+from aps.utils.methods import (
+    SpecificationType,
+    get_debug_level,
+    get_model_file_format,
+    get_specification_file,
+)
 
 
 def run(roxar=None, project=None, **kwargs):

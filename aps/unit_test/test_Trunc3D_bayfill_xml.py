@@ -8,12 +8,12 @@ from aps.algorithms.truncation_rules import Trunc3D_bayfill
 from aps.unit_test.constants import (
     BAYFILL_GAUSS_FIELD_FILES,
     FACIES_OUTPUT_FILE,
+    FACIES_OUTPUT_FILE_VECTORIZED,
     NO_VERBOSE_DEBUG,
-    OUTPUT_MODEL_FILE_NAME1,
-    OUTPUT_MODEL_FILE_NAME2,
     OUT_POLY_FILE1,
     OUT_POLY_FILE2,
-    FACIES_OUTPUT_FILE_VECTORIZED,
+    OUTPUT_MODEL_FILE_NAME1,
+    OUTPUT_MODEL_FILE_NAME2,
 )
 from aps.unit_test.helpers import (
     apply_truncations,

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from enum import IntEnum, Enum, EnumMeta
+from enum import Enum, EnumMeta, IntEnum
 
 
 class BaseMeta(EnumMeta):

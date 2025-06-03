@@ -21,7 +21,6 @@ fmu-tools = "^1.21.0"
 
 [tool.poetry.dev-dependencies]
 pytest = "^6.2.5"
-pylint = "^2.11.0"
 graphviz = "^0.19.1"
 piprot = "^0.9.11"
 mypy = "^0.931"
@@ -39,3 +38,16 @@ build-backend = "poetry.core.masonry.api"
 [tool.ruff]
 [tool.ruff.format]
 quote-style = "single"
+
+[tool.ruff.lint]
+select = ["I"]
+ignore = [
+    "F403",
+    "F821",
+    "E731",
+    "E722",
+    "E721",
+    "F841",
+    "F401",
+    "E712",
+]

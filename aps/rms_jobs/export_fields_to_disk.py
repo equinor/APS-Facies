@@ -17,23 +17,24 @@
 #          aps_<zone_name>_<region_name>_active
 
 import copy
-import xtgeo
-import roxar
+
 import numpy as np
+import roxar
+import xtgeo
 from roxar import Direction
 
 from aps.algorithms.APSModel import APSModel
+from aps.utils.constants.simple import Debug
 from aps.utils.fmu import get_export_location
 from aps.utils.roxar.grid_model import flip_grid_index_origo
 from aps.utils.roxar.progress_bar import APSProgressBar
-from aps.utils.constants.simple import Debug
 
 
 def run(project, **kwargs):
     """Export simulated GRF fields from ERTBOX grid to file readable by ERT"""
     if project.current_realisation > 0:
         raise ValueError(
-            f'In RMS models to be used with a FMU loop in ERT,'
+            'In RMS models to be used with a FMU loop in ERT,'
             'the grid and parameters should be shared and realisation = 1'
         )
     model_file_name = kwargs.get('model_file', None)
@@ -43,7 +44,7 @@ def run(project, **kwargs):
     aps_model = APSModel(model_file_name)
 
     if not fmu_mode:
-        raise ValueError(f'The export of GRF is only available in FMU mode with AHM')
+        raise ValueError('The export of GRF is only available in FMU mode with AHM')
     debug_level = aps_model.log_setting
     fmu_grid_name = aps_model.grid_model_name
     file_format = aps_model.fmu_field_file_format
@@ -54,10 +55,10 @@ def run(project, **kwargs):
     if debug_level >= Debug.ON:
         if fmu_use_residual_fields:
             print(
-                f"- Only the residual for GRF's with trend is written to files to be read by ERT!"
+                "- Only the residual for GRF's with trend is written to files to be read by ERT!"
             )
         else:
-            print(f'- GRF files are written to files to be read by ERT')
+            print('- GRF files are written to files to be read by ERT')
 
     # Get the ERTBOX grid from RMS
     fmu_grid_model = project.grid_models[fmu_grid_name]

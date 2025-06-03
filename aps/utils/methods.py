@@ -1,27 +1,26 @@
 # -*- coding: utf-8 -*-
+from copy import copy
+from enum import Enum
 from pathlib import Path
-from typing import Dict, TypeVar, Set, Type, List, Optional, Union
+from typing import Dict, List, Optional, Set, Type, TypeVar, Union
+from warnings import warn
 from xml.etree.ElementTree import Element
 
 import numpy as np
-from enum import Enum
-from warnings import warn
 
+from aps.utils.aps_config import APSConfig
 from aps.utils.constants.simple import Debug, ModelFileFormat
 from aps.utils.exceptions.xml import MissingKeyword
-from aps.utils.aps_config import APSConfig
-from copy import copy
-
 from aps.utils.types import (
-    ModelFile,
-    SeedLogFile,
-    OutputModelFile,
-    GlobalVariablesFile,
-    RmsProjectDataFile,
     FilePath,
-    WorkflowName,
-    ProbabilityLogSpecificationFile,
+    GlobalVariablesFile,
     JobName,
+    ModelFile,
+    OutputModelFile,
+    ProbabilityLogSpecificationFile,
+    RmsProjectDataFile,
+    SeedLogFile,
+    WorkflowName,
 )
 
 T = TypeVar('T')

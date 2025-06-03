@@ -2,20 +2,20 @@
 # -*- coding: utf-8 -*-
 import copy
 import math
-from typing import Optional, List, Union
-
-import numpy as np
+from typing import List, Optional, Union
 from warnings import warn
 from xml.etree.ElementTree import Element
+
+import numpy as np
 
 from aps.algorithms.APSMainFaciesTable import APSMainFaciesTable
 from aps.algorithms.truncation_rules.Trunc2D_Base_xml import Trunc2D_Base
 from aps.utils.constants.simple import Debug
 from aps.utils.containers import FmuAttribute
 from aps.utils.xmlUtils import (
+    createFMUvariableNameForBayfillTruncation,
     getKeyword,
     isFMUUpdatable,
-    createFMUvariableNameForBayfillTruncation,
 )
 
 """

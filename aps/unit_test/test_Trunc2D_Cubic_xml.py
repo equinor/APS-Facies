@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 import filecmp
 import xml.etree.ElementTree as ET
-from typing import List, Dict, Union, Tuple
+from typing import Dict, List, Tuple, Union
 from xml.etree.ElementTree import Element
 
 import pytest
@@ -12,18 +12,18 @@ from aps.algorithms.truncation_rules import Trunc2D_Cubic
 from aps.unit_test.constants import (
     CUBIC_GAUSS_FIELD_FILES,
     FACIES_OUTPUT_FILE,
-    OUTPUT_MODEL_FILE_NAME1,
-    OUTPUT_MODEL_FILE_NAME2,
+    FACIES_OUTPUT_FILE_VECTORIZED,
+    KEYRESOLUTION,
     OUT_POLY_FILE1,
     OUT_POLY_FILE2,
-    KEYRESOLUTION,
-    FACIES_OUTPUT_FILE_VECTORIZED,
+    OUTPUT_MODEL_FILE_NAME1,
+    OUTPUT_MODEL_FILE_NAME2,
 )
 from aps.unit_test.helpers import (
     apply_truncations,
     apply_truncations_vectorized,
-    getFaciesInTruncRule,
     get_cubic_facies_reference_file_path,
+    getFaciesInTruncRule,
     truncMapPolygons,
 )
 from aps.utils.constants.simple import Debug

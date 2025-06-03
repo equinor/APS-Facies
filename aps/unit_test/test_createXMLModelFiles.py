@@ -1,6 +1,8 @@
 #!/bin/env python
 # Python3  test that the model files can be created correctly.
 
+import pytest
+
 from aps.algorithms.APSFaciesProb import APSFaciesProb
 from aps.algorithms.APSGaussModel import APSGaussModel
 from aps.algorithms.APSMainFaciesTable import APSMainFaciesTable
@@ -20,24 +22,23 @@ from aps.algorithms.truncation_rules import (
 from aps.unit_test.constants import (
     FACIES_REAL_PARAM_NAME_RESULT,
     GRID_MODEL_NAME,
+    NO_VERBOSE_DEBUG,
+    REGION_PARAM_NAME,
     RMS_PROJECT,
     RMS_WORKFLOW,
-    ZONE_PARAM_NAME,
-    REGION_PARAM_NAME,
-    NO_VERBOSE_DEBUG,
-    VERY_VERBOSE_DEBUG,
     SEED_FILE_NAME,
+    VERY_VERBOSE_DEBUG,
+    ZONE_PARAM_NAME,
 )
 from aps.unit_test.helpers import get_model_file_path
 from aps.utils.checks import compare
 from aps.utils.constants.simple import (
     Debug,
     OriginType,
+    TransformType,
     TrendType,
     VariogramType,
-    TransformType,
 )
-import pytest
 
 
 def defineCommonModelParam(

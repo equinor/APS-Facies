@@ -16,15 +16,14 @@ Usage:
 The suffix MUST include a dot if a file ending is intended.
 """
 
+import os
 import random
 import string
 from pathlib import Path
 from shutil import copy
 from sys import argv
 from tempfile import gettempdir
-
-import os
-from typing import Dict, List, Optional, Tuple, Iterator, Iterable, Callable, Any
+from typing import Any, Callable, Dict, Iterable, Iterator, List, Optional, Tuple
 
 
 def run() -> None:

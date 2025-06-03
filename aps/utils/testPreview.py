@@ -6,20 +6,20 @@ from argparse import ArgumentParser, Namespace
 import matplotlib
 
 matplotlib.use('Tkagg')
-from matplotlib import pyplot as plt
-
 import collections
+
 import numpy as np
+from matplotlib import pyplot as plt
 from matplotlib.patches import Polygon
 
 from aps.algorithms.APSModel import APSModel
-from aps.utils.constants.simple import Debug, CrossSectionType
+from aps.utils.constants.simple import CrossSectionType, Debug
 from aps.utils.exceptions.xml import UndefinedZoneError
-from aps.utils.io import writeFileRTF
-from aps.utils.methods import get_colors, get_run_parameters, get_debug_level
-from aps.utils.roxar.APSDataFromRMS import APSDataFromRMS
-from aps.utils.plotting import plot_gaussian_field, cross_plot, plot_facies
 from aps.utils.facies_map import create_facies_map
+from aps.utils.io import writeFileRTF
+from aps.utils.methods import get_colors, get_debug_level, get_run_parameters
+from aps.utils.plotting import cross_plot, plot_facies, plot_gaussian_field
+from aps.utils.roxar.APSDataFromRMS import APSDataFromRMS
 
 
 def high_resolution_2D_grids(

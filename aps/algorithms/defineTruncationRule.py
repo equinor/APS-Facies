@@ -4,38 +4,35 @@
 # class DefineTruncationRule
 # Description: Handle truncation rule settings
 # --------------------------------------------------------
+import collections
+import copy
 import os
 from pathlib import Path
 from sys import argv
-
-import copy
-import collections
 from typing import Literal
+from xml.etree.ElementTree import Element
 
 import numpy as np
-
 from matplotlib import pyplot as plt
 from matplotlib.patches import Polygon
 
-from aps.algorithms.truncation_rules import (
-    Trunc3D_bayfill,
-    Trunc2D_Angle,
-    Trunc2D_Cubic,
-)
-from aps.utils.constants.simple import Debug
 from aps.algorithms.APSMainFaciesTable import APSMainFaciesTable
 from aps.algorithms.constants_truncation_rules import (
+    CubicAndOverlayIndices,
+    CubicPolygonIndices,
+    NonCubicAndOverlayIndices,
+    NonCubicPolygonIndices,
     OverlayGroupIndices,
     OverlayPolygonIndices,
-    CubicPolygonIndices,
-    NonCubicPolygonIndices,
-    CubicAndOverlayIndices,
-    NonCubicAndOverlayIndices,
 )
+from aps.algorithms.truncation_rules import (
+    Trunc2D_Angle,
+    Trunc2D_Cubic,
+    Trunc3D_bayfill,
+)
+from aps.utils.constants.simple import Debug
 from aps.utils.methods import get_colors
 from aps.utils.xmlUtils import prettify
-
-from xml.etree.ElementTree import Element
 
 FORMAT_TYPES = Literal['svg', 'png']
 
@@ -875,7 +872,7 @@ class DefineTruncationRule:
             self.__tableCubic[name] = truncStructureSetting
         else:
             # Check if the name is used
-            if not name in self.__tableCubic:
+            if name not in self.__tableCubic:
                 self.__tableCubic[name] = truncStructureSetting
 
     def initNewTruncationRuleSettingsNonCubic(self):

@@ -1,9 +1,10 @@
 # Script to set switch whether to simulate and export field parameter
 # or import field parameter
 from pathlib import Path
-from aps.utils.fmu import is_initial_iteration
-from aps.utils.constants.simple import Debug
+
 from fmu.config import utilities
+
+from aps.utils.constants.simple import Debug
 
 # Read possible global switches relevant for simulating perm/poro fields
 CFG = utilities.yaml_load('../../fmuconfig/output/global_variables.yml')['global']

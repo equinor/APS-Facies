@@ -36,15 +36,16 @@ Example model file in xml format:
 
 """
 
-import xml.etree.ElementTree as ET
 import os
+import xml.etree.ElementTree as ET
 from pathlib import Path
-from aps.utils.xmlUtils import getKeyword, getTextCommand
-from aps.utils.roxar.modifyBlockedWellData import createCombinedFaciesLogForBlockedWells
-from aps.utils.exceptions.xml import MissingKeyword
+
 from aps.utils.constants.simple import Debug
+from aps.utils.exceptions.xml import MissingKeyword
 from aps.utils.methods import check_missing_keywords_list
-from aps.utils.ymlUtils import get_text_value, get_dict, readYml
+from aps.utils.roxar.modifyBlockedWellData import createCombinedFaciesLogForBlockedWells
+from aps.utils.xmlUtils import getKeyword, getTextCommand
+from aps.utils.ymlUtils import get_dict, get_text_value, readYml
 
 
 def run(params):

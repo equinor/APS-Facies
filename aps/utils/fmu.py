@@ -2,33 +2,33 @@
 # -*- coding: utf-8 -*-
 import os
 from abc import ABCMeta, abstractmethod
-from contextlib import contextmanager
 from collections import defaultdict
-from typing import (
-    Dict,
-    Tuple,
-    Optional,
-    Union,
-    Callable,
-    List,
-    TYPE_CHECKING,
-    ContextManager,
-)
+from contextlib import contextmanager
 from pathlib import Path
+from typing import (
+    TYPE_CHECKING,
+    Callable,
+    ContextManager,
+    Dict,
+    List,
+    Optional,
+    Tuple,
+    Union,
+)
 
 import numpy as np
-
+from fmu.tools.rms.zone_mapping import ZoneMapping
 from roxar import Project
 from roxar.grids import Grid3D, GridModel
+
 from aps.algorithms.APSGaussModel import GaussianField
 from aps.algorithms.APSModel import APSModel
-from aps.algorithms.APSZoneModel import Conform, APSZoneModel
-from aps.algorithms.trend import Trend3D_elliptic_cone, ConicTrend
-from aps.utils.constants.simple import OriginType, Debug, TrendType, GridModelConstants
+from aps.algorithms.APSZoneModel import APSZoneModel, Conform
+from aps.algorithms.trend import ConicTrend, Trend3D_elliptic_cone
+from aps.utils.aps_config import APSConfig
+from aps.utils.constants.simple import Debug, GridModelConstants, OriginType, TrendType
 from aps.utils.decorators import cached
 from aps.utils.exceptions.zone import MissingConformityException
-from aps.utils.aps_config import APSConfig
-from fmu.tools.rms.zone_mapping import ZoneMapping
 
 if TYPE_CHECKING:
     from typing import Literal

@@ -1,8 +1,8 @@
 from aps.utils.constants.simple import Debug
 from aps.utils.grid import update_rms_parameter
 from aps.utils.roxar.grid_model import (
-    find_defined_cells,
     create_zone_parameter,
+    find_defined_cells,
     getDiscrete3DParameterValues,
 )
 from aps.utils.roxar.progress_bar import APSProgressBar

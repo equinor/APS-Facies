@@ -12,12 +12,12 @@ Output: New version of the APS model file.
 """
 
 import copy
-
 from pathlib import Path
+
 from aps.algorithms.APSModel import APSModel
 from aps.utils.constants.simple import Debug
 from aps.utils.methods import check_missing_keywords_list
-from aps.utils.ymlUtils import get_text_value, get_dict, readYml
+from aps.utils.ymlUtils import get_dict, get_text_value, readYml
 
 
 def run(params):
@@ -109,10 +109,10 @@ def run(params):
         print('-- New zones: ')
         for key, item in params['new_zones'].items():
             print(f'   {key}  {item}')
-        print(f'-- Old zones: ')
+        print('-- Old zones: ')
         for key, item in params['old_zones'].items():
             print(f'   {key}  {item}')
-        print(f'-- Zone mapping          : ')
+        print('-- Zone mapping          : ')
         for key, zone_list in params['zone_mapping'].items():
             print(f'   {key}  {zone_list}')
         if grid_model_name_for_output_model is not None:
@@ -121,7 +121,7 @@ def run(params):
             )
         else:
             print(
-                f'-- Grid model for output APS model:  The same as for input APS model.'
+                '-- Grid model for output APS model:  The same as for input APS model.'
             )
         print(' ')
 

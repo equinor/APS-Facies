@@ -1,16 +1,15 @@
 # -*- coding: utf-8 -*-
+import os
 from genericpath import exists
-from typing import List, Union, Callable, Any
-
-from PIL import ImageChops, Image
+from typing import Any, Callable, List, Union
 
 import numpy as np
-import os
+from PIL import Image, ImageChops
 
+from aps.algorithms.truncation_rules.types import TruncationRule
 from aps.utils.checks import compare
 from aps.utils.constants.simple import Debug
-from aps.utils.io import writeFile, readFile
-from aps.algorithms.truncation_rules.types import TruncationRule
+from aps.utils.io import readFile, writeFile
 
 
 def getFaciesInTruncRule(

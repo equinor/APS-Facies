@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
-from json import loads
 import re
-from typing import List, Tuple, NewType
+from json import loads
+from typing import List, NewType, Tuple
 
 Arguments = NewType('Arguments', List[str])
 

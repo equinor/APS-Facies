@@ -1,10 +1,11 @@
+from fmu.tools.rms.zone_mapping import ZoneMapping
+from roxar import GridPropertyType
+
 from aps.algorithms.APSModel import APSModel
-from aps.utils.constants.simple import GridModelConstants, Debug
+from aps.utils.constants.simple import Debug, GridModelConstants
 from aps.utils.roxar.grid_model import (
     create_zone_parameter,
 )
-from roxar import GridPropertyType
-from fmu.tools.rms.zone_mapping import ZoneMapping
 
 
 def get_codes_from_zone_param(grid_model, realization_number):

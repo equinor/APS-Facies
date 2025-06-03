@@ -5,12 +5,11 @@
 # Also find all yml files and xml files under aps/toolbox/example_input and add
 
 import re
-from os import walk, makedirs
+from os import makedirs, walk
 from os.path import exists
-from sys import argv
-from shutil import copyfile
 from pathlib import Path
-
+from shutil import copyfile
+from sys import argv
 
 _ignored = [
     r'.*/node_modules/.*',

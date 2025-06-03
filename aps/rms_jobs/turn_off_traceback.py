@@ -1,5 +1,4 @@
 import sys
-import os
 
 
 def excepthook(type, value, traceback):

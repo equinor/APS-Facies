@@ -1,18 +1,20 @@
 #!/bin/env python
 # -*- coding: utf-8 -*-
-from warnings import warn
-import numpy as np
 import copy
+from warnings import warn
+
+import numpy as np
+from roxar import Direction, GridPropertyType
+
 from aps.utils.constants.simple import (
     Debug,
+    FlipDirectionXtgeo,
     GridModelConstants,
     SimBoxThicknessConstants,
-    FlipDirectionXtgeo,
 )
 from aps.utils.decorators import cached
 from aps.utils.exceptions.general import raise_error
 from aps.utils.methods import calc_average
-from roxar import Direction, GridPropertyType
 
 
 def get_zone_code_names(grid_model):

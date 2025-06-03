@@ -5,7 +5,8 @@ from os.path import exists
 from typing import Union
 
 import numpy as np
-from aps.utils.constants.simple import VariogramType, Debug
+
+from aps.utils.constants.simple import Debug, VariogramType
 
 
 class NormalisationError(ValueError):

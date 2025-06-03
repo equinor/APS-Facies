@@ -259,15 +259,16 @@ Output:
     The output probability logs will get the name  <prefix>_<modelling_facies_name>.
 """
 
-import xml.etree.ElementTree as ET
 import os
+import xml.etree.ElementTree as ET
 from pathlib import Path
-from aps.utils.xmlUtils import getKeyword, getTextCommand, getIntCommand
-from aps.utils.ymlUtils import get_text_value, get_bool_value, get_dict, readYml
-from aps.utils.roxar.modifyBlockedWellData import createProbabilityLogs
-from aps.utils.exceptions.xml import MissingKeyword
+
 from aps.utils.constants.simple import Debug
+from aps.utils.exceptions.xml import MissingKeyword
 from aps.utils.methods import check_missing_keywords_list, get_cond_prob_dict
+from aps.utils.roxar.modifyBlockedWellData import createProbabilityLogs
+from aps.utils.xmlUtils import getIntCommand, getKeyword, getTextCommand
+from aps.utils.ymlUtils import get_bool_value, get_dict, get_text_value, readYml
 
 
 def run(params):
@@ -422,7 +423,7 @@ def run(params):
     if use_regions:
         if use_cond_prob:
             print(
-                f'Warning: Conditional probabilities is not implemented when using regions and will be ignored.'
+                'Warning: Conditional probabilities is not implemented when using regions and will be ignored.'
             )
         use_cond_prob = False
         conditional_prob_facies = None

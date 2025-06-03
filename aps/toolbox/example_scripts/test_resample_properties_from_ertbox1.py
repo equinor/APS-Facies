@@ -6,6 +6,7 @@
 # switch to fmu.tools and remove copy_rms_param_to_fmu_grid from aps.rms_jobs
 
 from fmu.tools.rms import copy_rms_param
+
 from aps.utils.constants.simple import Debug
 
 print(f'Run script: {copy_rms_param.__file__}  ')

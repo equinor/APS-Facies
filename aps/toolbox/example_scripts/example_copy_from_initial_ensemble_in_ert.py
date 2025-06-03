@@ -9,8 +9,8 @@
 #          and not a subset of them in ERT with ES or ES-MDA.
 # Written by: O.Lia
 # Updated by: Therese Natterøy
-import sys
 import os
+import sys
 from pathlib import Path
 
 
@@ -47,10 +47,10 @@ def main():
             print(
                 f'Found no ERT file for {field_name}. Copying file from {initial_fields_folder} into runpath'
             )
-            prev_iter_field = runpath.parent / f'iter-0/rms/output/aps' / field_name
+            prev_iter_field = runpath.parent / 'iter-0/rms/output/aps' / field_name
             os.symlink(prev_iter_field, ert_field)
     else:
-        print(f'Found no ERT FIELDS for APS, stopping the script...')
+        print('Found no ERT FIELDS for APS, stopping the script...')
 
 
 if __name__ == '__main__':

@@ -1,19 +1,18 @@
-import roxar
-import numpy as np
 import math
-
 from pathlib import Path
 
+import numpy as np
+import roxar
+
+from aps.toolbox import check_and_normalise_probability
 from aps.utils.constants.simple import Debug, ProbabilityTolerances
 from aps.utils.methods import check_missing_keywords_list
 from aps.utils.ymlUtils import (
-    get_text_value,
-    get_dict,
     get_bool_value,
-    get_float_value,
+    get_dict,
+    get_text_value,
     readYml,
 )
-from aps.toolbox import check_and_normalise_probability
 
 
 def run(params):
@@ -303,7 +302,7 @@ def calculate_new_probability_cubes(param_dict):
 
     if debug_level >= Debug.ON:
         print(' ')
-        print(f'- Calculate new set of probability cubes')
+        print('- Calculate new set of probability cubes')
 
     grid_model = project.grid_models[grid_model_name]
     zone_param = grid_model.properties[zone_param_name]
@@ -397,7 +396,7 @@ def calculate_new_probability_cubes(param_dict):
             sum_values[selected_active_cells] < 1 + eps
         )
         if debug_level >= Debug.VERBOSE:
-            print(f'-- Check normalization of new set of probability cubes.')
+            print('-- Check normalization of new set of probability cubes.')
         if not np.all(checked_values):
             raise ValueError(
                 f'The updated facies probabilities is not normalized within the tolerance {eps} around 1.0'
@@ -454,7 +453,7 @@ def normalize_weights(
                 f'The weights in keyword {keyword} for zone {zone_number} are all zero '
             )
         else:
-            err_msg = f'The weights for some probability cube set are all zero '
+            err_msg = 'The weights for some probability cube set are all zero '
         raise ValueError(err_msg)
 
     if math.fabs(sum_weights - 1.0) > eps:

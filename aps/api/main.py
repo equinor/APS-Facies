@@ -1,26 +1,27 @@
+import sys
+
+import roxar.rms
+
 from aps.rms_jobs.APS_main import run as run_truncation
 from aps.rms_jobs.APS_normalize_prob_cubes import run as run_normalization
 from aps.rms_jobs.APS_simulate_gauss_singleprocessing import run as run_simulation
-from aps.rms_jobs.updateAPSModelFromFMU import (
-    run as run_update_fmu_variables_in_model_file,
-)
-from aps.rms_jobs.import_fields_from_disk import run as run_import_fields
-from aps.rms_jobs.export_fields_to_disk import run as run_export_fields
-from aps.rms_jobs.export_simbox_grid_to_disk import run as run_export_aps_grid
-from aps.rms_jobs.create_simulation_grid import run as run_create_simulation_grid
 from aps.rms_jobs.check_grid_index_origin import run as run_check_grid_index_origin
-from aps.rms_jobs.export_fmu_config_files import run as run_export_fmu_config_files
 from aps.rms_jobs.copy_rms_param_trend_to_fmu_grid import (
     run as run_copy_rms_param_trend_to_fmu_grid,
+)
+from aps.rms_jobs.create_simulation_grid import run as run_create_simulation_grid
+from aps.rms_jobs.export_fields_to_disk import run as run_export_fields
+from aps.rms_jobs.export_fmu_config_files import run as run_export_fmu_config_files
+from aps.rms_jobs.export_simbox_grid_to_disk import run as run_export_aps_grid
+from aps.rms_jobs.import_fields_from_disk import run as run_import_fields
+from aps.rms_jobs.updateAPSModelFromFMU import (
+    run as run_update_fmu_variables_in_model_file,
 )
 from aps.utils.decorators import loggable, output_version_information
 from aps.utils.fmu import fmu_aware_model_file
 from aps.utils.io import create_temporary_model_file
 from aps.utils.roxar.job import JobConfig, classify_job_configuration
 from aps.utils.roxar.progress_bar import APSProgressBar
-
-import roxar.rms
-import sys
 
 
 def run(config):

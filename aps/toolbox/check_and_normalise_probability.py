@@ -158,18 +158,18 @@ import numpy as np
 import roxar
 from roxar.grids import GridModel
 
-from aps.utils.constants.simple import Debug, ProbabilityTolerances, GridModelConstants
+from aps.utils.checks import check_probability_normalisation, check_probability_values
+from aps.utils.constants.simple import Debug, GridModelConstants, ProbabilityTolerances
+from aps.utils.methods import check_missing_keywords_list
 from aps.utils.roxar.generalFunctionsUsingRoxAPI import (
     set_continuous_3d_parameter_values,
     set_discrete_3d_parameter_values,
 )
 from aps.utils.roxar.grid_model import (
+    find_defined_cells,
     getContinuous3DParameterValues,
     getDiscrete3DParameterValues,
-    find_defined_cells,
 )
-from aps.utils.checks import check_probability_values, check_probability_normalisation
-from aps.utils.methods import check_missing_keywords_list
 
 
 class NormalisationError(ValueError):

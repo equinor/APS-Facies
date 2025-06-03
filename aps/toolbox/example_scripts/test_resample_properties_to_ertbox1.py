@@ -7,7 +7,6 @@
 
 from fmu.tools.rms import copy_rms_param
 
-
 print(f'Run script: {copy_rms_param.__file__}  ')
 print('Copy 3D parameter from Geo grid to Ertbox grid')
 

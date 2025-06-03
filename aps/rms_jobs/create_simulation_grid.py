@@ -9,15 +9,12 @@ to save the GRF values to be exchanged between ERT and APS.
 """
 
 import xtgeo
-
-from numpy import pi
 from roxar import Direction
 
 from aps.algorithms.APSModel import APSModel
-from aps.utils.constants.simple import Debug
+from aps.utils.constants.simple import Debug, FlipDirectionXtgeo
 from aps.utils.roxar.grid_model import GridSimBoxSize
 from aps.utils.roxar.progress_bar import APSProgressBar
-from aps.utils.constants.simple import FlipDirectionXtgeo
 
 
 def get_grid_rotation(geometry):
@@ -42,7 +39,7 @@ def create_ertbox_grid_model(
 ):
     if project.current_realisation > 0:
         raise ValueError(
-            f'In RMS models to be used with a FMU loop in ERT,'
+            'In RMS models to be used with a FMU loop in ERT,'
             'the grid and parameters should be shared and realisation = 1'
         )
 

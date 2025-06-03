@@ -1,7 +1,7 @@
 # Example using dictionary with input parameters
 
 from aps.toolbox import check_and_normalise_probability
-from aps.utils.constants.simple import Debug, ProbabilityTolerances
+from aps.utils.constants.simple import Debug
 
 print(f'Run script: {check_and_normalise_probability.__file__}  ')
 print('Example using APS model file')

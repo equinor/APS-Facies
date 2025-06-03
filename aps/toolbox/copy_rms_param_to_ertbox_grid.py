@@ -6,26 +6,27 @@ in ERTBOX grid. This functionality is used when the user wants to
 use FIELD keywords for petrophysical properties in ERT in Assisted History Matching.
 """
 
+from pathlib import Path
+
 import roxar
+from fmu.tools.rms.zone_mapping import ZoneMapping
 from roxar import Direction
 
-from pathlib import Path
+from aps.rms_jobs.copy_rms_param_trend_to_fmu_grid import (
+    copy_from_geo_to_ertbox_grid,
+    get_grid_model,
+)
 from aps.utils.constants.simple import (
-    Debug,
     Conform,
+    Debug,
     ExtrapolationMethod,
 )
-from aps.rms_jobs.copy_rms_param_trend_to_fmu_grid import (
-    get_grid_model,
-    copy_from_geo_to_ertbox_grid,
-)
-
-from aps.utils.ymlUtils import get_text_value, get_dict, get_bool_value, readYml
 from aps.utils.methods import check_missing_keywords_list
 from aps.utils.roxar.generalFunctionsUsingRoxAPI import (
     set_continuous_3d_parameter_values_in_zone_region,
 )
-from fmu.tools.rms.zone_mapping import ZoneMapping
+from aps.utils.ymlUtils import get_bool_value, get_dict, get_text_value, readYml
+
 # TODO: When the stubs are removed, this function is no longe necessary since
 # this functionality is implemented in fmu.tools.rms.copy_rms_param
 

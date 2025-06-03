@@ -1,4 +1,5 @@
 from collections import OrderedDict
+
 import numpy as np
 
 from aps.utils.constants.simple import Debug
@@ -91,7 +92,7 @@ def initialize_rms_parameters(
 
     """
     if len(active_output_variable_list) == 0:
-        raise ValueError(f'Need to specify which variables to initialize')
+        raise ValueError('Need to specify which variables to initialize')
     grid_model_name = aps_model.grid_model_name
     realization_number = project.current_realisation
     grid_model = project.grid_models[grid_model_name]

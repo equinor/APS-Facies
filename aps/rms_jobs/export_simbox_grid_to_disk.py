@@ -1,9 +1,9 @@
 import xtgeo
 
 from aps.algorithms.APSModel import APSModel
+from aps.utils.constants.simple import Debug
 from aps.utils.fmu import get_export_location
 from aps.utils.methods import get_specification_file
-from aps.utils.constants.simple import Debug
 from aps.utils.roxar.progress_bar import APSProgressBar
 
 

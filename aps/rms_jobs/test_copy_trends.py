@@ -1,5 +1,5 @@
-from aps.rms_jobs.copy_rms_param_trend_to_fmu_grid import run
 from aps.algorithms.APSModel import APSModel
+from aps.rms_jobs.copy_rms_param_trend_to_fmu_grid import run
 from aps.utils.constants.simple import Debug, ExtrapolationMethod
 
 

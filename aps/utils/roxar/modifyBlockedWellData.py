@@ -1,11 +1,11 @@
 #!/bin/env python
 # -*- coding: utf-8 -*-
-import roxar
-import numpy as np
 import collections
 
-from typing import Dict, List
-from aps.utils.constants.simple import ProbabilityTolerances, Debug
+import numpy as np
+import roxar
+
+from aps.utils.constants.simple import Debug, ProbabilityTolerances
 from aps.utils.roxar.grid_model import (
     create_zone_parameter,
     getDiscrete3DParameterValues,
@@ -687,7 +687,7 @@ def check_probability_logs(
     for key, modelling_facies in modelling_facies_per_zone_region.items():
         (zone_number, region_number) = key
         if use_regions and region_number <= 0:
-            raise ValueError(f'Region log should only have integer region values > 0')
+            raise ValueError('Region log should only have integer region values > 0')
         sum_values = None
         number_of_active_values = 0
         for index, facies_name in enumerate(modelling_facies):

@@ -5,7 +5,7 @@ from pathlib import Path
 
 from aps.algorithms.APSModel import APSModel
 from aps.utils.constants.simple import Debug
-from aps.utils.methods import get_run_parameters, get_debug_level
+from aps.utils.methods import get_debug_level, get_run_parameters
 from aps.utils.roxar.progress_bar import APSProgressBar
 
 
@@ -48,7 +48,7 @@ def run(project, **kwargs):
     current_job_name = params['current_job_name']
 
     if global_variables_file:
-        print(f'\nUpdate APS model parameters from FMU parameters')
+        print('\nUpdate APS model parameters from FMU parameters')
         if debug_level >= Debug.ON:
             print(
                 f'- Read file with global variables from FMU: {global_variables_file}'
