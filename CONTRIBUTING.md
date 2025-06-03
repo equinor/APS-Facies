@@ -24,7 +24,8 @@ Please reach out, create an issue, pull request, or suggest changes.
 
 **NOTE**: Running APS locally, requires [Aspen RMS&trade;](https://www.aspentech.com/en/products/sse/aspen-rms) to be installed, or available in a container with a valid license.
 
-Install [asdf](https://asdf-vm.com/guide/getting-started.html#_3-install-asdf), if not already installed.
+Install [`mise`](https://mise.jdx.dev/getting-started.html), if not already installed.
+We use [`uv`](https://docs.astral.sh/uv/) for managing Python packages and installation[^1].
 
 On macOS, you may have to set
 ```bash
@@ -34,8 +35,9 @@ export SYSTEM_VERSION_COMPAT=1
 first, in order to make user Python is compiled / installed as a Framework, which is highly recommended to make matplotlib behave.
 
 ```bash
-asdf install
-poetry install  # Installed via asdf
+mise trust .
+mise install
+uv sync  # Installed via mise
 ```
 
 ```bash
@@ -88,3 +90,13 @@ sudo service nginx restart
 ```
 
 **NOTE**: CodeSpaces might not work as expected because RMS must be available.
+
+
+## Testing
+
+```bash
+uv run pytest tests
+```
+
+
+[^1]: We also support using regular `pip install -e .`, but then the dependencies will not be deterministic which _may_ cause some issues.

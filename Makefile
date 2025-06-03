@@ -84,13 +84,7 @@ EXAMPLES_FOLDER := $(CODE_DIR)/examples
 TEST_FOLDER := $(SOURCE_DIR)/tests
 AUXILLARY := $(CODE_DIR)/auxillary
 # Paths local to the compiled app
-REQUESTS_CA_BUNDLE ?= $(SSL_CERT_FILE)
-POETRY := $(shell which poetry)
-ifneq ($(POETRY),)
-RUN := PYTHONPATH=$(PYTHONPATH) $(POETRY) run
-else
-RUN := PYTHONPATH=$(PYTHONPATH)
-endif
+RUN := PYTHONPATH=$(PYTHONPATH) uv run
 PYTHON ?= $(RUN) python3
 PIP ?= $(PYTHON) -m pip
 PY.TEST := $(RUN) python -m pytest
@@ -255,7 +249,7 @@ mock-STUB_VERSION:
 	cat $(CODE_DIR)/bin/STUB_VERSION > $(SOURCE_DIR)/api/STUB_VERSION
 	ln -sf $(SOURCE_DIR)/api/STUB_VERSION $(CODE_DIR)/STUB_VERSION
 
-init: dependencies init-workflow package.json local.settings.json dotenv generate-truncation-rules
+init: init-workflow package.json local.settings.json dotenv generate-truncation-rules
 
 init-workflow: links generate-workflow-files
 
@@ -306,11 +300,6 @@ clean-changelog-link:
 generate-workflow-files: $(CREATE_WORKFLOW_DIR)
 	$(PYTHON) $(BIN_DIR)/generate_workflow_blocks.py $(CODE_DIR) $(WORKFLOWS_TO_PROJECT)
 
-dependencies: requirements
-
-requirements:
-	$(POETRY) install --no-root
-
 clean: clean-links clean-workflow-blocks
 	rm -rf $(BUILD_DIR)
 	rm -f $(CODE_DIR)/build.txt
@@ -328,18 +317,10 @@ clean-__pycache__:
 clean-pyc:
 	rm -f $(shell find $(CODE_DIR) -name *.py[cod] -not -path *.rms/*)
 
-copy-source:
-	cd $(CODE_DIR)
-	$(TAR) --exclude-vcs-ignore \
-	    -cvzf code.tar.gz .
-
-update-dependencies: update-node-dependencies update-python-dependencies
+update-dependencies: update-node-dependencies
 
 update-node-dependencies:
 	$(YARN) upgrade
-
-update-python-dependencies:
-	$(POETRY) update --dev
 
 unit-tests: clean-tests run-tests clean-tests
 

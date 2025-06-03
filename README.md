@@ -14,15 +14,16 @@ If you want to build from source, some prerequisites are necessary;
 * [Python](https://www.python.org/downloads/)[^1]
 * [Node.js](https://nodejs.org/en/download/)[^2] (with [yarn 1 / classic](https://classic.yarnpkg.com/en/docs/install#mac-stable))
 
-The repo is also set up to use [asdf](https://asdf-vm.com/guide/getting-started.html#_3-install-asdf) to manage the necessary tools
+The repo is also set up to use [`mise`](https://mise.jdx.dev/getting-started.html) to manage the necessary tools
 ```bash
-asdf install
+mise trust .
+mise install
 ```
 
 Then, execute
 
 ```bash
-make build-gui
+mise run build-gui
 ```
 
 This should create a new `.plugin` file at the root of the repository.
