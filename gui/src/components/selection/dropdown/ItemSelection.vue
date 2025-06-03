@@ -6,7 +6,7 @@
     :error-messages="errors"
     variant="underlined"
     @blur="v.$touch()"
-    @update:model-value="(e) => $emit('update:model-value', e as T)"
+    @update:model-value="(e: T) => $emit('update:model-value', e)"
   />
 </template>
 
