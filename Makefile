@@ -91,7 +91,7 @@ TRUNCATION_RULE_VISUALIZATIONS := $(WEB_DIR)/public/truncation-rules
 LIB_PREFIX := $(CODE_DIR)/aps/libraries
 LIB_SOURCE := $(LIB_PREFIX)/sources
 EXAMPLES_FOLDER := $(CODE_DIR)/examples
-TEST_FOLDER := $(SOURCE_DIR)/unit_test
+TEST_FOLDER := $(SOURCE_DIR)/tests
 INTEGRATION_TESTS := $(TEST_FOLDER)/integration
 AUXILLARY := $(CODE_DIR)/auxillary
 # Paths local to the compiled app
@@ -181,7 +181,7 @@ compile-files-for-plugin: gather-python-scripts auxillary-files compile-python-f
 gather-python-scripts: copy-python-files __init__.py
 	cp $(UI.PY) $(PLUGIN_DIR)
 	cp $(MAIN.PY) $(PLUGIN_DIR)
-	rm -rf $(PLUGIN_DIR)/aps/unit_test \
+	rm -rf $(PLUGIN_DIR)/aps/tests \
 	       $(PLUGIN_DIR)/aps/api
 
 __init__.py:

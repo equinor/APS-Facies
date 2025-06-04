@@ -11,6 +11,7 @@ import numpy as np
 from aps.utils.constants.simple import Debug
 from aps.utils.methods import get_workflow_name
 from aps.utils.roxar import running_in_batch_mode
+from aps.utils.types import FilePath
 from aps.utils.ymlUtils import readYml
 
 
@@ -22,7 +23,7 @@ def write_status_file(status: bool, always: bool = False) -> None:
 
 
 def writeFile(
-    file_name: str,
+    file_name: Path,
     a: Union[List[int], np.ndarray],
     nx: int,
     ny: int,
@@ -39,12 +40,10 @@ def writeFile(
 
 
 def readFile(
-    fileName: str, debug_level: Debug = Debug.OFF
+    fileName: Path, debug_level: Debug = Debug.OFF
 ) -> Tuple[np.ndarray, int, int]:
     if debug_level >= Debug.ON:
         print(f'Read file: {fileName}')
-    if not exists(fileName):
-        fileName = f'aps/unit_test/{fileName}'
     with open(fileName, 'r', encoding='utf-8') as file:
         inString = file.read()
         words = inString.split()
@@ -347,7 +346,7 @@ class GlobalVariables:
 
 
 def write_string_to_file(
-    file_name: str, content: str, debug_level: Debug = Debug.OFF
+    file_name: FilePath, content: str, debug_level: Debug = Debug.OFF
 ) -> None:
     with open(file_name, 'w', encoding='utf-8') as file:
         file.write(content)

@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import os
 from genericpath import exists
+from pathlib import Path
 from typing import Any, Callable, List, Union
 
 import numpy as np
@@ -33,7 +34,7 @@ def getFaciesInTruncRule(
 
 def apply_truncations(
     truncRule: TruncationRule,
-    faciesReferenceFile: str,
+    faciesReferenceFile: Path,
     nGaussFields: int,
     gaussFieldFiles: List[str],
     faciesOutputFile: str,
@@ -89,7 +90,7 @@ def apply_truncations(
 
 def apply_truncations_vectorized(
     truncRule: TruncationRule,
-    faciesReferenceFile: str,
+    faciesReferenceFile: Path,
     nGaussFields: int,
     gaussFieldFiles: List[str],
     faciesOutputFile: str,
@@ -194,18 +195,13 @@ def writePolygons(fileName: str, polygons: Any, debug_level: Debug = Debug.OFF) 
                 file.write('\n')
 
 
-def get_cubic_facies_reference_file_path(testCase: int) -> str:
-    faciesReferenceFile = 'testData_Cubic/test_case_' + str(testCase) + '.dat'
-    return faciesReferenceFile
-
-
-def get_model_file_path(modelFile: str) -> str:
-    if not exists(modelFile):
-        modelFile = 'aps/unit_test/' + modelFile
-    return modelFile
-
-
-def assert_identical_files(source: str, reference: str) -> None:
+def assert_identical_files(
+    source: Union[str, Path], reference: Union[str, Path]
+) -> None:
+    if isinstance(source, Path):
+        source = str(source.absolute())
+    if isinstance(reference, Path):
+        reference = str(reference.absolute())
     _assert_compare_files(source, reference, compare)
 
 

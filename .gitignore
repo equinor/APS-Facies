@@ -468,17 +468,14 @@ VERSION
 STUB_VERSION
 
 # Unit testing
-aps/unit_test/fmu_attributes.txt
-aps/unit_test/fmu_attributes.yaml
-aps/unit_test/Created_truncation_maps_cubic.png
-aps/unit_test/Created_truncation_maps_cubic_overlay.png
-aps/unit_test/Overview_truncation_maps.png
-!aps/unit_test/testData_models/*.xml
-!aps/unit_test/testData_*/*.dat
-!aps/unit_test/testData_updateAPSModel/APS*.xml
-aps/unit_test/matplotlibrc
-aps/unit_test/integration/matplotlibrc
-aps/unit_test/testData_trunc_settings/trunc_rules_out.dat
+aps/tests/out/
+aps/tests/Overview_truncation_maps.png
+!aps/tests/data/*/*.dat
+!aps/tests/data/models/*.xml
+!aps/tests/data/update_aps_model/*.xml
+aps/tests/matplotlibrc
+aps/tests/integration/matplotlibrc
+aps/tests/data/truncation_settings/trunc_rules_out.dat
 
 # Symbolic links
 bin/APS_make_gauss_IPL.py
@@ -491,7 +488,7 @@ aps/utils/roxar/getRMSProjectData.py
 examples/DefineTruncStructure.py
 workflow/Cleanup_tmpdir.ipl
 workflow/APS_simulate_gauss_multiprocessing.ipl
-aps/unit_test/integration/examples
+aps/tests/integration/examples
 !gui/public/CHANGELOG.md
 
 # Data stores
@@ -511,4 +508,4 @@ local.settings.json
 /integration_test/
 
 # Local projects
-models/
+/models/

@@ -1,12 +1,21 @@
 #!/bin/env python
 # -*- coding: utf-8 -*-
+from pathlib import Path
+
+import pytest
+
 from aps.algorithms.defineTruncationRule import DefineTruncationRule
-from aps.unit_test.helpers import (
+from aps.tests.helpers import (
     assert_identical_files,
 )
 
 
-def test_create_cubic_rules():
+@pytest.fixture
+def data_directory(data_directory) -> Path:
+    return data_directory / 'truncation_settings'
+
+
+def test_create_cubic_rules(data_directory):
     list_dir = ['H', 'V', 'H', 'V', 'V', 'V', 'H', 'H']
     list_nPoly = [3, 4, 5, 5, 6, 4, 5, 5]
     list_level = [
@@ -44,14 +53,14 @@ def test_create_cubic_rules():
         rules.addTruncationRuleSettingsCubic(nameBG, truncStructureCubic)
 
     outFile = 'Cubic_out.dat'
-    reference_file = 'testData_trunc_settings/Cubic_reference.dat'
+    reference_file = data_directory / 'Cubic_reference.dat'
     rules.writeFile(outFile)
 
     # Compare with reference data
     assert_identical_files(outFile, reference_file)
 
 
-def test_create_non_cubic_rules():
+def test_create_non_cubic_rules(data_directory, output_directory):
     list_nPoly = [3, 4, 5, 5, 5, 6]
     list_angle = [
         [0.0, 45.0, -45.0],
@@ -65,8 +74,7 @@ def test_create_non_cubic_rules():
     list_facies_per_polygon = ['F01', 'F02', 'F03', 'F04', 'F05', 'F06']
     prob_frac_per_polygon = [1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
 
-    truncRuleDir = ''
-    rules = DefineTruncationRule(truncRuleDir)
+    rules = DefineTruncationRule(output_directory)
 
     for i in range(len(list_nPoly)):
         truncStructureNonCubic = rules.initNewTruncationRuleSettingsNonCubic()
@@ -84,14 +92,14 @@ def test_create_non_cubic_rules():
 
     # rules.createOverviewPlotCubic('Cubic_rules_test')
     outFile = 'NonCubic_out.dat'
-    reference_file = 'testData_trunc_settings/NonCubic_reference.dat'
+    reference_file = data_directory / 'NonCubic_reference.dat'
     rules.writeFile(outFile)
 
     # Compare with reference data
-    assert_identical_files(outFile, reference_file)
+    assert_identical_files(output_directory / outFile, reference_file)
 
 
-def test_create_cubic_rules_with_overlay():
+def test_create_cubic_rules_with_overlay(data_directory, output_directory):
     list_dir = ['H', 'V', 'H', 'V', 'V']
     list_nPoly = [3, 4, 5, 5, 6]
     list_level = [
@@ -104,8 +112,7 @@ def test_create_cubic_rules_with_overlay():
     list_facies_per_polygon = ['F01', 'F02', 'F03', 'F04', 'F05', 'F06']
     prob_frac_per_polygon = [1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
 
-    truncRuleDir = ''
-    rules = DefineTruncationRule(truncRuleDir)
+    rules = DefineTruncationRule(output_directory)
 
     for i in range(len(list_nPoly)):
         direction = list_dir[i]
@@ -196,18 +203,16 @@ def test_create_cubic_rules_with_overlay():
             )
 
     outFile = 'Cubic_with_overlay_out.dat'
-    reference_file = 'testData_trunc_settings/Cubic_with_overlay_reference.dat'
+    reference_file = data_directory / 'Cubic_with_overlay_reference.dat'
     rules.writeFile(outFile)
 
     # Compare with reference data
-    assert_identical_files(outFile, reference_file)
+    assert_identical_files(output_directory / outFile, reference_file)
 
     # Create plots and check them
     plotFileName = 'Created_truncation_maps_cubic'
     out_plot_file = plotFileName + '.png'
-    ref_plot_file = (
-        'testData_trunc_settings/Created_truncation_maps_cubic_reference.png'
-    )
+    ref_plot_file = data_directory / 'Created_truncation_maps_cubic_reference.png'
 
     rules.createOverviewPlotCubic(plotFileName)
 
@@ -216,37 +221,32 @@ def test_create_cubic_rules_with_overlay():
     plotFileName = 'Created_truncation_maps_cubic_overlay'
     out_plot_file = plotFileName + '.png'
     ref_plot_file = (
-        'testData_trunc_settings/Created_truncation_maps_cubic_overlay_reference.png'
+        data_directory / 'Created_truncation_maps_cubic_overlay_reference.png'
     )
 
     rules.createOverviewPlotCubicWithOverlay(plotFileName)
     # Compare with reference data
 
 
-def test_write_read():
-    directory = 'testData_trunc_settings'
-    outFile = 'trunc_rules_out.dat'
-    refFile = 'truncation_settings_reference.dat'
-    reference_file = directory + '/' + refFile
-    out_file = directory + '/' + outFile
-    rules = DefineTruncationRule(directory)
-    rules.readFile(refFile)
-    rules.writeFile(outFile)
+def test_write_read(data_directory, output_directory):
+    out_file = output_directory / 'trunc_rules_out.dat'
+    reference_file = data_directory / 'truncation_settings_reference.dat'
+    rules = DefineTruncationRule(data_directory)
+    rules.readFile(reference_file)
+    rules.writeFile(out_file)
 
     # Compare with reference data
     assert_identical_files(out_file, reference_file)
 
 
-def test_create_plots():
-    refFile = 'testData_trunc_settings/truncation_settings_reference.dat'
-    rules = DefineTruncationRule('')
+def test_create_plots(data_directory, output_directory):
+    refFile = data_directory / 'truncation_settings_reference.dat'
+    rules = DefineTruncationRule(output_directory)
     rules.readFile(refFile)
 
-    plotFileName = 'Overview_truncation_maps'
-    out_plot_file = plotFileName + '.png'
-    ref_plot_file = 'testData_trunc_settings/Overview_truncation_maps_reference.png'
+    ref_plot_file = data_directory / 'Overview_truncation_maps_reference.png'
 
-    rules.createOverviewPlotCubic(plotFileName)
+    rules.createOverviewPlotCubic('Overview_truncation_maps')
 
     # Compare with reference data
 
@@ -254,10 +254,7 @@ def test_create_plots():
 def run():
     # ---------  Main ----------
     print('Start test_defineTruncSetting')
-    test_create_cubic_rules()
-    test_create_non_cubic_rules()
-    test_create_cubic_rules_with_overlay()
-    test_write_read()
+    pytest.main([__file__])
 
 
 if __name__ == '__main__':

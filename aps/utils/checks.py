@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 import difflib
 from filecmp import cmp
-from os.path import exists
 from typing import Union
 
 import numpy as np
@@ -186,12 +185,7 @@ def compare(
     reference: str,
     verbose: bool = True,
 ) -> bool:
-    prefix = ''
-    if not exists(reference):
-        prefix = 'aps/unit_test/'
-        if not exists(prefix + reference):
-            prefix += 'integration/'
-    check = cmp(prefix + reference, source)
+    check = cmp(reference, source)
 
     if verbose:
         if check:

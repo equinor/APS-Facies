@@ -2,26 +2,24 @@
 # -*- coding: utf-8 -*-
 import filecmp
 import xml.etree.ElementTree as ET
+from pathlib import Path
+from typing import List
+
+import pytest
 
 from aps.algorithms.APSMainFaciesTable import APSMainFaciesTable
 from aps.algorithms.truncation_rules import Trunc3D_bayfill
-from aps.unit_test.constants import (
-    BAYFILL_GAUSS_FIELD_FILES,
-    FACIES_OUTPUT_FILE,
-    FACIES_OUTPUT_FILE_VECTORIZED,
+from aps.tests.constants import (
     NO_VERBOSE_DEBUG,
-    OUT_POLY_FILE1,
-    OUT_POLY_FILE2,
-    OUTPUT_MODEL_FILE_NAME1,
-    OUTPUT_MODEL_FILE_NAME2,
 )
-from aps.unit_test.helpers import (
+from aps.tests.helpers import (
     apply_truncations,
     apply_truncations_vectorized,
     getFaciesInTruncRule,
     truncMapPolygons,
     writePolygons,
 )
+from aps.tests.types import FaciesListType, FaciesTableType, GaussianFieldsListType
 from aps.utils.constants.simple import Debug
 from aps.utils.xmlUtils import prettify
 
@@ -217,158 +215,147 @@ def truncMapsystemPolygons(
         print('Files are equal: OK')
 
 
-def test_Trunc3DBayfill():
-    nCase = 5
-    start = 1
-    end = 5
-    for testCase in range(start, end + 1):
-        print('Case number: ' + str(testCase))
-
-        if testCase == 1:
-            test_case_1()
-
-        elif testCase == 2:
-            test_case_2()
-
-        elif testCase == 3:
-            test_case_3()
-
-        elif testCase == 4:
-            test_case_4()
-
-        elif testCase == 5:
-            test_case_5()
-
-
-def test_case_1():
-    run(
-        fTable={1: 'F1', 2: 'F2', 3: 'F3', 4: 'F4', 5: 'F5'},
-        faciesInZone=['F3', 'F2', 'F1', 'F4', 'F5'],
-        faciesInTruncRule=['F1', 'F2', 'F3', 'F4', 'F5'],
-        faciesProb=[0.2, 0.2, 0.2, 0.2, 0.2],
-        sf_value=0.0,
-        sf_name='',
-        sf_fmu_updatable=True,
-        ysf=0.0,
-        ysf_fmu_updatable=True,
-        sbhd=0.0,
-        sbhd_fmu_updatable=True,
-        gaussFieldsInZone=['GRF1', 'GRF2', 'GRF3', 'GRF4'],
-        gaussFieldsForBGFacies=['GRF1', 'GRF2', 'GRF3'],
-        useConstTruncParam=True,
-        faciesReferenceFile=get_facies_reference_file_path(1),
-    )
-
-
-def test_case_2():
-    run(
-        fTable={1: 'F1', 2: 'F2', 3: 'F3', 4: 'F4', 5: 'F5'},
-        faciesInZone=['F2', 'F5', 'F4', 'F1', 'F3'],
-        faciesInTruncRule=['F1', 'F2', 'F3', 'F4', 'F5'],
-        faciesProb=[0.01, 0.19, 0.4, 0.2, 0.2],
-        sf_value=0.5,
-        sf_name='',
-        sf_fmu_updatable=False,
-        ysf=0.0,
-        ysf_fmu_updatable=False,
-        sbhd=0.0,
-        sbhd_fmu_updatable=False,
-        gaussFieldsInZone=['GRF1', 'GRF2', 'GRF3', 'GRF4'],
-        gaussFieldsForBGFacies=['GRF1', 'GRF2', 'GRF3'],
-        useConstTruncParam=True,
-        faciesReferenceFile=get_facies_reference_file_path(2),
-    )
-
-
-def test_case_3():
-    run(
-        fTable={1: 'F2', 2: 'F1', 3: 'F3', 4: 'F5', 5: 'F4'},
-        faciesInZone=['F3', 'F2', 'F1', 'F4', 'F5'],
-        faciesInTruncRule=['F1', 'F2', 'F3', 'F4', 'F5'],
-        faciesProb=[0.8, 0.02, 0.0, 0.08, 0.1],
-        sf_value=1.0,
-        sf_name='',
-        sf_fmu_updatable=True,
-        ysf=0.0,
-        ysf_fmu_updatable=True,
-        sbhd=0.0,
-        sbhd_fmu_updatable=True,
-        gaussFieldsInZone=['GRF1', 'GRF2', 'GRF3', 'GRF4'],
-        gaussFieldsForBGFacies=['GRF1', 'GRF2', 'GRF3'],
-        useConstTruncParam=True,
-        faciesReferenceFile=get_facies_reference_file_path(3),
-    )
-
-
-def test_case_4():
-    run(
-        fTable={1: 'F2', 2: 'F1', 3: 'F3', 4: 'F5', 5: 'F4'},
-        faciesInZone=['F3', 'F2', 'F1', 'F4', 'F5'],
-        faciesInTruncRule=['F1', 'F2', 'F3', 'F4', 'F5'],
-        faciesProb=[0.1, 0.8, 0.05, 0.05, 0.0],
-        sf_value=1.0,
-        sf_name='',
-        sf_fmu_updatable=False,
-        ysf=1.0,
-        ysf_fmu_updatable=False,
-        sbhd=0.0,
-        sbhd_fmu_updatable=False,
-        gaussFieldsInZone=['GRF1', 'GRF2', 'GRF3', 'GRF4'],
-        gaussFieldsForBGFacies=['GRF1', 'GRF2', 'GRF3'],
-        useConstTruncParam=True,
-        faciesReferenceFile=get_facies_reference_file_path(4),
-    )
-
-
-def test_case_5():
-    run(
-        fTable={1: 'F2', 2: 'F1', 3: 'F3', 4: 'F5', 5: 'F4'},
-        faciesInZone=['F3', 'F2', 'F1', 'F4', 'F5'],
-        faciesInTruncRule=['F1', 'F2', 'F3', 'F4', 'F5'],
-        faciesProb=[0.1, 0.1, 0.15, 0.75, 0.0],
-        sf_value=0.1,
-        sf_name='',
-        sf_fmu_updatable=True,
-        ysf=1.0,
-        ysf_fmu_updatable=True,
-        sbhd=1.0,
-        sbhd_fmu_updatable=True,
-        gaussFieldsInZone=['GRF1', 'GRF2', 'GRF3', 'GRF4'],
-        gaussFieldsForBGFacies=['GRF1', 'GRF2', 'GRF3'],
-        useConstTruncParam=True,
-        faciesReferenceFile=get_facies_reference_file_path(5),
-    )
-
-
-def get_facies_reference_file_path(testCase):
-    return f'testData_Bayfill/test_case_{testCase}.dat'
-
-
-def run(
-    fTable,
-    faciesInTruncRule,
-    faciesInZone,
-    faciesProb,
-    faciesReferenceFile,
-    gaussFieldsInZone,
-    gaussFieldsForBGFacies,
-    sbhd,
-    sbhd_fmu_updatable,
-    sf_name,
-    sf_value,
-    sf_fmu_updatable,
-    useConstTruncParam,
-    ysf,
-    ysf_fmu_updatable,
+@pytest.mark.parametrize('kind', ['bayfill'])
+@pytest.mark.parametrize(
+    [
+        'case_number',
+        'facies_table',
+        'facies_in_zone',
+        'facies_in_truncation_rule',
+        'facies_probabilities',
+        'sf_value',
+        'sf_name',
+        'sf_fmu_updatable',
+        'ysf',
+        'ysf_fmu_updatable',
+        'sbhd',
+        'sbhd_fmu_updatable',
+        'gaussian_fields_in_zone',
+        'gaussian_fields_for_background_facies',
+        'use_constant_truncation_param',
+    ],
+    [
+        (
+            1,
+            {1: 'F1', 2: 'F2', 3: 'F3', 4: 'F4', 5: 'F5'},
+            ['F3', 'F2', 'F1', 'F4', 'F5'],
+            ['F1', 'F2', 'F3', 'F4', 'F5'],
+            [0.2, 0.2, 0.2, 0.2, 0.2],
+            0.0,
+            '',
+            True,
+            0.0,
+            True,
+            0.0,
+            True,
+            ['GRF1', 'GRF2', 'GRF3', 'GRF4'],
+            ['GRF1', 'GRF2', 'GRF3'],
+            True,
+        ),
+        (
+            2,
+            {1: 'F1', 2: 'F2', 3: 'F3', 4: 'F4', 5: 'F5'},
+            ['F2', 'F5', 'F4', 'F1', 'F3'],
+            ['F1', 'F2', 'F3', 'F4', 'F5'],
+            [0.01, 0.19, 0.4, 0.2, 0.2],
+            0.5,
+            '',
+            False,
+            0.0,
+            False,
+            0.0,
+            False,
+            ['GRF1', 'GRF2', 'GRF3', 'GRF4'],
+            ['GRF1', 'GRF2', 'GRF3'],
+            True,
+        ),
+        (
+            3,
+            {1: 'F2', 2: 'F1', 3: 'F3', 4: 'F5', 5: 'F4'},
+            ['F3', 'F2', 'F1', 'F4', 'F5'],
+            ['F1', 'F2', 'F3', 'F4', 'F5'],
+            [0.8, 0.02, 0.0, 0.08, 0.1],
+            1.0,
+            '',
+            True,
+            0.0,
+            True,
+            0.0,
+            True,
+            ['GRF1', 'GRF2', 'GRF3', 'GRF4'],
+            ['GRF1', 'GRF2', 'GRF3'],
+            True,
+        ),
+        (
+            4,
+            {1: 'F2', 2: 'F1', 3: 'F3', 4: 'F5', 5: 'F4'},
+            ['F3', 'F2', 'F1', 'F4', 'F5'],
+            ['F1', 'F2', 'F3', 'F4', 'F5'],
+            [0.1, 0.8, 0.05, 0.05, 0.0],
+            1.0,
+            '',
+            False,
+            1.0,
+            False,
+            0.0,
+            False,
+            ['GRF1', 'GRF2', 'GRF3', 'GRF4'],
+            ['GRF1', 'GRF2', 'GRF3'],
+            True,
+        ),
+        (
+            5,
+            {1: 'F2', 2: 'F1', 3: 'F3', 4: 'F5', 5: 'F4'},
+            ['F3', 'F2', 'F1', 'F4', 'F5'],
+            ['F1', 'F2', 'F3', 'F4', 'F5'],
+            [0.1, 0.1, 0.15, 0.75, 0.0],
+            0.1,
+            '',
+            True,
+            1.0,
+            True,
+            1.0,
+            True,
+            ['GRF1', 'GRF2', 'GRF3', 'GRF4'],
+            ['GRF1', 'GRF2', 'GRF3'],
+            True,
+        ),
+    ],
+)
+def test_bayfill_truncation_rule(
+    case_number: int,
+    facies_table: FaciesTableType,
+    facies_in_zone: FaciesListType,
+    facies_in_truncation_rule: FaciesListType,
+    facies_probabilities: List[float | str],
+    sf_value: float,
+    sf_name: str,
+    sf_fmu_updatable: bool,
+    ysf: float,
+    ysf_fmu_updatable: bool,
+    sbhd: float,
+    sbhd_fmu_updatable: bool,
+    gaussian_fields_in_zone: GaussianFieldsListType,
+    gaussian_fields_for_background_facies: GaussianFieldsListType,
+    use_constant_truncation_param: bool,
+    facies_reference_file: Path,
+    bayfill_gauss_field_files: List[Path],
+    output_model_file_name_1: Path,
+    output_model_file_name_2: Path,
+    out_poly_file_1: Path,
+    out_poly_file_2: Path,
+    cubic_gauss_field_files: List[Path],
+    facies_output_file_vectorized: Path,
+    facies_output_file: Path,
 ):
     truncRule, truncRule2 = initialize_write_read(
-        outputModelFileName1=OUTPUT_MODEL_FILE_NAME1,
-        outputModelFileName2=OUTPUT_MODEL_FILE_NAME2,
-        fTable=fTable,
-        faciesInZone=faciesInZone,
-        faciesInTruncRule=faciesInTruncRule,
-        gaussFieldsInZone=gaussFieldsInZone,
-        gaussFieldsForBGFacies=gaussFieldsForBGFacies,
+        outputModelFileName1=output_model_file_name_1,
+        outputModelFileName2=output_model_file_name_2,
+        fTable=facies_table,
+        faciesInZone=facies_in_zone,
+        faciesInTruncRule=facies_in_truncation_rule,
+        gaussFieldsInZone=gaussian_fields_in_zone,
+        gaussFieldsForBGFacies=gaussian_fields_for_background_facies,
         sf_value=sf_value,
         sf_name=sf_name,
         sf_fmu_updatable=sf_fmu_updatable,
@@ -376,37 +363,37 @@ def run(
         ysf_fmu_updatable=ysf_fmu_updatable,
         sbhd=sbhd,
         sbhd_fmu_updatable=sbhd_fmu_updatable,
-        useConstTruncParam=useConstTruncParam,
+        useConstTruncParam=use_constant_truncation_param,
         debug_level=NO_VERBOSE_DEBUG,
     )
     nGaussFields = truncRule.getNGaussFieldsInModel()
     getClassName(truncRule)
-    getFaciesInTruncRule(truncRule, truncRule2, faciesInTruncRule)
+    getFaciesInTruncRule(truncRule, truncRule2, facies_in_truncation_rule)
     truncMapPolygons(
         truncRule=truncRule,
         truncRule2=truncRule2,
-        faciesProb=faciesProb,
-        outPolyFile1=OUT_POLY_FILE1,
-        outPolyFile2=OUT_POLY_FILE2,
+        faciesProb=facies_probabilities,
+        outPolyFile1=out_poly_file_1,
+        outPolyFile2=out_poly_file_2,
     )
     apply_truncations(
         truncRule=truncRule,
-        faciesReferenceFile=faciesReferenceFile,
+        faciesReferenceFile=facies_reference_file,
         nGaussFields=nGaussFields,
-        gaussFieldFiles=BAYFILL_GAUSS_FIELD_FILES,
-        faciesOutputFile=FACIES_OUTPUT_FILE,
+        gaussFieldFiles=bayfill_gauss_field_files,
+        faciesOutputFile=facies_output_file,
         debug_level=NO_VERBOSE_DEBUG,
     )
 
     apply_truncations_vectorized(
         truncRule=truncRule,
-        faciesReferenceFile=faciesReferenceFile,
+        faciesReferenceFile=facies_reference_file,
         nGaussFields=nGaussFields,
-        gaussFieldFiles=BAYFILL_GAUSS_FIELD_FILES,
-        faciesOutputFile=FACIES_OUTPUT_FILE_VECTORIZED,
+        gaussFieldFiles=bayfill_gauss_field_files,
+        faciesOutputFile=facies_output_file_vectorized,
         debug_level=NO_VERBOSE_DEBUG,
     )
 
 
 if __name__ == '__main__':
-    test_Trunc3DBayfill()
+    pytest.main([__file__])
