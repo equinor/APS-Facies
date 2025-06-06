@@ -22,7 +22,7 @@
         :persistent-hint="persistentHint"
         :append-icon="appendIcon"
         @update:model-value="
-          (e) => {
+          (e: Exclude<InternalValue, null>) => {
             v.fieldValue.$touch()
             updateValue(e)
           }
@@ -62,7 +62,7 @@ import FmuUpdatableValue from '@/utils/domain/bases/fmuUpdatable'
 import { computed, ref, watch, onMounted } from 'vue'
 import type { ValidationRule } from '@vuelidate/core'
 import useVuelidate from '@vuelidate/core'
-import { VTextField } from 'vuetify/lib/components/index.mjs'
+import { VTextField } from 'vuetify/lib/components/index.js'
 import {
   useConstantsRangesAzimuthStore,
   useConstantsRangesDepositionalAzimuthStore,
@@ -286,8 +286,8 @@ function emitChange(value: BigNumber | boolean | null): void {
   emit('update:model-value', payload)
 }
 
-function updateValue(event: BigNumber | string | InputEvent): void {
-  let value: BigNumber | string | null
+function updateValue(event: Exclude<InternalValue, null> | InputEvent): void {
+  let value: BigNumber | number | string | null
 
   if (event instanceof InputEvent) {
     value = (event.target as HTMLInputElement).value

@@ -104,18 +104,20 @@ const __layout = computed<Partial<Layout>>(() => {
     showline: false,
     scaleratio: scaleRatio,
     autorange: true,
-    titlefont: {
-      family: 'Roboto',
+    title: {
+      font: {
+        family: 'Roboto',
+      },
     },
   }
   const xaxis: Partial<LayoutAxis> = props.axisNames.x
-    ? { ..._axis, visible: true, title: props.axisNames.x }
+    ? { ..._axis, visible: true, title: { text: props.axisNames.x } }
     : _axis
   const yaxis: Partial<LayoutAxis> = {
     ..._axis,
     scaleanchor: 'x',
     ...(props.axisNames.y && {
-      title: props.axisNames.y,
+      title: { text: props.axisNames.y },
       visible: true,
     }),
   }
