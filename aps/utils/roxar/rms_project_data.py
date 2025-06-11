@@ -515,11 +515,13 @@ class RMSData:
             )
             return {}
 
-    def migrate_state(self, state: str, from_version: str, to_version: str):
+    def migrate_state(
+        self, state: str, from_version: Optional[str], to_version: Optional[str]
+    ):
         migration = Migration(self)
         return migration.migrate(_decode_state(state), from_version, to_version)
 
-    def can_migrate_state(self, from_version: str, to_version: str) -> bool:
+    def can_migrate_state(self, from_version: Optional[str], to_version: str) -> bool:
         migration = Migration(self)
         return migration.can_migrate(from_version, to_version)
 

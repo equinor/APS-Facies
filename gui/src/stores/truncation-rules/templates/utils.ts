@@ -265,7 +265,7 @@ function organizeCubicPolygons(
   return allPolygons
 }
 
-type TruncationRuleArguments<T extends TruncationRuleType> =
+export type TruncationRuleArguments<T extends TruncationRuleType> =
   ConstructorParameters<
     T extends 'bayfill'
       ? typeof Bayfill

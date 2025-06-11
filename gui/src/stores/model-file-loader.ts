@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 import { acceptHMRUpdate, defineStore } from 'pinia'
 
-import type { Newable } from '@/utils/domain/bases/interfaces'
 import APSError from '@/utils/domain/errors/base'
 import type FaciesGroup from '@/utils/domain/facies/group'
 import GaussianRandomField, {
@@ -26,6 +25,7 @@ import type {
 import type { TrendConfiguration } from '@/utils/domain/gaussianRandomField/trend'
 import type { VariogramConfiguration } from '@/utils/domain/gaussianRandomField/variogram'
 import type OverlayTruncationRule from '@/utils/domain/truncationRule/overlay'
+import type { OverlayTruncationRuleArgs } from '@/utils/domain/truncationRule/overlay'
 import type { Optional } from '@/utils/typing'
 import { usePanelStore } from '@/stores/panels'
 import type {
@@ -454,11 +454,14 @@ function makeOverlayTruncationRule<
   P extends PolygonSpecification,
   RULE extends OverlayTruncationRule<T, S, P>,
   CONTAINER extends TruncationRuleContentOverlay,
+  ARGS extends OverlayTruncationRuleArgs<T>,
 >(
   container: CONTAINER,
   parent: Parent,
   makeBackgroundPolygons: (container: CONTAINER['BackGroundModel']) => T[],
-  _class: Newable<RULE>,
+  _class: {
+    new (args: ARGS): RULE
+  },
   extra = {},
 ): RULE {
   const backgroundFields = getAlphaFields(container, parent)
@@ -480,7 +483,7 @@ function makeOverlayTruncationRule<
     _useOverlay: overlayPolygons.length > 0,
     parent,
     ...extra,
-  })
+  } as ARGS)
 }
 
 function makeNonCubicTruncationRule(

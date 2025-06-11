@@ -168,12 +168,12 @@ export default {
       : new Promise((resolve) => resolve(null)),
   // Methods related to state migration
   canMigrate: (
-    fromVersion: string | undefined,
+    fromVersion: string | null,
     toVersion: string,
   ): Promise<boolean> => api.call('can_migrate_state', fromVersion, toVersion),
   migrate: (
     state: string,
-    fromVersion: string,
+    fromVersion: string | null,
     toVersion: string | null,
   ): Promise<{ state: unknown; errors: string }> =>
     api.call('migrate_state', state, fromVersion, toVersion),

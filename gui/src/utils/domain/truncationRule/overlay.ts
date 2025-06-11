@@ -21,7 +21,7 @@ import { allSet, getId } from '@/utils/helpers'
 import type { TruncationRule as BaseTruncationRule } from '@/utils/domain/truncationRule/index'
 
 export type OverlayTruncationRuleArgs<T extends Polygon> =
-  TruncationRuleConfiguration<T> & {
+  TruncationRuleConfiguration<T | OverlayPolygon> & {
     _useOverlay?: boolean
   }
 

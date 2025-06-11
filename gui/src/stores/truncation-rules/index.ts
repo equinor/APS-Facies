@@ -1,6 +1,11 @@
 import { acceptHMRUpdate, defineStore } from 'pinia'
 import { useIdentifiedItems } from '@/stores/utils/identified-items'
-import { CubicPolygon, NonCubicPolygon, OverlayPolygon } from '@/utils/domain'
+import {
+  CubicPolygon,
+  NonCubicPolygon,
+  OverlayPolygon,
+  type Parent,
+} from '@/utils/domain'
 import { computed } from 'vue'
 import { getId, hasParents, makeTruncationRuleSpecification } from '@/utils'
 import { useZoneStore } from '@/stores/zones'
@@ -31,24 +36,32 @@ import type { TruncationRuleTemplateType } from '@/stores/truncation-rules/templ
 import { isNumber, sample, times } from 'lodash'
 import { useGaussianRandomFieldStore } from '@/stores/gaussian-random-fields'
 import { APSError, APSTypeError } from '@/utils/domain/errors'
-import OverlayTruncationRule from '@/utils/domain/truncationRule/overlay'
+import OverlayTruncationRule, {
+  type OverlayTruncationRuleArgs,
+} from '@/utils/domain/truncationRule/overlay'
 import rms from '@/api/rms'
 import { useTruncationRuleTemplateStore } from './templates'
 import { useTruncationRulePresetStore } from './presets'
 import { useFaciesGroupStore } from '@/stores/facies/groups'
 import { useTruncationRuleTemplateTypeStore } from './templates/types'
-import { makeRule } from './templates/utils'
+import { makeRule, type TruncationRuleArguments } from './templates/utils'
 import type {
   PolygonSerialization,
   PolygonSpecification,
 } from '@/utils/domain/polygon/base'
-import type { TruncationRuleSerialization } from '@/utils/domain/truncationRule/base'
+import type {
+  TruncationRuleConfiguration,
+  TruncationRuleSerialization,
+} from '@/utils/domain/truncationRule/base'
 import { getRelevant, isReady } from '@/stores/utils/helpers'
 import type { ID } from '@/utils/domain/types'
-import type { BayfillPolygonSerialization } from '@/utils/domain/polygon/bayfill'
+import BayfillPolygon, {
+  type BayfillPolygonSerialization,
+} from '@/utils/domain/polygon/bayfill'
 import type { NonCubicPolygonSerialization } from '@/utils/domain/polygon/nonCubic'
 import type { CubicPolygonSerialization } from '@/utils/domain/polygon/cubic'
 import type { OverlayPolygonSerialization } from '@/utils/domain/polygon/overlay'
+import type { CubicTruncationRuleArgs } from '@/utils/domain/truncationRule/cubic'
 
 export interface RuleName {
   title: string
@@ -71,7 +84,7 @@ export function deserializeTruncationRule<S extends PolygonSerialization>(
     ),
     polygons: deserializePolygons(rule.polygons),
     parent: resolveParentReference(rule.parent),
-  })
+  } as TruncationRuleArguments<(typeof rule)['type']>)
 }
 
 export const useTruncationRuleStore = defineStore('truncation-rules', () => {
@@ -161,11 +174,17 @@ export const useTruncationRuleStore = defineStore('truncation-rules', () => {
   >(
     rule:
       | BaseTruncationRule<T, S, P>
-      | TruncationRuleTemplateType
+      | (TruncationRuleTemplateType<S> & Parent)
       | InstantiatedTruncationRule,
   ) {
     if (!(rule instanceof BaseTruncationRule)) {
-      rule = makeRule(rule.type, rule)
+      rule = makeRule(
+        rule.type,
+        rule as unknown as
+          | TruncationRuleConfiguration<BayfillPolygon>
+          | OverlayTruncationRuleArgs<NonCubicPolygon>
+          | CubicTruncationRuleArgs,
+      )
     }
     addAvailable(rule as InstantiatedTruncationRule)
   }
