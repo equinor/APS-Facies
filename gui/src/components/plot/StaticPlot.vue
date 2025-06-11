@@ -32,6 +32,10 @@ type Size = {
   height: number
 }
 
+defineEmits<{
+  (event: 'click', e: MouseEvent): void
+}>()
+
 type Props = {
   dataDefinition: Partial<PlotData | Shape>[]
   annotations?: Array<Partial<Annotations>>
