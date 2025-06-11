@@ -12,7 +12,6 @@
       variant="underlined"
       @keydown.enter="update"
       @focusout="update"
-      @update:error="(e: boolean) => emit('update:error', e)"
     />
     <!-- </v-edit-dialog> -->
   </div>
