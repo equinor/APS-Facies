@@ -11,8 +11,9 @@
       </v-toolbar-title>
     </v-toolbar>
     <v-card rounded="0">
-      <!-- eslint-disable-next-line vue/no-v-html -->
+      <!-- eslint-disable-next-line vue/no-v-text-v-html-on-component vue/no-v-html -->
       <v-card-text v-if="html" v-show="!!message" v-html="message" />
+      <!-- eslint-disable-next-line vue/no-v-text-v-html-on-component -->
       <v-card-text v-else v-show="!!message" v-text="message" />
       <v-card-actions>
         <v-spacer />
