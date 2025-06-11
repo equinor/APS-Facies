@@ -21,6 +21,7 @@
         :hint="hint"
         :persistent-hint="persistentHint"
         :append-icon="appendIcon"
+        variant="underlined"
         @update:model-value="
           (e: Exclude<InternalValue, null>) => {
             v.fieldValue.$touch()
@@ -31,7 +32,6 @@
         @keydown.down="decrease"
         @click:append="(e: MouseEvent) => emit('click:append', e)"
         @blur="v.fieldValue.$touch"
-        variant="underlined"
       />
     </v-col>
     <v-col v-if="isFmuUpdatable" v-bind="binding">

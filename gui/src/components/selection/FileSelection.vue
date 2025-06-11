@@ -7,13 +7,13 @@
         rows="1"
         :disabled="disabled"
         :label="label"
-        :append-outer-icon="icon"
+        :append-icon="icon"
         :error-messages="errors"
-        @keydown.enter.prevent="() => null /** Ignore newline */"
-        @click:append-outer="choosePath"
-        @input="touch()"
-        @blur="touch()"
         variant="underlined"
+        @keydown.enter.prevent="() => null /** Ignore newline */"
+        @click:append="choosePath"
+        @update:model-value="touch()"
+        @blur="touch()"
       />
     </v-col>
   </v-row>

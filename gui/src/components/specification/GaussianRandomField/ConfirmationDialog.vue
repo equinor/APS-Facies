@@ -6,7 +6,7 @@
     @keydown.enter="agree()"
   >
     <v-toolbar :color="options.color" dark dense>
-      <v-toolbar-title class="white--text">
+      <v-toolbar-title class="text-white">
         {{ title }}
       </v-toolbar-title>
     </v-toolbar>
@@ -16,7 +16,7 @@
       </v-card-text>
       <v-card-actions>
         <v-spacer />
-        <v-btn color="warning darken-1" variant="text" @click.native="agree()">
+        <v-btn color="warning-darken-1" variant="text" @click.native="agree()">
           Yes
         </v-btn>
         <v-btn color="grey" variant="text" @click.native="cancel()">

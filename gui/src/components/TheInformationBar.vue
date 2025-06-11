@@ -1,11 +1,11 @@
 <template>
-  <div id="information-bar" v-if="shown">
+  <div v-if="shown" id="information-bar">
     <v-alert
       :value="shown"
       :type="type"
       closable
       transition="slide-y-transition"
-      @input="shown = false"
+      @update:model-value="shown = false"
     >
       {{ message }}
     </v-alert>

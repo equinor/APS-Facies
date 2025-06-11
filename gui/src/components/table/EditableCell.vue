@@ -8,11 +8,11 @@
       :type="numeric ? 'number' : 'text'"
       :error-messages="errorMessages"
       single-line
+      hide-details
+      variant="underlined"
       @keydown.enter="update"
       @focusout="update"
       @update:error="(e: boolean) => emit('update:error', e)"
-      hide-details
-      variant="underlined"
     />
     <!-- </v-edit-dialog> -->
   </div>

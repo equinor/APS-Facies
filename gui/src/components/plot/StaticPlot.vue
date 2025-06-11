@@ -1,7 +1,7 @@
 <template>
   <plotly-plot
-    ref="plot"
     :id="id"
+    ref="plot"
     :data="__content"
     :layout="__layout"
     :options="__options"

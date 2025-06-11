@@ -1,6 +1,7 @@
 <template>
   <static-plot
     :id="`truncation-rule/cubic/${rule.parentId}`"
+    ref="plot"
     :data-definition="__data.polygons"
     :annotations="__data.annotations"
     :width="300"
@@ -10,7 +11,6 @@
     expand
     svg
     @click.native="clicked"
-    ref="plot"
   />
 </template>
 

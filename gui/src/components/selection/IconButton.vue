@@ -16,13 +16,13 @@
       :color="color"
       :dark="dark"
       :large="large"
-      :left="left"
+      :start="left"
       :light="light"
       :medium="medium"
-      :right="right"
+      :end="right"
       :size="size"
       :small="small"
-      :x-large="xLarge"
+      :size="xLarge ? 'x-large' : undefined"
       >{{ fullIconName }}</v-icon
     >
   </v-btn>

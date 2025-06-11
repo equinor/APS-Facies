@@ -3,8 +3,8 @@
     :model-value="selected"
     :items="facies"
     multiple
-    @update:model-value="(e: Facies[]) => update(e)"
     variant="underlined"
+    @update:model-value="(e: Facies[]) => update(e)"
   />
 </template>
 

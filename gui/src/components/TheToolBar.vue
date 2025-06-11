@@ -28,19 +28,19 @@
       Run Settings
     </v-btn>
     <icon-button
+      v-tooltip.bottom="`What's new?`"
       icon="changelog"
       color="primary"
-      v-tooltip.bottom="`What's new?`"
       @click="() => openChangelog()"
     />
     <changelog-dialog ref="changelogDialog" />
     <icon-button
-      icon="help"
-      color="primary"
-      @click="() => goToHelp()"
       v-tooltip="
         'Documentation of the APS methodology and user guide for this plug-in.'
       "
+      icon="help"
+      color="primary"
+      @click="() => goToHelp()"
     />
     <span v-if="betaBuild">
       {{ `${versionInformation}` }}

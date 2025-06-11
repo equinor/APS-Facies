@@ -28,12 +28,12 @@
         <td v-else>
           <fraction-field
             :model-value="facies.previewProbability"
+            label=""
+            dense
             @update:model-value="
               (probability) =>
                 changeProbability(facies, probability as PROBABILITY)
             "
-            label=""
-            dense
           />
         </td>
       </tr>

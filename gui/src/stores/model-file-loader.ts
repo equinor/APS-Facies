@@ -1637,7 +1637,7 @@ export const useModelFileLoaderStore = defineStore('model-file-loader', () => {
         changePresetType(
           availableTruncationRuleTemplateTypes.find(
             (item): boolean => item.name === type,
-          )!?.type,
+          )?.type!,
           null,
         )
       }

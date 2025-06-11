@@ -2,10 +2,10 @@
   <v-text-field
     v-model="fieldName"
     :error-messages="errors"
-    @click.stop
-    @input="v.fieldName.$touch()"
-    @blur="v.fieldName.$touch()"
     variant="underlined"
+    @click.stop
+    @update:model-value="v.fieldName.$touch()"
+    @blur="v.fieldName.$touch()"
   />
 </template>
 <script setup lang="ts">
