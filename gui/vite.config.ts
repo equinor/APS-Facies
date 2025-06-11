@@ -18,7 +18,6 @@ export default defineConfig({
       autoImport: true,
     }),
     checker({
-      typescript: true,
       vueTsc: true,
     }),
   ],
