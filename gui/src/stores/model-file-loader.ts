@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/naming-convention */
 import { acceptHMRUpdate, defineStore } from 'pinia'
 
 import type { Newable } from '@/utils/domain/bases/interfaces'

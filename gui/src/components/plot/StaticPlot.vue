@@ -2,9 +2,9 @@
   <plotly-plot
     :id="id"
     ref="plot"
-    :data="__content"
-    :layout="__layout"
-    :options="__options"
+    :data="_content"
+    :layout="_layout"
+    :options="_options"
     auto-resize
     @click="(e: MouseEvent) => $emit('click', e)"
     @resize="resize"
@@ -63,7 +63,7 @@ const props = withDefaults(defineProps<Props>(), {
 const size = ref<Size>({ height: 0, width: 0 })
 const plot = ref<InstanceType<typeof PlotlyPlot> | null>(null)
 
-const __content = computed<Partial<PlotData>[]>(() => {
+const _content = computed<Partial<PlotData>[]>(() => {
   if (!props.svg) {
     return (props.dataDefinition as Partial<PlotData>[]).map((obj) => {
       const opacity = getDisabledOpacity(props.disabled)
@@ -93,8 +93,8 @@ function getScaleRatio(data: Partial<PlotData>[]): number {
   return x.length / y.length
 }
 
-const __layout = computed<Partial<Layout>>(() => {
-  const scaleRatio = getScaleRatio(__content.value)
+const _layout = computed<Partial<Layout>>(() => {
+  const scaleRatio = getScaleRatio(_content.value)
 
   const _axis: Partial<LayoutAxis> = {
     ticks: '',
@@ -151,7 +151,7 @@ const __layout = computed<Partial<Layout>>(() => {
   }
 })
 
-const __options = computed<Partial<Config>>(() => ({
+const _options = computed<Partial<Config>>(() => ({
   staticPlot: true,
   responsive: true,
 }))

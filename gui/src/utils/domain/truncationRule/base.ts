@@ -30,6 +30,7 @@ export type TruncationRuleType = 'bayfill' | 'non-cubic' | 'cubic'
 
 export const truncationRuleTypeNames: Record<TruncationRuleType, string> = {
   bayfill: 'Bayfill',
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   'non-cubic': 'Non-Cubic',
   cubic: 'Cubic',
 }

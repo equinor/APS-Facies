@@ -8,6 +8,7 @@ function callPythonFunction(method: string, parameters: string): Promise<JSON> {
     // simple:
     axios
       .post(`/${method}`, parameters, {
+        // eslint-disable-next-line @typescript-eslint/naming-convention
         headers: { 'Content-Type': 'text/plain;charset=utf-8' },
       })
       .then((response) => {

@@ -2,8 +2,8 @@
   <static-plot
     :id="`truncation-rule/cubic/${rule.parentId}`"
     ref="plot"
-    :data-definition="__data.polygons"
-    :annotations="__data.annotations"
+    :data-definition="_data.polygons"
+    :annotations="_data.annotations"
     :width="300"
     :height="300"
     :max-height="maxSize.height"
@@ -65,7 +65,7 @@ const maxSize = { width: 400, height: 400 }
 
 const theme = useTheme()
 
-const __data = computed<PlotSpecification>(() =>
+const _data = computed<PlotSpecification>(() =>
   plotify(
     [
       ...polygons.value,

@@ -4,14 +4,11 @@
     align="center"
     justify="center"
     no-gutters
-    :class="__class"
+    :class="_class"
   >
-    <v-col
-      :cols="12 - (isFmuUpdatable ? checkboxSize + 1 : 0)"
-      :class="__class"
-    >
+    <v-col :cols="12 - (isFmuUpdatable ? checkboxSize + 1 : 0)" :class="_class">
       <v-text-field
-        :class="__class"
+        :class="_class"
         :model-value="fieldValue"
         :error-messages="errors"
         :label="label"
@@ -38,7 +35,7 @@
       <v-checkbox
         v-model="updatable"
         v-tooltip.bottom="'Toggle whether this should be updatable in FMU'"
-        :class="__class"
+        :class="_class"
         :disabled="disabled"
         persistent-hint
       />
@@ -203,7 +200,7 @@ const _unit = computed(() => {
   }
 })
 
-const __class = computed(() => (props.dense ? ['dense'] : []))
+const _class = computed(() => (props.dense ? ['dense'] : []))
 
 const fmuOptionStore = useFmuOptionStore()
 const isFmuUpdatable = computed(

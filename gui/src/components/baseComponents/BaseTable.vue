@@ -72,6 +72,7 @@ const props = withDefaults(defineProps<Props>(), {
 
 defineSlots<{
   item(args: { item: T; props?: Props }): void
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   'expanded-item'(args: { item: T; columns: VuetifyColumns }): void
 }>()
 

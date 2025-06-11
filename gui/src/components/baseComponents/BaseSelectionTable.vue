@@ -92,6 +92,7 @@ const emit = defineEmits<{
 
 defineSlots<{
   item(props: { item: T; isSelected: boolean; isCurrent: boolean }): void
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   'expanded-item'(props: { item: T; columns: VuetifyColumns }): void
 }>()
 

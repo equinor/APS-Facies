@@ -267,6 +267,7 @@ function organizeCubicPolygons(
 
 const typeMapping = {
   bayfill: Bayfill,
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   'non-cubic': NonCubic,
   cubic: Cubic,
 }
