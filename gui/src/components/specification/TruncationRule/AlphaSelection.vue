@@ -49,7 +49,7 @@ const emit = defineEmits<{
 const fieldStore = useGaussianRandomFieldStore()
 
 const _fields = computed<GaussianRandomField[]>(() =>
-  fieldStore.selected.sort((a, b) => a.name.localeCompare(b.name)),
+  fieldStore.selected.toSorted((a, b) => a.name.localeCompare(b.name)),
 )
 
 const fields = computed<ListItem<string>[]>(() =>
