@@ -91,7 +91,7 @@ const propertyValue = computed({
     getValue(
       field.value,
       props.propertyType as keyof typeof field.value,
-      // @ts-ignore
+      // @ts-expect-error: Should work as expected
       props.subPropertyType,
     ),
   set: (value) =>
@@ -99,7 +99,7 @@ const propertyValue = computed({
       props.value,
       variogramOrTrend.value,
       props.propertyType as keyof typeof field.value,
-      // @ts-ignore
+      // @ts-expect-error: Should work as expected
       props.subPropertyType,
       value,
     ),

@@ -81,7 +81,7 @@ export const usePanelStore = defineStore('panels', () => {
             'individual gaussian fields expects a list of numbers',
           )
       }
-      // @ts-ignore: We check the types are consistent above
+      // @ts-expect-error We check the types are consistent above
       panels[sectionName][panelName] = open
     }
   }
