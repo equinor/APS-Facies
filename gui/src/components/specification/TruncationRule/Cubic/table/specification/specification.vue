@@ -10,7 +10,7 @@
     :max-width="maxSize.width"
     expand
     svg
-    @click.native="clicked"
+    @click="clicked"
   />
 </template>
 

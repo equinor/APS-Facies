@@ -15,7 +15,7 @@
       <v-card-text v-else v-show="!!message" v-text="message" />
       <v-card-actions>
         <v-spacer />
-        <v-btn color="gray" variant="text" @click.native="close()"> OK </v-btn>
+        <v-btn color="gray" variant="text" @click="close()"> OK </v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>

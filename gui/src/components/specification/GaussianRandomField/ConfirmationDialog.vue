@@ -16,12 +16,10 @@
       </v-card-text>
       <v-card-actions>
         <v-spacer />
-        <v-btn color="warning-darken-1" variant="text" @click.native="agree()">
+        <v-btn color="warning-darken-1" variant="text" @click="agree()">
           Yes
         </v-btn>
-        <v-btn color="grey" variant="text" @click.native="cancel()">
-          Cancel
-        </v-btn>
+        <v-btn color="grey" variant="text" @click="cancel()"> Cancel </v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
