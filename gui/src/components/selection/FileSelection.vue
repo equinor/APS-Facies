@@ -21,7 +21,7 @@
 
 <script setup lang="ts">
 import rms from '@/api/rms'
-import { relativeTo } from '@/utils/queries'
+import { relativeTo as _relativeTo } from '@/utils/queries'
 import { ref, computed, onMounted, watch } from 'vue'
 import useVuelidate from '@vuelidate/core'
 import { required, helpers } from '@vuelidate/validators'
@@ -49,7 +49,7 @@ const open = ref(false)
 const path = computed({
   get: () =>
     props.relativeTo && props.modelValue
-      ? relativeTo(props.relativeTo, props.modelValue)
+      ? _relativeTo(props.relativeTo, props.modelValue)
       : props.modelValue,
   set: (value: string | null) => {
     if (props.relativeTo && !value?.startsWith('/')) {
