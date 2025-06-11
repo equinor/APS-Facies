@@ -10,10 +10,10 @@
       :loading="loading"
       variant="underlined"
     >
-      <template #item="{ item, props }">
+      <template #item="{ item, props: _props }">
         <hover-helper v-slot="{ isHovering }">
           <v-list-item
-            v-bind="props"
+            v-bind="_props"
             :value="item.props.value"
             :disabled="item.props.disabled"
           >

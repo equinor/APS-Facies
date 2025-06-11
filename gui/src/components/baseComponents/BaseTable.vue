@@ -24,8 +24,8 @@
         </th>
       </tr>
     </template>
-    <template #item="{ item, props }">
-      <slot v-bind="props" :item="item" name="item" />
+    <template #item="{ item, props: _props }">
+      <slot v-bind="_props" :item="item" name="item" />
     </template>
     <template #expanded-row="{ item, columns }">
       <slot :item="item" :columns="columns" name="expanded-item" />
