@@ -74,6 +74,7 @@ function giveNewIds(
   }
   let serialization = JSON.stringify(_serialization)
   for (const [key, value] of idMapping) {
+    // eslint-disable-next-line security/detect-non-literal-regexp
     const regex = new RegExp(key, 'gi') // Necessary to change _all_ occurrences, instead of just the first
     serialization = serialization.replace(regex, value)
   }
