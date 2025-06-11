@@ -96,13 +96,15 @@ const icon = computed(
 
 async function choosePath(): Promise<void> {
   open.value = true
-  let newPath = null
+  let newPath: string | null
   try {
     newPath = props.directory
       ? await rms.chooseDir('load')
       : // setting parameters filter and suggestion does not seem to work...
         await rms.chooseFile('save', '', '')
-  } catch {}
+  } catch {
+    newPath = null
+  }
   if (newPath) {
     path.value = newPath
   }

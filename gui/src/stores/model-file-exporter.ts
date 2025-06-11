@@ -21,8 +21,9 @@ export const useModelFileExporterStore = defineStore(
     const model = computed(() => {
       try {
         return btoa(createModel())
-      } catch {}
-      return ''
+      } catch {
+        return ''
+      }
     })
 
     return { model, createModelFileFromStore }
