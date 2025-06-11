@@ -90,12 +90,14 @@ export function minFacies<
       )
       const items = getOverlayItems(rule)
       if (items !== null && items !== undefined) {
-        items.forEach((item: any): void => {
-          item.polygons
-            ? item.polygons.forEach((polygon: any): void => {
-                uniqueFacies.add(polygon.facies.name)
-              })
-            : uniqueFacies.add(item.facies)
+        items.forEach((item): void => {
+          if ('polygons' in item) {
+            item.polygons.forEach((polygon): void => {
+              uniqueFacies.add(polygon.facies.name)
+            })
+          } else {
+            uniqueFacies.add(item.facies)
+          }
         })
       }
       minFacies = uniqueFacies.size

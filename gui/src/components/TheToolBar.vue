@@ -196,11 +196,11 @@ async function loadModelFile(
       })
       const jsObject = xmlParser.parse(fileContent)
       json = JSON.stringify(jsObject)
-    } catch (err: any) {
+    } catch (err) {
       displayError(
         'The file you tried to open is not valid XML and cannot be used\n' +
           'Fix the following error before opening again:\n\n' +
-          err.message,
+          (err as Error).message,
       )
     }
     if (json) {

@@ -32,7 +32,7 @@ function getValue<T extends Trend | Variogram>(
   field: T,
   property: keyof T,
   subProperty: (keyof T[keyof T] & string) | undefined,
-): any {
+) {
   return !!subProperty && hasOwnProperty(field[property], subProperty)
     ? field[property][subProperty]
     : field[property]
@@ -94,7 +94,7 @@ const propertyValue = computed({
       // @ts-ignore
       props.subPropertyType,
     ),
-  set: (value: any) =>
+  set: (value) =>
     fieldStore.setProperty(
       props.value,
       variogramOrTrend.value,

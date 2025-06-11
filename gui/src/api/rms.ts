@@ -21,7 +21,7 @@ import { rms as mock } from './roxar'
 import type { PolygonSpecification } from '@/utils/domain/polygon/base'
 import type { ProbabilityCube } from '@/utils/domain/facies/local'
 const api = (typeof rms !== 'undefined' ? rms.uipy : mock.uipy) as {
-  call: <T>(name: string, ...args: any[]) => Promise<T>
+  call: <T>(name: string, ...args: unknown[]) => Promise<T>
 }
 
 export default {
@@ -175,7 +175,7 @@ export default {
     state: string,
     fromVersion: string,
     toVersion: string | null,
-  ): Promise<{ state: any; errors: string }> =>
+  ): Promise<{ state: unknown; errors: string }> =>
     api.call('migrate_state', state, fromVersion, toVersion),
 
   // Methods that are ONLY intended to be available in development mode, or when running the plugin locally

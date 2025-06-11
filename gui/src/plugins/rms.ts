@@ -2,18 +2,14 @@ import { useRootStore } from '@/stores'
 import { useGridModelStore } from '@/stores/grid-models'
 import { dumpState } from '@/utils/helpers/processing/export'
 
-interface SerializedState {
-  [_: string]: any
-}
-
-export interface RmsJob extends SerializedState {
+export interface RmsJob extends Record<string, unknown> {
   _treeorigin: string
   _version: string
 }
 
 export function attachRMSListeners() {
   if (typeof rms !== 'undefined') {
-    rms.onPluginSave((): SerializedState => {
+    rms.onPluginSave(() => {
       return dumpState()
     })
 

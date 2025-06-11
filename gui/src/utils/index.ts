@@ -218,7 +218,7 @@ function sortAlphabetically<T extends Named>(arr: T[]): T[] {
   return Object.values(arr).sort((a, b): number => a.name.localeCompare(b.name))
 }
 
-const encodeState = (state: any): string => btoa(JSON.stringify(state))
+const encodeState = (state: unknown): string => btoa(JSON.stringify(state))
 
 export {
   getId,

@@ -222,7 +222,7 @@ export default abstract class TruncationRule<
     }
   }
 
-  protected _hashify(): any {
+  protected _hashify() {
     const spec: TruncationRuleSerialization<S> & {
       fields?: GaussianRandomFieldSerialization[]
     } = this.toJSON()

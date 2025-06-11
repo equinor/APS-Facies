@@ -2,7 +2,7 @@ import type { Tooltip } from 'floating-vue'
 import 'vite/client'
 
 declare module '*.json' {
-  const value: any
+  const value: Record<string, unknown>
   export default value
 }
 
@@ -14,6 +14,6 @@ declare module '@vue/runtime-core' {
 
 declare module '*.vue' {
   import type { DefineComponent } from 'vue'
-  const component: DefineComponent<{}, {}, any>
+  const component: DefineComponent<object, object, unknown>
   export default component
 }
