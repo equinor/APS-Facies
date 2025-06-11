@@ -55,11 +55,7 @@
             <v-col cols="8">
               <v-row no-gutters>
                 <v-col class="pa-2">
-                  <v-radio-group
-                    v-model="showZoneNameNumber"
-                    column
-                    label="Show:"
-                  >
+                  <v-radio-group v-model="showZoneNameNumber" label="Show:">
                     <v-radio label="Zone Name" value="name" />
                     <v-radio label="Zone Number" value="number" />
                   </v-radio-group>

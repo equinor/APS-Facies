@@ -1,30 +1,28 @@
 <template>
   <v-btn
     :disabled="disabled || waiting"
+    :theme="theme"
     :color="color"
-    :dark="dark"
     :large="large"
     :start="left"
     :end="right"
-    :light="light"
     :small="small"
     icon
     variant="text"
     @click.stop="(e: MouseEvent) => emit('click', e)"
   >
     <v-icon
+      :theme="theme"
       :color="color"
-      :dark="dark"
       :large="large"
       :start="left"
-      :light="light"
       :medium="medium"
       :end="right"
       :size="size"
       :small="small"
-      :size="xLarge ? 'x-large' : undefined"
-      >{{ fullIconName }}</v-icon
     >
+      {{ fullIconName }}
+    </v-icon>
   </v-btn>
 </template>
 
@@ -37,11 +35,10 @@ type Props = {
   waiting?: boolean
   disabled?: boolean
   loadingSpinner?: boolean
+  theme?: 'light' | 'dark'
   color?: Color
-  dark?: boolean
   large?: boolean
   left?: boolean
-  light?: boolean
   medium?: boolean
   right?: boolean
   size?: number | string
@@ -52,11 +49,10 @@ const props = withDefaults(defineProps<Props>(), {
   waiting: false,
   disabled: false,
   loadingSpinner: false,
+  theme: undefined,
   color: undefined,
-  dark: false,
   large: false,
   left: false,
-  light: false,
   medium: false,
   right: false,
   size: undefined,
