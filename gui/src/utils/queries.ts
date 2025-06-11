@@ -23,7 +23,11 @@ export function hasFaciesSpecifiedForMultiplePolygons(
     .reduce((counts: Counts, { facies }): Counts => {
       const id = getId(facies)
       if (ignoreEmptyFacies && !id) return counts
-      hasOwnProperty(counts, id) ? (counts[id] += 1) : (counts[id] = 1)
+      if (hasOwnProperty(counts, id)) {
+        counts[id] += 1
+      } else {
+        counts[id] = 1
+      }
       return counts
     }, {})
   return Object.values(faciesCount).some((count): boolean => count > 1)

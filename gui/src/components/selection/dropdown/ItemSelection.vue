@@ -43,8 +43,8 @@ const errors = computed(() => {
 
   const errors: string[] = []
   if (!v.value.$dirty) return errors
-  !v.value.modelValue.required && errors.push('Is required')
-  !v.value.modelValue.legalChoice && errors.push('Illegal choice')
+  if (!v.value.modelValue.required) errors.push('Is required')
+  if (!v.value.modelValue.legalChoice) errors.push('Illegal choice')
   return errors
 })
 
