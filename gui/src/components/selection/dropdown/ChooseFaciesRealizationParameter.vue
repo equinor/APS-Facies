@@ -3,7 +3,6 @@
     v-model="faciesRealizationParameter"
     v-model:search-input="faciesRealizationParameter"
     :items="available"
-    :append-icon="''"
     :append-icon="'$vuetify.icons.values.search'"
     label="Facies Realization parameter"
     variant="underlined"
