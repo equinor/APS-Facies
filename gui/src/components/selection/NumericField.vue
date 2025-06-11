@@ -304,6 +304,7 @@ function updateValue(event: Exclude<InternalValue, null> | InputEvent): void {
   }
 
   let numericValue: BigNumber | null = null
+  // eslint-disable-next-line security/detect-unsafe-regex
   if (/^[+-]?(\d+(\.\d*)?|\.\d+)$/.test(value.toString())) {
     numericValue = getValue(value)
   } else if (value === '') {
