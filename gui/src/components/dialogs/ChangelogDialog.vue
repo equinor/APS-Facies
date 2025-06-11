@@ -4,6 +4,7 @@
       <v-row>
         <v-spacer />
         <v-col>
+          <!-- eslint-disable-next-line vue/no-v-html We are in control of the changelog -->
           <div id="changelog" v-html="changelog" />
         </v-col>
         <v-spacer />
