@@ -2,7 +2,6 @@
   <div>
     <!-- <v-edit-dialog lazy @open="reset"> -->
     <v-text-field
-      slot="input"
       v-model="_fieldValue"
       :label="label"
       :type="numeric ? 'number' : 'text'"
