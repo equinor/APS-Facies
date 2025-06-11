@@ -54,7 +54,7 @@ export function processFields(
       .sort((a, b) => a.channel - b.channel)
       .map(({ field }) => field)
   } else {
-    return fieldChannelReferences.map((_) => null)
+    return fieldChannelReferences.map(() => null)
   }
 }
 

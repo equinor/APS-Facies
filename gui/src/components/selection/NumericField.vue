@@ -262,7 +262,7 @@ function hasChanged(
       math.bignumber(fieldValue.value as InternalValue),
       getValue(value) ?? 0,
     ) as boolean
-  } catch (e) {
+  } catch {
     return false
   }
 }
