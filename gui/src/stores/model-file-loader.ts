@@ -988,7 +988,7 @@ interface EllipticConeTrend extends EllipticTrend {
   relativeSize: MaybeFmuUpdatable
 }
 
-interface HyperbolicTrend extends EllipticConeTrend {}
+type HyperbolicTrend = EllipticConeTrend
 
 interface RMSParameterTrend {
   TrendParamName: string
