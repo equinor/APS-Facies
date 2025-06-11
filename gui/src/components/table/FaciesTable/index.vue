@@ -49,7 +49,7 @@ import { useFaciesStore } from '@/stores/facies'
 import { useConstantsFaciesColorsStore } from '@/stores/constants/facies-colors'
 import type { ID } from '@/utils/domain/types'
 
-const props = withDefaults(defineProps<{ hideAlias: boolean }>(), {
+const props = withDefaults(defineProps<{ hideAlias?: boolean }>(), {
   hideAlias: false,
 })
 

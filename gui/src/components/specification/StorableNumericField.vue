@@ -31,7 +31,7 @@ import { useGaussianRandomFieldStore } from '@/stores/gaussian-random-fields'
 function getValue<T extends Trend | Variogram>(
   field: T,
   property: keyof T,
-  subProperty: (keyof T[keyof T] & string) | undefined,
+  subProperty?: keyof T[keyof T] & string,
 ) {
   return !!subProperty && hasOwnProperty(field[property], subProperty)
     ? field[property][subProperty]
@@ -39,12 +39,12 @@ function getValue<T extends Trend | Variogram>(
 }
 
 type TrendProps<T extends Trend = Trend> = {
-  trend: true
+  trend?: true
   propertyType: keyof T
   subPropertyType?: keyof T[keyof T] | string
 }
 type VariogramProps<T extends Variogram = Variogram> = {
-  trend: false
+  trend?: false
   propertyType: keyof T
   subPropertyType?: keyof T[keyof T]
 }
