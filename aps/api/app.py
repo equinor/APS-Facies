@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import atexit
 from os import environ, urandom
 
 from flask import Flask, jsonify, request
@@ -48,6 +49,14 @@ except NameError:
             setattr(__builtins__, 'project', project)
     else:
         raise RuntimeError('No project available, and RMS_PROJECT_PATH is not set')
+
+
+@atexit.register
+def shutdown():
+    try:
+        project.close()
+    except NameError:
+        pass
 
 
 if __name__ == '__main__':
