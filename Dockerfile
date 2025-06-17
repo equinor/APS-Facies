@@ -8,12 +8,13 @@ ENV TRUNCATION_RULES=src/stores/truncation-rules/templates/truncationRules.json
 
 FROM bitnami/nginx:1.27.3-debian-12-r5 AS nginx
 
-FROM ${RMS_IMAGE} AS python
+FROM ${RMS_IMAGE} AS base
 # RMS 12.0 and earlier uses Python 3.6.1, but it is so old that I was unable to update the CA certificates,
 # and thus unable to download any packages
 ENV XDG_CACHE_HOME=/var/cahce
 
 WORKDIR /code
+FROM base AS python
 ENV PATH="/root/.local/bin:$PATH"
 
 COPY .tool-versions ./
@@ -43,42 +44,21 @@ COPY aps/__init__.py ./aps/
 
 
 FROM python AS truncation-rules
-RUN <<EOF
-#!/usr/bin/env bash
-
-OS_ID="$(grep '^ID=' /etc/os-release | tr -d 'ID=' | tr -d '"')"
-if [[ $OS_ID == 'debian' ]]; then
-  install() {
-    apt-get update -y
-    apt-get install -y $@
-  }
-elif [[ $OS_ID == 'centos' ]]; then
-  install() {
-    yum update -y
-    yum install -y $@
-  }
-elif [[ $OS_ID == 'rhel' ]]; then
-  install () {
-    dnf update -y
-    dnf install -y $@
-  }
-else
-  echo "Unsupported OS ($OS_ID)" >/dev/stderr
-  exit 1
-fi
-install make
-EOF
+SHELL ["/bin/bash", "-euo", "pipefail", "-c"]
+RUN curl https://mise.run | MISE_INSTALL_PATH=/usr/local/bin/mise sh
 
 COPY --from=aps /code/aps/ aps/
 
+COPY .mise-tasks .mise-tasks/
+COPY mise.toml ./
 COPY bin/parse-truncation-rule-templates.py ./bin/
 COPY examples/truncation_settings.dat ./examples/
-COPY Makefile .
 
-RUN mkdir -p \
-    aps/tests/integration \
-    gui/src/stores/truncation-rules/templates
-RUN roxenv make generate-truncation-rules
+ENV MISE_AUTO_INSTALL=false
+RUN <<EOF
+mise trust
+roxenv mise tasks run generate-truncation-rules
+EOF
 
 FROM node AS install
 

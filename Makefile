@@ -25,8 +25,6 @@ CODE_DIR ?= $(shell pwd)
 BIN_DIR := $(CODE_DIR)/bin
 PYTHONPATH := $(CODE_DIR):$(PYTHONPATH)
 SOURCE_DIR := $(CODE_DIR)/aps
-BUILD_DIR := $(CODE_DIR)/build
-PYTHON_API_DIR := $(SOURCE_DIR)/api
 REMOVE_APS_GUI_TEMP_FOLDER := $(EMPTY)
 ifeq ($(MODE),production)
 REMOVE_APS_GUI_TEMP_FOLDER := --move
@@ -36,19 +34,6 @@ GIT_VERSION  = "$(shell git --version)"
 
 # Time stamp format YY daynumber_in_year hour minutes
 BUILD_NUMBER := $(shell date "+%y%j%H%M")
-ROXENV := roxenv
-HAS_ROXENV := $(shell command -v $(ROXENV) 2>/dev/null)
-ZIP := $(ROXENV) --zip
-ifndef HAS_ROXENV
-ZIP := zip --recurse-paths $(REMOVE_APS_GUI_TEMP_FOLDER) -9
-ROXENV := $(EMPTY)
-endif
-
-ALLWAYS_INSTALL_WEB_DEPENDENCIES ?= yes
-PACKAGE.JSON := $(EMPTY)
-ifeq ($(ALLWAYS_INSTALL_WEB_DEPENDENCIES),yes)
-PACKAGE.JSON := package.json
-endif
 
 RMS_DIR := $(CODE_DIR)/.rms
 RMS_PROJECT ?= $(RMS_DIR)/testAPSWorkflow_new.rms11.0.0
@@ -71,15 +56,9 @@ endif
 APS_VERSION_FROM_GIT =  $(shell git describe --match='v*' --abbrev=0 --tags)
 APS_VERSION = $(shell echo $(APS_VERSION_FROM_GIT) | $(SED) -e "s/v//g")
 APS_FULL_VERSION = $(APS_VERSION).$(BUILD_NUMBER)
-LATEST_COMMIT_HASH = $(shell git rev-parse --short HEAD)
 LATEST_COMMIT_HASH_LONG = $(shell git rev-parse HEAD)
 
-PLUGIN_NAME := aps_gui
-PLUGIN_BIN = $(PLUGIN_NAME).$(APS_FULL_VERSION).plugin
-PLUGIN_DIR := $(BUILD_DIR)/$(PLUGIN_NAME)
-DEPLOY_VERSION_PATH = $(CODE_DIR)/DEPLOY_VERSION.txt
 WEB_DIR := $(CODE_DIR)/gui
-TRUNCATION_RULE_VISUALIZATIONS := $(WEB_DIR)/public/truncation-rules
 EXAMPLES_FOLDER := $(CODE_DIR)/examples
 TEST_FOLDER := $(SOURCE_DIR)/tests
 AUXILLARY := $(CODE_DIR)/auxillary
@@ -101,10 +80,6 @@ else
 VUE_APP_API_URL := $(VUE_APP_APS_PROTOCOL)://$(VUE_APP_APS_SERVER):$(VUE_APP_APS_API_PORT)
 VUE_APP_GUI_URL := $(VUE_APP_APS_PROTOCOL)://$(VUE_APP_APS_SERVER):$(VUE_APP_APS_GUI_PORT)
 endif
-
-UI.PY := $(PYTHON_API_DIR)/ui.py
-MAIN.PY := $(PYTHON_API_DIR)/main.py
-INFO.XML := $(WEB_DIR)/static/info.xml
 
 MKDIR := mkdir -p
 
@@ -133,110 +108,6 @@ NO_COLOR = \033[0m
 # Build / clean / run
 build: clean-all init
 
-build-stable-gui:
-	cat $(WEB_DIR)/public/CHANGELOG.md | grep $(APS_VERSION) >/dev/null || { \
-	    echo "When building a stable version, the changelog MUST have some information of this version ($(APS_VERSION))." ; \
-	    exit 1 ; \
-	}
-	make build-gui VUE_APP_BUILD_MODE=stable
-
-build-gui: clean-build build-front-end compile-files-for-plugin
-	cd $(BUILD_DIR) && \
-	$(ZIP) $(PLUGIN_BIN) $(PLUGIN_NAME)
-	mv $(BUILD_DIR)/$(PLUGIN_BIN) $(CODE_DIR) 2>/dev/null || mv $(BUILD_DIR)/zip.zip $(CODE_DIR)/$(PLUGIN_BIN)
-	echo "$(PLUGIN_BIN)" > $(DEPLOY_VERSION_PATH)
-
-compile-files-for-plugin: gather-python-scripts auxillary-files compile-python-files
-
-gather-python-scripts: copy-python-files __init__.py
-	cp $(UI.PY) $(PLUGIN_DIR)
-	cp $(MAIN.PY) $(PLUGIN_DIR)
-	rm -rf $(PLUGIN_DIR)/aps/tests \
-	       $(PLUGIN_DIR)/aps/api
-
-__init__.py:
-	touch $(PLUGIN_DIR)/__init__.py
-
-compile-python-files: compile-pydist remove-extraneous-files
-
-compile-pydist: move-pydist move-python-files-to-pydist
-
-move-python-files-to-pydist:
-	mv $(PLUGIN_DIR)/aps $(PLUGIN_DIR)/pydist/aps
-	cp $(PLUGIN_DIR)/VERSION $(PLUGIN_DIR)/pydist/aps/toolbox/VERSION
-
-copy-python-files:
-	$(PYTHON) $(BIN_DIR)/gather-python-files.py $(CODE_DIR) $(PLUGIN_DIR)
-	cp $(BIN_DIR)/generate_workflow_blocks.py $(PLUGIN_DIR)
-
-move-pydist:
-	mv $(PLUGIN_DIR)/aps/pydist $(PLUGIN_DIR)
-
-remove-extraneous-files:
-
-clean-build: clean-plugin clean-links clean-build-dir
-
-clean-build-dir:
-	rm -rf $(BUILD_DIR)
-
-clean-plugin:
-	rm -rf $(PLUGIN_DIR) \
-	       $(PLUGIN_DIR).plugin \
-	       $(PLUGIN_DIR).*.plugin
-
-build-front-end: $(PACKAGE.JSON) build-dir generate-truncation-rules _build-front-end copy-changelog.md
-
-_build-front-end:
-	VUE_APP_APS_VERSION="$(APS_VERSION)" \
-	VUE_APP_BUILD_NUMBER="$(BUILD_NUMBER)" \
-	VUE_APP_HASH="$(LATEST_COMMIT_HASH)" \
-	$(YARN) build && \
-	mv $(WEB_DIR)/dist $(PLUGIN_DIR)
-	mkdir -p $(PLUGIN_DIR)/public
-	mv $(PLUGIN_DIR)/truncation-rules $(PLUGIN_DIR)/public
-
-copy-changelog.md:
-	cp $(WEB_DIR)/public/CHANGELOG.md $(PLUGIN_DIR)/CHANGELOG.md
-
-truncation-rule-vislualization-dir:
-	$(MKDIR) $(TRUNCATION_RULE_VISUALIZATIONS)
-	ln -sf $(CODE_DIR)/matplotlibrc $(TRUNCATION_RULE_VISUALIZATIONS)/matplotlibrc
-
-clean-generated-truncation-rules:
-	rm -rf $(TRUNCATION_RULE_VISUALIZATIONS)
-	rm -f  $(WEB_DIR)/src/stores/truncation-rules/templates/truncationRules.json
-
-generate-truncation-rules: generate-truncation-rule-images
-	$(RUN) python3 $(CODE_DIR)/bin/parse-truncation-rule-templates.py $(WEB_DIR)/src/stores/truncation-rules/templates/truncationRules.json
-
-generate-truncation-rule-images: clean-generated-truncation-rules truncation-rule-vislualization-dir
-	cd $(TRUNCATION_RULE_VISUALIZATIONS) && \
-	printf "r\n$(EXAMPLES_FOLDER)/truncation_settings.dat\nm\nf\nsvg\na\nq\nq\n" | \
-	HIDE_TITLE='yes' \
-	DONT_WRITE_OVERVIEW='yes' \
-	WRITE_TO_DIRECTORIES='yes' \
-	$(RUN) python3 $(SOURCE_DIR)/algorithms/setupInteractiveTruncationSetting.py
-	rm -f $(TRUNCATION_RULE_VISUALIZATIONS)/matplotlibrc
-
-build-dir:
-	$(MKDIR) $(BUILD_DIR)
-
-auxillary-files: VERSION COMMIT STUB_VERSION
-	cp $(INFO.XML) $(PLUGIN_DIR)
-
-VERSION:
-	echo $(APS_FULL_VERSION) > $(PLUGIN_DIR)/VERSION
-	echo $(CURRENT_OS)
-	echo $(SED)
-	echo $(GIT_VERSION)
-	echo $(APS_VERSION_FROM_GIT)
-
-COMMIT:
-	echo $(LATEST_COMMIT_HASH_LONG) > $(PLUGIN_DIR)/COMMIT
-
-STUB_VERSION:
-	cat $(CODE_DIR)/bin/STUB_VERSION > $(PLUGIN_DIR)/STUB_VERSION
-
 mock-VERSION:
 	echo $(APS_FULL_VERSION) > $(SOURCE_DIR)/api/VERSION
 	ln -sf $(SOURCE_DIR)/api/VERSION $(CODE_DIR)/VERSION
@@ -249,13 +120,13 @@ mock-STUB_VERSION:
 	cat $(CODE_DIR)/bin/STUB_VERSION > $(SOURCE_DIR)/api/STUB_VERSION
 	ln -sf $(SOURCE_DIR)/api/STUB_VERSION $(CODE_DIR)/STUB_VERSION
 
-init: init-workflow package.json local.settings.json dotenv generate-truncation-rules
+init: init-workflow package.json local.settings.json dotenv
 
 init-workflow: links generate-workflow-files
 
 init-local-develop: local.settings.json dotenv docker-compose
 
-docker-compose: generate-truncation-rules dotenv
+docker-compose: dotenv
 
 local.settings.json: local-project-location
 	echo "$$LOCAL_SETTINGS_JSON" > $(CODE_DIR)/local.settings.json
@@ -301,7 +172,6 @@ generate-workflow-files: $(CREATE_WORKFLOW_DIR)
 	$(PYTHON) $(BIN_DIR)/generate_workflow_blocks.py $(CODE_DIR) $(WORKFLOWS_TO_PROJECT)
 
 clean: clean-links clean-workflow-blocks
-	rm -rf $(BUILD_DIR)
 	rm -f $(CODE_DIR)/build.txt
 
 clean-workflow-blocks:

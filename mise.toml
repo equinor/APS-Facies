@@ -1,2 +1,16 @@
+[tasks."dependencies:python"]
+run = "uv sync --no-install-project"
+sources = ["pyproject.toml", "uv.lock"]
+outputs = [".venv/"]
+
+[tasks."dependencies:node"]
+run = "yarn install --frozen-lockfile"
+dir = "gui"
+sources = ["gui/package.json", "gui/yarn.lock"]
+outputs = ["gui/node_modules/"]
+
+[tasks.dependencies]
+depends = ["dependencies:python", "dependencies:node"]
+
 [settings]
 python.uv_venv_auto = true

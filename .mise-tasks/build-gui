@@ -1,0 +1,132 @@
+#!/usr/bin/env bash
+set -euo pipefail
+#MISE depends=["dependencies", "generate-truncation-rules"]
+
+if [[ ${TRACE:-} == '1' ]]; then
+    set -x
+fi
+
+function aps_version() {
+    git describe --match='v*' --abbrev=0 --tags | tr -d '^v'
+}
+
+function compile_files_for_plugin() {
+    local BUILD_NUMBER="$1"
+    local PLUGIN_DIR="$2"
+    python3 "$MISE_PROJECT_ROOT/bin/gather-python-files.py" "$MISE_PROJECT_ROOT" "$PLUGIN_DIR"
+    cp "$MISE_PROJECT_ROOT/bin/generate_workflow_blocks.py" "$PLUGIN_DIR"
+    touch "$PLUGIN_DIR/__init__.py"
+
+    for file in "ui.py" "main.py"; do
+        cp "$MISE_PROJECT_ROOT/aps/api/$file" "$PLUGIN_DIR"
+    done
+    rm -rf \
+        "$PLUGIN_DIR/aps/tests" \
+        "$PLUGIN_DIR/aps/api"
+
+    # Auxiliary files
+    echo "$(aps_version).$BUILD_NUMBER" >"$PLUGIN_DIR/VERSION"
+    git rev-parse HEAD >"$PLUGIN_DIR/COMMIT"
+    cp "$MISE_PROJECT_ROOT/bin/STUB_VERSION" "$PLUGIN_DIR/VERSION_STUB"
+    cp "$MISE_PROJECT_ROOT/gui/static/info.xml" "$PLUGIN_DIR"
+
+    # Adjust pydist / 'dependencies'
+    mv "$PLUGIN_DIR/aps/pydist" "$PLUGIN_DIR"
+    mv "$PLUGIN_DIR/aps" "$PLUGIN_DIR/pydist/aps"
+    cp "$PLUGIN_DIR/VERSION" "$PLUGIN_DIR/pydist/aps/toolbox/VERSION"
+}
+
+function compile_gui_client_for_plugin() {
+    local build_mode="$1"
+    local BUILD_NUMBER="$2"
+    local PLUGIN_DIR="$3"
+
+    rm -rf "$PLUGIN_DIR"
+    mkdir -p "$PLUGIN_DIR"
+
+    pushd "$MISE_PROJECT_ROOT/gui" >/dev/null
+
+    mise tasks run generate-truncation-rules
+
+    VUE_APP_APS_VERSION="$(aps_version)" \
+    VUE_APP_BUILD_NUMBER="$BUILD_NUMBER" \
+    VUE_APP_HASH="$(git rev-parse --short HEAD)" \
+    VUE_APP_BUILD_MODE="$build_mode" \
+        yarn build
+
+    cp -r dist/* "$PLUGIN_DIR"
+    mkdir -p "$PLUGIN_DIR/public"
+    mv "$PLUGIN_DIR/truncation-rules" "$PLUGIN_DIR/public"
+
+    cp public/CHANGELOG.md "$PLUGIN_DIR/public/"
+}
+
+function package_plugin_for_distribution() {
+    local PLUGIN_NAME="$1"
+    local BUILD_DIR="$2"
+    local BUILD_NUMBER="$3"
+
+    local FULL_PLUGIN_NAME
+    FULL_PLUGIN_NAME="$PLUGIN_NAME.$(aps_version).$BUILD_NUMBER.plugin"
+    pushd "$BUILD_DIR" >/dev/null || exit 1
+    if [[ $(command -v rmsenv) ]]; then
+        function _zip() {
+            roxenv --zip "$@"
+        }
+    else
+        function _zip() {
+            zip --recurse-paths -9 "$@"
+        }
+    fi
+    _zip "$FULL_PLUGIN_NAME" "$PLUGIN_NAME"
+    mv "$BUILD_DIR/$FULL_PLUGIN_NAME" "$MISE_PROJECT_ROOT" 2>/dev/null || mv "$BUILD_DIR/zip.zip" "$MISE_PROJECT_ROOT/$FULL_PLUGIN_NAME"
+    echo "$FULL_PLUGIN_NAME" >"$MISE_PROJECT_ROOT/DEPLOY_VERSION.txt"
+}
+
+function build() {
+    local build_mode="$1"
+    local PLUGIN_NAME='aps_gui'
+    local BUILD_DIR="${TMPDIR:-${TMP:-/tmp}}/APS-GUI.build/$RANDOM"
+    local PLUGIN_DIR="$BUILD_DIR/$PLUGIN_NAME"
+    local BUILD_NUMBER
+    # Time stamp format YY daynumber_in_year hour minutes
+    BUILD_NUMBER=$(date "+%y%j%H%M")
+
+    compile_gui_client_for_plugin "$build_mode" "$BUILD_NUMBER" "$PLUGIN_DIR"
+
+    compile_files_for_plugin "$BUILD_NUMBER" "$PLUGIN_DIR"
+
+    package_plugin_for_distribution "$PLUGIN_NAME" "$BUILD_DIR" "$BUILD_NUMBER"
+}
+
+function main() {
+    local BUILD_MODE='beta'
+    while [[ $# -gt 0 ]]; do
+        case "$1" in
+        --help | -h)
+            echo "Usage: $0 [--help|-h]"
+            exit 0
+            ;;
+        --release)
+            BUILD_MODE='stable'
+            ;;
+        *)
+            echo "Unknown option: $1"
+            exit 1
+            ;;
+        esac
+        shift
+    done
+
+    if [[ $BUILD_MODE == 'stable' ]]; then
+        local APS_VERSION
+        APS_VERSION=$(aps_version)
+        grep "$APS_VERSION" "$MISE_PROJECT_ROOT/gui/public/CHANGELOG.md" >/dev/null || {
+            echo "When building a stable version, the changelog MUST have some information of this version ($APS_VERSION)."
+            exit 1
+        }
+    fi
+    build "$BUILD_MODE"
+}
+
+main "$@"
