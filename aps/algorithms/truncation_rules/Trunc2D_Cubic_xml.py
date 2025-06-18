@@ -11,6 +11,7 @@ from aps.algorithms.APSMainFaciesTable import APSMainFaciesTable
 from aps.algorithms.truncation_rules.Trunc2D_Base_xml import Trunc2D_Base
 from aps.utils.constants.simple import Debug
 from aps.utils.containers import FmuAttribute
+from aps.utils.types import CubicTruncationRuleStructureType, OverlayGroupType
 from aps.utils.xmlUtils import getKeyword
 
 """
@@ -1176,10 +1177,8 @@ class Trunc2D_Cubic(Trunc2D_Base):
         faciesInZone: List[str],
         gaussFieldsInZone: List[str],
         alphaFieldNameForBackGroundFacies: List[str],
-        truncStructureList: List[Union[str, List[Union[str, float, int]]]],
-        overlayGroups: Optional[
-            List[List[Union[List[List[Union[str, float]]], List[str]]]]
-        ] = None,
+        truncStructureList: CubicTruncationRuleStructureType,
+        overlayGroups: Optional[OverlayGroupType] = None,
         keyResolution: int = 100,
         debug_level: Debug = Debug.OFF,
     ) -> None:

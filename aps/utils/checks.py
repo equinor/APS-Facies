@@ -6,6 +6,7 @@ from typing import Union
 import numpy as np
 
 from aps.utils.constants.simple import Debug, VariogramType
+from aps.utils.types import FilePath
 
 
 class NormalisationError(ValueError):
@@ -181,8 +182,8 @@ def check_probability_normalisation(
 
 
 def compare(
-    source: str,
-    reference: str,
+    source: FilePath,
+    reference: FilePath,
     verbose: bool = True,
 ) -> bool:
     check = cmp(reference, source)

@@ -1,5 +1,13 @@
+from __future__ import annotations
+
 from pathlib import Path
-from typing import NewType, Tuple, Union
+from typing import Dict, List, NewType, Tuple, Union
+
+try:
+    from typing import Literal, TypeAlias, Unpack
+except ImportError:
+    from typing_extensions import Literal, TypeAlias, Unpack
+
 
 FilePath = Union[Path, str]
 
@@ -27,9 +35,9 @@ HyperbolicTrendParameters = Tuple[float, float, float, float, float, float]
 
 ModelFile = NewType('ModelFile', str)
 ProbabilityLogSpecificationFile = NewType('ProbabilityLogSpecificationFile', str)
-OutputModelFile = NewType('OutputModelFile', FilePath)
-GlobalVariablesFile = NewType('GlobalVariablesFile', FilePath)
-RmsProjectDataFile = NewType('RmsProjectDataFile', FilePath)
+OutputModelFile = NewType('OutputModelFile', Path)
+GlobalVariablesFile = NewType('GlobalVariablesFile', Path)
+RmsProjectDataFile = NewType('RmsProjectDataFile', Path)
 TemporaryGaussianSimulation = NewType('TemporaryGaussianSimulation', str)
 FmuVariablesFile = NewType('FmuVariablesFile', str)
 TaggedVariableFile = NewType('TaggedVariableFile', str)
@@ -38,7 +46,7 @@ BlockedWellSetName = NewType('BlockedWellSetName', str)
 FaciesLogName = NewType('FaciesLogName', str)
 WorkflowName = NewType('WorkflowName', str)
 JobName = NewType('JobName', str)
-SeedLogFile = NewType('SeedLogFile', FilePath)
+SeedLogFile = NewType('SeedLogFile', Path)
 
 
 ProjectName = NewType('ProjectName', str)
@@ -66,3 +74,15 @@ ZoneName = NewType('ZoneName', str)
 RegionNumber = NewType('RegionNumber', int)
 
 Average = NewType('Average', float)
+
+FaciesTableType: TypeAlias = Dict[int, str]
+FaciesListType: TypeAlias = NewType('FaciesListType', List[str])
+GaussianFieldsListType: TypeAlias = NewType('GaussianFieldsListType', List[str])
+
+OverlayGroupType: TypeAlias = Tuple[List[Tuple[str, str, float, float]], List[str]]
+
+
+NonCubicTruncationRuleStructureType: TypeAlias = List[Tuple[str, float, float, bool]]
+CubicTruncationRuleStructureType: TypeAlias = Tuple[
+    Union[Literal['H', 'V'], str], Unpack[Tuple[Tuple[str, float, int, int, int], ...]]
+]

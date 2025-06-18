@@ -3,7 +3,7 @@
 import filecmp
 import xml.etree.ElementTree as ET
 from pathlib import Path
-from typing import Dict, List, Tuple, Union
+from typing import Dict, List, Tuple
 from xml.etree.ElementTree import Element
 
 import pytest
@@ -19,8 +19,12 @@ from aps.tests.helpers import (
     getFaciesInTruncRule,
     truncMapPolygons,
 )
-from aps.tests.types import FaciesTableType, OverlayGroupType
 from aps.utils.constants.simple import Debug
+from aps.utils.types import (
+    CubicTruncationRuleStructureType,
+    FaciesTableType,
+    OverlayGroupType,
+)
 from aps.utils.xmlUtils import prettify
 
 
@@ -84,8 +88,8 @@ def createTrunc(
     faciesInZone: List[str],
     gaussFieldsInZone: List[str],
     gaussFieldsForBGFacies: List[str],
-    truncStructure: List[Union[str, List[Union[str, float, int]]]],
-    overlayGroups: List[List[Union[List[List[Union[str, float]]], List[str]]]],
+    truncStructure: CubicTruncationRuleStructureType,
+    overlayGroups: OverlayGroupType,
     keyResolution: int,
     debug_level: Debug = Debug.OFF,
 ) -> Trunc2D_Cubic:
@@ -109,13 +113,13 @@ def createTrunc(
 
 
 def initialize_write_read(
-    outputModelFileName1: Path,
-    outputModelFileName2: Path,
+    outputModelFileName1: str,
+    outputModelFileName2: str,
     fTable: Dict[int, str],
     faciesInZone: List[str],
     gaussFieldsInZone: List[str],
     gaussFieldsForBGFacies: List[str],
-    truncStructure: Tuple[str, *Tuple[str, float, int, int, int]],
+    truncStructure: CubicTruncationRuleStructureType,
     overlayGroups: OverlayGroupType,
     keyResolution: int,
     debug_level: Debug = Debug.OFF,
@@ -723,7 +727,7 @@ def test_Trunc2DCubic(
     case_number: int,
     facies_table: FaciesTableType,
     facies_in_zone: List[str],
-    truncation_rule: Tuple[str, *Tuple[str, float, int, int, int]],
+    truncation_rule: CubicTruncationRuleStructureType,
     facies_in_truncation_rule: List[str],
     gaussian_fields_in_zone: List[str],
     gaussian_fields_for_background_facies: List[str],

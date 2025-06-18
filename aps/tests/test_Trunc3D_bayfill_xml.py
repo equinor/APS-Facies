@@ -19,8 +19,8 @@ from aps.tests.helpers import (
     truncMapPolygons,
     writePolygons,
 )
-from aps.tests.types import FaciesListType, FaciesTableType, GaussianFieldsListType
 from aps.utils.constants.simple import Debug
+from aps.utils.types import FaciesListType, FaciesTableType, GaussianFieldsListType
 from aps.utils.xmlUtils import prettify
 
 

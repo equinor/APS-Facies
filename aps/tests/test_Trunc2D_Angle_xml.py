@@ -3,7 +3,7 @@
 import filecmp
 import xml.etree.ElementTree as ET
 from pathlib import Path
-from typing import List, Tuple, TypeAlias
+from typing import List
 from xml.etree.ElementTree import Element
 
 import numpy as np
@@ -21,16 +21,15 @@ from aps.tests.helpers import (
     getFaciesInTruncRule,
     truncMapPolygons,
 )
-from aps.tests.types import (
+from aps.utils.constants.simple import Debug
+from aps.utils.types import (
     FaciesListType,
     FaciesTableType,
     GaussianFieldsListType,
+    NonCubicTruncationRuleStructureType,
     OverlayGroupType,
 )
-from aps.utils.constants.simple import Debug
 from aps.utils.xmlUtils import prettify
-
-NonCubicTruncationRuleStructureType: TypeAlias = List[Tuple[str, float, float, bool]]
 
 
 def interpretXMLModelFileAndWrite(

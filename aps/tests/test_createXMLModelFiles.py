@@ -31,7 +31,6 @@ from aps.tests.constants import (
     VERY_VERBOSE_DEBUG,
     ZONE_PARAM_NAME,
 )
-from aps.tests.types import FaciesTableType, OverlayGroupType
 from aps.utils.checks import compare
 from aps.utils.constants.simple import (
     Debug,
@@ -39,6 +38,12 @@ from aps.utils.constants.simple import (
     TransformType,
     TrendType,
     VariogramType,
+)
+from aps.utils.types import (
+    CubicTruncationRuleStructureType,
+    FaciesTableType,
+    NonCubicTruncationRuleStructureType,
+    OverlayGroupType,
 )
 
 
@@ -134,7 +139,9 @@ class ZoneDescription(TypedDict, total=False):
     # Truncation rule
     truncType: str
     alphaFieldNameForBackGroundFacies: List[str]
-    truncStructureList: Union[...]  # Truncation structure
+    truncStructureList: Union[
+        NonCubicTruncationRuleStructureType, CubicTruncationRuleStructureType
+    ]
     overlayGroups: List[OverlayGroupType]
     useConstTruncParam: bool
     faciesInTruncRule: List[str]
@@ -502,7 +509,7 @@ def aps_model(
                     simBoxThickness=4.0,
                     # Facies prob for zone
                     faciesInZone=['F1', 'F2'],
-                    useConstProb=1,
+                    useConstProb=True,
                     faciesProbList=[0.4, 0.6],
                     # Gauss field parameters. One entry in list for each gauss field
                     gaussFieldsInZone=['GRF1', 'GRF2'],
@@ -520,7 +527,7 @@ def aps_model(
                     dipVariogramAnglesFmuUpdatable=[False, False],
                     powerFmuUpdatable=[False, False],
                     # Trend parameters. One entry in list for each gauss field
-                    useTrend=[1, 0],
+                    useTrend=[True, False],
                     relStdDev=[0.05, 0.0],
                     relStdDevFmuUpdatable=[True, True],
                     azimuthAngle=[125.0, 0.0],
@@ -539,7 +546,7 @@ def aps_model(
                         ['F2', 1.0, 2, 0, 0],
                     ],
                     overlayGroups=[],
-                    useConstTruncParam=1,
+                    useConstTruncParam=True,
                     sf_value=0.0,
                     sf_name=None,
                     ysf=0.0,
@@ -561,7 +568,7 @@ def aps_model(
                     simBoxThickness=4.0,
                     # Facies prob for zone
                     faciesInZone=['F1', 'F2'],
-                    useConstProb=1,
+                    useConstProb=True,
                     faciesProbList=[0.4, 0.6],
                     # Gauss field parameters. One entry in list for each gauss field
                     gaussFieldsInZone=['GRF1', 'GRF2'],
@@ -579,7 +586,7 @@ def aps_model(
                     dipVariogramAnglesFmuUpdatable=[False, False],
                     powerFmuUpdatable=[False, False],
                     # Trend parameters. One entry in list for each gauss field
-                    useTrend=[1, 0],
+                    useTrend=[True, False],
                     relStdDev=[0.05, 0.0],
                     relStdDevFmuUpdatable=[True, True],
                     azimuthAngle=[125.0, 0.0],
@@ -598,7 +605,7 @@ def aps_model(
                         ['F2', 1.0, 2, 0, 0],
                     ],
                     overlayGroups=[],
-                    useConstTruncParam=1,
+                    useConstTruncParam=True,
                     sf_value=0.0,
                     sf_name=None,
                     ysf=0.0,
@@ -612,7 +619,7 @@ def aps_model(
                     simBoxThickness=12.0,
                     # Facies prob for zone
                     faciesInZone=['F3', 'F1', 'F2'],
-                    useConstProb=0,
+                    useConstProb=False,
                     faciesProbList=['F3_prob', 'F1_prob', 'F2_prob'],
                     # Gauss field parameters. One entry in list for each gauss field
                     gaussFieldsInZone=['GRF3', 'GRF4', 'GRF5'],
@@ -630,7 +637,7 @@ def aps_model(
                     dipVariogramAnglesFmuUpdatable=[True, False, True],
                     powerFmuUpdatable=[True, False, True],
                     # Trend parameters. One entry in list for each gauss field
-                    useTrend=[0, 1, 0],
+                    useTrend=[False, True, False],
                     relStdDev=[0, 0.05, 0],
                     relStdDevFmuUpdatable=[True, True, True],
                     azimuthAngle=[0.0, 125.0, 0.0],
@@ -665,7 +672,7 @@ def aps_model(
                         ['F3', 45.0, 1.0, False],
                     ],
                     overlayGroups=[[[['GRF5', 'F2', 1.0, 0.5]], ['F1', 'F3']]],
-                    useConstTruncParam=1,
+                    useConstTruncParam=True,
                     grid_layouts=['TopConform', 'TopConform', 'TopConform'],
                     debug_level=NO_VERBOSE_DEBUG,
                 ),
@@ -685,7 +692,7 @@ def aps_model(
                     simBoxThickness=4.0,
                     # Facies prob for zone
                     faciesInZone=['F1', 'F2', 'F5', 'F7'],
-                    useConstProb=1,
+                    useConstProb=True,
                     faciesProbList=[0.4, 0.5, 0.03, 0.07],
                     # Gauss field parameters. One entry in list for each gauss field
                     gaussFieldsInZone=['GRF6', 'GRF7', 'GRF8', 'GRF9'],
@@ -708,7 +715,7 @@ def aps_model(
                     dipVariogramAnglesFmuUpdatable=[True, True, True, True],
                     powerFmuUpdatable=[True, True, True, True],
                     # Trend parameters. One entry in list for each gauss field
-                    useTrend=[1, 0, 0, 0],
+                    useTrend=[True, False, False, False],
                     relStdDev=[0.05, 0, 0, 0],
                     relStdDevFmuUpdatable=[True, True, True, True],
                     azimuthAngle=[125.0, 0.0, 0.0, 0.0],
@@ -749,7 +756,7 @@ def aps_model(
                         [[['GRF8', 'F5', 1.0, 0.0]], ['F1']],
                         [[['GRF9', 'F7', 1.0, 0.8]], ['F2']],
                     ],
-                    useConstTruncParam=1,
+                    useConstTruncParam=True,
                     grid_layouts=[
                         'TopConform',
                         'TopConform',
@@ -773,7 +780,7 @@ def aps_model(
                     simBoxThickness=4.0,
                     # Facies prob for zone
                     faciesInZone=['F1', 'F2', 'F5', 'F7'],
-                    useConstProb=1,
+                    useConstProb=True,
                     faciesProbList=[0.4, 0.5, 0.03, 0.07],
                     # Gauss field parameters. One entry in list for each gauss field
                     gaussFieldsInZone=['GRF6', 'GRF7', 'GRF8', 'GRF9'],
@@ -796,7 +803,7 @@ def aps_model(
                     dipVariogramAnglesFmuUpdatable=[True, True, True, True],
                     powerFmuUpdatable=[True, True, True, True],
                     # Trend parameters. One entry in list for each gauss field
-                    useTrend=[1, 0, 0, 0],
+                    useTrend=[True, False, False, False],
                     relStdDev=[0.05, 0, 0, 0],
                     relStdDevFmuUpdatable=[True, True, True, True],
                     azimuthAngle=[125.0, 0.0, 0.0, 0.0],
@@ -837,7 +844,7 @@ def aps_model(
                         [[['GRF8', 'F5', 1.0, 0.0]], ['F1']],
                         [[['GRF9', 'F7', 1.0, 0.8]], ['F2']],
                     ],
-                    useConstTruncParam=1,
+                    useConstTruncParam=True,
                     grid_layouts=[
                         'TopConform',
                         'TopConform',
@@ -852,7 +859,7 @@ def aps_model(
                     simBoxThickness=12.0,
                     # Facies prob for zone
                     faciesInZone=['F3', 'F1', 'F2', 'F5', 'F6', 'F7'],
-                    useConstProb=0,
+                    useConstProb=False,
                     faciesProbList=[
                         'F3_prob',
                         'F1_prob',
@@ -882,7 +889,7 @@ def aps_model(
                     dipVariogramAnglesFmuUpdatable=[True, True, True, True],
                     powerFmuUpdatable=[True, True, True, True],
                     # Trend parameters. One entry in list for each gauss field
-                    useTrend=[1, 0, 1, 0],
+                    useTrend=[True, False, True, False],
                     relStdDev=[0.05, 0, 0.03, 0],
                     relStdDevFmuUpdatable=[True, True, True, True],
                     azimuthAngle=[125.0, 0.0, 90.0, 0.0],
@@ -924,7 +931,7 @@ def aps_model(
                         [[['GRF8', 'F6', 1.0, 0.5]], ['F1', 'F3']],
                         [[['GRF9', 'F7', 1.0, 0.7]], ['F2', 'F5']],
                     ],
-                    useConstTruncParam=1,
+                    useConstTruncParam=True,
                     grid_layouts=[
                         'TopConform',
                         'TopConform',
@@ -949,7 +956,7 @@ def aps_model(
                     simBoxThickness=4.0,
                     # Facies prob for zone
                     faciesInZone=['F1', 'F2', 'F5', 'F7', 'F3'],
-                    useConstProb=1,
+                    useConstProb=True,
                     faciesProbList=[0.4, 0.4, 0.03, 0.07, 0.1],
                     # Gauss field parameters. One entry in list for each gauss field
                     gaussFieldsInZone=['GRF6', 'GRF7', 'GRF8', 'GRF9'],
@@ -972,7 +979,7 @@ def aps_model(
                     dipVariogramAnglesFmuUpdatable=[True, False, True, False],
                     powerFmuUpdatable=[True, False, True, False],
                     # Trend parameters. One entry in list for each gauss field
-                    useTrend=[1, 0, 0, 0],
+                    useTrend=[True, False, False, False],
                     relStdDev=[0.05, 0, 0, 0],
                     relStdDevFmuUpdatable=[True, True, True, True],
                     azimuthAngle=[125.0, 0.0, 0.0, 0.0],
@@ -1007,7 +1014,7 @@ def aps_model(
                     sf_value=0.65,
                     ysf=0.5,
                     sbhd=0.55,
-                    useConstTruncParam=1,
+                    useConstTruncParam=True,
                     faciesInTruncRule=['F1', 'F2', 'F3', 'F5', 'F7'],
                     grid_layouts=[
                         'TopConform',
@@ -1032,7 +1039,7 @@ def aps_model(
                     simBoxThickness=4.0,
                     # Facies prob for zone
                     faciesInZone=['F1', 'F2', 'F5', 'F7', 'F3'],
-                    useConstProb=1,
+                    useConstProb=True,
                     faciesProbList=[0.4, 0.4, 0.03, 0.07, 0.1],
                     # Gauss field parameters. One entry in list for each gauss field
                     gaussFieldsInZone=['GRF6', 'GRF7', 'GRF8', 'GRF9'],
@@ -1055,7 +1062,7 @@ def aps_model(
                     dipVariogramAnglesFmuUpdatable=[True, False, True, False],
                     powerFmuUpdatable=[True, False, True, False],
                     # Trend parameters. One entry in list for each gauss field
-                    useTrend=[1, 1, 0, 0],
+                    useTrend=[True, True, False, False],
                     relStdDev=[0.05, 0.06, 0, 0],
                     relStdDevFmuUpdatable=[True, True, True, True],
                     azimuthAngle=[125.0, 80.0, 0.0, 0.0],
@@ -1092,7 +1099,7 @@ def aps_model(
                     sf_value=0.65,
                     ysf=0.5,
                     sbhd=0.55,
-                    useConstTruncParam=1,
+                    useConstTruncParam=True,
                     faciesInTruncRule=['F1', 'F2', 'F3', 'F5', 'F7'],
                     grid_layouts=[
                         'TopConform',
@@ -1150,7 +1157,6 @@ def test_should_not_be_able_to_remove_region_parameter_name_when_at_least_one_zo
 
 def test_read_and_write_modelfiles_without_project_name_work_flow_name_and_region_parameter_name(
     output_directory,
-    debug_level=Debug.OFF,
 ):
     _attributes_file = output_directory / 'fmu_attributes.yaml'
 

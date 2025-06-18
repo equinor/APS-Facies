@@ -32,7 +32,7 @@ from aps.algorithms.truncation_rules import (
 from aps.algorithms.truncation_rules.types import TruncationRule
 from aps.utils.constants.simple import Conform, Debug, VariogramType
 from aps.utils.containers import FmuAttribute
-from aps.utils.types import FaciesName
+from aps.utils.types import FaciesName, FilePath
 from aps.utils.xmlUtils import (
     get_region_number,
     getBoolCommand,
@@ -125,7 +125,7 @@ class APSZoneModel:
         ET_Tree: Optional[ElementTree] = None,
         zoneNumber: int = 0,
         regionNumber: int = 0,
-        modelFileName: Optional[str] = None,
+        modelFileName: Optional[FilePath] = None,
         useConstProb: bool = False,
         simBoxThickness: float = 10.0,
         faciesProbObject: Optional[APSFaciesProb] = None,

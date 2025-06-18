@@ -107,7 +107,7 @@ class APSFaciesProb:
     ):
         self.__class_name: str = self.__class__.__name__
         self.__faciesProbForZoneModel: List[FaciesProbability] = []
-        self.__useConstProb: bool = 0
+        self.__useConstProb: bool = False
         self.__debug_level = Debug.OFF
         self.__mainFaciesTable: APSMainFaciesTable = None
         self.__zoneNumber = 0
