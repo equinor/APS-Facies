@@ -1,15 +1,13 @@
 # Set path to the aps code unpacked from the plugin file
 
-import roxar.rms
-
-from zipfile import ZipFile
+import os
+import shutil
+import sys
 from importlib import import_module
 from pathlib import Path
-from functools import wraps
-import os
-import sys
-import shutil
+from zipfile import ZipFile
 
+import roxar.rms
 
 # Define all used environment variables
 APS_ROOT = 'APS_ROOT'

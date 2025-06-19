@@ -11,9 +11,8 @@ use FIELD keywords for petrophysical properties in ERT in Assisted History Match
 # It will be replaced by fmu.tools.rms function copy_rms_param
 
 from aps.toolbox import copy_rms_param_to_ertbox_grid
-from aps.utils.constants.simple import ModelFileFormat
-from aps.utils.methods import get_specification_file, SpecificationType
-from aps.utils.constants.simple import Debug
+from aps.utils.constants.simple import Debug, ModelFileFormat
+from aps.utils.methods import SpecificationType, get_specification_file
 
 
 def run(project, **kwargs):

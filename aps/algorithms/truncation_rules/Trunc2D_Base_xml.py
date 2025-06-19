@@ -1,16 +1,16 @@
 #!/bin/env python
 # -*- coding: utf-8 -*-
-from typing import List, Optional, Tuple, Union, Sized
+import copy
+from typing import List, Optional, Sized, Tuple, Union
 from warnings import warn
 from xml.etree.ElementTree import Element
 
-import copy
 import numpy as np
 
 from aps.algorithms.APSMainFaciesTable import APSMainFaciesTable
+from aps.algorithms.Memoization import RoundOffConstant
 from aps.utils.constants.simple import Debug
 from aps.utils.xmlUtils import getFloatCommand, getKeyword
-from aps.algorithms.Memoization import RoundOffConstant
 
 """
 -----------------------------------------------------------------------
@@ -1385,7 +1385,7 @@ Background facies:
                         & (alphaValue <= self._highAlphaInGroup[groupIndx][i])
                     )
                     set_overlay_facies_index = (
-                        set_overlay_facies_index == False
+                        set_overlay_facies_index == False  # noqa: E712 We are filtering an array
                     ) & inside_truncation_interval
                     index_vector[set_overlay_facies_index] = (
                         self._overlayFaciesIndxInGroup[groupIndx][i]

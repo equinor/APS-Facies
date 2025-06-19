@@ -29,29 +29,28 @@
 # (including the added trends for those that should have trends) is then copied back to the geomodel grid.
 
 from pathlib import Path
-from roxar import Direction
 
 import numpy as np
 import xtgeo
-
-from aps.algorithms.APSModel import APSModel
-from aps.utils.constants.simple import Debug
-from aps.utils.roxar.grid_model import (
-    getContinuous3DParameterValues,
-    GridSimBoxSize,
-    flip_grid_index_origo,
-)
-from aps.utils.roxar.generalFunctionsUsingRoxAPI import (
-    set_continuous_3d_parameter_values_in_zone_region,
-)
-from aps.utils.roxar.progress_bar import APSProgressBar
-from aps.utils.trend import add_trends
-from aps.utils.aps_config import APSConfig
-
 from fmu.tools.rms.copy_rms_param_to_ertbox_grid import (
     extract_values_from_ertbox_grid_to_geogrid_simbox,
 )
 from fmu.tools.rms.zone_mapping import ZoneMapping
+from roxar import Direction
+
+from aps.algorithms.APSModel import APSModel
+from aps.utils.aps_config import APSConfig
+from aps.utils.constants.simple import Debug
+from aps.utils.roxar.generalFunctionsUsingRoxAPI import (
+    set_continuous_3d_parameter_values_in_zone_region,
+)
+from aps.utils.roxar.grid_model import (
+    GridSimBoxSize,
+    flip_grid_index_origo,
+    getContinuous3DParameterValues,
+)
+from aps.utils.roxar.progress_bar import APSProgressBar
+from aps.utils.trend import add_trends
 
 
 def get_field_name(field_name, zone):

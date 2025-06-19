@@ -4,7 +4,6 @@ import pytest
 from aps.algorithms.properties import FmuProperty
 from aps.algorithms.trend import Point3DProperty
 
-
 test_data = [
     ((1, 1, 1), (1, 1, 1), (False, False, False)),
     (((1, 1, 1),), (1, 1, 1), (False, False, False)),

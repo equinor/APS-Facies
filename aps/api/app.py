@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
 from os import environ, urandom
+
 from flask import Flask, jsonify, request
 from flask.cli import main
 from flask_cors import CORS, cross_origin
 
-from aps.utils.parsing import parse_signature
 from aps.api.ui import call
+from aps.utils.parsing import parse_signature
 
 
 def _get_environ(variable_name, default, divider=':'):

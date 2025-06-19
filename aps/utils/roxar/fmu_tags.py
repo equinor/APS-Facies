@@ -1,11 +1,12 @@
 #!/bin/env python
 # -*- coding: utf-8 -*-
 # Python3 script to update APS model file from global IPL include file
-from typing import List, Optional, Union, Tuple
+from typing import List, Optional, Tuple, Union
 
 from roxar import Project
+
 from aps.algorithms.APSModel import APSModel
-from aps.utils.constants.simple import Debug, VariogramType, TrendType
+from aps.utils.constants.simple import Debug, TrendType, VariogramType
 
 
 def get_list_of_aps_uncertainty_parameters(

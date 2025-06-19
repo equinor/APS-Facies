@@ -1,14 +1,14 @@
 #!/bin/env python
 # -*- coding: utf-8 -*-
 
+from aps.algorithms.defineFaciesProbTrend import DefineFaciesProb
+from aps.utils.constants.simple import Debug
 from aps.utils.methods import (
     SpecificationType,
     get_debug_level,
-    get_specification_file,
     get_model_file_format,
+    get_specification_file,
 )
-from aps.algorithms.defineFaciesProbTrend import DefineFaciesProb
-from aps.utils.constants.simple import Debug
 
 
 def run(roxar=None, project=None, **kwargs):

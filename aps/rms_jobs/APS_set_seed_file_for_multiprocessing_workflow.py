@@ -3,9 +3,10 @@
 # This script use both gaussianfft and ROXAR API functions and run simulations sequentially and not in parallel
 import os
 from pathlib import Path
+
 from aps.algorithms.APSModel import APSModel
-from aps.utils.methods import get_run_parameters
 from aps.utils.constants.simple import Debug
+from aps.utils.methods import get_run_parameters
 
 
 def run(roxar=None, project=None, **kwargs):

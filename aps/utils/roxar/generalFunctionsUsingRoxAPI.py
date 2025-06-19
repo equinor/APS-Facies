@@ -2,20 +2,20 @@
 # -*- coding: utf-8 -*-
 import sys
 from pathlib import Path
-
-import numpy as np
 from warnings import warn
 
+import numpy as np
+import roxar
+from fmu.tools.rms.zone_mapping import ZoneMapping
+from roxar import Direction
+
+from aps.utils.constants.simple import Debug
 from aps.utils.exceptions.general import raise_error
 from aps.utils.roxar.grid_model import (
     get3DParameter,
     modify_selected_grid_cells,
     update_code_names,
 )
-from aps.utils.constants.simple import Debug
-from fmu.tools.rms.zone_mapping import ZoneMapping
-import roxar
-from roxar import Direction
 
 
 def get_grid_dimension(project, name):

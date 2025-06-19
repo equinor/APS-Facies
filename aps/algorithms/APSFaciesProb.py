@@ -1,15 +1,14 @@
 # -*- coding: utf-8 -*-
+from typing import List, Optional, Tuple, Union
 from warnings import warn
-
-from typing import List, Optional, Union, Tuple
 from xml.etree.ElementTree import Element
 
 from aps.algorithms.APSMainFaciesTable import APSMainFaciesTable
 from aps.utils.constants.simple import Debug
 from aps.utils.numeric import isNumber
-from aps.utils.types import Probability, FaciesName, ErrorCode, Index, ZoneNumber
-from aps.utils.xmlUtils import getKeyword, getTextCommand
 from aps.utils.records import FaciesProbabilityRecord
+from aps.utils.types import ErrorCode, FaciesName, Index, Probability, ZoneNumber
+from aps.utils.xmlUtils import getKeyword, getTextCommand
 
 
 class FaciesProbability:

@@ -1,7 +1,7 @@
 #!/bin/env python
 # -*- coding: utf-8 -*-
 import copy
-from typing import Optional, List, Union
+from typing import List, Optional, Union
 from warnings import warn
 from xml.etree.ElementTree import Element
 
@@ -13,11 +13,11 @@ from aps.utils.constants.simple import Debug
 from aps.utils.containers import FmuAttribute
 from aps.utils.numeric import isNumber
 from aps.utils.xmlUtils import (
+    createFMUvariableNameForNonCubicTruncation,
     getFloatCommand,
     getKeyword,
     getTextCommand,
     isFMUUpdatable,
-    createFMUvariableNameForNonCubicTruncation,
 )
 
 

@@ -1,8 +1,7 @@
 #!/bin/env python
 # -*- coding: utf-8 -*-
 import copy
-from enum import Enum
-from typing import List, Optional, Union, Tuple
+from typing import List, Optional, Tuple, Union
 from warnings import warn
 from xml.etree.ElementTree import Element, ElementTree
 
@@ -11,36 +10,36 @@ import numpy as np
 from aps.algorithms.APSFaciesProb import APSFaciesProb
 from aps.algorithms.APSGaussModel import (
     APSGaussModel,
-    GaussianFieldName,
     GaussianField,
+    GaussianFieldName,
     Trend,
 )
 from aps.algorithms.APSMainFaciesTable import APSMainFaciesTable
 from aps.algorithms.Memoization import MemoizationItem, RoundOffConstant
+from aps.algorithms.properties import CrossSection
 from aps.algorithms.trend import (
-    Trend3D_hyperbolic,
     Trend3D_elliptic,
+    Trend3D_hyperbolic,
     Trend3D_linear,
-    Trend3D_rms_param,
     Trend3D_rms_map,
+    Trend3D_rms_param,
 )
 from aps.algorithms.truncation_rules import (
     Trunc2D_Angle,
     Trunc2D_Cubic,
     Trunc3D_bayfill,
 )
-from aps.algorithms.properties import CrossSection
-from aps.utils.constants.simple import Debug, VariogramType, Conform
+from aps.algorithms.truncation_rules.types import TruncationRule
+from aps.utils.constants.simple import Conform, Debug, VariogramType
 from aps.utils.containers import FmuAttribute
 from aps.utils.types import FaciesName
-from aps.algorithms.truncation_rules.types import TruncationRule
 from aps.utils.xmlUtils import (
+    get_region_number,
+    getBoolCommand,
     getFloatCommand,
     getIntCommand,
     getKeyword,
     getTextCommand,
-    getBoolCommand,
-    get_region_number,
 )
 
 

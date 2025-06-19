@@ -1,16 +1,15 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 import sys
-
 from argparse import ArgumentParser
 
 from aps.toolbox.bitmap_to_rms import run as run_convert_bitmap_to_rms
 from aps.utils.constants.simple import Debug
 from aps.utils.methods import (
-    get_specification_file,
     SpecificationType,
     get_debug_level,
     get_model_file_format,
+    get_specification_file,
 )
 
 

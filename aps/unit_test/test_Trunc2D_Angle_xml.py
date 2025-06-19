@@ -3,6 +3,7 @@
 import filecmp
 import xml.etree.ElementTree as ET
 from xml.etree.ElementTree import Element
+
 import numpy as np
 
 from aps.algorithms.APSMainFaciesTable import APSMainFaciesTable
@@ -11,18 +12,18 @@ from aps.unit_test.constants import (
     ANGLE_GAUSS_FIELD_FILES,
     FACIES_OUTPUT_FILE,
     FACIES_OUTPUT_FILE_VECTORIZED,
-    OUTPUT_MODEL_FILE_NAME1,
-    OUTPUT_MODEL_FILE_NAME2,
+    KEYRESOLUTION,
     OUT_POLY_FILE1,
     OUT_POLY_FILE2,
+    OUTPUT_MODEL_FILE_NAME1,
+    OUTPUT_MODEL_FILE_NAME2,
     USE_CONST_TRUNC_PARAM,
-    KEYRESOLUTION,
 )
 from aps.unit_test.helpers import (
     apply_truncations,
+    apply_truncations_vectorized,
     getFaciesInTruncRule,
     truncMapPolygons,
-    apply_truncations_vectorized,
 )
 from aps.utils.constants.simple import Debug
 from aps.utils.xmlUtils import prettify

@@ -1,13 +1,14 @@
 #!/bin/env python
 # -*- coding: utf-8 -*-
 
-import xml.etree.ElementTree as ET
 import os
+import xml.etree.ElementTree as ET
 from pathlib import Path
-from typing import Dict, List
+from typing import List
+
 from aps.utils.constants.simple import Debug
 from aps.utils.exceptions.xml import MissingKeyword
-from aps.utils.methods import get_item_from_model_file, get_selected_zones
+from aps.utils.methods import get_selected_zones
 from aps.utils.xmlUtils import getTextCommand
 from aps.utils.ymlUtils import get_text_value, readYml
 
@@ -162,15 +163,15 @@ class BaseDefineFacies:
 
         # Check that all necessary parameters are set
         if self._grid_model_name is None:
-            raise ValueError(f'Missing specification of: grid_model_name')
+            raise ValueError('Missing specification of: grid_model_name')
         if self._zone_parameter_name is None:
-            raise ValueError(f'Missing specification of: zone_parameter_name')
+            raise ValueError('Missing specification of: zone_parameter_name')
         if self._facies_parameter_name is None:
-            raise ValueError(f'Missing specification of: facies_parameter_name')
+            raise ValueError('Missing specification of: facies_parameter_name')
         if self._probability_parameter_name_prefix is None:
-            raise ValueError(f'Missing specification of: prefix')
+            raise ValueError('Missing specification of: prefix')
         if len(self._selected_zone_numbers) == 0:
-            raise ValueError(f'Missing specification of: selected_zones')
+            raise ValueError('Missing specification of: selected_zones')
 
     @property
     def debug_level(self):

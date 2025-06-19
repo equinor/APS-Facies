@@ -3,37 +3,38 @@
 import collections
 import copy
 import xml.etree.ElementTree as ET
-from typing import List, Optional, Tuple, Union, Dict, TYPE_CHECKING
+from typing import TYPE_CHECKING, Dict, List, Optional, Tuple, Union
+
+from fmu.tools.rms.zone_mapping import ZoneMapping
 
 from aps.algorithms.APSMainFaciesTable import APSMainFaciesTable
 from aps.algorithms.APSZoneModel import APSZoneModel
 from aps.algorithms.properties import CrossSection
 from aps.utils.constants.simple import (
-    Debug,
-    TransformType,
     CrossSectionType,
-    GridModelConstants,
+    Debug,
     ExtrapolationMethod,
+    GridModelConstants,
     ProbabilityTolerances,
+    TransformType,
 )
-from aps.utils.exceptions.xml import MissingAttributeInKeyword
 from aps.utils.containers import FmuAttribute
-from aps.utils.numeric import isNumber
-from aps.utils.types import FilePath
-from aps.utils.xmlUtils import (
-    getKeyword,
-    getTextCommand,
-    prettify,
-    minify,
-    get_region_number,
-    create_node,
-)
+from aps.utils.exceptions.xml import MissingAttributeInKeyword
 from aps.utils.io import GlobalVariables, write_string_to_file
+from aps.utils.numeric import isNumber
 from aps.utils.roxar.grid_model import (
     create_zone_parameter,
     find_defined_cells,
 )
-from fmu.tools.rms.zone_mapping import ZoneMapping
+from aps.utils.types import FilePath
+from aps.utils.xmlUtils import (
+    create_node,
+    get_region_number,
+    getKeyword,
+    getTextCommand,
+    minify,
+    prettify,
+)
 
 if TYPE_CHECKING:
     from roxar import Project
@@ -1637,8 +1638,9 @@ class APSModel:
         but grid can be realization dependent and we therefore should ensure that we use the
         simbox thickness for the current realisation of the grid.
         """
-        from aps.utils.roxar.grid_model import get_simulation_box_thickness
         from fmu.tools.rms.zone_mapping import ZoneMapping
+
+        from aps.utils.roxar.grid_model import get_simulation_box_thickness
 
         if debug_level >= Debug.VERBOSE:
             print(f'-- Get simbox thickness for grid model {self.grid_model_name}')

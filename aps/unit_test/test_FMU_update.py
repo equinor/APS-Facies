@@ -1,17 +1,18 @@
 #!/bin/env python
 # -*- coding: utf-8 -*-
 
+import os
 import xml.etree.ElementTree as ET
 from typing import Dict
 
 import pytest
-import os
-from aps.utils.constants.simple import Debug
+
 from aps.rms_jobs.updateAPSModelFromFMU import update_aps_model_from_fmu
 from aps.unit_test.test_createXMLModelFiles import (
-    get_apsmodel_with_no_fmu_markers,
     get_apsmodel_with_all_fmu_markers,
+    get_apsmodel_with_no_fmu_markers,
 )
+from aps.utils.constants.simple import Debug
 
 
 @pytest.fixture(scope='module')

@@ -16,43 +16,42 @@
 ####################################################################
 
 import math
-from typing import Union, List, Tuple, Optional, Dict, Any
+from typing import Any, Dict, List, Optional, Tuple, Union
 from xml.etree.ElementTree import Element
 
 import numpy as np
+from fmu.tools.rms.zone_mapping import ZoneMapping
 
 from aps.algorithms.properties import (
-    make_angle_property,
+    CrossSection,
     FmuProperty,
+    make_angle_property,
     make_lower_bounded_property,
     make_ranged_property,
-    CrossSection,
 )
 from aps.utils.constants.simple import (
-    Debug,
-    OriginType,
-    TrendType,
     CrossSectionType,
+    Debug,
     Direction,
+    OriginType,
     TrendParameter,
+    TrendType,
 )
-
 from aps.utils.containers import FmuAttribute
 from aps.utils.types import (
-    Point3D,
-    SimulationBoxOrigin,
     GaussianFieldName,
     HyperbolicTrendParameters,
+    Point3D,
+    SimulationBoxOrigin,
 )
 from aps.utils.xmlUtils import (
-    getIntCommand,
-    getTextCommand,
     createFMUvariableNameForTrend,
     fmu_xml_element,
     get_fmu_value_from_xml,
     get_origin_type_from_model_file,
+    getIntCommand,
+    getTextCommand,
 )
-from fmu.tools.rms.zone_mapping import ZoneMapping
 
 
 def required_parameters(_type: TrendType) -> List[TrendParameter]:
@@ -463,11 +462,11 @@ class Trend3D:
                 if np.ptp(values_in_selected_cells) < 0.000001:
                     values_in_selected_cells[0] += 1.0
         elif isinstance(self, Trend3D_rms_map):
-            from aps.utils.roxar.sample_map_to_grid import (
-                trend_map_to_grid_param,
-                check_existence_of_map,
-            )
             from aps.utils.roxar.grid_model import getContinuous3DParameterValues
+            from aps.utils.roxar.sample_map_to_grid import (
+                check_existence_of_map,
+                trend_map_to_grid_param,
+            )
 
             if not check_existence_of_map(
                 project, self.trend_map_zone, self.trend_map_name

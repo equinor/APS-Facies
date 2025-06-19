@@ -11,9 +11,9 @@ import xtgeo
 
 from aps.algorithms.APSModel import APSModel
 from aps.algorithms.APSZoneModel import Conform
+from aps.utils.constants.simple import Debug, GridModelConstants
 from aps.utils.exceptions.zone import MissingConformityException
 from aps.utils.fmu import create_get_property, find_zone_range, get_ert_location
-from aps.utils.constants.simple import Debug, GridModelConstants
 from aps.utils.methods import get_debug_level
 from aps.utils.roxar.grid_model import create_zone_parameter
 
@@ -80,7 +80,7 @@ def get_field_name(field_name, zone):
 def run(project, model_file, geo_grid_name=None, load_dir=None, **kwargs):
     if project.current_realisation > 0:
         raise ValueError(
-            f'In RMS models to be used with a FMU loop in ERT,'
+            'In RMS models to be used with a FMU loop in ERT,'
             'the grid and parameters should be shared and realisation = 1'
         )
     aps_model = APSModel(model_file)

@@ -3,14 +3,14 @@ import os
 from os.path import exists
 from pathlib import Path
 from tempfile import NamedTemporaryFile
-from typing import Tuple, Union, List
+from typing import List, Tuple, Union
 from warnings import warn
 
 import numpy as np
 
 from aps.utils.constants.simple import Debug
-from aps.utils.roxar import running_in_batch_mode
 from aps.utils.methods import get_workflow_name
+from aps.utils.roxar import running_in_batch_mode
 from aps.utils.ymlUtils import readYml
 
 

@@ -1,19 +1,19 @@
 #!/bin/env python
 # -*- coding: utf-8 -*-
 from functools import wraps
-from typing import Optional, Union, Tuple, Any, Callable, List
+from typing import Any, Callable, List, Optional, Tuple, Union
 from xml.dom import minidom
 from xml.etree import ElementTree as ET
 from xml.etree.ElementTree import Element
 
-from aps.utils.exceptions.xml import (
-    ReadingXmlError,
-    LessThanExpected,
-    MoreThanExpected,
-    MissingRequiredValue,
-)
 from aps.utils.constants.simple import OriginType
 from aps.utils.containers import FmuAttribute
+from aps.utils.exceptions.xml import (
+    LessThanExpected,
+    MissingRequiredValue,
+    MoreThanExpected,
+    ReadingXmlError,
+)
 from aps.utils.types import GaussianFieldName
 
 

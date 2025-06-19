@@ -1,7 +1,6 @@
-from aps.utils.fmu import fmu_aware_model_file
-from aps.utils.constants.simple import Debug
 from aps.algorithms.APSModel import APSModel
-
+from aps.utils.constants.simple import Debug
+from aps.utils.fmu import fmu_aware_model_file
 
 aps_model_file = 'aps.xml'
 output_aps_model_file = 'aps_out.xml'

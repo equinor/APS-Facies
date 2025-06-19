@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 from pathlib import Path
-from typing import Optional, List
+from typing import List, Optional
 from warnings import warn
-from aps.utils.constants.simple import Debug
+
 from aps.utils.version import Version
 
 
@@ -98,9 +98,8 @@ def import_module(
 
     paths = get_common_python_packages_paths()
 
-    import sys
     import importlib.util
-    from pathlib import Path
+    import sys
 
     if dependencies is None:
         dependencies = []

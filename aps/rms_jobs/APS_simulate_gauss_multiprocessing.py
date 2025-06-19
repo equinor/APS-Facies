@@ -2,15 +2,16 @@
 # -*- coding: utf-8 -*-
 # This script does not call ROXAR API functions
 
+import multiprocessing as mp
 import os
 import time
+
 import numpy as np
-import multiprocessing as mp
 
 from aps.algorithms.APSModel import APSModel
+from aps.utils.constants.simple import Debug
 from aps.utils.methods import get_run_parameters
 from aps.utils.roxar.APSDataFromRMS import APSDataFromRMS
-from aps.utils.constants.simple import Debug
 
 
 def simulateGauss(

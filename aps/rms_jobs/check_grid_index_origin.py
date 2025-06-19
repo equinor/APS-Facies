@@ -1,5 +1,6 @@
-from aps.utils.constants.simple import Debug
 import roxar
+
+from aps.utils.constants.simple import Debug
 
 
 def get_grid_ijk_handedness(grid) -> roxar.Direction:
@@ -34,7 +35,7 @@ def run(
             if grid_ijk_handedness == roxar.Direction.left:
                 grid_type = 'RMS (lower left corner of non-rotated grids)'
             else:
-                grid_type = f'ECLIPSE (upper left corner of non-rotated grids)'
+                grid_type = 'ECLIPSE (upper left corner of non-rotated grids)'
             print(f'-- Grid index origin for {grid_model_name} is standard {grid_type}')
 
         return grid_ijk_handedness
@@ -88,5 +89,5 @@ def run(
                 )
             if fmu_ijk_handedness == roxar.Direction.left:
                 raise ValueError(
-                    f'FMU mode for AHM require that the grid index origin is Eclipse standard (upper left corner index origin)'
+                    'FMU mode for AHM require that the grid index origin is Eclipse standard (upper left corner index origin)'
                 )

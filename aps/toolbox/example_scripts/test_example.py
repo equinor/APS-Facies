@@ -3,8 +3,8 @@
 # using the aps toolbox scripts.
 
 
-from aps.utils.constants.simple import Debug
 from aps.toolbox import name_of_help_script
+from aps.utils.constants.simple import Debug
 
 # Define input parameters in dictionary.
 # Specification depends on which aps script is choosen.

@@ -1,6 +1,7 @@
 #!/bin/env python
 # -*- coding: utf-8 -*-
 import os
+
 from aps.algorithms.defineTruncationRule import DefineTruncationRule
 from aps.utils.numeric import isNumber
 

@@ -1,18 +1,19 @@
 #!/bin/env python
 # -*- coding: utf-8 -*-
 
-import numpy as np
 from typing import List
 
+import numpy as np
+from fmu.tools.rms.zone_mapping import ZoneMapping
+
+from aps.algorithms.defineFacies import BaseDefineFacies
+from aps.utils.constants.simple import Debug
+from aps.utils.exceptions.xml import MissingKeyword
 from aps.utils.roxar.generalFunctionsUsingRoxAPI import (
     set_continuous_3d_parameter_values,
 )
 from aps.utils.roxar.grid_model import getDiscrete3DParameterValues
-from aps.utils.constants.simple import Debug
-from aps.algorithms.defineFacies import BaseDefineFacies
-from aps.utils.exceptions.xml import MissingKeyword
 from aps.utils.xmlUtils import getIntCommand
-from fmu.tools.rms.zone_mapping import ZoneMapping
 
 
 class DefineFaciesProbMapDep(BaseDefineFacies):

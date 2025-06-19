@@ -1,8 +1,8 @@
 #!/bin/env python
 # -*- coding: utf-8 -*-
 from aps.algorithms.defineFaciesProbMapDepTrend import DefineFaciesProbMapDep
-from aps.utils.methods import SpecificationType, get_debug_level, get_specification_file
 from aps.utils.constants.simple import Debug
+from aps.utils.methods import SpecificationType, get_debug_level, get_specification_file
 
 
 def run(roxar=None, project=None, **kwargs):

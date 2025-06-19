@@ -2,8 +2,8 @@
 from aps.toolbox.redefine_zones_in_aps_model import (
     run as run_redefine_zones_in_aps_model,
 )
-from aps.utils.methods import get_debug_level, get_specification_file, SpecificationType
 from aps.utils.constants.simple import Debug, ModelFileFormat
+from aps.utils.methods import SpecificationType, get_specification_file
 
 
 def run(roxar=None, project=None, **kwargs):

@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
-from typing import NamedTuple, Union, Optional
+from typing import NamedTuple, Optional, Union
 
-from aps.algorithms.trend import Trend3D
 from aps.algorithms.APSGaussModel import GaussianFieldName
+from aps.algorithms.trend import Trend3D
 from aps.utils.constants.simple import VariogramType
-from aps.utils.types import FaciesName, FaciesCode
+from aps.utils.types import FaciesCode, FaciesName
 
 class VariogramRecord(NamedTuple):
     Name: GaussianFieldName

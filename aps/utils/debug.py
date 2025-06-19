@@ -6,10 +6,8 @@ import traceback
 from datetime import datetime
 from enum import Enum, auto
 from pathlib import Path
-from typing import Union
-from zipfile import ZipFile, ZIP_DEFLATED
-
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Union
+from zipfile import ZIP_DEFLATED, ZipFile
 
 if TYPE_CHECKING:
     # This is a circular import

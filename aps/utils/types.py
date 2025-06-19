@@ -1,6 +1,5 @@
 from pathlib import Path
-
-from typing import Union, Tuple, NewType
+from typing import NewType, Tuple, Union
 
 FilePath = Union[Path, str]
 

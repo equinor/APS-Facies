@@ -1,7 +1,7 @@
 #!/bin/env python
 # -*- coding: utf-8 -*-
-from aps.utils.roxar.modifyBlockedWellData import createProbabilityLogs
 from aps.utils.methods import get_run_parameters
+from aps.utils.roxar.modifyBlockedWellData import createProbabilityLogs
 
 
 def run(roxar=None, project=None, **kwargs):

@@ -1,13 +1,13 @@
 #!/bin/env python
 # -*- coding: utf-8 -*-
-from aps.utils.methods import (
-    get_debug_level,
-    get_specification_file,
-    SpecificationType,
-    get_model_file_format,
-)
 from aps.toolbox.create_probability_logs import run as run_create_prob_logs
 from aps.utils.constants.simple import Debug
+from aps.utils.methods import (
+    SpecificationType,
+    get_debug_level,
+    get_model_file_format,
+    get_specification_file,
+)
 
 
 def run(roxar=None, project=None, **kwargs):

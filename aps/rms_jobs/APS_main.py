@@ -16,26 +16,26 @@ import numpy as np
 from scipy.stats import norm
 
 from aps.algorithms.APSModel import APSModel
-from aps.utils.checks import check_probability_values, check_probability_normalisation
+from aps.utils.checks import check_probability_normalisation, check_probability_values
 from aps.utils.constants.simple import (
     Debug,
+    GridModelConstants,
     ProbabilityTolerances,
     TransformType,
-    GridModelConstants,
 )
 from aps.utils.grid import update_rms_parameter
-from aps.utils.methods import calc_average, get_specification_file, get_debug_level
+from aps.utils.methods import calc_average, get_debug_level, get_specification_file
 from aps.utils.records import Probability
 from aps.utils.roxar.generalFunctionsUsingRoxAPI import (
     update_discrete_3d_parameter_values,
 )
 from aps.utils.roxar.grid_model import (
+    create_zone_parameter,
+    find_defined_cells,
     get3DParameter,
     getContinuous3DParameterValues,
-    isParameterDefinedWithValuesInRMS,
     getDiscrete3DParameterValues,
-    find_defined_cells,
-    create_zone_parameter,
+    isParameterDefinedWithValuesInRMS,
 )
 from aps.utils.roxar.progress_bar import APSProgressBar
 from aps.utils.simulation import initialize_rms_parameters

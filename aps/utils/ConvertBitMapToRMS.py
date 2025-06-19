@@ -69,8 +69,8 @@ Usage:
 --------------------------------------------------------------------------------------"""
 
 import copy
-import xml.etree.ElementTree as ET
 import os
+import xml.etree.ElementTree as ET
 from pathlib import Path
 
 import numpy as np
@@ -78,17 +78,17 @@ from PIL import Image
 
 from aps.utils.constants.simple import Debug
 from aps.utils.methods import (
-    get_colors,
     check_missing_keywords_dict,
     check_missing_keywords_list,
+    get_colors,
 )
 from aps.utils.ymlUtils import (
-    get_text_value,
     get_bool_value,
-    get_float_value,
     get_dict,
+    get_float_value,
     get_int_value,
     get_list,
+    get_text_value,
     readYml,
 )
 

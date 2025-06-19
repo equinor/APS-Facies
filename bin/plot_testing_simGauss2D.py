@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-from aps.utils.simGauss2D import simGaussField
 from aps.utils.constants.simple import Debug, VariogramType
 from aps.utils.io import writeFileRTF
+from aps.utils.simGauss2D import simGaussField
 
 
 def run():

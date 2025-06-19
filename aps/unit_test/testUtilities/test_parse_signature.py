@@ -3,7 +3,6 @@ import pytest
 
 from aps.utils.parsing import parse_signature
 
-
 testdata = [
     ('ui.call("get_grid_models")', ('get_grid_models', [])),
     (

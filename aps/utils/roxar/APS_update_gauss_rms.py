@@ -4,12 +4,12 @@
 import numpy as np
 
 from aps.algorithms.APSModel import APSModel
+from aps.utils.constants.simple import Debug
 from aps.utils.methods import get_run_parameters
 from aps.utils.roxar.APSDataFromRMS import APSDataFromRMS
 from aps.utils.roxar.generalFunctionsUsingRoxAPI import (
     set_continuous_3d_parameter_values_in_zone,
 )
-from aps.utils.constants.simple import Debug
 
 
 def run_main(

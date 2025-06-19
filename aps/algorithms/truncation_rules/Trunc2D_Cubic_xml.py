@@ -1,7 +1,7 @@
 #!/bin/env python
 # -*- coding: utf-8 -*-
 import copy
-from typing import Optional, List, Union
+from typing import List, Optional, Union
 from warnings import warn
 from xml.etree.ElementTree import Element
 
@@ -388,7 +388,7 @@ class Trunc2D_Cubic(Trunc2D_Base):
                                 facies_name = text.strip()
                                 text = childL3.text
                                 probFrac = float(text.strip())
-                                if not (facies_name in self._faciesInZone):
+                                if facies_name not in self._faciesInZone:
                                     raise ValueError(
                                         f'Error when reading model file: {modelFileName}\n'
                                         f'Error: Read truncation rule: {self._className}\n'

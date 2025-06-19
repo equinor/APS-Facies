@@ -1,8 +1,14 @@
 #!/bin/env python
 # -*- coding: utf-8 -*-
 import copy
-import numpy as np
 from typing import List
+
+import numpy as np
+from fmu.tools.rms.zone_mapping import ZoneMapping
+
+from aps.algorithms.defineFacies import BaseDefineFacies
+from aps.utils.constants.simple import Debug
+from aps.utils.methods import get_cond_prob_dict
 from aps.utils.roxar.generalFunctionsUsingRoxAPI import (
     set_continuous_3d_parameter_values,
 )
@@ -10,12 +16,8 @@ from aps.utils.roxar.grid_model import (
     getCellValuesFilteredOnDiscreteParam,
     getDiscrete3DParameterValues,
 )
-from aps.algorithms.defineFacies import BaseDefineFacies
-from aps.utils.constants.simple import Debug
-from aps.utils.methods import get_cond_prob_dict
 from aps.utils.xmlUtils import getIntCommand
 from aps.utils.ymlUtils import get_bool_value, get_dict
-from fmu.tools.rms.zone_mapping import ZoneMapping
 
 
 class DefineFaciesProb(BaseDefineFacies):

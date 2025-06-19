@@ -1,67 +1,65 @@
 #!/bin/env python
 # -*- coding: utf-8 -*-
+from collections import OrderedDict
+from typing import Callable, Dict, List, Optional, Tuple, TypeVar, Union
+from xml.etree.ElementTree import Element
+
+import numpy as np
 from numpy import float64, ndarray
 
 from aps.algorithms.APSMainFaciesTable import APSMainFaciesTable
+from aps.algorithms.properties import (
+    CrossSection,
+    FmuProperty,
+    make_angle_property,
+    make_lower_bounded_property,
+    make_ranged_property,
+    make_trend_property,
+)
 from aps.algorithms.trend import (
+    Trend3D,
     Trend3D_elliptic,
     Trend3D_elliptic_cone,
     Trend3D_hyperbolic,
     Trend3D_linear,
-    Trend3D_rms_param,
     Trend3D_rms_map,
-    Trend3D,
-)
-from typing import List, Optional, Tuple, Union, TypeVar, Dict, Callable
-from xml.etree.ElementTree import Element
-
-import numpy as np
-from collections import OrderedDict
-
-from aps.algorithms.properties import (
-    make_ranged_property,
-    make_trend_property,
-    make_angle_property,
-    make_lower_bounded_property,
-    FmuProperty,
-    CrossSection,
+    Trend3D_rms_param,
 )
 from aps.utils.checks import isVariogramTypeOK
 from aps.utils.constants.simple import (
-    Debug,
-    VariogramType,
     CrossSectionType,
-    MinimumValues,
-    MaximumValues,
-    ModuloValues,
-    TrendType,
+    Debug,
     Direction,
+    MaximumValues,
+    MinimumValues,
+    ModuloValues,
     OriginType,
+    TrendType,
+    VariogramType,
 )
 from aps.utils.containers import FmuAttribute
 from aps.utils.numeric import flip_if_necessary
+
+# Dictionaries of legal value ranges for gauss field parameters
+from aps.utils.records import SeedRecord, TrendRecord, VariogramRecord
 from aps.utils.simGauss2D import simGaussField
 from aps.utils.types import (
-    GridSize,
-    SimulationBoxSize,
-    SimulationBoxOrigin,
     GaussianFieldName,
-    PropertyName,
-    XMLKeyword,
+    GridSize,
     Number,
+    PropertyName,
+    SimulationBoxOrigin,
+    SimulationBoxSize,
+    XMLKeyword,
 )
 from aps.utils.xmlUtils import (
-    getIntCommand,
-    getKeyword,
     createFMUvariableNameForResidual,
     createFMUvariableNameForTrend,
     get_fmu_value_from_xml,
+    getIntCommand,
+    getKeyword,
     isFMUUpdatable,
 )
-
-# Dictionaries of legal value ranges for gauss field parameters
-from aps.utils.records import VariogramRecord, SeedRecord, TrendRecord
-
 
 T = TypeVar('T')
 
@@ -1133,7 +1131,7 @@ class APSGaussModel:
                     raise ValueError(
                         'In model file {0} in keyword Trend for gauss field name: {1}\n'
                         'The use of trend functions requires that simulation box thickness is specified.\n'
-                        ''.format(self.__model_file_name, gf_name, self.__class_name)
+                        ''.format(self.__model_file_name, gf_name)
                     )
 
                 # checking first child of element Trend to determine the type of Trend
@@ -1142,7 +1140,7 @@ class APSGaussModel:
                     raise ValueError(
                         'In model file {0} in keyword Trend for gauss field name: {1}\n'
                         'No actual Trend is specified.\n'
-                        ''.format(self.__model_file_name, gf_name, self.__class_name)
+                        ''.format(self.__model_file_name, gf_name)
                     )
                 common_params = {
                     'model_file_name': self.__model_file_name,

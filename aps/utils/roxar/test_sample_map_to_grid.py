@@ -4,8 +4,8 @@ JRIV/OLIA
 """
 
 from aps.algorithms.APSModel import APSModel
-from aps.utils.roxar.sample_map_to_grid import trend_map_to_grid_param
 from aps.utils.constants.simple import Debug
+from aps.utils.roxar.sample_map_to_grid import trend_map_to_grid_param
 
 
 def run(*, project, zone_number, **kwargs):

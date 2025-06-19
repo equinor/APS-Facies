@@ -1,5 +1,5 @@
-from aps.utils.constants.simple import Debug
 from aps.toolbox.prob_cube_parameterization import run as run_update_prob_cubes
+from aps.utils.constants.simple import Debug
 
 if __name__ == '__main__':
     facies_names_per_zone_dict = {

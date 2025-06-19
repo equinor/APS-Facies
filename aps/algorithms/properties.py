@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 from functools import total_ordering
-from typing import Union, Dict, Generic, TypeVar, Optional, Callable, Any
+from typing import Any, Callable, Dict, Generic, Optional, TypeVar, Union
 
-from aps.utils.constants.simple import MinimumValues, MaximumValues, CrossSectionType
+from aps.utils.constants.simple import CrossSectionType, MaximumValues, MinimumValues
 from aps.utils.types import Number
 
 T = TypeVar('T')

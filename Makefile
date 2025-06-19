@@ -106,7 +106,6 @@ PYTHON ?= $(RUN) python3
 PIP ?= $(PYTHON) -m pip
 PY.TEST := $(RUN) python -m pytest
 PIPROT := $(RUN) piprot
-PYLINT := $(RUN) pylint
 SAFETY_CHECK := $(POETRY) check
 FLASK := $(RUN) flask
 REQUIREMENTS.TXT := $(POETRY) export --dev --format 'requirements.txt'
@@ -464,12 +463,7 @@ find-circular-dependencies:
 	          --extensions js,ts \
 	          $(WEB_DIR)/src
 
-linting: run-python-linting javascript-linting
-
-python-linting: clean-links run-python-linting links
-
-run-python-linting:
-	$(PYLINT) --jobs=$(NUMBER_OF_PROCESSORS) $(SOURCE_DIR) $(CODE_DIR)/depricated $(BIN_DIR)
+linting: javascript-linting
 
 javascript-linting:
 	$(YARN) lint

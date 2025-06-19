@@ -1,15 +1,15 @@
 #!/bin/env python
 # -*- coding: utf-8 -*-
 
-from aps.algorithms.APSModel import APSModel
-from aps.utils.methods import get_specification_file, get_debug_level
-from aps.utils.constants.simple import GridModelConstants, Debug
-from aps.utils.io import write_string_to_file, GlobalVariables
-from aps.utils.aps_config import APSConfig
-from aps.utils.roxar.progress_bar import APSProgressBar
-
-from warnings import warn
 from pathlib import Path
+from warnings import warn
+
+from aps.algorithms.APSModel import APSModel
+from aps.utils.aps_config import APSConfig
+from aps.utils.constants.simple import Debug, GridModelConstants
+from aps.utils.io import GlobalVariables, write_string_to_file
+from aps.utils.methods import get_debug_level, get_specification_file
+from aps.utils.roxar.progress_bar import APSProgressBar
 
 
 def run(project, **kwargs):
@@ -26,7 +26,7 @@ def run(project, **kwargs):
         # Job name will not exist if this script is run from APSGUI interactively, but only
         # when the running from workflow or batch
         if debug_level >= Debug.ON:
-            print(f'- Write FMU and ERT related template config files')
+            print('- Write FMU and ERT related template config files')
         if job_name is None:
             job_name = default_job_name
             print(
@@ -161,7 +161,7 @@ def run(project, **kwargs):
                     content += f'FIELD {fmu_field_name}   '
                     content += f'PARAMETER {fmu_field_name_file}   '
                     content += f'INIT_FILES:{aps_config.rms_field_dir_for_run_path()}/{fmu_field_name_file}   '
-                    content += f'MIN:-5.5  MAX:5.5  FORWARD_INIT:True\n'
+                    content += 'MIN:-5.5  MAX:5.5  FORWARD_INIT:True\n'
 
             write_string_to_file(
                 ert_field_keyword_file_name, content, debug_level=debug_level

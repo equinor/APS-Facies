@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
-from aps.utils.roxar.rms_project_data import RMSData
 import roxar.rms
+
+from aps.utils.roxar.rms_project_data import RMSData
 
 
 def call(method_name, *args, **kwargs):

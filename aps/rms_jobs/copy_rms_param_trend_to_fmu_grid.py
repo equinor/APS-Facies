@@ -6,6 +6,16 @@ apply customized trends for GRF's in APS and run this in FMU with AHM.
 
 import rmsapi.rms
 
+# The functionality to copy between geogrid and ertbox grid is now placed
+# in fmu.tools.rms function copy_rms_param
+# TODO: This will not work before fmu.tools has merged the copy_rms_param_to_ertbox_grid
+from fmu.tools.rms.copy_rms_param_to_ertbox_grid import (
+    check_grid_layout,
+    copy_from_geo_to_ertbox_grid,
+    define_active_parameters_in_ertbox,
+)
+from fmu.tools.rms.zone_mapping import ZoneMapping
+
 from aps.algorithms.APSModel import APSModel
 from aps.utils.constants.simple import (
     Debug,
@@ -15,16 +25,6 @@ from aps.utils.roxar.grid_model import (
     get_grid_model,
 )
 from aps.utils.roxar.progress_bar import APSProgressBar
-from fmu.tools.rms.zone_mapping import ZoneMapping
-
-# The functionality to copy between geogrid and ertbox grid is now placed
-# in fmu.tools.rms function copy_rms_param
-# TODO: This will not work before fmu.tools has merged the copy_rms_param_to_ertbox_grid
-from fmu.tools.rms.copy_rms_param_to_ertbox_grid import (
-    define_active_parameters_in_ertbox,
-    copy_from_geo_to_ertbox_grid,
-    check_grid_layout,
-)
 
 
 def get_trend_param_names_from_aps_model(

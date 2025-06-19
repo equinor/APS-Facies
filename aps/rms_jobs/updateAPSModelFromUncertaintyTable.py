@@ -2,13 +2,13 @@
 # -*- coding: utf-8 -*-
 # Python3 script to update APS model file from global IPL include file
 from aps.algorithms.APSModel import APSModel
+from aps.utils.aps_config import APSConfig
 from aps.utils.constants.simple import Debug
+from aps.utils.methods import get_debug_level, get_run_parameters
 from aps.utils.roxar.fmu_tags import (
     get_list_of_aps_uncertainty_parameters,
     set_selected_as_fmu_updatable,
 )
-from aps.utils.methods import get_run_parameters, get_workflow_name, get_debug_level
-from aps.utils.aps_config import APSConfig
 
 """
 Description:
