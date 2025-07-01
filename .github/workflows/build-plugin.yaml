@@ -29,13 +29,31 @@ jobs:
         with:
           node-version: 20
 
+      - name: Cache Python dependencies
+        uses: actions/cache@v4
+        with:
+          path: .venv
+          key: ${{ runner.os }}-python-${{ steps.python-version.outputs.python_version }}-poetry-${{ hashFiles('pyproject.toml', 'poetry.lock') }}
+
+      - name: Cache Node.js dependencies
+        uses: actions/cache@v4
+        with:
+          path: gui/node_modules
+          key: ${{ runner.os }}-yarn-${{ hashFiles('gui/yarn.lock', 'gui/package.json') }}
+
       - name: Set up dependencies
         run: |
-          python3 -m venv .venv
+          if [[ ! -d .venv ]]; then
+            python3 -m venv .venv
+            source .venv/bin/activate
+            pip install --upgrade pip
+            pip install "poetry==$(cat .tool-versions|grep poetry | grep -o -E '([0-9]+\.?)+')"
+            poetry install
+          fi
+
+      - name: Initialize project
+        run: |
           source .venv/bin/activate
-          pip install --upgrade pip
-          pip install "poetry==$(cat .tool-versions|grep poetry | grep -o -E '([0-9]+\.?)+')"
-          poetry install
           make --directory=${{ github.workspace }} init
 
       - name: Build GUI
