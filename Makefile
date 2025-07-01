@@ -76,7 +76,7 @@ ifneq ($(STUB_PREFIX),$(EMPTY))
 WORKFLOWS_TO_PROJECT := --suffix $(STUB_SUFFIX) $(WORKFLOWS_TO_PROJECT)
 endif
 
-APS_VERSION_FROM_GIT =  $(shell git describe --abbrev=0 --tags)
+APS_VERSION_FROM_GIT =  $(shell git describe --match='v*' --abbrev=0 --tags)
 APS_VERSION = $(shell echo $(APS_VERSION_FROM_GIT) | $(SED) -e "s/v//g")
 APS_FULL_VERSION = $(APS_VERSION).$(BUILD_NUMBER)
 LATEST_COMMIT_HASH = $(shell git rev-parse --short HEAD)

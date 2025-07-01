@@ -47,8 +47,15 @@ jobs:
       - name: Store GUI artifact
         uses: actions/upload-artifact@v4
         with:
-          name: gui
+          name: build-artifacts-gui
           path: |
             *.plugin
           retention-days: 90
           compression-level: '0' # The plugin is already a zip file, so we don't need to compress it again
+
+      - name: Store metadata about the build
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-artifacts-metadata
+          path: |
+            DEPLOY_VERSION.txt

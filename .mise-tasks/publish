@@ -1,0 +1,78 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+if [[ "${TRACE:-}" == "1" ]]; then
+    set -x
+fi
+
+PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+readonly PROJECT_ROOT
+
+function abort() {
+    local message="$1"
+    echo "$message" >&2
+    exit 1
+}
+
+function publish_official_release() {
+    local git_tag
+    local aps_version
+    git_tag=$(git describe --match='v*' --abbrev=0 --tags)
+    aps_version="${git_tag//v/}"
+
+    local plugin_name="aps_gui.$aps_version.plugin"
+    cp "$(cat DEPLOY_VERSION.txt)" "$plugin_name"
+    gh release create "$git_tag" \
+        --title "$aps_version" \
+        --notes "$(sed -n "/## $aps_version/,/^## /p" gui/public/CHANGELOG.md | sed '$d')" \
+        "$plugin_name"
+}
+
+function publish_bleeding_release() {
+    local tag_name="bleeding"
+
+    if gh release view "$tag_name" --json tagName --jq .tagName &>/dev/null; then
+        echo "Bleeding release already exists, deleting it first"
+        gh release delete "$tag_name" --yes
+    fi
+    # The notes are in MarkDown and we use backticks '`' which has a special meaning in bash
+    # shellcheck disable=SC2016
+    gh release create "$tag_name" \
+        --title 'Bleeding' \
+        --prerelease \
+        --notes 'The latest version of the APS-Facies GUI
+        Built from `main`' \
+        --generate-notes \
+        "$(cat DEPLOY_VERSION.txt)" \
+        DEPLOY_VERSION.txt
+}
+
+function main() {
+    if ! command -v gh &>/dev/null; then
+        abort "I require the GitHub CLI to be installed"
+    fi
+
+    local mode=regular
+    while [[ $# -gt 0 ]]; do
+        case $1 in
+        --stable)
+            mode='stable'
+            ;;
+        *)
+            abort "Unknown option: $1"
+            ;;
+        esac
+        shift
+    done
+
+    pushd "$PROJECT_ROOT" >/dev/null || exit 1
+    if [[ "$mode" == "stable" ]]; then
+        publish_official_release
+    elif [[ "$mode" == 'regular' ]]; then
+        publish_bleeding_release
+    else
+        abort "Unknown mode: $mode"
+    fi
+}
+
+main "$@"
