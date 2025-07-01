@@ -84,7 +84,6 @@ class Trunc2D_Angle(Trunc2D_Base):
         mainFaciesTable: Optional[APSMainFaciesTable] = None,
         faciesInZone: Optional[List[str]] = None,
         gaussFieldsInZone: Optional[List[str]] = None,
-        keyResolution: int = 100,
         debug_level: Debug = Debug.OFF,
         modelFileName: Optional[str] = None,
         zoneNumber: Optional[int] = None,
@@ -107,7 +106,6 @@ class Trunc2D_Angle(Trunc2D_Base):
             debug_level,
             modelFileName,
             nGaussFieldsInBackGroundModel=2,
-            keyResolution=keyResolution,
         )
         # Variables containing truncations for the 2D truncation map
         # The input direction angles can be file names in case trend parameters for these are specified
@@ -302,7 +300,6 @@ class Trunc2D_Angle(Trunc2D_Base):
             List[List[Union[List[List[Union[str, float]]], List[str]]]]
         ] = None,
         useConstTruncParam: int = True,
-        keyResolution: int = 100,
         debug_level: Debug = Debug.OFF,
     ) -> None:
         """
@@ -333,7 +330,7 @@ class Trunc2D_Angle(Trunc2D_Base):
         :return:
         """
         # Initialize data structure
-        self.__init__(keyResolution=keyResolution, debug_level=debug_level)
+        self.__init__(debug_level=debug_level)
 
         if self._debug_level >= Debug.VERY_VERBOSE:
             print(f'--- Call the initialize function in {self._className}')
@@ -797,7 +794,9 @@ class Trunc2D_Angle(Trunc2D_Base):
 
         return outputPolyA, outputPolyB, closestPolygon
 
-    def setTruncRule(self, faciesProb: List[float], cellIndx: int = 0) -> None:
+    def setTruncRule(
+        self, faciesProb: List[float], cellIndx: int = 0, resolution: int = 100
+    ) -> None:
         """
         Description:
         Input: Facies names, direction angles for facies boundary lines and facies probabilities.
@@ -811,7 +810,7 @@ class Trunc2D_Angle(Trunc2D_Base):
         if self._isFaciesProbEqualOne(faciesProb):
             return
 
-        faciesProbRoundOff = self._makeRoundOffFaciesProb(faciesProb)
+        faciesProbRoundOff = self._makeRoundOffFaciesProb(faciesProb, resolution)
         sumProb = faciesProbRoundOff.sum()
         if np.abs(sumProb - 1.0) > 0.00001:
             print(

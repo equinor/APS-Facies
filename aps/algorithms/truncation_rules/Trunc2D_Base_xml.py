@@ -100,7 +100,6 @@ class Trunc2D_Base:
         debug_level: Debug = Debug.OFF,
         modelFileName: Optional[str] = None,
         nGaussFieldsInBackGroundModel: int = 2,
-        keyResolution: int = 100,
     ) -> None:
         """
         Initialize the data structure for empty object.
@@ -218,15 +217,9 @@ class Trunc2D_Base:
         # between two polygons and the algorithm is not able to define in which polygon the point is located.
         self._nCountShiftBoundary = 0
 
-        # The key resolution is a resolution of how to round off facies probability.
-        # The facies probability rounded off is used as key to classify which grid cells have the same facies
-        # probability and can be treated simultaneously when looking up facies in the truncation cubes.
-        self._keyResolution = 100
-
         self._className = self.__class__.__name__
         self._gaussFieldsInZone = []
         self._debug_level = debug_level
-        self._keyResolution = keyResolution
         self._nGaussFieldsInBackGroundModel = nGaussFieldsInBackGroundModel
 
         if trRuleXML is not None:
@@ -1451,18 +1444,23 @@ Background facies:
         key = tuple(faciesProbRoundOff)
         return key
 
-    def _makeRoundOffFaciesProb(self, facies_prob):
+    def _makeRoundOffFaciesProb(self, facies_prob, resolution: int = 100):
         """Calculate round off of facies probabilities and adjusted
         so that the round off values also are close to normalised
         Resolution is set to 100 if input is not positive. The case that memoization is turned off
         corresponds to input resolution = 0 and in this case 100 is always used.
+
+        :param facies_prob: The Facies probabilities to use
+        :param resolution: The key resolution is a resolution of how to round off facies probability.
+                           The facies probability rounded off is used as key to classify which grid cells
+                           have the same facies probability and can be treated simultaneously when looking
+                           up facies in the truncation cubes.
         """
         if len(facies_prob) == 0:
             warn('The facies probabilities are empty')
             return facies_prob
         # A value of 0 or negative indicates that memoization is turned off.
         # Anyway the probabilities will be rounded off to nearest 1/100.
-        resolution = 100 if self._keyResolution <= 0 else self._keyResolution
         delta = 1.0 / resolution
         facies_prob = (facies_prob * resolution + 0.5).astype(int) * delta
         sum_prob = facies_prob.sum()

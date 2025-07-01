@@ -38,7 +38,6 @@ def interpretXMLModelFileAndWrite(
     fTable,
     faciesInZone,
     gaussFieldsInZone,
-    keyResolution,
     debug_level=Debug.OFF,
 ):
     # Read test model file with truncation rule into xml tree
@@ -59,7 +58,6 @@ def interpretXMLModelFileAndWrite(
         mainFaciesTable,
         faciesInZone,
         gaussFieldsInZone,
-        keyResolution,
         debug_level=debug_level,
         modelFileName=modelFileName,
     )
@@ -91,7 +89,6 @@ def createTrunc(
     truncStructure,
     overlayGroups,
     useConstTruncParam,
-    keyResolution,
     debug_level=Debug.OFF,
 ):
     mainFaciesTable = APSMainFaciesTable(facies_table=fTable)
@@ -106,7 +103,6 @@ def createTrunc(
         truncStructure,
         overlayGroups,
         useConstTruncParam,
-        keyResolution,
         debug_level,
     )
 
@@ -125,7 +121,6 @@ def initialize_write_read(
     truncStructure,
     overlayGroups,
     useConstTruncParam,
-    keyResolution,
     debug_level=Debug.OFF,
 ):
     file1 = outputModelFileName1
@@ -141,7 +136,6 @@ def initialize_write_read(
         truncStructure,
         overlayGroups,
         useConstTruncParam,
-        keyResolution,
         debug_level,
     )
     inputFile = file1
@@ -157,7 +151,6 @@ def initialize_write_read(
         fTable,
         faciesInZone,
         gaussFieldsInZone,
-        keyResolution,
         debug_level,
     )
 
@@ -435,7 +428,6 @@ def test_non_cubic_truncation_rule(
         truncStructure=truncation_rule,
         overlayGroups=overlay_groups,
         useConstTruncParam=USE_CONST_TRUNC_PARAM,
-        keyResolution=KEYRESOLUTION,
         debug_level=Debug.OFF,
     )
     nGaussFields = truncRule.getNGaussFieldsInModel()

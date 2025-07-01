@@ -10,9 +10,6 @@ import pytest
 
 from aps.algorithms.APSMainFaciesTable import APSMainFaciesTable
 from aps.algorithms.truncation_rules import Trunc2D_Cubic
-from aps.tests.constants import (
-    KEYRESOLUTION,
-)
 from aps.tests.helpers import (
     apply_truncations,
     apply_truncations_vectorized,
