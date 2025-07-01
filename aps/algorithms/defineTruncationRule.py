@@ -4,12 +4,14 @@
 # class DefineTruncationRule
 # Description: Handle truncation rule settings
 # --------------------------------------------------------
+from __future__ import annotations
+
 import collections
 import copy
 import os
 from pathlib import Path
 from sys import argv
-from typing import Literal
+from typing import Literal, Optional, Union
 from xml.etree.ElementTree import Element
 
 import numpy as np
@@ -37,18 +39,18 @@ from aps.utils.xmlUtils import prettify
 FORMAT_TYPES = Literal['svg', 'png']
 
 
-def conditional_directory(name):
+def conditional_directory(name: str):
     path = Path(name)
     if not path.exists():
         os.mkdir(name)
 
     def wrapper(func):
-        def inner_wrapper(self, *args, **kwargs):
-            old = self._DefineTruncationRule__directory
+        def inner_wrapper(self: 'DefineTruncationRule', *args, **kwargs):
+            old = self.directory
             if self.write_to_directories:
-                self._DefineTruncationRule__directory = name
+                self.directory = name
             result = func(self, *args, **kwargs)
-            self._DefineTruncationRule__directory = old
+            self.directory = old
             return result
 
         return inner_wrapper
@@ -68,7 +70,7 @@ class DefineTruncationRule:
 
     def __init__(
         self,
-        directory='',
+        directory: Optional[Union[Path, str]] = None,
         debug_level=Debug.VERBOSE,
         show_title=True,
         write_overlay=True,
@@ -223,12 +225,23 @@ class DefineTruncationRule:
 
         self.__inputFileName = None
         self.debug_level = debug_level
-        self.__directory = directory
+        self._directory: Optional[Path] = None
+        self.directory = directory
         self.show_title = show_title
         self.write_overlay = write_overlay
         self.write_overview = write_overview
         self.write_to_directories = write_to_directories
         self.format: FORMAT_TYPES = 'png'
+
+    @property
+    def directory(self) -> Optional[Path]:
+        return self._directory
+
+    @directory.setter
+    def directory(self, directory: Union[Path, str, None]):
+        if isinstance(directory, str):
+            directory = Path(directory)
+        self._directory = directory
 
     def readFile(self, inputFileName):
         """Read ascii file with definition of truncation rule settings for background facies."""
@@ -236,10 +249,7 @@ class DefineTruncationRule:
         self.__inputFileName = copy.copy(inputFileName)
         finished = False
         print('Read file with truncation rules: {}'.format(inputFileName))
-        if self.__directory:
-            inputFile = self.__directory + '/' + self.__inputFileName
-        else:
-            inputFile = self.__inputFileName
+        inputFile = self._get_full_path_name(self.__inputFileName)
         with open(inputFile, 'r', encoding='utf-8') as file:
             while not finished:
                 line = file.readline()
@@ -301,10 +311,7 @@ class DefineTruncationRule:
 
     def writeFile(self, outputFileName):
         """Write dictionaries with truncation rule settings to file for background facies and overlay facies."""
-        if self.__directory:
-            outputFile = self.__directory + '/' + outputFileName
-        else:
-            outputFile = outputFileName
+        outputFile = self._get_full_path_name(outputFileName)
         if self.debug_level >= Debug.VERBOSE:
             print(
                 'Debug output: Write file with truncation rules: {}'.format(outputFile)
@@ -1230,7 +1237,7 @@ class DefineTruncationRule:
         for key, item in dictionary.items():
             nBG = self.__getNBackgroundFacies(truncType, item)
             nOL = self.__getNOverlayFacies(truncType, item)
-            truncMapPlotFile = self.__directory + '/' + key + '.png'
+            truncMapPlotFile = self._get_full_path_name(key, '.png')
             if nBackgroundFacies == 0:
                 settingsList.append([key, item, truncMapPlotFile])
             elif nBackgroundFacies == nBG and nOverlayFacies == nOL:
@@ -1412,9 +1419,7 @@ class DefineTruncationRule:
             axTrunc.axis('off')
             plt.autoscale(tight=True)
         if write_file:
-            plotFileName = name + f'.{self.format}'
-            if self.__directory:
-                plotFileName = self.__directory + '/' + plotFileName
+            plotFileName = self._get_full_path_name(name, f'.{self.format}')
             print('Write file: {}'.format(plotFileName))
             fig.savefig(plotFileName, transparent=True)
             plt.close(fig)
@@ -1524,33 +1529,25 @@ class DefineTruncationRule:
     def createAllCubicXMLTemplates(self):
         """Make template xml files containing all Cubic truncation rule settings."""
         for name, truncStructItem in self.__tableCubic.items():
-            outputFileName = name + '.xml'
-            if self.__directory:
-                outputFileName = self.__directory + '/' + name + '.xml'
+            outputFileName = self._get_full_path_name(name, '.xml')
             self.writeTruncRuleToXmlFile(name, outputFileName)
 
     def createAllNonCubicXMLTemplates(self):
         """Make template xml files containing all NonCubic truncation rule settings."""
         for name, truncStructItem in self.__tableNonCubic.items():
-            outputFileName = name + '.xml'
-            if self.__directory:
-                outputFileName = self.__directory + '/' + name + '.xml'
+            outputFileName = self._get_full_path_name(name, '.xml')
             self.writeTruncRuleToXmlFile(name, outputFileName)
 
     def createAllCubicXMLTemplatesWithOverlayFacies(self):
         """Make template xml files containing all Cubic truncation rule settings with overlay facies."""
         for name, truncStructItem in self.__tableCubicAndOverlay.items():
-            outputFileName = name + '.xml'
-            if self.__directory:
-                outputFileName = self.__directory + '/' + name + '.xml'
+            outputFileName = self._get_full_path_name(name, '.xml')
             self.writeTruncRuleToXmlFile(name, outputFileName)
 
     def createAllNonCubicXMLTemplatesWithOverlayFacies(self):
         """Make template xml files containing all NonCubic truncation rule settings with overlay facies."""
         for name, truncStructItem in self.__tableNonCubicAndOverlay.items():
-            outputFileName = name + '.xml'
-            if self.__directory:
-                outputFileName = self.__directory + '/' + name + '.xml'
+            outputFileName = self._get_full_path_name(name, '.xml')
             self.writeTruncRuleToXmlFile(name, outputFileName)
 
     def createOverviewPlotCubic(self, plotName):
@@ -1581,13 +1578,17 @@ class DefineTruncationRule:
         for truncation_name, trunc_structure_item in sorted_truncation_rule.items():
             self.__makeTruncationMapSubPlot(truncation_name, fig, rows, cols, indx)
             indx += 1
-        plot_file_name = plot_name + '.png'
-        if self.__directory:
-            plot_file_name = self.__directory + '/' + plot_name + '.png'
+        plot_file_name = self._get_full_path_name(plot_name, '.png')
         print('Write file: {}'.format(plot_file_name))
         plt.axis('off')
         fig.savefig(plot_file_name)
         plt.close(fig)
+
+    def _get_full_path_name(self, name: str, suffix: str = ''):
+        name = f'{name}{suffix}'
+        if self.directory:
+            name = self.directory / name
+        return name
 
 
 def run_example():
