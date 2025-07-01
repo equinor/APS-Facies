@@ -1690,7 +1690,6 @@ Background facies:
         # Input is facies polygons for truncation rules and coordinates in alpha space for
         # for a set of points saved in vectors of length equal to the set of points.
         # Check in which polygon the points are located and thereby the facies
-        faciesCode_vector = np.ones(len(x_coordinates), dtype=np.uint8) * (-1)
         for poly_number in range(self.num_polygons):
             polygon = self._faciesPolygons[poly_number]
             selected = polygon_number_all_vector == -1
