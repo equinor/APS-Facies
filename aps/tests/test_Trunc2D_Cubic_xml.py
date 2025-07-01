@@ -34,7 +34,6 @@ def interpretXMLModelFileAndWrite(
     fTable: Dict[int, str],
     faciesInZone: List[str],
     gaussFieldsInZone: List[str],
-    keyResolution: int,
     debug_level: Debug = Debug.OFF,
 ) -> Trunc2D_Cubic:
     # Read test model file with truncation rule into xml tree
@@ -90,7 +89,6 @@ def createTrunc(
     gaussFieldsForBGFacies: List[str],
     truncStructure: CubicTruncationRuleStructureType,
     overlayGroups: OverlayGroupType,
-    keyResolution: int,
     debug_level: Debug = Debug.OFF,
 ) -> Trunc2D_Cubic:
     mainFaciesTable = APSMainFaciesTable(facies_table=fTable)
@@ -104,7 +102,7 @@ def createTrunc(
         gaussFieldsForBGFacies,
         truncStructure,
         overlayGroups,
-        debug_level,
+        debug_level=debug_level,
     )
 
     # Build an xml tree with the data and write it to file
@@ -121,7 +119,6 @@ def initialize_write_read(
     gaussFieldsForBGFacies: List[str],
     truncStructure: CubicTruncationRuleStructureType,
     overlayGroups: OverlayGroupType,
-    keyResolution: int,
     debug_level: Debug = Debug.OFF,
 ) -> Tuple[Trunc2D_Cubic, Trunc2D_Cubic]:
     file1 = outputModelFileName1
@@ -136,7 +133,6 @@ def initialize_write_read(
         gaussFieldsForBGFacies,
         truncStructure,
         overlayGroups,
-        keyResolution,
         debug_level,
     )
     inputFile = file1
@@ -150,7 +146,6 @@ def initialize_write_read(
         fTable,
         faciesInZone,
         gaussFieldsInZone,
-        keyResolution,
         debug_level,
     )
 
@@ -753,7 +748,6 @@ def test_Trunc2DCubic(
         gaussFieldsForBGFacies=gaussian_fields_for_background_facies,
         truncStructure=truncation_rule,
         overlayGroups=overlay_groups,
-        keyResolution=KEYRESOLUTION,
         debug_level=Debug.OFF,
     )
     nGaussFields = truncRule.getNGaussFieldsInModel()
