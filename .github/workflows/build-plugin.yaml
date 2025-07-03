@@ -1,0 +1,79 @@
+on:
+  workflow_call:
+    inputs:
+      stable:
+        type: boolean
+        default: false
+        description: 'Toggles whether a stable (full release) or a beta should be build'
+
+jobs:
+  build-gui:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Find minimum supported Python
+        id: python-version
+        run: |
+          echo "python_version=$(grep -E '^python = ".*[0-9]\.[0-9]+"' pyproject.toml | sed -E 's/.*([0-9].[0-9]+).*/\1/g')" >> "$GITHUB_OUTPUT"
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ steps.python-version.outputs.python_version }}
+
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Cache Python dependencies
+        uses: actions/cache@v4
+        with:
+          path: .venv
+          key: ${{ runner.os }}-python-${{ steps.python-version.outputs.python_version }}-poetry-${{ hashFiles('pyproject.toml', 'poetry.lock') }}
+
+      - name: Cache Node.js dependencies
+        uses: actions/cache@v4
+        with:
+          path: gui/node_modules
+          key: ${{ runner.os }}-yarn-${{ hashFiles('gui/yarn.lock', 'gui/package.json') }}
+
+      - name: Set up dependencies
+        run: |
+          if [[ ! -d .venv ]]; then
+            python3 -m venv .venv
+            source .venv/bin/activate
+            pip install --upgrade pip
+            pip install "poetry==$(cat .tool-versions|grep poetry | grep -o -E '([0-9]+\.?)+')"
+            poetry install
+          fi
+
+      - name: Initialize project
+        run: |
+          source .venv/bin/activate
+          make --directory=${{ github.workspace }} init
+
+      - name: Build GUI
+        run: |
+          source .venv/bin/activate
+          export NODE_OPTIONS=--max_old_space_size=4096
+          make --directory=${{ github.workspace }} ${{ inputs.stable && 'build-stable-gui' || 'build-gui' }}
+
+      - name: Store GUI artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-artifacts-gui
+          path: |
+            *.plugin
+          retention-days: 90
+          compression-level: '0' # The plugin is already a zip file, so we don't need to compress it again
+
+      - name: Store metadata about the build
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-artifacts-metadata
+          path: |
+            DEPLOY_VERSION.txt

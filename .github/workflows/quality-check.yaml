@@ -6,9 +6,12 @@ on:
   workflow_dispatch:
   push:
 
+permissions:
+  contents: read
+
 jobs:
   pre-commit-hooks:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
@@ -16,42 +19,5 @@ jobs:
       - uses: actions/setup-python@v5
       - uses: pre-commit/action@v3.0.1
 
-  on-push:
-    runs-on: ubuntu-22.04
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: 3.9
-
-      - name: Use Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-
-      - name: Set up dependencies
-        run: |
-          python3.9 -m venv .venv
-          source .venv/bin/activate
-          pip install --upgrade pip
-          pip install "poetry==$(cat .tool-versions|grep poetry | grep -o -E '([0-9]+\.?)+')"
-          poetry install
-          make --directory=${{ github.workspace }} init
-
-      - name: Build GUI
-        run: |
-          source .venv/bin/activate
-          export NODE_OPTIONS=--max_old_space_size=4096
-          make --directory=${{ github.workspace }} build-gui
-
-      - name: Store GUI artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: gui
-          path: |
-            *.plugin
-          retention-days: ${{ github.ref == 'refs/head/main' && '400' || '30' }}
+  build-gui:
+    uses: ./.github/workflows/build-plugin.yaml
