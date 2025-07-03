@@ -40,6 +40,7 @@
     "@stylistic/eslint-plugin": "^5.1.0",
     "@types/lodash": "^4.14.196",
     "@types/markdown-it": "^12.2.3",
+    "@types/node": "^20.19.4",
     "@types/object-hash": "^2.2.1",
     "@types/plotly.js-dist-min": "^2.3.4",
     "@types/uuid": "^8.3.4",
