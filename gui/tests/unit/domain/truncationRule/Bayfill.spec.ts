@@ -1,3 +1,4 @@
+import { describe, it, expect } from 'vitest'
 import FmuUpdatableValue from '@/utils/domain/bases/fmuUpdatable'
 import GlobalFacies from '@/utils/domain/facies/global'
 import Facies from '@/utils/domain/facies/local'

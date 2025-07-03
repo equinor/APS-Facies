@@ -1,3 +1,4 @@
+import { describe, it, expect } from 'vitest'
 import BaseItem from '@/utils/domain/bases/baseItem'
 import { v4 as uuid } from 'uuid'
 
