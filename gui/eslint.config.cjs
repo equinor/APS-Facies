@@ -1,19 +1,19 @@
-import {
+const {
   defineConfigWithVueTs,
   vueTsConfigs,
-} from '@vue/eslint-config-typescript'
-import vue from 'eslint-plugin-vue'
-import vuetify from 'eslint-plugin-vuetify'
-import security from 'eslint-plugin-security'
-import stylisticTs from '@stylistic/eslint-plugin'
-import globals from 'globals'
-import parser from 'vue-eslint-parser'
-import js from '@eslint/js'
-import skipFormatting from '@vue/eslint-config-prettier/skip-formatting'
+} = require('@vue/eslint-config-typescript')
+const vue = require('eslint-plugin-vue')
+const vuetify = require('eslint-plugin-vuetify')
+const security = require('eslint-plugin-security')
+const stylisticTs = require('@stylistic/eslint-plugin')
+const globals = require('globals')
+const parser = require('vue-eslint-parser')
+const js = require('@eslint/js')
+const skipFormatting = require('@vue/eslint-config-prettier/skip-formatting')
 
 const verbosity = process.env.NODE_ENV === 'production' ? 'error' : 'off'
 
-export default defineConfigWithVueTs(
+module.exports = defineConfigWithVueTs(
   js.configs.recommended,
 
   {
@@ -149,4 +149,10 @@ export default defineConfigWithVueTs(
     },
   },
   skipFormatting,
+  {
+    files: ['**/*.cjs'],
+    rules: {
+      '@typescript-eslint/no-require-imports': 'off',
+    },
+  },
 )
