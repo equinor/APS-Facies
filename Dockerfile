@@ -75,7 +75,7 @@ COPY examples/truncation_settings.dat ./examples/
 COPY Makefile .
 
 RUN mkdir -p \
-    aps/unit_test/integration \
+    aps/tests/integration \
     gui/src/stores/truncation-rules/templates
 RUN roxenv make generate-truncation-rules
 

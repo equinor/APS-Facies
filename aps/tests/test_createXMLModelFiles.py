@@ -1,5 +1,6 @@
 #!/bin/env python
 # Python3  test that the model files can be created correctly.
+from typing import List, Tuple, TypedDict, Union
 
 import pytest
 
@@ -19,7 +20,7 @@ from aps.algorithms.truncation_rules import (
     Trunc2D_Cubic,
     Trunc3D_bayfill,
 )
-from aps.unit_test.constants import (
+from aps.tests.constants import (
     FACIES_REAL_PARAM_NAME_RESULT,
     GRID_MODEL_NAME,
     NO_VERBOSE_DEBUG,
@@ -30,7 +31,6 @@ from aps.unit_test.constants import (
     VERY_VERBOSE_DEBUG,
     ZONE_PARAM_NAME,
 )
-from aps.unit_test.helpers import get_model_file_path
 from aps.utils.checks import compare
 from aps.utils.constants.simple import (
     Debug,
@@ -39,6 +39,17 @@ from aps.utils.constants.simple import (
     TrendType,
     VariogramType,
 )
+from aps.utils.types import (
+    CubicTruncationRuleStructureType,
+    FaciesTableType,
+    NonCubicTruncationRuleStructureType,
+    OverlayGroupType,
+)
+
+
+@pytest.fixture
+def data_directory(data_directory):
+    return data_directory / 'models'
 
 
 def defineCommonModelParam(
@@ -78,6 +89,71 @@ def defineCommonModelParam(
         blocked_well_log=fTable_blockedWellLog,
     )
     apsmodel.setMainFaciesTable(main_facies_table)
+
+
+class ZoneDescription(TypedDict, total=False):
+    zoneNumber: int
+    regionNumber: int
+    simBoxThickness: float
+    # Facies prob for zone
+    faciesInZone: List[str]
+    useConstProb: bool
+    faciesProbList: List[str | float]
+    # Gauss field parameters. One entry in list for each gauss field
+    gaussFieldsInZone: List[str]
+    gfTypes: List[str]
+    range1: List[float]
+    range1FmuUpdatable: List[bool]
+    range2: List[float]
+    range2FmuUpdatable: List[bool]
+    range3: List[float]
+    range3FmuUpdatable: List[bool]
+    azimuthVariogramAngles: List[float]
+    azimuthVariogramAnglesFmuUpdatable: List[bool]
+    dipVariogramAngles: List[float]
+    dipVariogramAnglesFmuUpdatable: List[bool]
+    power: List[float]
+    powerFmuUpdatable: List[bool]
+    # Trend parameters. One entry in list for each gauss field
+    useTrend: List[bool]
+    relStdDev: List[float]
+    relStdDevFmuUpdatable: List[bool]
+    azimuthAngle: List[float]
+    azimuthAngleFmuUpdatable: List[bool]
+    stackingAngle: List[float]
+    stackingAngleFmuUpdatable: List[bool]
+    direction: List[int]
+    trendType: List[TrendType]
+    curvature: List[float]
+    curvatureFmuUpdatable: List[bool]
+    migrationAngle: List[float]
+    migrationAngleFmuUpdatable: List[bool]
+    relativeSize: List[float]
+    relativeSizeFmuUpdatable: List[bool]
+    origin_x: List[float]
+    origin_y: List[float]
+    origin_z_simbox: List[float]
+    originFmuUpdatable: List[bool]
+    origin_type: List[OriginType]
+    previewSeed: List[int]
+    # Truncation rule
+    truncType: str
+    alphaFieldNameForBackGroundFacies: List[str]
+    truncStructureList: Union[
+        NonCubicTruncationRuleStructureType, CubicTruncationRuleStructureType
+    ]
+    overlayGroups: List[OverlayGroupType]
+    useConstTruncParam: bool
+    faciesInTruncRule: List[str]
+    sf_value: float
+    sf_name: str
+    sf_fmu_updatable: bool
+    ysf: float
+    ysf_fmu_updatable: bool
+    sbhd: float
+    sbhd_fmu_updatable: bool
+    grid_layouts: List[str]  # literal values
+    debug_level: Debug
 
 
 def addZoneParam(
@@ -377,30 +453,684 @@ def addZoneParam(
     print(apsmodel.getZoneNumberList())
 
 
-def read_write_model(apsmodel, debug_level=Debug.OFF):
-    outfile1 = 'testOut1.xml'
-    attributesFile = 'fmu_attributes.yaml'
-    apsmodel.write_model(outfile1, attributesFile, debug_level=debug_level)
+@pytest.fixture
+def aps_model(
+    facies_table: FaciesTableType,
+    zone_descriptions: List[ZoneDescription],
+    zone_region_selections: List[Tuple[int, int]],
+    rmsProject=RMS_PROJECT,
+    rmsWorkflow=RMS_WORKFLOW,
+    gridModelName=GRID_MODEL_NAME,
+    zoneParamName=ZONE_PARAM_NAME,
+    regionParamName=REGION_PARAM_NAME,
+    faciesRealParamNameResult=FACIES_REAL_PARAM_NAME_RESULT,
+    seedFileName=SEED_FILE_NAME,
+    fTable_blockedWell='BW',
+    fTable_blockedWellLog='facies',
+    debug_level: Debug = Debug.OFF,
+):
+    apsmodel = APSModel()
+    defineCommonModelParam(
+        apsmodel=apsmodel,
+        rmsProject=rmsProject,
+        rmsWorkflow=rmsWorkflow,
+        gridModelName=gridModelName,
+        zoneParamName=zoneParamName,
+        regionParamName=regionParamName,
+        faciesRealParamNameResult=faciesRealParamNameResult,
+        seedFileName=seedFileName,
+        fTable=facies_table,
+        fTable_blockedWell=fTable_blockedWell,
+        fTable_blockedWellLog=fTable_blockedWellLog,
+        debug_level=debug_level,
+    )
+    for zone_description in zone_descriptions:
+        addZoneParam(apsmodel, **zone_description)
+    for zone_number, region_number in zone_region_selections:
+        apsmodel.setSelectedZoneAndRegionNumber(zone_number, region_number)
+        apsmodel.setPreviewZoneAndRegionNumber(zone_number, region_number)
+    return apsmodel
+
+
+@pytest.mark.parametrize(
+    [
+        'facies_table',
+        'zone_descriptions',
+        'zone_region_selections',
+        'debug_level',
+    ],
+    [
+        (
+            {2: 'F2', 1: 'F1', 3: 'F3'},
+            [
+                ZoneDescription(
+                    zoneNumber=1,
+                    regionNumber=0,
+                    simBoxThickness=4.0,
+                    # Facies prob for zone
+                    faciesInZone=['F1', 'F2'],
+                    useConstProb=True,
+                    faciesProbList=[0.4, 0.6],
+                    # Gauss field parameters. One entry in list for each gauss field
+                    gaussFieldsInZone=['GRF1', 'GRF2'],
+                    gfTypes=['GENERAL_EXPONENTIAL', 'SPHERICAL'],
+                    range1=[2000.0, 1500.0],
+                    range2=[1400.0, 750.0],
+                    range3=[2.0, 1.0],
+                    azimuthVariogramAngles=[35.0, 125.0],
+                    dipVariogramAngles=[0.0, 0.1],
+                    power=[1.8, 1.0],
+                    range1FmuUpdatable=[False, False],
+                    range2FmuUpdatable=[False, False],
+                    range3FmuUpdatable=[False, False],
+                    azimuthVariogramAnglesFmuUpdatable=[False, False],
+                    dipVariogramAnglesFmuUpdatable=[False, False],
+                    powerFmuUpdatable=[False, False],
+                    # Trend parameters. One entry in list for each gauss field
+                    useTrend=[True, False],
+                    relStdDev=[0.05, 0.0],
+                    relStdDevFmuUpdatable=[True, True],
+                    azimuthAngle=[125.0, 0.0],
+                    stackingAngle=[0.1, 0.0],
+                    azimuthAngleFmuUpdatable=[True, True],
+                    stackingAngleFmuUpdatable=[True, True],
+                    direction=[1, 1],
+                    trendType=[TrendType.LINEAR, TrendType.LINEAR],
+                    previewSeed=[9282727, 96785],
+                    # Truncation rule
+                    truncType='Cubic',
+                    alphaFieldNameForBackGroundFacies=['GRF1', 'GRF2'],
+                    truncStructureList=[
+                        'V',
+                        ['F1', 1.0, 1, 0, 0],
+                        ['F2', 1.0, 2, 0, 0],
+                    ],
+                    overlayGroups=[],
+                    useConstTruncParam=True,
+                    sf_value=0.0,
+                    sf_name=None,
+                    ysf=0.0,
+                    sbhd=0.0,
+                    grid_layouts=['TopConform', 'TopConform'],
+                ),
+            ],
+            [
+                [1, 0],
+            ],
+            Debug.VERY_VERBOSE,
+        ),
+        (
+            {2: 'F2', 1: 'F1', 3: 'F3'},
+            [
+                ZoneDescription(
+                    zoneNumber=1,
+                    regionNumber=0,
+                    simBoxThickness=4.0,
+                    # Facies prob for zone
+                    faciesInZone=['F1', 'F2'],
+                    useConstProb=True,
+                    faciesProbList=[0.4, 0.6],
+                    # Gauss field parameters. One entry in list for each gauss field
+                    gaussFieldsInZone=['GRF1', 'GRF2'],
+                    gfTypes=['GENERAL_EXPONENTIAL', 'SPHERICAL'],
+                    range1=[2000.0, 1500.0],
+                    range2=[1400.0, 750.0],
+                    range3=[2.0, 1.0],
+                    azimuthVariogramAngles=[35.0, 125.0],
+                    dipVariogramAngles=[0.0, 0.1],
+                    power=[1.8, 1.0],
+                    range1FmuUpdatable=[False, False],
+                    range2FmuUpdatable=[False, False],
+                    range3FmuUpdatable=[False, False],
+                    azimuthVariogramAnglesFmuUpdatable=[False, False],
+                    dipVariogramAnglesFmuUpdatable=[False, False],
+                    powerFmuUpdatable=[False, False],
+                    # Trend parameters. One entry in list for each gauss field
+                    useTrend=[True, False],
+                    relStdDev=[0.05, 0.0],
+                    relStdDevFmuUpdatable=[True, True],
+                    azimuthAngle=[125.0, 0.0],
+                    stackingAngle=[0.1, 0.0],
+                    azimuthAngleFmuUpdatable=[True, True],
+                    stackingAngleFmuUpdatable=[True, True],
+                    direction=[1, 1],
+                    trendType=[TrendType.LINEAR, TrendType.LINEAR],
+                    previewSeed=[9282727, 96785],
+                    # Truncation rule
+                    truncType='Cubic',
+                    alphaFieldNameForBackGroundFacies=['GRF1', 'GRF2'],
+                    truncStructureList=[
+                        'V',
+                        ['F1', 1.0, 1, 0, 0],
+                        ['F2', 1.0, 2, 0, 0],
+                    ],
+                    overlayGroups=[],
+                    useConstTruncParam=True,
+                    sf_value=0.0,
+                    sf_name=None,
+                    ysf=0.0,
+                    sbhd=0.0,
+                    grid_layouts=['TopConform', 'TopConform'],
+                    debug_level=NO_VERBOSE_DEBUG,
+                ),
+                ZoneDescription(
+                    zoneNumber=2,
+                    regionNumber=0,
+                    simBoxThickness=12.0,
+                    # Facies prob for zone
+                    faciesInZone=['F3', 'F1', 'F2'],
+                    useConstProb=False,
+                    faciesProbList=['F3_prob', 'F1_prob', 'F2_prob'],
+                    # Gauss field parameters. One entry in list for each gauss field
+                    gaussFieldsInZone=['GRF3', 'GRF4', 'GRF5'],
+                    gfTypes=['GENERAL_EXPONENTIAL', 'SPHERICAL', 'EXPONENTIAL'],
+                    range1=[2000.0, 1500.0, 6000.0],
+                    range2=[1400.0, 750.0, 250.0],
+                    range3=[2.0, 1.0, 4.5],
+                    azimuthVariogramAngles=[35.0, 125.0, 315.0],
+                    dipVariogramAngles=[0.01, 0.0, 0.0],
+                    power=[1.8, 1.0, 1.0],
+                    range1FmuUpdatable=[True, False, True],
+                    range2FmuUpdatable=[True, False, True],
+                    range3FmuUpdatable=[True, False, True],
+                    azimuthVariogramAnglesFmuUpdatable=[True, False, True],
+                    dipVariogramAnglesFmuUpdatable=[True, False, True],
+                    powerFmuUpdatable=[True, False, True],
+                    # Trend parameters. One entry in list for each gauss field
+                    useTrend=[False, True, False],
+                    relStdDev=[0, 0.05, 0],
+                    relStdDevFmuUpdatable=[True, True, True],
+                    azimuthAngle=[0.0, 125.0, 0.0],
+                    stackingAngle=[0.0, 0.1, 0.0],
+                    azimuthAngleFmuUpdatable=[True, True, True],
+                    stackingAngleFmuUpdatable=[True, True, True],
+                    direction=[1, -1, 1],
+                    trendType=[
+                        TrendType.LINEAR,
+                        TrendType.ELLIPTIC,
+                        TrendType.ELLIPTIC,
+                    ],
+                    curvature=[1.0, 2.0, 1.0],
+                    curvatureFmuUpdatable=[True, True, True],
+                    migrationAngle=[0, 0, 0],
+                    migrationAngleFmuUpdatable=[True, True, True],
+                    origin_x=[0.5, 0.5, 0.5],
+                    origin_y=[0.0, 0.0, 0.0],
+                    origin_z_simbox=[0.0, 0.0, 0.0],
+                    originFmuUpdatable=[True, True, True],
+                    origin_type=[
+                        OriginType.RELATIVE,
+                        OriginType.RELATIVE,
+                        OriginType.RELATIVE,
+                    ],
+                    previewSeed=[8727, 977727, 776785],
+                    # Truncation rule
+                    truncType='Angle',
+                    alphaFieldNameForBackGroundFacies=['GRF3', 'GRF4'],
+                    truncStructureList=[
+                        ['F1', 0.0, 1.0, True],
+                        ['F3', 45.0, 1.0, False],
+                    ],
+                    overlayGroups=[[[['GRF5', 'F2', 1.0, 0.5]], ['F1', 'F3']]],
+                    useConstTruncParam=True,
+                    grid_layouts=['TopConform', 'TopConform', 'TopConform'],
+                    debug_level=NO_VERBOSE_DEBUG,
+                ),
+            ],
+            [
+                [1, 0],
+                [2, 0],
+            ],
+            Debug.ON,
+        ),
+        (
+            {2: 'F2', 1: 'F1', 3: 'F3', 4: 'F4', 5: 'F5', 6: 'F6', 7: 'F7'},
+            [
+                ZoneDescription(
+                    zoneNumber=1,
+                    regionNumber=0,
+                    simBoxThickness=4.0,
+                    # Facies prob for zone
+                    faciesInZone=['F1', 'F2', 'F5', 'F7'],
+                    useConstProb=True,
+                    faciesProbList=[0.4, 0.5, 0.03, 0.07],
+                    # Gauss field parameters. One entry in list for each gauss field
+                    gaussFieldsInZone=['GRF6', 'GRF7', 'GRF8', 'GRF9'],
+                    gfTypes=[
+                        'GENERAL_EXPONENTIAL',
+                        'SPHERICAL',
+                        'EXPONENTIAL',
+                        'GENERAL_EXPONENTIAL',
+                    ],
+                    range1=[3000.0, 1500.0, 2500.0, 750.0],
+                    range2=[1400.0, 750.0, 800.0, 5200.0],
+                    range3=[2.0, 1.0, 4.0, 120.0],
+                    azimuthVariogramAngles=[35.0, 125.0, 95.0, 323.0],
+                    dipVariogramAngles=[0.01, 0.0, 0.0, 0.02],
+                    power=[1.8, 1.0, 1.0, 1.95],
+                    range1FmuUpdatable=[True, True, True, True],
+                    range2FmuUpdatable=[True, True, True, True],
+                    range3FmuUpdatable=[True, True, True, True],
+                    azimuthVariogramAnglesFmuUpdatable=[True, True, True, True],
+                    dipVariogramAnglesFmuUpdatable=[True, True, True, True],
+                    powerFmuUpdatable=[True, True, True, True],
+                    # Trend parameters. One entry in list for each gauss field
+                    useTrend=[True, False, False, False],
+                    relStdDev=[0.05, 0, 0, 0],
+                    relStdDevFmuUpdatable=[True, True, True, True],
+                    azimuthAngle=[125.0, 0.0, 0.0, 0.0],
+                    stackingAngle=[0.1, 0.0, 0.0, 0.0],
+                    azimuthAngleFmuUpdatable=[True, True, True, True],
+                    stackingAngleFmuUpdatable=[True, True, True, True],
+                    direction=[1, 1, 1, 1],
+                    trendType=[
+                        TrendType.HYPERBOLIC,
+                        TrendType.ELLIPTIC,
+                        TrendType.ELLIPTIC,
+                        TrendType.ELLIPTIC,
+                    ],
+                    curvature=[2.0, 2.0, 1.0, 1.0],
+                    curvatureFmuUpdatable=[True, True, True, True],
+                    migrationAngle=[88.0, 0, 0, 0],
+                    migrationAngleFmuUpdatable=[True, True, True, True],
+                    origin_x=[0.5, 0.5, 0.5, 0.5],
+                    origin_y=[0.5, 0.0, 0.0, 0.0],
+                    origin_z_simbox=[0.5, 0.0, 0.0, 0.0],
+                    originFmuUpdatable=[True, True, True, True],
+                    origin_type=[
+                        OriginType.RELATIVE,
+                        OriginType.RELATIVE,
+                        OriginType.RELATIVE,
+                        OriginType.RELATIVE,
+                    ],
+                    previewSeed=[9282727, 96785, 88760019, 8156827],
+                    # Truncation rule
+                    truncType='Cubic',
+                    alphaFieldNameForBackGroundFacies=['GRF6', 'GRF7'],
+                    truncStructureList=[
+                        'H',
+                        ['F1', 1.0, 1, 0, 0],
+                        ['F2', 1.0, 2, 0, 0],
+                    ],
+                    overlayGroups=[
+                        [[['GRF8', 'F5', 1.0, 0.0]], ['F1']],
+                        [[['GRF9', 'F7', 1.0, 0.8]], ['F2']],
+                    ],
+                    useConstTruncParam=True,
+                    grid_layouts=[
+                        'TopConform',
+                        'TopConform',
+                        'TopConform',
+                        'TopConform',
+                    ],
+                    debug_level=NO_VERBOSE_DEBUG,
+                ),
+            ],
+            [
+                [1, 0],
+            ],
+            Debug.ON,
+        ),
+        (
+            {2: 'F2', 1: 'F1', 3: 'F3', 4: 'F4', 5: 'F5', 6: 'F6', 7: 'F7'},
+            [
+                ZoneDescription(
+                    zoneNumber=1,
+                    regionNumber=0,
+                    simBoxThickness=4.0,
+                    # Facies prob for zone
+                    faciesInZone=['F1', 'F2', 'F5', 'F7'],
+                    useConstProb=True,
+                    faciesProbList=[0.4, 0.5, 0.03, 0.07],
+                    # Gauss field parameters. One entry in list for each gauss field
+                    gaussFieldsInZone=['GRF6', 'GRF7', 'GRF8', 'GRF9'],
+                    gfTypes=[
+                        'GENERAL_EXPONENTIAL',
+                        'SPHERICAL',
+                        'EXPONENTIAL',
+                        'GENERAL_EXPONENTIAL',
+                    ],
+                    range1=[3000.0, 1500.0, 2500.0, 750.0],
+                    range2=[1400.0, 750.0, 800.0, 5200.0],
+                    range3=[2.0, 1.0, 4.0, 120.0],
+                    azimuthVariogramAngles=[35.0, 125.0, 95.0, 323.0],
+                    dipVariogramAngles=[0.01, 0.0, 0.0, 0.02],
+                    power=[1.8, 1.0, 1.0, 1.95],
+                    range1FmuUpdatable=[True, True, True, True],
+                    range2FmuUpdatable=[True, True, True, True],
+                    range3FmuUpdatable=[True, True, True, True],
+                    azimuthVariogramAnglesFmuUpdatable=[True, True, True, True],
+                    dipVariogramAnglesFmuUpdatable=[True, True, True, True],
+                    powerFmuUpdatable=[True, True, True, True],
+                    # Trend parameters. One entry in list for each gauss field
+                    useTrend=[True, False, False, False],
+                    relStdDev=[0.05, 0, 0, 0],
+                    relStdDevFmuUpdatable=[True, True, True, True],
+                    azimuthAngle=[125.0, 0.0, 0.0, 0.0],
+                    stackingAngle=[0.1, 0.0, 0.0, 0.0],
+                    azimuthAngleFmuUpdatable=[True, True, True, True],
+                    stackingAngleFmuUpdatable=[True, True, True, True],
+                    direction=[1, 1, 1, 1],
+                    trendType=[
+                        TrendType.HYPERBOLIC,
+                        TrendType.ELLIPTIC,
+                        TrendType.ELLIPTIC,
+                        TrendType.ELLIPTIC,
+                    ],
+                    curvature=[2.0, 2.0, 1.0, 1.0],
+                    curvatureFmuUpdatable=[True, True, True, True],
+                    migrationAngle=[88.0, 0, 0, 0],
+                    migrationAngleFmuUpdatable=[True, True, True, True],
+                    origin_x=[0.5, 0.5, 0.5, 0.5],
+                    origin_y=[0.5, 0.0, 0.0, 0.0],
+                    origin_z_simbox=[0.5, 0.0, 0.0, 0.0],
+                    originFmuUpdatable=[True, True, True, True],
+                    origin_type=[
+                        OriginType.RELATIVE,
+                        OriginType.RELATIVE,
+                        OriginType.RELATIVE,
+                        OriginType.RELATIVE,
+                    ],
+                    previewSeed=[9282727, 96785, 88760019, 8156827],
+                    # Truncation rule
+                    truncType='Cubic',
+                    alphaFieldNameForBackGroundFacies=['GRF6', 'GRF7'],
+                    truncStructureList=[
+                        'H',
+                        ['F1', 1.0, 1, 0, 0],
+                        ['F2', 1.0, 2, 0, 0],
+                    ],
+                    overlayGroups=[
+                        [[['GRF8', 'F5', 1.0, 0.0]], ['F1']],
+                        [[['GRF9', 'F7', 1.0, 0.8]], ['F2']],
+                    ],
+                    useConstTruncParam=True,
+                    grid_layouts=[
+                        'TopConform',
+                        'TopConform',
+                        'TopConform',
+                        'TopConform',
+                    ],
+                    debug_level=NO_VERBOSE_DEBUG,
+                ),
+                ZoneDescription(
+                    zoneNumber=2,
+                    regionNumber=0,
+                    simBoxThickness=12.0,
+                    # Facies prob for zone
+                    faciesInZone=['F3', 'F1', 'F2', 'F5', 'F6', 'F7'],
+                    useConstProb=False,
+                    faciesProbList=[
+                        'F3_prob',
+                        'F1_prob',
+                        'F2_prob',
+                        'F5_prob',
+                        'F6_prob',
+                        'F7_prob',
+                    ],
+                    # Gauss field parameters. One entry in list for each gauss field
+                    gaussFieldsInZone=['GRF6', 'GRF7', 'GRF8', 'GRF9'],
+                    gfTypes=[
+                        'GENERAL_EXPONENTIAL',
+                        'SPHERICAL',
+                        'EXPONENTIAL',
+                        'GENERAL_EXPONENTIAL',
+                    ],
+                    range1=[2000.0, 2500.0, 1500.0, 1750.0],
+                    range2=[1400.0, 750.0, 800.0, 5200.0],
+                    range3=[2.0, 1.0, 4.0, 120.0],
+                    azimuthVariogramAngles=[135.0, 25.0, 75.0, 23.0],
+                    dipVariogramAngles=[0.0, 0.0, 0.01, 0.02],
+                    power=[1.8, 1.0, 1.0, 1.95],
+                    range1FmuUpdatable=[True, True, True, True],
+                    range2FmuUpdatable=[True, True, True, True],
+                    range3FmuUpdatable=[True, True, True, True],
+                    azimuthVariogramAnglesFmuUpdatable=[True, True, True, True],
+                    dipVariogramAnglesFmuUpdatable=[True, True, True, True],
+                    powerFmuUpdatable=[True, True, True, True],
+                    # Trend parameters. One entry in list for each gauss field
+                    useTrend=[True, False, True, False],
+                    relStdDev=[0.05, 0, 0.03, 0],
+                    relStdDevFmuUpdatable=[True, True, True, True],
+                    azimuthAngle=[125.0, 0.0, 90.0, 0.0],
+                    stackingAngle=[0.1, 0.0, 0.01, 0.0],
+                    azimuthAngleFmuUpdatable=[True, True, True, True],
+                    stackingAngleFmuUpdatable=[True, True, True, True],
+                    direction=[1, 1, -1, 1],
+                    trendType=[
+                        TrendType.HYPERBOLIC,
+                        TrendType.ELLIPTIC,
+                        TrendType.ELLIPTIC,
+                        TrendType.ELLIPTIC,
+                    ],
+                    curvature=[10.0, 2.0, 1.0, 1.0],
+                    curvatureFmuUpdatable=[True, True, True, True],
+                    migrationAngle=[88.0, 0, 0, 0],
+                    migrationAngleFmuUpdatable=[True, True, True, True],
+                    origin_x=[0.5, 0.5, 0.5, 0.5],
+                    origin_y=[0.5, 0.0, 0.0, 0.0],
+                    origin_z_simbox=[0.5, 0.0, 0.0, 0.0],
+                    originFmuUpdatable=[True, True, True, True],
+                    origin_type=[
+                        OriginType.RELATIVE,
+                        OriginType.RELATIVE,
+                        OriginType.RELATIVE,
+                        OriginType.RELATIVE,
+                    ],
+                    previewSeed=[9282727, 96785, 88760019, 8156827],
+                    # Truncation rule
+                    truncType='Angle',
+                    alphaFieldNameForBackGroundFacies=['GRF6', 'GRF7'],
+                    truncStructureList=[
+                        ['F1', 0.0, 1.0, True],
+                        ['F3', 45.0, 1.0, True],
+                        ['F2', -35.0, 1.0, True],
+                        ['F5', 145.0, 1.0, True],
+                    ],
+                    overlayGroups=[
+                        [[['GRF8', 'F6', 1.0, 0.5]], ['F1', 'F3']],
+                        [[['GRF9', 'F7', 1.0, 0.7]], ['F2', 'F5']],
+                    ],
+                    useConstTruncParam=True,
+                    grid_layouts=[
+                        'TopConform',
+                        'TopConform',
+                        'TopConform',
+                        'TopConform',
+                    ],
+                    debug_level=NO_VERBOSE_DEBUG,
+                ),
+            ],
+            [
+                [1, 0],
+                [2, 0],
+            ],
+            Debug.ON,
+        ),
+        (
+            {2: 'F2', 1: 'F1', 3: 'F3', 4: 'F4', 5: 'F5', 6: 'F6', 7: 'F7'},
+            [
+                ZoneDescription(
+                    zoneNumber=1,
+                    regionNumber=0,
+                    simBoxThickness=4.0,
+                    # Facies prob for zone
+                    faciesInZone=['F1', 'F2', 'F5', 'F7', 'F3'],
+                    useConstProb=True,
+                    faciesProbList=[0.4, 0.4, 0.03, 0.07, 0.1],
+                    # Gauss field parameters. One entry in list for each gauss field
+                    gaussFieldsInZone=['GRF6', 'GRF7', 'GRF8', 'GRF9'],
+                    gfTypes=[
+                        'GENERAL_EXPONENTIAL',
+                        'SPHERICAL',
+                        'EXPONENTIAL',
+                        'GENERAL_EXPONENTIAL',
+                    ],
+                    range1=[3000.0, 1500.0, 2500.0, 750.0],
+                    range2=[1400.0, 750.0, 800.0, 5200.0],
+                    range3=[2.0, 1.0, 4.0, 120.0],
+                    azimuthVariogramAngles=[35.0, 125.0, 95.0, 323.0],
+                    dipVariogramAngles=[0.01, 0.0, 0.0, 0.02],
+                    power=[1.8, 1.0, 1.0, 1.95],
+                    range1FmuUpdatable=[True, False, True, False],
+                    range2FmuUpdatable=[True, False, True, False],
+                    range3FmuUpdatable=[True, False, True, False],
+                    azimuthVariogramAnglesFmuUpdatable=[True, False, True, False],
+                    dipVariogramAnglesFmuUpdatable=[True, False, True, False],
+                    powerFmuUpdatable=[True, False, True, False],
+                    # Trend parameters. One entry in list for each gauss field
+                    useTrend=[True, False, False, False],
+                    relStdDev=[0.05, 0, 0, 0],
+                    relStdDevFmuUpdatable=[True, True, True, True],
+                    azimuthAngle=[125.0, 0.0, 0.0, 0.0],
+                    stackingAngle=[0.1, 0.0, 0.0, 0.0],
+                    azimuthAngleFmuUpdatable=[True, True, True, True],
+                    stackingAngleFmuUpdatable=[True, True, True, True],
+                    direction=[1, 1, 1, 1],
+                    trendType=[
+                        TrendType.HYPERBOLIC,
+                        TrendType.ELLIPTIC,
+                        TrendType.ELLIPTIC,
+                        TrendType.ELLIPTIC,
+                    ],
+                    curvature=[6.1, 2.0, 1.0, 1.0],
+                    curvatureFmuUpdatable=[True, True, True, True],
+                    migrationAngle=[0.0, 0.0, 0.0, 0.0],
+                    migrationAngleFmuUpdatable=[True, True, True, True],
+                    origin_x=[450000.0, 0.5, 0.5, 0.5],
+                    origin_y=[6000000.0, 0.5, 0.0, 0.0],
+                    origin_z_simbox=[0.5, 0.0, 0.0, 0.0],
+                    originFmuUpdatable=[True, True, True, True],
+                    origin_type=[
+                        OriginType.ABSOLUTE,
+                        OriginType.RELATIVE,
+                        OriginType.RELATIVE,
+                        OriginType.RELATIVE,
+                    ],
+                    previewSeed=[9282727, 96785, 88760019, 8156827],
+                    # Truncation rule
+                    truncType='Bayfill',
+                    alphaFieldNameForBackGroundFacies=['GRF6', 'GRF7', 'GRF8'],
+                    sf_value=0.65,
+                    ysf=0.5,
+                    sbhd=0.55,
+                    useConstTruncParam=True,
+                    faciesInTruncRule=['F1', 'F2', 'F3', 'F5', 'F7'],
+                    grid_layouts=[
+                        'TopConform',
+                        'TopConform',
+                        'TopConform',
+                        'TopConform',
+                    ],
+                    debug_level=NO_VERBOSE_DEBUG,
+                )
+            ],
+            [
+                [1, 0],
+            ],
+            Debug.ON,
+        ),
+        (
+            {2: 'F2', 1: 'F1', 3: 'F3', 4: 'F4', 5: 'F5', 6: 'F6', 7: 'F7'},
+            [
+                ZoneDescription(
+                    zoneNumber=1,
+                    regionNumber=0,
+                    simBoxThickness=4.0,
+                    # Facies prob for zone
+                    faciesInZone=['F1', 'F2', 'F5', 'F7', 'F3'],
+                    useConstProb=True,
+                    faciesProbList=[0.4, 0.4, 0.03, 0.07, 0.1],
+                    # Gauss field parameters. One entry in list for each gauss field
+                    gaussFieldsInZone=['GRF6', 'GRF7', 'GRF8', 'GRF9'],
+                    gfTypes=[
+                        'GENERAL_EXPONENTIAL',
+                        'SPHERICAL',
+                        'EXPONENTIAL',
+                        'GENERAL_EXPONENTIAL',
+                    ],
+                    range1=[3000.0, 1500.0, 2500.0, 750.0],
+                    range2=[1400.0, 750.0, 800.0, 5200.0],
+                    range3=[2.0, 1.0, 4.0, 120.0],
+                    azimuthVariogramAngles=[35.0, 125.0, 95.0, 323.0],
+                    dipVariogramAngles=[0.01, 0.0, 0.0, 0.02],
+                    power=[1.8, 1.0, 1.0, 1.95],
+                    range1FmuUpdatable=[True, False, True, False],
+                    range2FmuUpdatable=[True, False, True, False],
+                    range3FmuUpdatable=[True, False, True, False],
+                    azimuthVariogramAnglesFmuUpdatable=[True, False, True, False],
+                    dipVariogramAnglesFmuUpdatable=[True, False, True, False],
+                    powerFmuUpdatable=[True, False, True, False],
+                    # Trend parameters. One entry in list for each gauss field
+                    useTrend=[True, True, False, False],
+                    relStdDev=[0.05, 0.06, 0, 0],
+                    relStdDevFmuUpdatable=[True, True, True, True],
+                    azimuthAngle=[125.0, 80.0, 0.0, 0.0],
+                    stackingAngle=[0.1, 0.025, 0.0, 0.0],
+                    azimuthAngleFmuUpdatable=[True, True, True, True],
+                    stackingAngleFmuUpdatable=[True, True, True, True],
+                    direction=[1, 1, 1, 1],
+                    trendType=[
+                        TrendType.HYPERBOLIC,
+                        TrendType.ELLIPTIC_CONE,
+                        TrendType.NONE,
+                        TrendType.NONE,
+                    ],
+                    curvature=[2.5, 2.9, 0, 0],
+                    curvatureFmuUpdatable=[True, True, True, True],
+                    migrationAngle=[89.5, 88.0, 0, 0],
+                    migrationAngleFmuUpdatable=[True, True, True, True],
+                    relativeSize=[0, 1.0, 0, 0],
+                    relativeSizeFmuUpdatable=[True, True, True, True],
+                    origin_x=[0.5, 0.5, 0.5, 0.5],
+                    origin_y=[0.0, 0.0, 0.0, 0.0],
+                    origin_z_simbox=[1.0, 1.0, 1.0, 1.0],
+                    originFmuUpdatable=[True, True, True, True],
+                    origin_type=[
+                        OriginType.RELATIVE,
+                        OriginType.RELATIVE,
+                        OriginType.RELATIVE,
+                        OriginType.RELATIVE,
+                    ],
+                    previewSeed=[9282727, 96785, 88760019, 8156827],
+                    # Truncation rule
+                    truncType='Bayfill',
+                    alphaFieldNameForBackGroundFacies=['GRF6', 'GRF7', 'GRF8'],
+                    sf_value=0.65,
+                    ysf=0.5,
+                    sbhd=0.55,
+                    useConstTruncParam=True,
+                    faciesInTruncRule=['F1', 'F2', 'F3', 'F5', 'F7'],
+                    grid_layouts=[
+                        'TopConform',
+                        'TopConform',
+                        'TopConform',
+                        'TopConform',
+                    ],
+                    debug_level=NO_VERBOSE_DEBUG,
+                )
+            ],
+            [
+                [1, 0],
+            ],
+            Debug.ON,
+        ),
+    ],
+)
+def test_read_write_model(
+    aps_model,
+    output_directory,
+    debug_level,
+):
+    outfile1 = output_directory / 'testOut1.xml'
+    attributesFile = output_directory / 'fmu_attributes.yaml'
+    aps_model.write_model(outfile1, attributesFile, debug_level=debug_level)
 
     # Read the xml file into an new APSModel object
     apsmodel2 = APSModel(outfile1, debug_level=debug_level)
-    outfile2 = 'testOut2.xml'
-    attributesFile = 'fmu_attributes.yaml'
+    outfile2 = output_directory / 'testOut2.xml'
+    attributesFile = output_directory / 'fmu_attributes.yaml'
     apsmodel2.write_model(outfile2, attributesFile, debug_level=debug_level)
-    print(f'Compare file: {outfile1} and {outfile2}')
-    check = compare(outfile1, outfile2)
-
-    assert check is True
-    print('')
-
-
-def read_write_model_update(debug_level=Debug.OFF):
-    outfile1 = 'testOut1.xml'
-    # Read the xml file into an new APSModel object
-    apsmodel2 = APSModel(outfile1)
-    outfile2 = 'testOut2.xml'
-    attributes_file = 'fmu_attributes.yaml'
-    apsmodel2.write_model(outfile2, attributes_file, debug_level=debug_level)
     print(f'Compare file: {outfile1} and {outfile2}')
     check = compare(outfile1, outfile2)
 
@@ -426,22 +1156,22 @@ def test_should_not_be_able_to_remove_region_parameter_name_when_at_least_one_zo
 
 
 def test_read_and_write_modelfiles_without_project_name_work_flow_name_and_region_parameter_name(
-    debug_level=Debug.OFF,
+    output_directory,
 ):
-    attributes_file = 'fmu_attributes.yaml'
+    _attributes_file = output_directory / 'fmu_attributes.yaml'
 
     aps_model = create_apsmodel_with_and_without_regions_and_regionparam(False, True)
     aps_model.rms_project_name = None
     aps_model.setRmsWorkflowName(None)
     aps_model.setRmsRegionParamName(None)
 
-    outfile1 = 'testOut4.xml'
-    aps_model.write_model(outfile1, attributes_file, debug_level=Debug.OFF)
+    outfile1 = output_directory / 'testOut4.xml'
+    aps_model.write_model(outfile1, _attributes_file, debug_level=Debug.OFF)
 
     aps_model_2 = APSModel(outfile1, debug_level=Debug.READ)
 
-    outfile2 = 'testOut5.xml'
-    aps_model_2.write_model(outfile2, attributes_file, debug_level=Debug.OFF)
+    outfile2 = output_directory / 'testOut5.xml'
+    aps_model_2.write_model(outfile2, _attributes_file, debug_level=Debug.OFF)
 
     assert compare(outfile1, outfile2)
 
@@ -516,86 +1246,92 @@ def test_variogram_generation():
     apsGaussModel.calc2DVariogramFrom3DVariogram(gfName, gridAzimuthAngle, projection)
 
 
-def test_read_and_write_APSModel():
+def test_read_and_write_aps_model(data_directory, output_directory):
     """
     ******  Case: Read APSModel file and write back APSModel file in sorted order for (zone,region) key *****
             Input has format version 1.0 and output has format version 1.1
     """
-    modelFile = get_model_file_path('testData_models/APS.xml')
     apsmodel = APSModel(
-        model_file_name=modelFile,
+        model_file_name=data_directory / 'APS.xml',
         debug_level=Debug.VERBOSE,
         log_setting=Debug.VERY_VERBOSE,
     )
-    outfile3 = 'testOut3.xml'
-    attributes_file = 'fmu_attributes.yaml'
+    outfile3 = output_directory / 'testOut3.xml'
+    attributes_file = output_directory / 'fmu_attributes.yaml'
     apsmodel.write_model(outfile3, attributes_file)
-    reference_file = 'testData_models/APS_sorted.xml'
+    reference_file = data_directory / 'APS_sorted.xml'
     check = compare(outfile3, reference_file)
     assert check is True, f'Compare file: {outfile3} and {reference_file}'
 
 
-def test_read_and_write_APSModel_with_job_settings_version1():
+def test_read_and_write_aps_model_with_job_settings_version1(
+    data_directory, output_directory
+):
     """
     ******  Case: Read APSModel file and write back APSModel file with job settings extension
             Input has format version 1.1 and output has format version 1.1
     """
-    modelFile = get_model_file_path('testData_models/APS_with_job_settings.xml')
-    apsmodel = APSModel(model_file_name=modelFile, log_setting=Debug.VERY_VERBOSE)
-    outfile3 = 'testOut3B.xml'
-    attributes_file = 'fmu_attributes.yaml'
+    apsmodel = APSModel(
+        model_file_name=data_directory / 'APS_with_job_settings.xml',
+        log_setting=Debug.VERY_VERBOSE,
+    )
+    outfile3 = output_directory / 'testOut3B.xml'
+    attributes_file = output_directory / 'fmu_attributes.yaml'
     apsmodel.write_model(outfile3, attributes_file)
-    reference_file = 'testData_models/APS_with_job_settings_out.xml'
+    reference_file = data_directory / 'APS_with_job_settings_out.xml'
     check = compare(outfile3, reference_file)
     assert check is True, f'Compare file: {outfile3} and {reference_file}'
 
 
-def test_read_and_write_APSModel_with_job_settings_version2():
+def test_read_and_write_aps_model_with_job_settings_version2(
+    data_directory, output_directory
+):
     """
     ******  Case: Read APSModel file and write back APSModel file with job settings extension
             Input has format version 1.0 and output has format version 1.0
     """
-    modelFile = get_model_file_path('testData_models/APS.xml')
     apsmodel = APSModel(
-        model_file_name=modelFile,
+        model_file_name=data_directory / 'APS.xml',
         debug_level=Debug.VERY_VERBOSE,
         log_setting=Debug.VERBOSE,
         aps_model_version='1.0',
     )
-    outfile3 = 'testOut3C.xml'
-    attributes_file = 'fmu_attributes.yaml'
+    outfile3 = output_directory / 'testOut3C.xml'
+    attributes_file = output_directory / 'fmu_attributes.yaml'
     apsmodel.write_model(outfile3, attributes_file)
-    reference_file = 'testData_models/APS_without_job_settings.xml'
+    reference_file = data_directory / 'APS_without_job_settings.xml'
     check = compare(outfile3, reference_file)
     assert check is True, f'Compare file: {outfile3} and {reference_file}'
 
 
-def test_read_and_write_APSModel_with_job_settings_version3():
+def test_read_and_write_aps_model_with_job_settings_version3(
+    data_directory, output_directory
+):
     """
     ******  Case: Read APSModel file and write back APSModel file with job settings extension
             Input has format version 1.1 and output has format version 1.0
     """
-    modelFile = get_model_file_path('testData_models/APS_with_job_settings.xml')
     apsmodel = APSModel(
-        model_file_name=modelFile,
+        model_file_name=data_directory / 'APS_with_job_settings.xml',
         debug_level=Debug.VERY_VERBOSE,
         log_setting=Debug.VERBOSE,
         aps_model_version='1.0',
     )
-    outfile3 = 'testOut3D.xml'
-    attributes_file = 'fmu_attributes.yaml'
+    outfile3 = output_directory / 'testOut3D.xml'
+    attributes_file = output_directory / 'fmu_attributes.yaml'
     apsmodel.write_model(outfile3, attributes_file)
-    reference_file = 'testData_models/APS_without_job_settings2.xml'
+    reference_file = data_directory / 'APS_without_job_settings2.xml'
     check = compare(outfile3, reference_file)
     assert check is True, f'Compare file: {outfile3} and {reference_file}'
 
 
-def test_updating_model1():
+def test_updating_model1(data_directory, output_directory):
     print('***** Case: Update parameters case 1 *****')
     # Test updating of model
-    modelFile = get_model_file_path('testData_models/APS.xml')
     apsmodel = APSModel(
-        model_file_name=modelFile, debug_level=Debug.VERBOSE, log_setting=Debug.VERBOSE
+        model_file_name=data_directory / 'APS.xml',
+        debug_level=Debug.VERBOSE,
+        log_setting=Debug.VERBOSE,
     )
     # Do some updates of the model
     zoneNumber = 1
@@ -678,21 +1414,22 @@ def test_updating_model1():
                 gfName, powerFmuUpdatable, zone, 'PowerFmuUpdatable'
             )
 
-    outfile2 = 'testOut1_updated.xml'
-    attributes_file = 'fmu_attributes.yaml'
+    outfile2 = output_directory / 'testOut1_updated.xml'
+    attributes_file = output_directory / 'fmu_attributes.yaml'
     apsmodel.write_model(outfile2, attributes_file, debug_level=Debug.OFF)
-    reference_file = 'testData_models/APS_updated1.xml'
+    reference_file = data_directory / 'APS_updated1.xml'
     print(f'Compare file: {outfile2} and {reference_file}')
     check = compare(outfile2, reference_file)
     assert check is True
 
 
-def test_updating_model2():
+def test_updating_model2(data_directory, output_directory):
     print('***** Case: Update parameters case 2 *****')
     # Test updating of model
-    modelFile = get_model_file_path('testData_models/APS.xml')
     apsmodel = APSModel(
-        model_file_name=modelFile, debug_level=Debug.VERBOSE, log_setting=Debug.VERBOSE
+        model_file_name=data_directory / 'APS.xml',
+        debug_level=Debug.VERBOSE,
+        log_setting=Debug.VERBOSE,
     )
     # Do some updates of the model
     zoneNumber = 2
@@ -743,21 +1480,22 @@ def test_updating_model2():
         if variogramType == VariogramType.GENERAL_EXPONENTIAL:
             power = powerList[i]
             assertPropertyGetterSetter(gfName, power, zone, 'Power')
-    outfile2 = 'testOut2_updated.xml'
-    attributes_file = 'fmu_attributes.yaml'
+    outfile2 = output_directory / 'testOut2_updated.xml'
+    attributes_file = output_directory / 'fmu_attributes.yaml'
     apsmodel.write_model(outfile2, attributes_file, debug_level=Debug.OFF)
-    reference_file = 'testData_models/APS_updated2.xml'
+    reference_file = data_directory / 'APS_updated2.xml'
     print(f'Compare file: {outfile2} and {reference_file}')
     check = compare(outfile2, reference_file)
     assert check is True
 
 
-def test_updating_model3():
+def test_updating_model3(data_directory, output_directory):
     print('***** Case: Update parameters case 3 *****')
     # Test updating of model
-    modelFile = get_model_file_path('testData_models/APS.xml')
     apsmodel = APSModel(
-        model_file_name=modelFile, debug_level=Debug.ON, log_setting=Debug.ON
+        model_file_name=data_directory / 'APS.xml',
+        debug_level=Debug.ON,
+        log_setting=Debug.ON,
     )
     # Do some updates of the model
     zoneNumber = 2
@@ -889,10 +1627,10 @@ def test_updating_model3():
                     trendParamName, trendModelObj, 'trend_parameter_name'
                 )
 
-    outfile3 = 'testOut3_updated.xml'
-    attributes_file = 'fmu_attributes.yaml'
+    outfile3 = output_directory / 'testOut3_updated.xml'
+    attributes_file = output_directory / 'fmu_attributes.yaml'
     apsmodel.write_model(outfile3, attributes_file, debug_level=Debug.OFF)
-    reference_file = 'testData_models/APS_updated3.xml'
+    reference_file = data_directory / 'APS_updated3.xml'
     print(f'Compare file: {outfile3} and {reference_file}')
     check = compare(outfile3, reference_file)
     assert check is True
@@ -917,227 +1655,6 @@ def getSetTrendParameters(value, trend, _property):
     new = getattr(trend, _property)
     assert value == new
     print(_property + ' ' + str(original) + ' -> ' + str(new))
-
-
-def test_case_1():
-    print('\n**** Case number: 1 ****')
-
-    #  --- Zone 1 ---
-    apsmodel = get_case_1_zone_1()
-    read_write_model(apsmodel, Debug.VERY_VERBOSE)
-
-    #  --- Zone 2 ---
-    apsmodel = get_case_1_zone_2()
-    read_write_model(apsmodel, Debug.ON)
-
-
-def test_case_2():
-    print('\n**** Case number: 2 ****')
-
-    #  --- Zone 1 ---
-    apsmodel = get_case_2_zone_1()
-    read_write_model(apsmodel, Debug.ON)
-
-    #  --- Zone 2 ---
-    apsmodel = get_case_2_zone_2()
-    read_write_model(apsmodel, Debug.ON)
-
-
-def test_case_3():
-    print('\n**** Case number: 3 ****')
-
-    #  --- Zone 1 ---
-    apsmodel = get_case_3_zone_1()
-    read_write_model(apsmodel, Debug.ON)
-
-
-def test_case_4():
-    print('\n**** Case number: 4 ****')
-
-    #  --- Zone 1 ---
-    apsmodel = get_case_4_zone_1()
-    read_write_model(apsmodel, Debug.ON)
-
-
-def get_case_1_zone_1():
-    print('Common parameters')
-    fTable = {2: 'F2', 1: 'F1', 3: 'F3'}
-    apsmodel = APSModel()
-    defineCommonModelParam(
-        apsmodel=apsmodel,
-        rmsProject=RMS_PROJECT,
-        rmsWorkflow=RMS_WORKFLOW,
-        gridModelName=GRID_MODEL_NAME,
-        zoneParamName=ZONE_PARAM_NAME,
-        regionParamName=REGION_PARAM_NAME,
-        faciesRealParamNameResult=FACIES_REAL_PARAM_NAME_RESULT,
-        seedFileName=SEED_FILE_NAME,
-        fTable=fTable,
-        fTable_blockedWell='BW',
-        fTable_blockedWellLog='facies',
-        debug_level=Debug.VERY_VERBOSE,
-    )
-    # Only one zone
-    print('Zone: 1')
-    add_zone_1_for_case_1(apsmodel)
-    selectedZoneNumber = 1
-    selectedRegionNumber = 0
-    apsmodel.setSelectedZoneAndRegionNumber(selectedZoneNumber, selectedRegionNumber)
-    apsmodel.setPreviewZoneAndRegionNumber(selectedZoneNumber, selectedRegionNumber)
-    return apsmodel
-
-
-def get_case_1_zone_2():
-    print('Common parameters')
-    fTable = {2: 'F2', 1: 'F1', 3: 'F3'}
-    apsmodel = APSModel()
-    defineCommonModelParam(
-        apsmodel=apsmodel,
-        rmsProject=RMS_PROJECT,
-        rmsWorkflow=RMS_WORKFLOW,
-        gridModelName=GRID_MODEL_NAME,
-        zoneParamName=ZONE_PARAM_NAME,
-        regionParamName=REGION_PARAM_NAME,
-        faciesRealParamNameResult=FACIES_REAL_PARAM_NAME_RESULT,
-        seedFileName=SEED_FILE_NAME,
-        fTable=fTable,
-        fTable_blockedWell='BW',
-        fTable_blockedWellLog='facies',
-        debug_level=Debug.ON,
-    )
-    # Two zones
-    print('Zone: 1')
-    add_zone_1_for_case_1(apsmodel)
-    print('Zone: 2')
-    add_zone_2_for_case_1(apsmodel)
-    selectedZoneNumber = 1
-    selectedRegionNumber = 0
-    apsmodel.setSelectedZoneAndRegionNumber(selectedZoneNumber, selectedRegionNumber)
-
-    selectedZoneNumber = 2
-    selectedRegionNumber = 0
-    apsmodel.setSelectedZoneAndRegionNumber(selectedZoneNumber, selectedRegionNumber)
-    apsmodel.setPreviewZoneAndRegionNumber(selectedZoneNumber, selectedRegionNumber)
-    return apsmodel
-
-
-def get_case_2_zone_1():
-    print('Common parameters')
-    fTable = {2: 'F2', 1: 'F1', 3: 'F3', 4: 'F4', 5: 'F5', 6: 'F6', 7: 'F7'}
-    apsmodel = APSModel()
-    defineCommonModelParam(
-        apsmodel=apsmodel,
-        rmsProject=RMS_PROJECT,
-        rmsWorkflow=RMS_WORKFLOW,
-        gridModelName=GRID_MODEL_NAME,
-        zoneParamName=ZONE_PARAM_NAME,
-        regionParamName=REGION_PARAM_NAME,
-        faciesRealParamNameResult=FACIES_REAL_PARAM_NAME_RESULT,
-        seedFileName=SEED_FILE_NAME,
-        fTable=fTable,
-        fTable_blockedWell='BW',
-        fTable_blockedWellLog='facies',
-        debug_level=Debug.ON,
-    )
-
-    # Only one zone
-    print('Zone: 1')
-    add_zone_1_for_case_2(apsmodel)
-    selectedZoneNumber = 1
-    selectedRegionNumber = 0
-    apsmodel.setSelectedZoneAndRegionNumber(selectedZoneNumber, selectedRegionNumber)
-    apsmodel.setPreviewZoneAndRegionNumber(selectedZoneNumber, selectedRegionNumber)
-    return apsmodel
-
-
-def get_case_2_zone_2():
-    print('Common parameters')
-    fTable = {2: 'F2', 1: 'F1', 3: 'F3', 4: 'F4', 5: 'F5', 6: 'F6', 7: 'F7'}
-    apsmodel = APSModel()
-    defineCommonModelParam(
-        apsmodel=apsmodel,
-        rmsProject=RMS_PROJECT,
-        rmsWorkflow=RMS_WORKFLOW,
-        gridModelName=GRID_MODEL_NAME,
-        zoneParamName=ZONE_PARAM_NAME,
-        regionParamName=REGION_PARAM_NAME,
-        faciesRealParamNameResult=FACIES_REAL_PARAM_NAME_RESULT,
-        seedFileName=SEED_FILE_NAME,
-        fTable=fTable,
-        fTable_blockedWell='BW',
-        fTable_blockedWellLog='facies',
-        debug_level=Debug.ON,
-    )
-    # Two zones
-    print('Zone: 1')
-    add_zone_1_for_case_2(apsmodel)
-    print('Zone: 2')
-    add_zone_2_for_case_2(apsmodel)
-    selectedZoneNumber = 1
-    selectedRegionNumber = 0
-    apsmodel.setSelectedZoneAndRegionNumber(selectedZoneNumber, selectedRegionNumber)
-
-    selectedZoneNumber = 2
-    selectedRegionNumber = 0
-    apsmodel.setSelectedZoneAndRegionNumber(selectedZoneNumber, selectedRegionNumber)
-    apsmodel.setPreviewZoneAndRegionNumber(selectedZoneNumber, selectedRegionNumber)
-    return apsmodel
-
-
-def get_case_3_zone_1():
-    print('Common parameters')
-    fTable = {2: 'F2', 1: 'F1', 3: 'F3', 4: 'F4', 5: 'F5', 6: 'F6', 7: 'F7'}
-    apsmodel = APSModel()
-    defineCommonModelParam(
-        apsmodel=apsmodel,
-        rmsProject=RMS_PROJECT,
-        rmsWorkflow=RMS_WORKFLOW,
-        gridModelName=GRID_MODEL_NAME,
-        zoneParamName=ZONE_PARAM_NAME,
-        regionParamName=REGION_PARAM_NAME,
-        faciesRealParamNameResult=FACIES_REAL_PARAM_NAME_RESULT,
-        seedFileName=SEED_FILE_NAME,
-        fTable=fTable,
-        fTable_blockedWell='BW',
-        fTable_blockedWellLog='facies',
-        debug_level=Debug.ON,
-    )
-    # Only one zone
-    print('Zone: 1')
-    add_zone_1_for_case_3(apsmodel)
-    selectedZoneNumber = 1
-    selectedRegionNumber = 0
-    apsmodel.setSelectedZoneAndRegionNumber(selectedZoneNumber, selectedRegionNumber)
-    apsmodel.setPreviewZoneAndRegionNumber(selectedZoneNumber, selectedRegionNumber)
-    return apsmodel
-
-
-def get_case_4_zone_1():
-    print('Common parameters')
-    fTable = {2: 'F2', 1: 'F1', 3: 'F3', 4: 'F4', 5: 'F5', 6: 'F6', 7: 'F7'}
-    apsmodel = APSModel()
-    defineCommonModelParam(
-        apsmodel=apsmodel,
-        rmsProject=RMS_PROJECT,
-        rmsWorkflow=RMS_WORKFLOW,
-        gridModelName=GRID_MODEL_NAME,
-        zoneParamName=ZONE_PARAM_NAME,
-        regionParamName=REGION_PARAM_NAME,
-        faciesRealParamNameResult=FACIES_REAL_PARAM_NAME_RESULT,
-        seedFileName=SEED_FILE_NAME,
-        fTable=fTable,
-        fTable_blockedWell='BW',
-        fTable_blockedWellLog='facies',
-        debug_level=Debug.ON,
-    )
-    # Only one zone
-    print('Zone: 1')
-    add_zone_1_for_case_4(apsmodel)
-    selectedZoneNumber = 1
-    selectedRegionNumber = 0
-    apsmodel.setSelectedZoneAndRegionNumber(selectedZoneNumber, selectedRegionNumber)
-    apsmodel.setPreviewZoneAndRegionNumber(selectedZoneNumber, selectedRegionNumber)
-    return apsmodel
 
 
 def get_apsmodel_with_no_fmu_markers():
@@ -1323,421 +1840,6 @@ def add_zone_without_region_number(apsmodel):
         ysf=0.0,
         sbhd=0.0,
         grid_layouts=['TopConform', 'TopConform'],
-        debug_level=NO_VERBOSE_DEBUG,
-    )
-
-
-def add_zone_1_for_case_1(apsmodel):
-    addZoneParam(
-        apsmodel=apsmodel,
-        zoneNumber=1,
-        regionNumber=0,
-        simBoxThickness=4.0,
-        # Facies prob for zone
-        faciesInZone=['F1', 'F2'],
-        useConstProb=1,
-        faciesProbList=[0.4, 0.6],
-        # Gauss field parameters. One entry in list for each gauss field
-        gaussFieldsInZone=['GRF1', 'GRF2'],
-        gfTypes=['GENERAL_EXPONENTIAL', 'SPHERICAL'],
-        range1=[2000.0, 1500.0],
-        range2=[1400.0, 750.0],
-        range3=[2.0, 1.0],
-        azimuthVariogramAngles=[35.0, 125.0],
-        dipVariogramAngles=[0.0, 0.1],
-        power=[1.8, 1.0],
-        range1FmuUpdatable=[False, False],
-        range2FmuUpdatable=[False, False],
-        range3FmuUpdatable=[False, False],
-        azimuthVariogramAnglesFmuUpdatable=[False, False],
-        dipVariogramAnglesFmuUpdatable=[False, False],
-        powerFmuUpdatable=[False, False],
-        # Trend parameters. One entry in list for each gauss field
-        useTrend=[1, 0],
-        relStdDev=[0.05, 0.0],
-        relStdDevFmuUpdatable=[True, True],
-        azimuthAngle=[125.0, 0.0],
-        stackingAngle=[0.1, 0.0],
-        azimuthAngleFmuUpdatable=[True, True],
-        stackingAngleFmuUpdatable=[True, True],
-        direction=[1, 1],
-        trendType=[TrendType.LINEAR, TrendType.LINEAR],
-        previewSeed=[9282727, 96785],
-        # Truncation rule
-        truncType='Cubic',
-        alphaFieldNameForBackGroundFacies=['GRF1', 'GRF2'],
-        truncStructureList=['V', ['F1', 1.0, 1, 0, 0], ['F2', 1.0, 2, 0, 0]],
-        overlayGroups=[],
-        useConstTruncParam=1,
-        sf_value=0.0,
-        sf_name=None,
-        ysf=0.0,
-        sbhd=0.0,
-        grid_layouts=['TopConform', 'TopConform'],
-        debug_level=NO_VERBOSE_DEBUG,
-    )
-
-
-def add_zone_2_for_case_1(apsmodel):
-    addZoneParam(
-        apsmodel=apsmodel,
-        zoneNumber=2,
-        regionNumber=0,
-        simBoxThickness=12.0,
-        # Facies prob for zone
-        faciesInZone=['F3', 'F1', 'F2'],
-        useConstProb=0,
-        faciesProbList=['F3_prob', 'F1_prob', 'F2_prob'],
-        # Gauss field parameters. One entry in list for each gauss field
-        gaussFieldsInZone=['GRF3', 'GRF4', 'GRF5'],
-        gfTypes=['GENERAL_EXPONENTIAL', 'SPHERICAL', 'EXPONENTIAL'],
-        range1=[2000.0, 1500.0, 6000.0],
-        range2=[1400.0, 750.0, 250.0],
-        range3=[2.0, 1.0, 4.5],
-        azimuthVariogramAngles=[35.0, 125.0, 315.0],
-        dipVariogramAngles=[0.01, 0.0, 0.0],
-        power=[1.8, 1.0, 1.0],
-        range1FmuUpdatable=[True, False, True],
-        range2FmuUpdatable=[True, False, True],
-        range3FmuUpdatable=[True, False, True],
-        azimuthVariogramAnglesFmuUpdatable=[True, False, True],
-        dipVariogramAnglesFmuUpdatable=[True, False, True],
-        powerFmuUpdatable=[True, False, True],
-        # Trend parameters. One entry in list for each gauss field
-        useTrend=[0, 1, 0],
-        relStdDev=[0, 0.05, 0],
-        relStdDevFmuUpdatable=[True, True, True],
-        azimuthAngle=[0.0, 125.0, 0.0],
-        stackingAngle=[0.0, 0.1, 0.0],
-        azimuthAngleFmuUpdatable=[True, True, True],
-        stackingAngleFmuUpdatable=[True, True, True],
-        direction=[1, -1, 1],
-        trendType=[TrendType.LINEAR, TrendType.ELLIPTIC, TrendType.ELLIPTIC],
-        curvature=[1.0, 2.0, 1.0],
-        curvatureFmuUpdatable=[True, True, True],
-        migrationAngle=[0, 0, 0],
-        migrationAngleFmuUpdatable=[True, True, True],
-        origin_x=[0.5, 0.5, 0.5],
-        origin_y=[0.0, 0.0, 0.0],
-        origin_z_simbox=[0.0, 0.0, 0.0],
-        originFmuUpdatable=[True, True, True],
-        origin_type=[OriginType.RELATIVE, OriginType.RELATIVE, OriginType.RELATIVE],
-        previewSeed=[8727, 977727, 776785],
-        # Truncation rule
-        truncType='Angle',
-        alphaFieldNameForBackGroundFacies=['GRF3', 'GRF4'],
-        truncStructureList=[['F1', 0.0, 1.0, True], ['F3', 45.0, 1.0, False]],
-        overlayGroups=[[[['GRF5', 'F2', 1.0, 0.5]], ['F1', 'F3']]],
-        useConstTruncParam=1,
-        grid_layouts=['TopConform', 'TopConform', 'TopConform'],
-        debug_level=NO_VERBOSE_DEBUG,
-    )
-
-
-def add_zone_1_for_case_2(apsmodel):
-    addZoneParam(
-        apsmodel=apsmodel,
-        zoneNumber=1,
-        regionNumber=0,
-        simBoxThickness=4.0,
-        # Facies prob for zone
-        faciesInZone=['F1', 'F2', 'F5', 'F7'],
-        useConstProb=1,
-        faciesProbList=[0.4, 0.5, 0.03, 0.07],
-        # Gauss field parameters. One entry in list for each gauss field
-        gaussFieldsInZone=['GRF6', 'GRF7', 'GRF8', 'GRF9'],
-        gfTypes=[
-            'GENERAL_EXPONENTIAL',
-            'SPHERICAL',
-            'EXPONENTIAL',
-            'GENERAL_EXPONENTIAL',
-        ],
-        range1=[3000.0, 1500.0, 2500.0, 750.0],
-        range2=[1400.0, 750.0, 800.0, 5200.0],
-        range3=[2.0, 1.0, 4.0, 120.0],
-        azimuthVariogramAngles=[35.0, 125.0, 95.0, 323.0],
-        dipVariogramAngles=[0.01, 0.0, 0.0, 0.02],
-        power=[1.8, 1.0, 1.0, 1.95],
-        range1FmuUpdatable=[True, True, True, True],
-        range2FmuUpdatable=[True, True, True, True],
-        range3FmuUpdatable=[True, True, True, True],
-        azimuthVariogramAnglesFmuUpdatable=[True, True, True, True],
-        dipVariogramAnglesFmuUpdatable=[True, True, True, True],
-        powerFmuUpdatable=[True, True, True, True],
-        # Trend parameters. One entry in list for each gauss field
-        useTrend=[1, 0, 0, 0],
-        relStdDev=[0.05, 0, 0, 0],
-        relStdDevFmuUpdatable=[True, True, True, True],
-        azimuthAngle=[125.0, 0.0, 0.0, 0.0],
-        stackingAngle=[0.1, 0.0, 0.0, 0.0],
-        azimuthAngleFmuUpdatable=[True, True, True, True],
-        stackingAngleFmuUpdatable=[True, True, True, True],
-        direction=[1, 1, 1, 1],
-        trendType=[
-            TrendType.HYPERBOLIC,
-            TrendType.ELLIPTIC,
-            TrendType.ELLIPTIC,
-            TrendType.ELLIPTIC,
-        ],
-        curvature=[2.0, 2.0, 1.0, 1.0],
-        curvatureFmuUpdatable=[True, True, True, True],
-        migrationAngle=[88.0, 0, 0, 0],
-        migrationAngleFmuUpdatable=[True, True, True, True],
-        origin_x=[0.5, 0.5, 0.5, 0.5],
-        origin_y=[0.5, 0.0, 0.0, 0.0],
-        origin_z_simbox=[0.5, 0.0, 0.0, 0.0],
-        originFmuUpdatable=[True, True, True, True],
-        origin_type=[
-            OriginType.RELATIVE,
-            OriginType.RELATIVE,
-            OriginType.RELATIVE,
-            OriginType.RELATIVE,
-        ],
-        previewSeed=[9282727, 96785, 88760019, 8156827],
-        # Truncation rule
-        truncType='Cubic',
-        alphaFieldNameForBackGroundFacies=['GRF6', 'GRF7'],
-        truncStructureList=['H', ['F1', 1.0, 1, 0, 0], ['F2', 1.0, 2, 0, 0]],
-        overlayGroups=[
-            [[['GRF8', 'F5', 1.0, 0.0]], ['F1']],
-            [[['GRF9', 'F7', 1.0, 0.8]], ['F2']],
-        ],
-        useConstTruncParam=1,
-        grid_layouts=['TopConform', 'TopConform', 'TopConform', 'TopConform'],
-        debug_level=NO_VERBOSE_DEBUG,
-    )
-
-
-def add_zone_2_for_case_2(apsmodel):
-    addZoneParam(
-        apsmodel=apsmodel,
-        zoneNumber=2,
-        regionNumber=0,
-        simBoxThickness=12.0,
-        # Facies prob for zone
-        faciesInZone=['F3', 'F1', 'F2', 'F5', 'F6', 'F7'],
-        useConstProb=0,
-        faciesProbList=[
-            'F3_prob',
-            'F1_prob',
-            'F2_prob',
-            'F5_prob',
-            'F6_prob',
-            'F7_prob',
-        ],
-        # Gauss field parameters. One entry in list for each gauss field
-        gaussFieldsInZone=['GRF6', 'GRF7', 'GRF8', 'GRF9'],
-        gfTypes=[
-            'GENERAL_EXPONENTIAL',
-            'SPHERICAL',
-            'EXPONENTIAL',
-            'GENERAL_EXPONENTIAL',
-        ],
-        range1=[2000.0, 2500.0, 1500.0, 1750.0],
-        range2=[1400.0, 750.0, 800.0, 5200.0],
-        range3=[2.0, 1.0, 4.0, 120.0],
-        azimuthVariogramAngles=[135.0, 25.0, 75.0, 23.0],
-        dipVariogramAngles=[0.0, 0.0, 0.01, 0.02],
-        power=[1.8, 1.0, 1.0, 1.95],
-        range1FmuUpdatable=[True, True, True, True],
-        range2FmuUpdatable=[True, True, True, True],
-        range3FmuUpdatable=[True, True, True, True],
-        azimuthVariogramAnglesFmuUpdatable=[True, True, True, True],
-        dipVariogramAnglesFmuUpdatable=[True, True, True, True],
-        powerFmuUpdatable=[True, True, True, True],
-        # Trend parameters. One entry in list for each gauss field
-        useTrend=[1, 0, 1, 0],
-        relStdDev=[0.05, 0, 0.03, 0],
-        relStdDevFmuUpdatable=[True, True, True, True],
-        azimuthAngle=[125.0, 0.0, 90.0, 0.0],
-        stackingAngle=[0.1, 0.0, 0.01, 0.0],
-        azimuthAngleFmuUpdatable=[True, True, True, True],
-        stackingAngleFmuUpdatable=[True, True, True, True],
-        direction=[1, 1, -1, 1],
-        trendType=[
-            TrendType.HYPERBOLIC,
-            TrendType.ELLIPTIC,
-            TrendType.ELLIPTIC,
-            TrendType.ELLIPTIC,
-        ],
-        curvature=[10.0, 2.0, 1.0, 1.0],
-        curvatureFmuUpdatable=[True, True, True, True],
-        migrationAngle=[88.0, 0, 0, 0],
-        migrationAngleFmuUpdatable=[True, True, True, True],
-        origin_x=[0.5, 0.5, 0.5, 0.5],
-        origin_y=[0.5, 0.0, 0.0, 0.0],
-        origin_z_simbox=[0.5, 0.0, 0.0, 0.0],
-        originFmuUpdatable=[True, True, True, True],
-        origin_type=[
-            OriginType.RELATIVE,
-            OriginType.RELATIVE,
-            OriginType.RELATIVE,
-            OriginType.RELATIVE,
-        ],
-        previewSeed=[9282727, 96785, 88760019, 8156827],
-        # Truncation rule
-        truncType='Angle',
-        alphaFieldNameForBackGroundFacies=['GRF6', 'GRF7'],
-        truncStructureList=[
-            ['F1', 0.0, 1.0, True],
-            ['F3', 45.0, 1.0, True],
-            ['F2', -35.0, 1.0, True],
-            ['F5', 145.0, 1.0, True],
-        ],
-        overlayGroups=[
-            [[['GRF8', 'F6', 1.0, 0.5]], ['F1', 'F3']],
-            [[['GRF9', 'F7', 1.0, 0.7]], ['F2', 'F5']],
-        ],
-        useConstTruncParam=1,
-        grid_layouts=['TopConform', 'TopConform', 'TopConform', 'TopConform'],
-        debug_level=NO_VERBOSE_DEBUG,
-    )
-
-
-def add_zone_1_for_case_3(apsmodel):
-    addZoneParam(
-        apsmodel=apsmodel,
-        zoneNumber=1,
-        regionNumber=0,
-        simBoxThickness=4.0,
-        # Facies prob for zone
-        faciesInZone=['F1', 'F2', 'F5', 'F7', 'F3'],
-        useConstProb=1,
-        faciesProbList=[0.4, 0.4, 0.03, 0.07, 0.1],
-        # Gauss field parameters. One entry in list for each gauss field
-        gaussFieldsInZone=['GRF6', 'GRF7', 'GRF8', 'GRF9'],
-        gfTypes=[
-            'GENERAL_EXPONENTIAL',
-            'SPHERICAL',
-            'EXPONENTIAL',
-            'GENERAL_EXPONENTIAL',
-        ],
-        range1=[3000.0, 1500.0, 2500.0, 750.0],
-        range2=[1400.0, 750.0, 800.0, 5200.0],
-        range3=[2.0, 1.0, 4.0, 120.0],
-        azimuthVariogramAngles=[35.0, 125.0, 95.0, 323.0],
-        dipVariogramAngles=[0.01, 0.0, 0.0, 0.02],
-        power=[1.8, 1.0, 1.0, 1.95],
-        range1FmuUpdatable=[True, False, True, False],
-        range2FmuUpdatable=[True, False, True, False],
-        range3FmuUpdatable=[True, False, True, False],
-        azimuthVariogramAnglesFmuUpdatable=[True, False, True, False],
-        dipVariogramAnglesFmuUpdatable=[True, False, True, False],
-        powerFmuUpdatable=[True, False, True, False],
-        # Trend parameters. One entry in list for each gauss field
-        useTrend=[1, 0, 0, 0],
-        relStdDev=[0.05, 0, 0, 0],
-        relStdDevFmuUpdatable=[True, True, True, True],
-        azimuthAngle=[125.0, 0.0, 0.0, 0.0],
-        stackingAngle=[0.1, 0.0, 0.0, 0.0],
-        azimuthAngleFmuUpdatable=[True, True, True, True],
-        stackingAngleFmuUpdatable=[True, True, True, True],
-        direction=[1, 1, 1, 1],
-        trendType=[
-            TrendType.HYPERBOLIC,
-            TrendType.ELLIPTIC,
-            TrendType.ELLIPTIC,
-            TrendType.ELLIPTIC,
-        ],
-        curvature=[6.1, 2.0, 1.0, 1.0],
-        curvatureFmuUpdatable=[True, True, True, True],
-        migrationAngle=[0.0, 0.0, 0.0, 0.0],
-        migrationAngleFmuUpdatable=[True, True, True, True],
-        origin_x=[450000.0, 0.5, 0.5, 0.5],
-        origin_y=[6000000.0, 0.5, 0.0, 0.0],
-        origin_z_simbox=[0.5, 0.0, 0.0, 0.0],
-        originFmuUpdatable=[True, True, True, True],
-        origin_type=[
-            OriginType.ABSOLUTE,
-            OriginType.RELATIVE,
-            OriginType.RELATIVE,
-            OriginType.RELATIVE,
-        ],
-        previewSeed=[9282727, 96785, 88760019, 8156827],
-        # Truncation rule
-        truncType='Bayfill',
-        alphaFieldNameForBackGroundFacies=['GRF6', 'GRF7', 'GRF8'],
-        sf_value=0.65,
-        ysf=0.5,
-        sbhd=0.55,
-        useConstTruncParam=1,
-        faciesInTruncRule=['F1', 'F2', 'F3', 'F5', 'F7'],
-        grid_layouts=['TopConform', 'TopConform', 'TopConform', 'TopConform'],
-        debug_level=NO_VERBOSE_DEBUG,
-    )
-
-
-def add_zone_1_for_case_4(apsmodel):
-    addZoneParam(
-        apsmodel=apsmodel,
-        zoneNumber=1,
-        regionNumber=0,
-        simBoxThickness=4.0,
-        # Facies prob for zone
-        faciesInZone=['F1', 'F2', 'F5', 'F7', 'F3'],
-        useConstProb=1,
-        faciesProbList=[0.4, 0.4, 0.03, 0.07, 0.1],
-        # Gauss field parameters. One entry in list for each gauss field
-        gaussFieldsInZone=['GRF6', 'GRF7', 'GRF8', 'GRF9'],
-        gfTypes=[
-            'GENERAL_EXPONENTIAL',
-            'SPHERICAL',
-            'EXPONENTIAL',
-            'GENERAL_EXPONENTIAL',
-        ],
-        range1=[3000.0, 1500.0, 2500.0, 750.0],
-        range2=[1400.0, 750.0, 800.0, 5200.0],
-        range3=[2.0, 1.0, 4.0, 120.0],
-        azimuthVariogramAngles=[35.0, 125.0, 95.0, 323.0],
-        dipVariogramAngles=[0.01, 0.0, 0.0, 0.02],
-        power=[1.8, 1.0, 1.0, 1.95],
-        range1FmuUpdatable=[True, False, True, False],
-        range2FmuUpdatable=[True, False, True, False],
-        range3FmuUpdatable=[True, False, True, False],
-        azimuthVariogramAnglesFmuUpdatable=[True, False, True, False],
-        dipVariogramAnglesFmuUpdatable=[True, False, True, False],
-        powerFmuUpdatable=[True, False, True, False],
-        # Trend parameters. One entry in list for each gauss field
-        useTrend=[1, 1, 0, 0],
-        relStdDev=[0.05, 0.06, 0, 0],
-        relStdDevFmuUpdatable=[True, True, True, True],
-        azimuthAngle=[125.0, 80.0, 0.0, 0.0],
-        stackingAngle=[0.1, 0.025, 0.0, 0.0],
-        azimuthAngleFmuUpdatable=[True, True, True, True],
-        stackingAngleFmuUpdatable=[True, True, True, True],
-        direction=[1, 1, 1, 1],
-        trendType=[
-            TrendType.HYPERBOLIC,
-            TrendType.ELLIPTIC_CONE,
-            TrendType.NONE,
-            TrendType.NONE,
-        ],
-        curvature=[2.5, 2.9, 0, 0],
-        curvatureFmuUpdatable=[True, True, True, True],
-        migrationAngle=[89.5, 88.0, 0, 0],
-        migrationAngleFmuUpdatable=[True, True, True, True],
-        relativeSize=[0, 1.0, 0, 0],
-        relativeSizeFmuUpdatable=[True, True, True, True],
-        origin_x=[0.5, 0.5, 0.5, 0.5],
-        origin_y=[0.0, 0.0, 0.0, 0.0],
-        origin_z_simbox=[1.0, 1.0, 1.0, 1.0],
-        originFmuUpdatable=[True, True, True, True],
-        origin_type=[
-            OriginType.RELATIVE,
-            OriginType.RELATIVE,
-            OriginType.RELATIVE,
-            OriginType.RELATIVE,
-        ],
-        previewSeed=[9282727, 96785, 88760019, 8156827],
-        # Truncation rule
-        truncType='Bayfill',
-        alphaFieldNameForBackGroundFacies=['GRF6', 'GRF7', 'GRF8'],
-        sf_value=0.65,
-        ysf=0.5,
-        sbhd=0.55,
-        useConstTruncParam=1,
-        faciesInTruncRule=['F1', 'F2', 'F3', 'F5', 'F7'],
-        grid_layouts=['TopConform', 'TopConform', 'TopConform', 'TopConform'],
         debug_level=NO_VERBOSE_DEBUG,
     )
 
@@ -2040,28 +2142,5 @@ def add_bayfill_zone_with_all_fmu_markers(apsmodel):
     )
 
 
-def run():
-    # -------- Main -------
-    print('Start test_createXMLModelFiles')
-
-    test_case_1()
-    test_case_2()
-    test_case_3()
-    test_case_4()
-
-    test_read_and_write_APSModel()
-
-    test_updating_model1()
-    test_updating_model2()
-    test_updating_model3()
-
-    test_should_not_be_able_to_add_zones_with_region_to_apsmodel_when_regionparamname_is_empty()
-    test_should_not_be_able_to_remove_region_parameter_name_when_at_least_one_zone_has_region_number()
-    test_read_and_write_modelfiles_without_project_name_work_flow_name_and_region_parameter_name()
-
-    test_variogram_generation()
-    print('Finished')
-
-
 if __name__ == '__main__':
-    run()
+    pytest.main([__file__])

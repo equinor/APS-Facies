@@ -3,6 +3,7 @@
 import collections
 import copy
 import xml.etree.ElementTree as ET
+from pathlib import Path
 from typing import TYPE_CHECKING, Dict, List, Optional, Tuple, Union
 
 from fmu.tools.rms.zone_mapping import ZoneMapping
@@ -265,7 +266,7 @@ class APSModel:
 
     def __parse_model_file(
         self,
-        model_file_name: FilePath,
+        model_file_name: Path,
         debug_level: Debug = Debug.OFF,
         check_with_grid_model: Optional[bool] = False,
         project=None,
@@ -302,7 +303,7 @@ class APSModel:
         self,
         root: ET.Element,
         debug_level_input: Debug = Debug.OFF,
-        model_file_name: Optional[str] = None,
+        model_file_name: Optional[Path] = None,
         check_with_grid_model: Optional[bool] = False,
         project=None,
     ) -> None:
@@ -678,8 +679,8 @@ class APSModel:
 
     def update_model_file(
         self,
-        model_file_name: Optional[FilePath] = None,
-        parameter_file_name: Optional[FilePath] = None,
+        model_file_name: FilePath,
+        parameter_file_name: Optional[Path] = None,
         project: 'Optional[Project]' = None,
         workflow_name: Optional[str] = None,
         uncertainty_variable_names: Optional[List[str]] = None,
@@ -725,8 +726,8 @@ class APSModel:
                         f'--- Read global variables from file: {parameter_file_name} '
                     )
                 # keywords_read is a list of items where each item is [name, value]
-                keywords_read = self.__parse_global_variables(
-                    model_file_name, parameter_file_name, current_job_name, debug_level
+                keywords_read = self._parse_global_variables(
+                    parameter_file_name, current_job_name, debug_level
                 )
 
                 if current_job_name is None:
@@ -861,13 +862,12 @@ class APSModel:
                 # This is a model for a new region for an existing zone number that has several regions
                 zoneNumbers.append(zone_number)
 
-    def __parse_global_variables(
-        self,
-        model_file_name: str,
-        global_variables_file: FilePath,
+    @staticmethod
+    def _parse_global_variables(
+        global_variables_file: Path,
         current_job_name: Optional[str] = None,
         debug_level: Debug = Debug.OFF,
-    ) -> List[Tuple[str, Union[str, float]]]:
+    ) -> List[Tuple[str, Union[str, float]]] | None:
         """Read the global variables file (IPL, or YAML) to get updated model parameters from FMU"""
         # Search through the file line for line and skip lines commented out with '//'
         # Collect all variables that are assigned value as the three first words on a line

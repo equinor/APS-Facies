@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 import difflib
 from filecmp import cmp
-from os.path import exists
 from typing import Union
 
 import numpy as np
 
 from aps.utils.constants.simple import Debug, VariogramType
+from aps.utils.types import FilePath
 
 
 class NormalisationError(ValueError):
@@ -182,16 +182,11 @@ def check_probability_normalisation(
 
 
 def compare(
-    source: str,
-    reference: str,
+    source: FilePath,
+    reference: FilePath,
     verbose: bool = True,
 ) -> bool:
-    prefix = ''
-    if not exists(reference):
-        prefix = 'aps/unit_test/'
-        if not exists(prefix + reference):
-            prefix += 'integration/'
-    check = cmp(prefix + reference, source)
+    check = cmp(reference, source)
 
     if verbose:
         if check:

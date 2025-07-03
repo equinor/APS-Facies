@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import os
 from genericpath import exists
+from pathlib import Path
 from typing import Any, Callable, List, Union
 
 import numpy as np
@@ -33,10 +34,10 @@ def getFaciesInTruncRule(
 
 def apply_truncations(
     truncRule: TruncationRule,
-    faciesReferenceFile: str,
+    faciesReferenceFile: Path,
     nGaussFields: int,
-    gaussFieldFiles: List[str],
-    faciesOutputFile: str,
+    gaussFieldFiles: List[Path],
+    faciesOutputFile: Path,
     debug_level: Debug = Debug.OFF,
 ) -> None:
     print('In apply_truncations')
@@ -79,7 +80,10 @@ def apply_truncations(
     check = compare(faciesOutputFile, faciesReferenceFile, verbose=False)
     print(f'  Compare file: {faciesReferenceFile} and file: {faciesOutputFile}')
     if check is False:
-        fileName = faciesReferenceFile + '_' + faciesOutputFile + '.tmp'
+        fileName = (
+            faciesReferenceFile.parent
+            / f'{faciesReferenceFile.name}_{faciesOutputFile.name}.tmp'
+        )
         os.rename(faciesOutputFile, fileName)
         print('  Write file: {}'.format(fileName))
         raise ValueError('  Error: Files are different')
@@ -89,10 +93,10 @@ def apply_truncations(
 
 def apply_truncations_vectorized(
     truncRule: TruncationRule,
-    faciesReferenceFile: str,
+    faciesReferenceFile: Path,
     nGaussFields: int,
-    gaussFieldFiles: List[str],
-    faciesOutputFile: str,
+    gaussFieldFiles: List[Path],
+    faciesOutputFile: Path,
     debug_level: Debug = Debug.OFF,
 ) -> None:
     print('In apply_truncations_vectorized')
@@ -147,8 +151,8 @@ def truncMapPolygons(
     truncRule: TruncationRule,
     truncRule2: TruncationRule,
     faciesProb: List[float],
-    outPolyFile1: str,
-    outPolyFile2: str,
+    outPolyFile1: Path,
+    outPolyFile2: Path,
 ) -> None:
     assert faciesProb is not None
     assert truncRule is not None
@@ -175,7 +179,9 @@ def truncMapPolygons(
         print('  Files are equal: OK')
 
 
-def writePolygons(fileName: str, polygons: Any, debug_level: Debug = Debug.OFF) -> None:
+def writePolygons(
+    fileName: Path, polygons: Any, debug_level: Debug = Debug.OFF
+) -> None:
     if debug_level >= Debug.ON:
         print(f'Write file: {fileName}')
     with open(fileName, 'w', encoding='utf-8') as file:
@@ -194,18 +200,13 @@ def writePolygons(fileName: str, polygons: Any, debug_level: Debug = Debug.OFF) 
                 file.write('\n')
 
 
-def get_cubic_facies_reference_file_path(testCase: int) -> str:
-    faciesReferenceFile = 'testData_Cubic/test_case_' + str(testCase) + '.dat'
-    return faciesReferenceFile
-
-
-def get_model_file_path(modelFile: str) -> str:
-    if not exists(modelFile):
-        modelFile = 'aps/unit_test/' + modelFile
-    return modelFile
-
-
-def assert_identical_files(source: str, reference: str) -> None:
+def assert_identical_files(
+    source: Union[str, Path], reference: Union[str, Path]
+) -> None:
+    if isinstance(source, Path):
+        source = str(source.absolute())
+    if isinstance(reference, Path):
+        reference = str(reference.absolute())
     _assert_compare_files(source, reference, compare)
 
 

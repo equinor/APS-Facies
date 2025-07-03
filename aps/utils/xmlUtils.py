@@ -14,7 +14,7 @@ from aps.utils.exceptions.xml import (
     MoreThanExpected,
     ReadingXmlError,
 )
-from aps.utils.types import GaussianFieldName
+from aps.utils.types import FilePath, GaussianFieldName
 
 
 def prettify(
@@ -67,7 +67,7 @@ def getKeyword(
     parent: Element,
     keyword: str,
     parentKeyword: str = '',
-    modelFile: Optional[str] = None,
+    modelFile: Optional[FilePath] = None,
     required: bool = True,
 ) -> Optional[Element]:
     """
@@ -86,7 +86,7 @@ def getTextCommand(
     keyword: str,
     parentKeyword: str = '',
     defaultText: Optional[str] = None,
-    modelFile: Optional[str] = None,
+    modelFile: Optional[FilePath] = None,
     required: bool = True,
 ) -> Optional[str]:
     """

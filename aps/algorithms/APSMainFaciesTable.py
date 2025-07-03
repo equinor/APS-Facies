@@ -1,6 +1,7 @@
 #!/bin/env python
 # -*- coding: utf-8 -*-
 import copy
+from pathlib import Path
 from typing import Dict, List, Optional, Tuple, Union
 from xml.etree.ElementTree import Element, ElementTree
 
@@ -133,7 +134,7 @@ class APSMainFaciesTable:
     def __init__(
         self,
         ET_Tree: Optional[ElementTree] = None,
-        modelFileName: Optional[str] = None,
+        modelFileName: Optional[Path] = None,
         facies_table: Optional[Dict[int, str]] = None,
         blocked_well=None,
         blocked_well_log=None,

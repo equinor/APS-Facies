@@ -8,26 +8,28 @@ from typing import Dict
 import pytest
 
 from aps.rms_jobs.updateAPSModelFromFMU import update_aps_model_from_fmu
-from aps.unit_test.test_createXMLModelFiles import (
+from aps.tests.test_createXMLModelFiles import (
     get_apsmodel_with_all_fmu_markers,
     get_apsmodel_with_no_fmu_markers,
 )
 from aps.utils.constants.simple import Debug
 
 
-@pytest.fixture(scope='module')
-def parsed_input_file():
-    return ET.parse('testData_models/APS.xml')
+@pytest.fixture
+def parsed_input_file(data_directory):
+    return ET.parse(data_directory / 'models/APS.xml')
 
 
-@pytest.fixture(scope='module')
+@pytest.fixture
 def original_values(parsed_input_file):
     return read_values_from_xml_tree(parsed_input_file)
 
 
-@pytest.fixture(scope='module')
-def update_values():
-    return read_key_values_from_file_as_dict('testData_FMU/test_global_include.ipl')
+@pytest.fixture
+def update_values(data_directory):
+    return read_key_values_from_file_as_dict(
+        data_directory / 'fmu' / 'test_global_include.ipl'
+    )
 
 
 def read_key_values_from_file_as_dict(input_file):
@@ -81,11 +83,10 @@ def read_fmu_attributes_file(file) -> Dict[str, str]:
     return fmu_attributes
 
 
-def test_case_with_no_fmu_markers_set():
+def test_case_with_no_fmu_markers_set(output_directory, attributes_file):
     aps_model = get_apsmodel_with_no_fmu_markers()
 
-    out_file = 'aps_model_with_no_fmu_markers.xml'
-    attributes_file = 'fmu_attributes.yaml'
+    out_file = output_directory / 'aps_model_with_no_fmu_markers.xml'
     if os.path.isfile(attributes_file):
         os.remove(attributes_file)
     if os.path.isfile(out_file):
@@ -98,17 +99,18 @@ def test_case_with_no_fmu_markers_set():
     check_fmu_attributes_output_correlates_to_xml_output(out_file, attributes_file)
 
 
-def test_case_with_all_fmu_markers_set():
+def test_case_with_all_fmu_markers_set(
+    data_directory, output_directory, attributes_file
+):
     aps_model = get_apsmodel_with_all_fmu_markers()
 
-    out_file = 'aps_model_with_all_fmu_markers.xml'
-    attributes_file = 'fmu_attributes.yaml'
+    out_file = output_directory / 'aps_model_with_all_fmu_markers.xml'
     if os.path.isfile(attributes_file):
         os.remove(attributes_file)
     if os.path.isfile(out_file):
         os.remove(out_file)
 
-    expected_key_value_set_file = 'testData_FMU/expected_key_value_set.yaml'
+    expected_key_value_set_file = data_directory / 'fmu' / 'expected_key_value_set.yaml'
 
     aps_model.write_model(out_file, attributes_file, debug_level=Debug.OFF)
 
@@ -154,15 +156,18 @@ def test_global_include_file_has_all_necessary_update_values(
     assert set(original_values.keys()).issubset(set(update_values.keys()))
 
 
-def test_all_element_values_are_correctly_updated(original_values, update_values):
+def test_all_element_values_are_correctly_updated(
+    original_values, update_values, data_directory
+):
+    fmu_updated_aps = data_directory / 'models' / 'APS_FMUupdated.xml'
     update_aps_model_from_fmu(
-        'testData_FMU/test_global_include.ipl',
-        'testData_models/APS.xml',
-        'testData_models/APS_FMUupdated.xml',
+        data_directory / 'fmu' / 'test_global_include.ipl',
+        data_directory / 'models' / 'APS.xml',
+        fmu_updated_aps,
         Debug.VERBOSE,
     )
 
-    parsed_output_file = ET.parse('testData_models/APS_FMUupdated.xml')
+    parsed_output_file = ET.parse(fmu_updated_aps)
     new_values = read_values_from_xml_tree(parsed_output_file)
 
     # Filtering out keys not related to updatable FMU values in the model file
