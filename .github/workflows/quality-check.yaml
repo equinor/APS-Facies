@@ -17,7 +17,12 @@ jobs:
         with:
           fetch-depth: 0
       - uses: jdx/mise-action@v2
-      - uses: pre-commit/action@v3.0.1
+      - uses: actions/cache@v4
+        with:
+          path: ~/.cache/pre-commit
+          key: pre-commit-3|${{ env.pythonLocation }}|${{ hashFiles('.pre-commit-config.yaml') }}
+      - run: pre-commit run --all-files --show-diff-on-failure --color=always
+        shell: bash
 
   build-gui:
     uses: ./.github/workflows/build-plugin.yaml
