@@ -10,18 +10,27 @@ function aps_version() {
     git describe --match='v*' --abbrev=0 --tags | tr -d '^v'
 }
 
+function create_wheel() {
+    local OUTPUT_DIR="$1"
+    pushd "$MISE_PROJECT_ROOT" >/dev/null || exit 1
+    uv build --wheel --no-build-logs --out-dir "$OUTPUT_DIR"
+    popd >/dev/null || exit 1
+
+    local wheel_path
+    wheel_path="$(ls "$OUTPUT_DIR"/aps-*-py3-none-any.whl)"
+    echo "$wheel_path"
+}
+
 function compile_files_for_plugin() {
     local BUILD_NUMBER="$1"
     local PLUGIN_DIR="$2"
-    python3 "$MISE_PROJECT_ROOT/bin/gather-python-files.py" "$MISE_PROJECT_ROOT" "$PLUGIN_DIR"
+    local wheel_path
+    wheel_path=$(create_wheel "$PLUGIN_DIR/")
     touch "$PLUGIN_DIR/__init__.py"
 
     for file in "ui.py" "main.py"; do
-        cp "$MISE_PROJECT_ROOT/aps/api/$file" "$PLUGIN_DIR"
+        cp "$MISE_PROJECT_ROOT/src/aps/api/$file" "$PLUGIN_DIR"
     done
-    rm -rf \
-        "$PLUGIN_DIR/aps/tests" \
-        "$PLUGIN_DIR/aps/api"
 
     # Auxiliary files
     echo "$(aps_version).$BUILD_NUMBER" >"$PLUGIN_DIR/VERSION"
@@ -29,8 +38,14 @@ function compile_files_for_plugin() {
     cp "$MISE_PROJECT_ROOT/gui/static/info.xml" "$PLUGIN_DIR"
 
     # Adjust pydist / 'dependencies'
-    mv "$PLUGIN_DIR/aps/pydist" "$PLUGIN_DIR"
-    mv "$PLUGIN_DIR/aps" "$PLUGIN_DIR/pydist/aps"
+    mkdir -p "$PLUGIN_DIR/pydist/aps/toolbox"
+    touch "$PLUGIN_DIR/pydist/__init__.py"
+
+    unzip "$wheel_path" -d "$PLUGIN_DIR/pydist/"
+    rm -rf \
+        "$wheel_path" \
+        "$PLUGIN_DIR/pydist/aps/api"
+
     cp "$PLUGIN_DIR/VERSION" "$PLUGIN_DIR/pydist/aps/toolbox/VERSION"
 }
 

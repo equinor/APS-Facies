@@ -17,15 +17,15 @@
 !bin/parse-truncation-rule-templates.py
 !examples/truncation_settings.dat
 
-!aps/*.py
-!aps/api/**/*.py
-!aps/api/VERSION
-!aps/api/COMMIT
-!aps/api/STUB_VERSION
-!aps/utils/**/*.py
-!aps/rms_jobs/**/*.py
-!aps/toolbox/**/*.py
-!aps/algorithms/**/*.py
+!src/aps/*.py
+!src/aps/api/**/*.py
+!src/aps/api/VERSION
+!src/aps/api/COMMIT
+!src/aps/api/STUB_VERSION
+!src/aps/utils/**/*.py
+!src/aps/rms_jobs/**/*.py
+!src/aps/toolbox/**/*.py
+!src/aps/algorithms/**/*.py
 
 !gui/tsconfig.json
 !gui/eslint.config.cjs

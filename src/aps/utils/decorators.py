@@ -35,7 +35,7 @@ def loggable(func):
 def _root_path() -> Path:
     plugin_root = Path(__file__).parent.parent.parent
     if Path('/.dockerenv').exists():
-        return plugin_root / 'aps' / 'api' / 'pydist'
+        return plugin_root / 'src' / 'aps' / 'api' / 'pydist'
     return plugin_root
 
 

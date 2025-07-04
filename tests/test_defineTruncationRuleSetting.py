@@ -5,7 +5,7 @@ from pathlib import Path
 import pytest
 
 from aps.algorithms.defineTruncationRule import DefineTruncationRule
-from aps.tests.helpers import (
+from tests.helpers import (
     assert_identical_files,
 )
 

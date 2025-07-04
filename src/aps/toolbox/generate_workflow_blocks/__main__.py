@@ -471,7 +471,7 @@ def get_workflows(use_plugin_dir: bool = False) -> dict[str, list[str]]:
     return {
         'bin': [],
         'depricated': [],
-        'aps/rms_jobs': [
+        'src/aps/rms_jobs': [
             'APS_main',
             'APS_simulate_gauss_singleprocessing',
             'defineFaciesProbMapDepTrend',
@@ -489,13 +489,13 @@ def get_workflows(use_plugin_dir: bool = False) -> dict[str, list[str]]:
             'turn_on_traceback',
             'APS_redefine_zone_models',
         ],
-        'aps/algorithms': [
+        'src/aps/algorithms': [
             'setupFMUtags',
         ],
-        'aps/utils': [
+        'src/aps/utils': [
             'testPreview',
         ],
-        'aps/utils/roxar': [
+        'src/aps/utils/roxar': [
             'getGridModelAttributes',
             'compare_files',
         ],

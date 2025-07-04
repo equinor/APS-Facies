@@ -16,8 +16,8 @@ function create_example_truncation_rule_images() {
             DONT_WRITE_OVERVIEW='yes' \
             WRITE_TO_DIRECTORIES='yes' \
             MPLBACKEND=Agg \
-            PYTHONPATH="$MISE_PROJECT_ROOT" \
-            uv run --script "$MISE_PROJECT_ROOT/aps/algorithms/setupInteractiveTruncationSetting.py"
+            PYTHONPATH="$MISE_PROJECT_ROOT/src" \
+            uv run --script "$MISE_PROJECT_ROOT/src/aps/algorithms/setupInteractiveTruncationSetting.py"
 
     popd >/dev/null || exit 1
 }

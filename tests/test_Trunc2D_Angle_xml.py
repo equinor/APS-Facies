@@ -11,16 +11,6 @@ import pytest
 
 from aps.algorithms.APSMainFaciesTable import APSMainFaciesTable
 from aps.algorithms.truncation_rules import Trunc2D_Angle
-from aps.tests.constants import (
-    KEYRESOLUTION,
-    USE_CONST_TRUNC_PARAM,
-)
-from aps.tests.helpers import (
-    apply_truncations,
-    apply_truncations_vectorized,
-    getFaciesInTruncRule,
-    truncMapPolygons,
-)
 from aps.utils.constants.simple import Debug
 from aps.utils.types import (
     FaciesListType,
@@ -30,6 +20,16 @@ from aps.utils.types import (
     OverlayGroupType,
 )
 from aps.utils.xmlUtils import prettify
+from tests.constants import (
+    KEYRESOLUTION,
+    USE_CONST_TRUNC_PARAM,
+)
+from tests.helpers import (
+    apply_truncations,
+    apply_truncations_vectorized,
+    getFaciesInTruncRule,
+    truncMapPolygons,
+)
 
 
 def interpretXMLModelFileAndWrite(
