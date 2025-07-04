@@ -57,7 +57,7 @@ export const eventNames = [
 const events = eventNames.map((eventName) => ({
   eventName,
   handler(context: ComponentInternalInstance) {
-    return (...args: any[]) => {
+    return (...args: unknown[]) => {
       context.emit.apply(context, [eventName, ...args])
     }
   },

@@ -2,7 +2,7 @@
   <v-select
     v-model="conformity"
     :items="options"
-    :dark="dark"
+    :theme="dark ? 'dark' : 'light'"
     variant="underlined"
   />
 </template>

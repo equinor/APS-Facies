@@ -51,7 +51,7 @@ function defaultChannels(num: number): AlphaField[] {
 
 type Props = {
   value: RULE
-  minFields: number
+  minFields?: number
 }
 const props = withDefaults(defineProps<Props>(), { minFields: 2 })
 const fieldStore = useGaussianRandomFieldStore()

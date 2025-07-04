@@ -40,6 +40,7 @@ import BayfillPolygon, {
 import APSTypeError from '@/utils/domain/errors/type'
 import { getId } from '@/utils'
 import { useZoneStore } from '@/stores/zones'
+import type { TruncationRuleType } from '@/utils/domain/truncationRule/base'
 
 function getOverlayItems(rule: Parameters<typeof minFacies>[0]):
   | (
@@ -90,12 +91,14 @@ export function minFacies<
       )
       const items = getOverlayItems(rule)
       if (items !== null && items !== undefined) {
-        items.forEach((item: any): void => {
-          item.polygons
-            ? item.polygons.forEach((polygon: any): void => {
-                uniqueFacies.add(polygon.facies.name)
-              })
-            : uniqueFacies.add(item.facies)
+        items.forEach((item): void => {
+          if ('polygons' in item) {
+            item.polygons.forEach((polygon): void => {
+              uniqueFacies.add(polygon.facies.name)
+            })
+          } else {
+            uniqueFacies.add(item.facies)
+          }
         })
       }
       minFacies = uniqueFacies.size
@@ -194,7 +197,8 @@ export type PartiallySpecifiedPolygonSpecification = (
 
 export function makePolygonsFromSpecification<
   S extends PartiallySpecifiedPolygonSpecification,
->(polygons: S[]): RealizedPolygon[] {
+  TYPE extends TruncationRuleType,
+>(polygons: S[]) {
   const parsedPolygons = polygons.map((polygon): RealizedPolygon => {
     if ('order' in polygon && 'facies' in polygon) {
       if ('angle' in polygon) {
@@ -241,10 +245,19 @@ export function makePolygonsFromSpecification<
       addChildren(polygon, parsedPolygons)
     }
     return polygon
-  })
+  }) as POLYGON_GUARD<TYPE>
 }
 
+type POLYGON_GUARD<TYPE extends TruncationRuleType> = TYPE extends 'bayfill'
+  ? BayfillPolygon[]
+  : TYPE extends 'non-cubic'
+    ? (OverlayPolygon | NonCubicPolygon)[]
+    : TYPE extends 'cubic'
+      ? (CubicPolygon | OverlayPolygon)[]
+      : never
+
 export function deserializePolygons<
+  TYPE extends TruncationRuleType,
   S extends PolygonSerialization | OverlayPolygonSerialization,
 >(polygons: S[]) {
   const faciesStore = useFaciesStore()
@@ -268,7 +281,10 @@ export function deserializePolygons<
           facies,
         } as PartiallySpecifiedPolygonSpecification
     })
-  return makePolygonsFromSpecification(partiallyDefinedPolygons)
+  return makePolygonsFromSpecification<
+    PartiallySpecifiedPolygonSpecification,
+    TYPE
+  >(partiallyDefinedPolygons)
 }
 
 export function resolveParentReference(

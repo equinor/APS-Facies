@@ -3,13 +3,16 @@ import type { RootStoreSerialization } from '@/stores'
 import { useRootStore } from '@/stores'
 import { displayError, displayWarning } from '@/utils/helpers/storeInteraction'
 import { encodeState } from '@/utils'
+import type { RmsJob } from '@/plugins/rms'
 
-export default async function migrate(
-  data: any,
-  toVersion: string,
-): Promise<RootStoreSerialization> {
+export default async function migrate<
+  T extends
+    | (Partial<RootStoreSerialization> &
+        Pick<RootStoreSerialization, 'version'>)
+    | RmsJob,
+>(data: T, toVersion: string): Promise<RootStoreSerialization> {
   /* Inspired by: https://typeofnan.dev/an-approach-to-js-object-schema-migration/ */
-  const fromVersion = data.version
+  const fromVersion = (data.version || null) as string | null
   if (fromVersion === toVersion) return data as RootStoreSerialization
 
   const rootStore = useRootStore()
@@ -33,12 +36,12 @@ export default async function migrate(
     rootStore.startLoading()
     if (result.errors) {
       displayError(result.errors)
-      return data
+      return data as RootStoreSerialization
     }
-    return result.state
+    return result.state as RootStoreSerialization
   } catch (e) {
     displayError(e instanceof Error ? e.message : String(e))
     console.error(e)
-    return data
+    return data as RootStoreSerialization
   }
 }

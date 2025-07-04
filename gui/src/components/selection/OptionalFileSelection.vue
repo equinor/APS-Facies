@@ -29,7 +29,10 @@ type Props = {
   disabled?: boolean
   relativeTo?: string
 }
-const props = withDefaults(defineProps<Props>(), { disabled: true })
+const props = withDefaults(defineProps<Props>(), {
+  disabled: true,
+  relativeTo: undefined,
+})
 const emit = defineEmits<{
   (event: 'update:model-value', value: State): void
   (event: 'update:error', error: boolean): void

@@ -81,7 +81,7 @@ export const usePanelStore = defineStore('panels', () => {
             'individual gaussian fields expects a list of numbers',
           )
       }
-      // @ts-ignore: We check the types are consistent above
+      // @ts-expect-error We check the types are consistent above
       panels[sectionName][panelName] = open
     }
   }
@@ -101,10 +101,10 @@ export const usePanelStore = defineStore('panels', () => {
   const getOpen = computed(() => {
     return (sectionName: keyof PanelStructure) =>
       Object.entries(panels[sectionName])
-        .filter(([name, panel]) =>
+        .filter(([, /* name */ panel]) =>
           typeof panel === 'boolean' ? panel : Object.values(panel).length > 0,
         )
-        .map(([name, panel]) => name)
+        .map(([name /*, panel */]) => name)
   })
   function setOpen<
     S extends string & keyof PanelStructure,

@@ -32,8 +32,8 @@
             <template #title>
               <section-title>Facies</section-title>
             </template>
-            <template #text class="fill-height">
-              <v-row v-if="gridModelSelected" no-gutters>
+            <template #text>
+              <v-row v-if="gridModelSelected" no-gutters class="fill-height">
                 <v-row v-if="hasWellParameters" no-gutters>
                   <v-col class="pt-2" cols="6">
                     <choose-blocked-well-parameter />

@@ -1,6 +1,6 @@
 <template>
   <base-tooltip :message="active ? message : inactiveMessage">
-    <v-icon v-if="hasIcon" :color="color" :icon="__icon" />
+    <v-icon v-if="hasIcon" :color="color" :icon="_icon" />
   </base-tooltip>
 </template>
 
@@ -28,7 +28,7 @@ const props = withDefaults(
   },
 )
 
-const __icon = computed(() => `$${props.icon}${!props.active ? 'Negated' : ''}`)
+const _icon = computed(() => `$${props.icon}${!props.active ? 'Negated' : ''}`)
 
 const isCurrent = computed(() => props.current === props.value.id)
 
@@ -36,7 +36,7 @@ const color = computed(() => (isCurrent.value ? 'white' : undefined))
 
 const hasIcon = computed<boolean>(() => {
   // Vuetify 3 will throw an error if the icon does not exist, rather than not showing anything as was the case in 2
-  const name = __icon.value.replace('$', '')
+  const name = _icon.value.replace('$', '')
   const exists = !!vuetify.icons.aliases[name]
   if (!exists) {
     console.warn(`Tried to use icon ${name}, but it does not exist`)

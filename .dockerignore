@@ -26,7 +26,7 @@
 !aps/algorithms/**/*.py
 
 !gui/tsconfig.json
-!gui/.eslintrc.js
+!gui/eslint.config.js
 !gui/.postcssrc.js
 !gui/vue.config.js
 !gui/vite.config.ts

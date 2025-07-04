@@ -4,11 +4,11 @@
       <v-expansion-panels v-model="expanded" variant="accordion" multiple>
         <section-title>{{ title }}</section-title>
         <v-expansion-panel
-          value="faciesProbability"
           v-tooltip.bottom-start="{
             content: !hasFacies && 'No Facies has been selected',
             disabled: hasFacies,
           }"
+          value="faciesProbability"
           :disabled="!hasFacies"
           elevation="0"
         >
@@ -20,11 +20,11 @@
           </template>
         </v-expansion-panel>
         <v-expansion-panel
-          value="truncationRule"
           v-tooltip.bottom="{
             content: !hasEnoughFacies && 'Too few Facies has been selected',
             disabled: hasEnoughFacies,
           }"
+          value="truncationRule"
           :disabled="!hasEnoughFacies"
           elevation="0"
         >

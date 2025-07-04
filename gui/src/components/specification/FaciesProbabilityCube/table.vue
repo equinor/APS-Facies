@@ -28,12 +28,12 @@
         <td v-else>
           <fraction-field
             :model-value="facies.previewProbability"
+            label=""
+            dense
             @update:model-value="
               (probability) =>
                 changeProbability(facies, probability as PROBABILITY)
             "
-            label=""
-            dense
           />
         </td>
       </tr>
@@ -58,7 +58,7 @@ import type { PROBABILITY } from '@/utils/domain/types'
 const rootStore = useRootStore()
 const faciesStore = useFaciesStore()
 
-const facies = computed(() => faciesStore.selected)
+const selectedFacies = computed(() => faciesStore.selected)
 
 const probabilityCubes = computed<ListItem<ProbabilityCube>[]>(() =>
   [{ title: '', props: { disabled: false } }].concat(
@@ -66,7 +66,7 @@ const probabilityCubes = computed<ListItem<ProbabilityCube>[]>(() =>
       return {
         title: parameter,
         props: {
-          disabled: facies.value
+          disabled: selectedFacies.value
             .map((facies) => facies.probabilityCube)
             .includes(parameter),
         },
@@ -80,7 +80,7 @@ const useProbabilityCubes = computed(
 )
 
 const items = computed<Facies[]>(() =>
-  [...facies.value].sort((a, b) => a.code - b.code),
+  [...selectedFacies.value].sort((a, b) => a.code - b.code),
 )
 
 const headers = computed<HeaderItem[]>(() => {

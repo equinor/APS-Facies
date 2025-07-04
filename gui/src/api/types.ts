@@ -58,13 +58,15 @@ export interface RmsGridModel {
 
 export interface Job {
   id: string
-  // eslint-disable-next-line @typescript-eslint/naming-convention,camelcase
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   instance_name: string
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   'uncertain.size': number
   elapsedrealtime: number
   elapsedcputime: number
   tableoffset: number
   surfreprfloat: boolean
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   'description.size': number
   opentime: Date
   identifier: number

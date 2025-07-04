@@ -480,7 +480,7 @@ class Migration:
             'errors': errors,
         }
 
-    def can_migrate(self, from_version: str, to_version: str) -> bool:
+    def can_migrate(self, from_version: Optional[str], to_version: str) -> bool:
         if not from_version:
             return False
         version = from_version

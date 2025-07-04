@@ -269,7 +269,7 @@ export const useTruncationRuleTemplateStore = defineStore(
           H: Orientation.HORIZONTAL,
           V: Orientation.VERTICAL,
         }
-        if (!('direction' in settings)) return null
+        if (!('direction' in settings)) return undefined
         return mapping[settings.direction]
       }
       const direction = getDirection(template.settings)
@@ -278,6 +278,7 @@ export const useTruncationRuleTemplateStore = defineStore(
         direction,
         polygons,
         backgroundFields,
+        // @ts-expect-error Bayfill does not have the 'overlay' property and will ignore it if it is passed
         overlay: {
           use: overlayPolygons ? overlayPolygons.length > 0 : false,
         },

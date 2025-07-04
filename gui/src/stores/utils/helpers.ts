@@ -85,6 +85,8 @@ export function getRelevant<T extends Dependent>(
 export function getElements<S extends PolygonSerialization>(
   exclude: string[] = [],
 ): Element[] {
+  // Typing this appropriately turned out to be quite a bit harder than expected
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   function extractFromStore(store: () => any) {
     const { remove, add, available } = store()
     return {

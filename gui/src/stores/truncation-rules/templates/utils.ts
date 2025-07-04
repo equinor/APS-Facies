@@ -54,7 +54,7 @@ export function processFields(
       .sort((a, b) => a.channel - b.channel)
       .map(({ field }) => field)
   } else {
-    return fieldChannelReferences.map((_) => null)
+    return fieldChannelReferences.map(() => null)
   }
 }
 
@@ -265,24 +265,29 @@ function organizeCubicPolygons(
   return allPolygons
 }
 
-const typeMapping = {
-  bayfill: Bayfill,
-  'non-cubic': NonCubic,
-  cubic: Cubic,
-}
-
-// From https://stackoverflow.com/questions/43481518/get-argument-types-for-function-class-constructor
-type FirstArgument<T> = T extends (arg1: infer U, ...args: any[]) => any
-  ? U
-  : any
+export type TruncationRuleArguments<T extends TruncationRuleType> =
+  ConstructorParameters<
+    T extends 'bayfill'
+      ? typeof Bayfill
+      : T extends 'non-cubic'
+        ? typeof NonCubic
+        : T extends 'cubic'
+          ? typeof Cubic
+          : never
+  >[0]
 
 export function makeRule<T extends TruncationRuleType>(
   type: T,
-  args: FirstArgument<ConstructorParameters<(typeof typeMapping)[T]>>,
+  args: TruncationRuleArguments<T>,
 ) {
-  const TruncationRule = typeMapping[type as keyof typeof typeMapping]
-  if (!TruncationRule) {
-    throw new Error(`The truncation rule of type ${type} is not implemented`)
+  switch (type) {
+    case 'bayfill':
+      return new Bayfill(args as TruncationRuleArguments<'bayfill'>)
+    case 'non-cubic':
+      return new NonCubic(args as TruncationRuleArguments<'non-cubic'>)
+    case 'cubic':
+      return new Cubic(args as TruncationRuleArguments<'cubic'>)
+    default:
+      throw new Error(`The truncation rule of type ${type} is not implemented`)
   }
-  return new TruncationRule(args)
 }

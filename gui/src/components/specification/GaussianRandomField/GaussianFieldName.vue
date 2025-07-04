@@ -2,10 +2,10 @@
   <v-text-field
     v-model="fieldName"
     :error-messages="errors"
-    @click.stop
-    @input="v.fieldName.$touch()"
-    @blur="v.fieldName.$touch()"
     variant="underlined"
+    @click.stop
+    @update:model-value="v.fieldName.$touch()"
+    @blur="v.fieldName.$touch()"
   />
 </template>
 <script setup lang="ts">
@@ -45,8 +45,8 @@ const errors = computed(() => {
 
   const errors: string[] = []
   if (!v.value.fieldName.$dirty) return errors
-  !v.value.fieldName.required && errors.push('Is required')
-  !v.value.fieldName.isUnique && errors.push('Must be unique')
+  if (!v.value.fieldName.required) errors.push('Is required')
+  if (!v.value.fieldName.isUnique) errors.push('Must be unique')
   return errors
 })
 

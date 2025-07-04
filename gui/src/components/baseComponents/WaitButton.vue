@@ -2,7 +2,7 @@
   <floating-tooltip :disabled="!tooltipText" trigger="hover">
     <v-btn
       :disabled="waiting || disabled"
-      :dark="dark"
+      :theme="dark ? 'dark' : 'light'"
       :text="text"
       :color="color"
       :outlined="outlined"

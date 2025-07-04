@@ -10,9 +10,7 @@ import type { ID } from '@/utils/domain/types'
 export type Level = number[]
 
 export interface CubicPolygonArgs extends PolygonArgs {
-  // eslint-disable-next-line no-use-before-define
   parent?: CubicPolygon | null
-  // eslint-disable-next-line no-use-before-define
   children?: CubicPolygon[]
 }
 
@@ -51,7 +49,6 @@ export default class CubicPolygon extends Polygon {
     let level = this.parent.level.concat([this.order])
     if (this.children.length === 0) {
       if (
-        /* eslint-disable-next-line yoda */
         0 < DEFAULT_CUBIC_LEVELS &&
         DEFAULT_CUBIC_LEVELS < Number.POSITIVE_INFINITY &&
         level.length < DEFAULT_CUBIC_LEVELS

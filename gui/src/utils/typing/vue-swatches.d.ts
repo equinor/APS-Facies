@@ -14,4 +14,5 @@ declare module 'vue-swatches' {
   }
 
   export default defineComponent<VueSwatchesProps, VueSwatchesEmits>()
+  export { Identified, ColorLibrary }
 }

@@ -2,19 +2,13 @@ import { acceptHMRUpdate, defineStore } from 'pinia'
 import { useSelectableChoice } from './utils/selectable-choice'
 import rms from '@/api/rms'
 import { useGridModelStore } from '@/stores/grid-models'
-import type { Facies, FaciesGroup, Parent } from '@/utils/domain'
+import type { Parent } from '@/utils/domain'
 import { useZoneStore } from '@/stores/zones'
 import { useFaciesStore } from '@/stores/facies'
 import { useTruncationRuleStore } from '@/stores/truncation-rules'
 import { useFaciesGroupStore } from '@/stores/facies/groups'
 import { useGlobalFaciesStore } from '@/stores/facies/global'
 import { useParameterBlockedWellStore } from './blocked-well'
-import type { TruncationRule } from '@/utils/domain/truncationRule'
-import type {
-  PolygonSerialization,
-  PolygonSpecification,
-} from '@/utils/domain/polygon/base'
-import type Polygon from '@/utils/domain/polygon/base'
 import { ref } from 'vue'
 
 export const useParameterBlockedWellLogStore = defineStore(
@@ -23,12 +17,7 @@ export const useParameterBlockedWellLogStore = defineStore(
     const { available, selected, $reset } = useSelectableChoice<string>()
     const loading = ref(false)
 
-    function _removeFaciesDependent<
-      T extends Polygon,
-      S extends PolygonSerialization,
-      P extends PolygonSpecification,
-      RULE extends TruncationRule<T, S, P>,
-    >() {
+    function _removeFaciesDependent() {
       const zoneStore = useZoneStore()
 
       const parents: Parent[] = []
@@ -50,9 +39,10 @@ export const useParameterBlockedWellLogStore = defineStore(
 
       parents.flatMap((parent) =>
         stores.flatMap((store) =>
-          (store.available as (RULE | FaciesGroup | Facies)[])
+          store.available
             .filter((item) => item.isChildOf(parent))
-            .flatMap((item) => store.remove(item as any)),
+            // @ts-expect-error: The items belong to the store and should therefore be of the appropriate type
+            .flatMap((item) => store.remove(item)),
         ),
       )
     }

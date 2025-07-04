@@ -90,6 +90,7 @@ export default class BayfillPolygon extends Polygon {
 
   public get specification(): BayfillPolygonSpecification {
     const _mapping: Record<string, BayfillNameSpecification> = {
+      // eslint-disable-next-line @typescript-eslint/naming-convention
       'Bayhead Delta': 'SBHD',
       Floodplain: 'SF',
       Subbay: 'YSF',

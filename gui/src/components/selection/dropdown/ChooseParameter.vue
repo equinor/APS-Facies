@@ -49,6 +49,7 @@ const store = computed(() => {
     case 'blockedWellLog':
       return useParameterBlockedWellLogStore()
   }
+  throw new Error(`${props.parameterType} is not implemented`)
 })
 
 const available = computed(() =>

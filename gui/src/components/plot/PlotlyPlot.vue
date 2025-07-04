@@ -38,8 +38,14 @@ type Scheduled = { replot: boolean }
 const scheduled = ref<null | Scheduled>(null)
 
 const props = defineProps({
-  data: Array as PropType<Data[]>,
-  layout: Object as PropType<Partial<Layout>>,
+  data: {
+    type: Array as PropType<Data[]>,
+    required: true,
+  },
+  layout: {
+    type: Object as PropType<Partial<Layout>>,
+    required: true,
+  },
   id: {
     type: String,
     required: false,

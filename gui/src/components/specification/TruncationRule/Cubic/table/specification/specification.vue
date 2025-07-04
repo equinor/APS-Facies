@@ -1,16 +1,16 @@
 <template>
   <static-plot
     :id="`truncation-rule/cubic/${rule.parentId}`"
-    :data-definition="__data.polygons"
-    :annotations="__data.annotations"
+    ref="plot"
+    :data-definition="_data.polygons"
+    :annotations="_data.annotations"
     :width="300"
     :height="300"
     :max-height="maxSize.height"
     :max-width="maxSize.width"
     expand
     svg
-    @click.native="clicked"
-    ref="plot"
+    @click="clicked"
   />
 </template>
 
@@ -65,7 +65,7 @@ const maxSize = { width: 400, height: 400 }
 
 const theme = useTheme()
 
-const __data = computed<PlotSpecification>(() =>
+const _data = computed<PlotSpecification>(() =>
   plotify(
     [
       ...polygons.value,

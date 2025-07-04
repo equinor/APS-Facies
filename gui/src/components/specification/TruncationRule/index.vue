@@ -62,6 +62,7 @@ const truncationRuleType = computed<Optional<TruncationRuleType>>(() => {
 const truncationRuleComponent = computed<Optional<Component>>(() => {
   const mapping: Record<TruncationRuleType, Component> = {
     cubic: CubicSpecification,
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     'non-cubic': NonCubicSpecification,
     bayfill: BayfillSpecification,
   }

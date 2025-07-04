@@ -4,14 +4,11 @@
     align="center"
     justify="center"
     no-gutters
-    :class="__class"
+    :class="_class"
   >
-    <v-col
-      :cols="12 - (isFmuUpdatable ? checkboxSize + 1 : 0)"
-      :class="__class"
-    >
+    <v-col :cols="12 - (isFmuUpdatable ? checkboxSize + 1 : 0)" :class="_class">
       <v-text-field
-        :class="__class"
+        :class="_class"
         :model-value="fieldValue"
         :error-messages="errors"
         :label="label"
@@ -21,6 +18,7 @@
         :hint="hint"
         :persistent-hint="persistentHint"
         :append-icon="appendIcon"
+        variant="underlined"
         @update:model-value="
           (e: Exclude<InternalValue, null>) => {
             v.fieldValue.$touch()
@@ -31,14 +29,13 @@
         @keydown.down="decrease"
         @click:append="(e: MouseEvent) => emit('click:append', e)"
         @blur="v.fieldValue.$touch"
-        variant="underlined"
       />
     </v-col>
     <v-col v-if="isFmuUpdatable" v-bind="binding">
       <v-checkbox
         v-model="updatable"
         v-tooltip.bottom="'Toggle whether this should be updatable in FMU'"
-        :class="__class"
+        :class="_class"
         :disabled="disabled"
         persistent-hint
       />
@@ -203,7 +200,7 @@ const _unit = computed(() => {
   }
 })
 
-const __class = computed(() => (props.dense ? ['dense'] : []))
+const _class = computed(() => (props.dense ? ['dense'] : []))
 
 const fmuOptionStore = useFmuOptionStore()
 const isFmuUpdatable = computed(
@@ -265,7 +262,7 @@ function hasChanged(
       math.bignumber(fieldValue.value as InternalValue),
       getValue(value) ?? 0,
     ) as boolean
-  } catch (e) {
+  } catch {
     return false
   }
 }
@@ -307,6 +304,7 @@ function updateValue(event: Exclude<InternalValue, null> | InputEvent): void {
   }
 
   let numericValue: BigNumber | null = null
+  // eslint-disable-next-line security/detect-unsafe-regex
   if (/^[+-]?(\d+(\.\d*)?|\.\d+)$/.test(value.toString())) {
     numericValue = getValue(value)
   } else if (value === '') {

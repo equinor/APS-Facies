@@ -2,11 +2,12 @@
   <div class="color-picker">
     <button
       v-for="color of colors"
+      :key="color"
       :style="`--bg: ${color}`"
       class="color"
       :class="[value === color ? 'selected' : '']"
-      @click="value = color"
       :title="color"
+      @click="value = color"
     ></button>
   </div>
 </template>

@@ -6,7 +6,6 @@ import SelectableItem, {
   type SelectableSerialization,
   type SelectedType,
 } from './bases/selectableItem'
-/* eslint-disable no-use-before-define */
 
 type Regions = Identified<Region>
 

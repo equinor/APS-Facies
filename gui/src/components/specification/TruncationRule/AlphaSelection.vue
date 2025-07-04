@@ -1,6 +1,6 @@
 <template>
   <v-select v-model="selected" :items="fields" clearable variant="underlined">
-    <template v-if="channel" slot="label">
+    <template v-if="channel" #label>
       <span
         >α<sub>{{ channel }}</sub></span
       >
@@ -49,7 +49,7 @@ const emit = defineEmits<{
 const fieldStore = useGaussianRandomFieldStore()
 
 const _fields = computed<GaussianRandomField[]>(() =>
-  fieldStore.selected.sort((a, b) => a.name.localeCompare(b.name)),
+  fieldStore.selected.toSorted((a, b) => a.name.localeCompare(b.name)),
 )
 
 const fields = computed<ListItem<string>[]>(() =>

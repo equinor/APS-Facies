@@ -1,9 +1,9 @@
 <template>
   <floating-tooltip
+    v-tooltip="_explanation"
     placement="bottom"
     :triggers="_explanation ? ['hover'] : []"
     :disabled="!!_explanation"
-    v-tooltip="_explanation"
   >
     <icon-button
       :disabled="!!_explanation"

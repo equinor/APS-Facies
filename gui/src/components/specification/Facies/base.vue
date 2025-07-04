@@ -1,7 +1,7 @@
 <template>
   <v-select
-    :items="faciesOptions"
     v-model="selected"
+    :items="faciesOptions"
     :clearable="clearable"
     variant="underlined"
   />

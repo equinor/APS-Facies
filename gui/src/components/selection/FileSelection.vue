@@ -7,13 +7,13 @@
         rows="1"
         :disabled="disabled"
         :label="label"
-        :append-outer-icon="icon"
+        :append-icon="icon"
         :error-messages="errors"
-        @keydown.enter.prevent="() => null /** Ignore newline */"
-        @click:append-outer="choosePath"
-        @input="touch()"
-        @blur="touch()"
         variant="underlined"
+        @keydown.enter.prevent="() => null /** Ignore newline */"
+        @click:append="choosePath"
+        @update:model-value="touch()"
+        @blur="touch()"
       />
     </v-col>
   </v-row>
@@ -21,7 +21,7 @@
 
 <script setup lang="ts">
 import rms from '@/api/rms'
-import { relativeTo } from '@/utils/queries'
+import { relativeTo as _relativeTo } from '@/utils/queries'
 import { ref, computed, onMounted, watch } from 'vue'
 import useVuelidate from '@vuelidate/core'
 import { required, helpers } from '@vuelidate/validators'
@@ -49,7 +49,7 @@ const open = ref(false)
 const path = computed({
   get: () =>
     props.relativeTo && props.modelValue
-      ? relativeTo(props.relativeTo, props.modelValue)
+      ? _relativeTo(props.relativeTo, props.modelValue)
       : props.modelValue,
   set: (value: string | null) => {
     if (props.relativeTo && !value?.startsWith('/')) {
@@ -96,13 +96,15 @@ const icon = computed(
 
 async function choosePath(): Promise<void> {
   open.value = true
-  let newPath = null
+  let newPath: string | null
   try {
     newPath = props.directory
       ? await rms.chooseDir('load')
       : // setting parameters filter and suggestion does not seem to work...
         await rms.chooseFile('save', '', '')
-  } catch {}
+  } catch {
+    newPath = null
+  }
   if (newPath) {
     path.value = newPath
   }

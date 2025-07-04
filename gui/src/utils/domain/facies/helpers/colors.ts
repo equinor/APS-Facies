@@ -54,6 +54,7 @@ export const faciesColors: Color[] = [
 
 export const colorLibraries = {
   APS: apsColors,
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   'General Colors': generalColors,
   Facies: faciesColors,
 }

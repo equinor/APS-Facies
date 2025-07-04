@@ -61,6 +61,7 @@ const props = withDefaults(
   }>(),
   {
     hideAlias: false,
+    expanded: undefined,
   },
 )
 

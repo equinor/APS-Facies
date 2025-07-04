@@ -234,13 +234,13 @@ export const useGaussianRandomFieldStore = defineStore(
       variogramOrTrend: VorTProp,
       property: P1,
       subProperty: P2 | undefined,
-      value: any,
+      value: P2 extends keyof VorT[P1] ? VorT[P1][P2] : VorT[P1],
     ) {
       const object = field[variogramOrTrend] as VorT
       if (subProperty !== undefined) {
-        object[property][subProperty] = value
+        object[property][subProperty] = value as VorT[P1][P2]
       } else {
-        object[property] = value
+        object[property] = value as VorT[P1]
       }
     }
 

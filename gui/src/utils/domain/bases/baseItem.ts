@@ -30,7 +30,7 @@ export default class BaseItem implements Identifiable {
     }
   }
 
-  protected _hashify(): any {
+  protected _hashify(): BaseItemSerialization {
     return this.toJSON()
   }
 

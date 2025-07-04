@@ -5,11 +5,13 @@ import { ref } from 'vue'
 import type { TruncationRuleType } from '@/utils/domain/truncationRule/base'
 import type { PolygonSerialization } from '@/utils/domain/polygon/base'
 
-export interface TruncationRuleTemplateType {
+export interface TruncationRuleTemplateType<
+  S extends PolygonSerialization = PolygonSerialization,
+> {
   name: string
   type: TruncationRuleType
   order: number
-  polygons?: PolygonSerialization[]
+  polygons?: S[]
 }
 
 function _equal(

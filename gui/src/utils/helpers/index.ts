@@ -12,6 +12,7 @@ import {
 function isUUID(value: unknown): value is ID {
   if (typeof value !== 'string') return false
 
+  // eslint-disable-next-line security/detect-unsafe-regex
   const uuid = /^[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$/
   return uuid.test(value)
 }

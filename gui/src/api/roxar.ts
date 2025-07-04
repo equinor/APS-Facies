@@ -8,6 +8,7 @@ function callPythonFunction(method: string, parameters: string): Promise<JSON> {
     // simple:
     axios
       .post(`/${method}`, parameters, {
+        // eslint-disable-next-line @typescript-eslint/naming-convention
         headers: { 'Content-Type': 'text/plain;charset=utf-8' },
       })
       .then((response) => {
@@ -19,8 +20,8 @@ function callPythonFunction(method: string, parameters: string): Promise<JSON> {
 
 // utilities
 const uipyHandler = {
-  get(target: unknown, propKey: string): (...args: any[]) => Promise<JSON> {
-    return function (...args: any[]): Promise<JSON> {
+  get(target: unknown, propKey: string): (...args: unknown[]) => Promise<JSON> {
+    return function (...args: unknown[]): Promise<JSON> {
       let argstr = ''
       for (let i = 0, e = args.length; i < e; ++i) {
         if (i > 0) argstr += ', '

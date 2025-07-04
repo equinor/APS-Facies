@@ -1,11 +1,11 @@
 interface Selector {
-  onSelectionChanged(func: (changed: Rectord<string, any>) => void)
+  onSelectionChanged(func: (changed: Rectord<string, unknown>) => void)
   setSelection(selection)
-  getSelection(): Record<string, any>
+  getSelection(): Record<string, unknown>
 }
 
 interface SerializedState {
-  [_: string]: any
+  [_: string]: unknown
 }
 
 interface RmsJob extends SerializedState {
@@ -15,11 +15,11 @@ interface RmsJob extends SerializedState {
 
 declare namespace rms {
   declare namespace uipy {
-    function call<T>(name: string, ...args: any[]): Promise<T>
+    function call<T>(name: string, ...args: unknown[]): Promise<T>
   }
-  function onPluginSave(func: () => SerializedState): void
+  function onPluginSave(func: () => Job): void
   function onPluginLoaded(func: (data: RmsJob) => void): void
-  function onProjectChanged(func: (what: any) => void): void
+  function onProjectChanged(func: (what: unknown) => void): void
   function onRunExecuted(func: () => void): void
   function onRunCompleted(func: (output: string, reason: string) => void): void
   function chooseFile(

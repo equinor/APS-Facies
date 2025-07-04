@@ -1,14 +1,15 @@
 <template>
-  <div id="information-bar" v-if="shown">
-    <v-alert
-      :value="shown"
-      :type="type"
-      closable
-      transition="slide-y-transition"
-      @input="shown = false"
-    >
-      {{ message }}
-    </v-alert>
+  <div v-if="shown" id="information-bar">
+    <v-slide-y-transition>
+      <v-alert
+        :value="shown"
+        :type="type"
+        closable
+        @update:model-value="shown = false"
+      >
+        {{ message }}
+      </v-alert>
+    </v-slide-y-transition>
   </div>
 </template>
 

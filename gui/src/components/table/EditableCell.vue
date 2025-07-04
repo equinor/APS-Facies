@@ -2,17 +2,15 @@
   <div>
     <!-- <v-edit-dialog lazy @open="reset"> -->
     <v-text-field
-      slot="input"
       v-model="_fieldValue"
       :label="label"
       :type="numeric ? 'number' : 'text'"
       :error-messages="errorMessages"
       single-line
-      @keydown.enter="update"
-      @focusout="update"
-      @update:error="(e: boolean) => emit('update:error', e)"
       hide-details
       variant="underlined"
+      @keydown.enter="update"
+      @focusout="update"
     />
     <!-- </v-edit-dialog> -->
   </div>

@@ -1,12 +1,12 @@
 <template>
   <base-selection-table
     v-model="selected"
+    v-model:current="currentId"
     :headers="headers"
     :loading="loading"
     :loading-text="loadingText"
     :items="items"
     :no-data-text="_noDataText"
-    v-model:current="currentId"
   >
     <template #item="{ item, isCurrent }: { item: T; isCurrent: boolean }">
       <td v-if="showName" class="text-start">
