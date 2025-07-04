@@ -11,19 +11,14 @@ SHELL := /bin/bash
 CURRENT_OS := $(shell uname -s)
 EMPTY :=
 
-ifneq ("$(wildcard /.dockerenv)","")
-MATPLOTLIB_BACKEND ?= Agg
-endif
 ifeq ($(CURRENT_OS),Linux)
 NUMBER_OF_PROCESSORS := $(shell cat /proc/cpuinfo | grep processor | wc -l)
 TAR := tar
 SED := sed
-MATPLOTLIB_BACKEND ?= Agg
 else  # Darwin
 NUMBER_OF_PROCESSORS := $(shell sysctl -n hw.ncpu)
 TAR := gtar
 SED := gsed
-MATPLOTLIB_BACKEND ?= Agg
 endif
 
 TAR_EXTRACT := $(TAR) -xf
@@ -147,16 +142,9 @@ RMS_PROJECT_PATH=""
 endef
 export STANDARD_DOTENV
 
-define MATPLOTLIBRC
-backend             : $(MATPLOTLIB_BACKEND)
-savefig.facecolor   : white
-savefig.transparent : False
-endef
-export MATPLOTLIBRC
-
 COLOR = \033[32;01m
 NO_COLOR = \033[0m
-.PHONY: help run package.json matplotlibrc dotenv VERSION COMMIT STUB_VERSION
+.PHONY: help run package.json dotenv VERSION COMMIT STUB_VERSION
 
 # Build / clean / run
 build: clean-all init
@@ -226,7 +214,7 @@ _build-front-end:
 copy-changelog.md:
 	cp $(WEB_DIR)/public/CHANGELOG.md $(PLUGIN_DIR)/CHANGELOG.md
 
-truncation-rule-vislualization-dir: relink-matplotlibrc
+truncation-rule-vislualization-dir:
 	$(MKDIR) $(TRUNCATION_RULE_VISUALIZATIONS)
 	ln -sf $(CODE_DIR)/matplotlibrc $(TRUNCATION_RULE_VISUALIZATIONS)/matplotlibrc
 
@@ -243,7 +231,6 @@ generate-truncation-rule-images: clean-generated-truncation-rules truncation-rul
 	HIDE_TITLE='yes' \
 	DONT_WRITE_OVERVIEW='yes' \
 	WRITE_TO_DIRECTORIES='yes' \
-	MPLBACKEND=$(MATPLOTLIB_BACKEND) \
 	$(RUN) python3 $(SOURCE_DIR)/algorithms/setupInteractiveTruncationSetting.py
 	rm -f $(TRUNCATION_RULE_VISUALIZATIONS)/matplotlibrc
 
@@ -303,7 +290,7 @@ dotenv:
 	ln -sf $(CODE_DIR)/.env $(WEB_DIR)/.env
 
 
-links: clean-links create-workflow-dir matplotlibrc-links changelog-link
+links: clean-links create-workflow-dir changelog-link
 	ln -sf $(CODE_DIR)/depricated/APS_make_gauss_IPL.py $(BIN_DIR)
 	ln -sf $(CODE_DIR)/depricated/APSGaussFieldJobs.py $(SOURCE_DIR)/algorithms
 	ln -sf $(CODE_DIR)/depricated/APSupdateVarioAsimuth.py $(SOURCE_DIR)/utils
@@ -323,7 +310,7 @@ changelog-link:
 create-workflow-dir:
 	$(MKDIR) $(CODE_DIR)/workflow
 
-clean-links: clean-matplotlibrc clean-changelog-link
+clean-links: clean-changelog-link
 	rm -f $(BIN_DIR)/APS_make_gauss_IPL.py
 	rm -f $(SOURCE_DIR)/algorithms/APSGaussFieldJobs.py
 	rm -f $(SOURCE_DIR)/utils/APSupdateVarioAsimuth.py
@@ -344,23 +331,8 @@ generate-workflow-files: $(CREATE_WORKFLOW_DIR)
 
 dependencies: requirements
 
-requirements: matplotlibrc
+requirements:
 	$(POETRY) install --no-root
-
-relink-matplotlibrc: clean-matplotlibrc matplotlibrc matplotlibrc-links
-
-matplotlibrc:
-	echo "$$MATPLOTLIBRC" > $(CODE_DIR)/matplotlibrc
-
-clean-matplotlibrc:
-	rm -f $(CODE_DIR)/matplotlibrc \
-	      $(TEST_FOLDER)/matplotlibrc \
-	      $(INTEGRATION_TESTS)/matplotlibrc
-
-matplotlibrc-links: matplotlibrc
-	# Matplotlibrc (Force use of Agg in tests)
-	ln -sf $(CODE_DIR)/matplotlibrc $(TEST_FOLDER)/matplotlibrc
-	ln -sf $(CODE_DIR)/matplotlibrc $(INTEGRATION_TESTS)/matplotlibrc
 
 clean: clean-links clean-workflow-blocks
 	rm -rf $(BUILD_DIR)
@@ -399,15 +371,13 @@ update-python-dependencies:
 	$(POETRY) update --dev
 
 integration-tests: clean-integration init-workflow links link-example-files
-	MATPLOTLIB_BACKEND="Agg" \
-	make clean-matplotlibrc matplotlibrc-links
 	cd $(INTEGRATION_TESTS) && \
 	RMS_PROJECT="$(RMS_PROJECT)" \
 	APS_RESOURCES="$(INTEGRATION_TESTS)" \
 	APS_ROOT="$(CODE_DIR)" \
 	./test_workflows_in_rms11.sh
 
-clean-integration: clean-workflow-blocks clean-example-link clean-matplotlibrc
+clean-integration: clean-workflow-blocks clean-example-link
 	cd $(INTEGRATION_TESTS) && \
 	rm -f examples \
 	      matplotlibrc && \
@@ -484,7 +454,7 @@ package.json:
 
 api-start: run-rms.uipy-mock
 
-run-rms.uipy-mock: matplotlibrc
+run-rms.uipy-mock:
 	FLASK_APP=$(SOURCE_DIR)/api/app.py \
 	FLASK_DEBUG=1 \
 	APS_MODE='develop' \
