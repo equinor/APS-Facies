@@ -124,11 +124,6 @@ clean-__pycache__:
 clean-pyc:
 	rm -f $(shell find $(CODE_DIR) -name *.py[cod] -not -path *.rms/*)
 
-update-dependencies: update-node-dependencies
-
-update-node-dependencies:
-	$(YARN) upgrade
-
 find-circular-dependencies:
 	cd $(WEB_DIR) && \
 	npx strip-json-comments-cli@1 --no-whitespace $(WEB_DIR)/tsconfig.json > /tmp/tsconfig.json && \
