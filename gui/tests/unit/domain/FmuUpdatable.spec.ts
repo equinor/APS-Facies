@@ -1,3 +1,4 @@
+import { describe, it, expect } from 'vitest'
 import FmuUpdatableValue from '@/utils/domain/bases/fmuUpdatable'
 
 describe('When making an FMU-updatable value', () => {

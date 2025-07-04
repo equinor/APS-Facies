@@ -24,7 +24,7 @@
     "sourceMap": true,
     "useDefineForClassFields": true,
     "baseUrl": ".",
-    "types": ["vite/client", "vue", "vuetify", "node", "jest"],
+    "types": ["vite/client", "vue", "vuetify", "node"],
     "paths": {
       "@/*": ["src/*"]
     },
