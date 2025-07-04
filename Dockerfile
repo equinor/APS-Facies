@@ -1,6 +1,6 @@
 # syntax = docker/dockerfile:1
 ARG RMS_IMAGE
-FROM node:20.18.2-alpine3.21 AS node
+FROM node:20.19.2-alpine3.22 AS node
 
 ENV CODE=/code
 ENV NODE_MODULES=$CODE/node_modules
@@ -107,7 +107,7 @@ COPY gui/yarn.lock .
 
 # build / configuration files
 COPY gui/tsconfig.json .
-COPY gui/eslint.config.js .
+COPY gui/eslint.config.cjs .
 COPY gui/.postcssrc.js .
 COPY gui/vite.config.ts .
 COPY gui/vue.config.js .
