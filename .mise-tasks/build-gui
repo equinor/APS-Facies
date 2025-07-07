@@ -33,7 +33,6 @@ function compile_files_for_plugin() {
     done
 
     # Auxiliary files
-    echo "$(aps_version).$BUILD_NUMBER" >"$PLUGIN_DIR/VERSION"
     git rev-parse HEAD >"$PLUGIN_DIR/COMMIT"
     cp "$MISE_PROJECT_ROOT/gui/static/info.xml" "$PLUGIN_DIR"
 
@@ -45,8 +44,6 @@ function compile_files_for_plugin() {
     rm -rf \
         "$wheel_path" \
         "$PLUGIN_DIR/pydist/aps/api"
-
-    cp "$PLUGIN_DIR/VERSION" "$PLUGIN_DIR/pydist/aps/toolbox/VERSION"
 }
 
 function compile_gui_client_for_plugin() {

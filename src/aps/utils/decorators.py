@@ -2,6 +2,7 @@ from functools import wraps
 from pathlib import Path
 from zipfile import ZipFile
 
+from aps import __version__
 from aps.utils.constants.simple import Debug
 from aps.utils.debug import dump_debug_information
 
@@ -70,12 +71,11 @@ def output_version_information(func):
         if config.debug_level >= Debug.VERBOSE:
             print(f'Plugin running from: {plugin_root.parent}')
 
-        version = get_content('VERSION')
         try:
             toolbox_version = get_content('STUB_VERSION')
         except:
             toolbox_version = ' '
-        print(f'GUI version: {version}')
+        print(f'GUI version: {__version__}')
 
         if config.debug_level >= Debug.VERBOSE:
             print(f'APS toolbox (help script) version: {toolbox_version}  ')

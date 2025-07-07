@@ -466,6 +466,7 @@ src/aps/api/STUB_VERSION
 /COMMIT
 /VERSION
 /STUB_VERSION
+src/aps/_version.py
 
 # Unit testing
 src/aps/tests/out/

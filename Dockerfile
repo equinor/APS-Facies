@@ -15,6 +15,7 @@ ENV XDG_CACHE_HOME=/var/cahce
 
 WORKDIR /code
 FROM base AS python
+RUN dnf install -y git
 ENV PATH="/root/.local/bin:$PATH"
 
 COPY .tool-versions ./
