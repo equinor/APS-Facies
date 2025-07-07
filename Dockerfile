@@ -61,13 +61,6 @@ EOF
 
 FROM node AS install
 
-# Dependencies for building fibers (Required by vuetify)
-RUN apk add \
-        python3 \
-        make \
-        bash \
-        g++
-
 WORKDIR $CODE
 
 COPY gui/package.json gui/yarn.lock ./
