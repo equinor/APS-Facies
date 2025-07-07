@@ -12,10 +12,8 @@ CURRENT_OS := $(shell uname -s)
 EMPTY :=
 
 ifeq ($(CURRENT_OS),Linux)
-TAR := tar
 SED := sed
 else  # Darwin
-TAR := gtar
 SED := gsed
 endif
 
@@ -35,21 +33,15 @@ GIT_VERSION  = "$(shell git --version)"
 # Time stamp format YY daynumber_in_year hour minutes
 BUILD_NUMBER := $(shell date "+%y%j%H%M")
 
-RMS_DIR := $(CODE_DIR)/.rms
-RMS_PROJECT ?= $(RMS_DIR)/testAPSWorkflow_new.rms11.0.0
-
 APS_VERSION_FROM_GIT =  $(shell git describe --match='v*' --abbrev=0 --tags)
 APS_VERSION = $(shell echo $(APS_VERSION_FROM_GIT) | $(SED) -e "s/v//g")
 APS_FULL_VERSION = $(APS_VERSION).$(BUILD_NUMBER)
 LATEST_COMMIT_HASH_LONG = $(shell git rev-parse HEAD)
 
 WEB_DIR := $(CODE_DIR)/gui
-EXAMPLES_FOLDER := $(CODE_DIR)/examples
-AUXILLARY := $(CODE_DIR)/auxillary
 # Paths local to the compiled app
 RUN := PYTHONPATH=$(PYTHONPATH) uv run
 PYTHON ?= $(RUN) python3
-PIP ?= $(PYTHON) -m pip
 
 VUE_APP_APS_PROTOCOL ?= http
 VUE_APP_APS_SERVER := localhost
@@ -81,10 +73,6 @@ mock-COMMIT:
 	echo $(LATEST_COMMIT_HASH_LONG) > $(SOURCE_DIR)/api/COMMIT
 	ln -sf $(SOURCE_DIR)/api/COMMIT $(CODE_DIR)/COMMIT
 
-mock-STUB_VERSION:
-	cat $(CODE_DIR)/bin/STUB_VERSION > $(SOURCE_DIR)/api/STUB_VERSION
-	ln -sf $(SOURCE_DIR)/api/STUB_VERSION $(CODE_DIR)/STUB_VERSION
-
 links: clean-links create-workflow-dir changelog-link
 	ln -sf $(CODE_DIR)/workflow/APS_simulate_gauss_singleprocessing.py $(BIN_DIR)
 	ln -sf $(CODE_DIR)/aps/utils/ConvertBitMapToRMS.py $(CODE_DIR)/workflow
@@ -105,14 +93,8 @@ clean-links: clean-changelog-link
 	rm -f $(CODE_DIR)/workflow/ConvertBitMapToRMS.py
 	rm -f $(BIN_DIR)/bitmap2rms_xml.py
 
-clean-changelog-link:
-	rm -f $(CODE_DIR)/CHANGELOG.md
-
-clean: clean-links clean-workflow-blocks
+clean: clean-links
 	rm -f $(CODE_DIR)/build.txt
-
-clean-workflow-blocks:
-	rm -rf $(CODE_DIR)/workflow
 
 clean-all: clean clean-cache
 
