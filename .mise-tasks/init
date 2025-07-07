@@ -1,0 +1,48 @@
+#!/usr/bin/env bash
+set -euo pipefail
+#MISE depends=["generate-truncation-rules"]
+
+if [[ "${TRACE:-}" == "1" ]]; then
+    set -x
+fi
+
+function create_dotenv() {
+    local env_file="$MISE_PROJECT_ROOT/.env"
+    if [[ ! -f "$env_file" ]]; then
+        echo "Creating .env file"
+        cat <<EOF >"$env_file"
+# This path should be relative to the models directory
+# **BEGINNING WITH** / (it is mounted in the api container at the root)
+RMS_PROJECT_PATH=""
+EOF
+    else
+        echo ".env file already exists"
+    fi
+}
+
+function local_settings() {
+    local PROJECT_LOCATION_ROOT="${1:-$MISE_PROJECT_ROOT/models}"
+    local settings_file="$MISE_PROJECT_ROOT/local.settings.json"
+
+    if [[ ! -f "$settings_file" ]]; then
+        echo "Creating local.settings.json file"
+        mkdir -p \
+            "$PROJECT_LOCATION_ROOT" \
+            "$PROJECT_LOCATION_ROOT/project" \
+            "$PROJECT_LOCATION_ROOT/private"
+        cat <<EOF >"$settings_file"
+{
+  "projectRootLocation": "$PROJECT_LOCATION_ROOT"
+}
+EOF
+    else
+        echo "local.settings.json file already exists"
+    fi
+}
+
+function main() {
+    create_dotenv
+    local_settings "$@"
+}
+
+main "$@"

@@ -81,32 +81,14 @@ VUE_APP_API_URL := $(VUE_APP_APS_PROTOCOL)://$(VUE_APP_APS_SERVER):$(VUE_APP_APS
 VUE_APP_GUI_URL := $(VUE_APP_APS_PROTOCOL)://$(VUE_APP_APS_SERVER):$(VUE_APP_APS_GUI_PORT)
 endif
 
-MKDIR := mkdir -p
-
-PROJECT_LOCATION_ROOT ?= $(CODE_DIR)/models
-define LOCAL_SETTINGS_JSON
-{
-  "projectRootLocation": "$(PROJECT_LOCATION_ROOT)"
-}
-endef
-export LOCAL_SETTINGS_JSON
-
-
 YARN := yarn --cwd $(WEB_DIR)
-
-define STANDARD_DOTENV
-# This path should be relative to the models directory
-# **BEGINNING WITH** / (it is mounted in the api container at the root)
-RMS_PROJECT_PATH=""
-endef
-export STANDARD_DOTENV
 
 COLOR = \033[32;01m
 NO_COLOR = \033[0m
 .PHONY: help run package.json dotenv VERSION COMMIT STUB_VERSION
 
 # Build / clean / run
-build: clean-all init
+build: clean-all
 
 mock-VERSION:
 	echo $(APS_FULL_VERSION) > $(SOURCE_DIR)/api/VERSION
@@ -119,31 +101,6 @@ mock-COMMIT:
 mock-STUB_VERSION:
 	cat $(CODE_DIR)/bin/STUB_VERSION > $(SOURCE_DIR)/api/STUB_VERSION
 	ln -sf $(SOURCE_DIR)/api/STUB_VERSION $(CODE_DIR)/STUB_VERSION
-
-init: init-workflow package.json local.settings.json dotenv
-
-init-workflow: links generate-workflow-files
-
-init-local-develop: local.settings.json dotenv docker-compose
-
-docker-compose: dotenv
-
-local.settings.json: local-project-location
-	echo "$$LOCAL_SETTINGS_JSON" > $(CODE_DIR)/local.settings.json
-
-local-project-location:
-	mkdir -p \
-		$(PROJECT_LOCATION_ROOT) \
-		$(PROJECT_LOCATION_ROOT)/project \
-		$(PROJECT_LOCATION_ROOT)/private
-
-dotenv:
-	[ -f "$(CODE_DIR)/.env" ] \
-	|| { \
-		echo "$$STANDARD_DOTENV" > $(CODE_DIR)/.env ; \
-	}
-	ln -sf $(CODE_DIR)/.env $(WEB_DIR)/.env
-
 
 links: clean-links create-workflow-dir changelog-link
 	ln -sf $(CODE_DIR)/workflow/APS_simulate_gauss_singleprocessing.py $(BIN_DIR)
