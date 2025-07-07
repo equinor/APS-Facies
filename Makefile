@@ -116,7 +116,4 @@ find-circular-dependencies:
 	          --extensions js,ts \
 	          $(WEB_DIR)/src
 
-package.json:
-	$(YARN) install --dev --frozen-lockfile
-
 print-%  : ; @echo $($*)
