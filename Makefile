@@ -106,14 +106,4 @@ clean-__pycache__:
 clean-pyc:
 	rm -f $(shell find $(CODE_DIR) -name *.py[cod] -not -path *.rms/*)
 
-find-circular-dependencies:
-	cd $(WEB_DIR) && \
-	npx strip-json-comments-cli@1 --no-whitespace $(WEB_DIR)/tsconfig.json > /tmp/tsconfig.json && \
-	npx madge --circular \
-	          --warning \
-	          --ts-config /tmp/tsconfig.json \
-	          --webpack-config $(WEB_DIR)/node_modules/@vue/cli-service/webpack.config.js \
-	          --extensions js,ts \
-	          $(WEB_DIR)/src
-
 print-%  : ; @echo $($*)
