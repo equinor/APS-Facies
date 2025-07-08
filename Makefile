@@ -82,7 +82,6 @@ WEB_DIR := $(CODE_DIR)/gui
 TRUNCATION_RULE_VISUALIZATIONS := $(WEB_DIR)/public/truncation-rules
 EXAMPLES_FOLDER := $(CODE_DIR)/examples
 TEST_FOLDER := $(SOURCE_DIR)/tests
-INTEGRATION_TESTS := $(TEST_FOLDER)/integration
 AUXILLARY := $(CODE_DIR)/auxillary
 # Paths local to the compiled app
 REQUESTS_CA_BUNDLE ?= $(SSL_CERT_FILE)
@@ -348,30 +347,6 @@ update-node-dependencies:
 update-python-dependencies:
 	$(POETRY) update --dev
 
-integration-tests: clean-integration init-workflow links link-example-files
-	cd $(INTEGRATION_TESTS) && \
-	RMS_PROJECT="$(RMS_PROJECT)" \
-	APS_RESOURCES="$(INTEGRATION_TESTS)" \
-	APS_ROOT="$(CODE_DIR)" \
-	./test_workflows_in_rms11.sh
-
-clean-integration: clean-workflow-blocks clean-example-link
-	cd $(INTEGRATION_TESTS) && \
-	rm -f examples \
-	      matplotlibrc && \
-	rm -f *.log \
-	      *.html \
-	      *.xml \
-	      *.irap \
-	      *.roff \
-	      *.dat
-
-link-example-files: clean-example-link
-	ln -s $(EXAMPLES_FOLDER) $(INTEGRATION_TESTS)/examples
-
-clean-example-link:
-	rm -f $(INTEGRATION_TESTS)/examples
-
 unit-tests: clean-tests run-tests clean-tests
 
 run-tests: python-unit-tests
@@ -381,7 +356,7 @@ python-unit-tests:
 	PYTHONPATH=$(PYTHONPATH) \
 	$(PY.TEST) --import-mode=importlib
 
-clean-tests: clean-integration
+clean-tests:
 	cd $(TEST_FOLDER) && \
 	rm -rf .cache && \
 	rm -f  *.dat \
