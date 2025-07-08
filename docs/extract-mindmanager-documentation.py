@@ -1,32 +1,38 @@
 # /// script
 # requires-python = ">=3.11"
 # dependencies = [
+#     "PyYAML",
 #     "lxml",
 #     "types-lxml",
 #     "typer",
+#     "beautifulsoup4",
 # ]
 # ///
 
 from __future__ import annotations
 
 import base64
+import hashlib
 from abc import ABC
+from collections.abc import Mapping
 from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
-from typing import Self, NewType, cast
-from collections.abc import Mapping
-
-import typer
-import lxml.etree as ET
-from lxml.etree import _Element
+from typing import Callable, NewType, Self, TypeAlias, cast
 from zipfile import ZipFile
+
+import lxml.etree as ET
+import typer
+import yaml
+from bs4 import BeautifulSoup, PageElement, Tag
+from lxml.etree import _Element
 
 app = typer.Typer(pretty_exceptions_show_locals=False)
 
 
 class Format(str, Enum):
     html = 'html'
+    markdown = 'markdown'
 
 
 OId = NewType('OId', str)
@@ -44,6 +50,8 @@ def main(file: Path, format: Format = Format.html, destination: Path = Path('out
     match format:
         case 'html':
             exporter = HTMLExporter(mind_manager)
+        case 'markdown':
+            exporter = MarkdownExporter(mind_manager)
         case _:
             raise NotImplementedError(f'{format} is not supported')
     exporter.export(destination)
@@ -57,12 +65,124 @@ class Exporter(ABC):
     def export(self, destination: Path) -> None: ...
 
 
+class MarkdownExporter(Exporter):
+    def __init__(self, mind_manager: MindManager):
+        self.mind_manager = mind_manager
+
+    def export(self, destination: Path) -> None:
+        hierarchy = ExportHelper.export_topics(
+            self.mind_manager,
+            destination,
+            lambda hierarchy, index, topic: hierarchy[topic.parent.oid]
+            / topic.text.replace('\n', '').strip(),
+            lambda topic: 'README.md',
+            lambda hierarchy, topic: self.export_topic(hierarchy, topic),
+        )
+        # TODO: Deal with links
+        root = {}
+        for path in hierarchy.values():
+            path = path.relative_to(destination)
+            tree = root
+            for part in path.parts:
+                if part not in tree:
+                    tree[part] = {
+                        '_name': str(path / 'README.md'),
+                    }
+                else:
+                    tree = tree[part]
+
+        with open(destination / 'mkdocs.yml', 'w') as f:
+            f.write(yaml.dump(root, sort_keys=False))
+
+    def export_topic(self, hierarchy: Hierarchy, topic: Topic) -> str:
+        soup = BeautifulSoup(topic.notes.body, 'lxml')
+        content = f"""---
+title: {topic.text}
+---
+"""
+        for tag in soup.body:
+            content += self._export_tag(hierarchy, topic, tag)
+        return content.replace('\xc2', '').replace('\xa0', '')
+
+    def _export_tag(
+        self, hierarchy: Hierarchy, topic: Topic, tag: Tag | PageElement
+    ) -> str:
+        if tag.name == 'p':
+            parts = []
+            for content in tag.contents:
+                if isinstance(content, str):
+                    parts.append(content)
+                elif isinstance(content, Tag):
+                    parts.append(self._export_tag(hierarchy, topic, content))
+                else:
+                    raise NotImplementedError(
+                        f'Unsupported content type: {type(content)}'
+                    )
+            return '\n'.join(parts)
+        elif tag.name == 'ul':
+            return '\n'.join(
+                self._export_tag(hierarchy, topic, item) for item in tag.contents
+            )
+        elif tag.name == 'li':
+            # TODO: Deal with depth / nested lists
+            return f'- {"".join(str(item) for item in tag.contents)}\n'
+        elif tag.name == 'img':
+            return f'![]({self._export_image(hierarchy, topic, tag)})'
+        elif tag.name == 'font':
+            # Handle font tags, which may contain color information
+            color = tag.get('color')
+            if color:
+                return f"<span style='color: {color};'>{''.join(str(item) for item in tag.contents)}</span>"
+            else:
+                return ''.join(str(item) for item in tag.contents)
+        elif tag.name in ['b', 'strong']:
+            return f'**{"".join(str(item) for item in tag.contents)}**'
+        elif tag.name in ['i', 'em']:
+            return f'_{"".join(str(item) for item in tag.contents)}_'
+        elif tag.name == 'ol':
+            parts = []
+            for index, item in enumerate(tag.contents, start=1):
+                if isinstance(item, Tag):
+                    parts.append(f'{index}. {self._export_tag(hierarchy, topic, item)}')
+                else:
+                    raise NotImplementedError(
+                        f'Unsupported content type in ordered list: {type(item)}'
+                    )
+            return '\n'.join(parts)
+        elif tag.name == 'br':
+            return '\n'
+        elif tag.name == 'span':
+            return ''.join(str(item) for item in tag.contents)
+        elif tag.name == 'blockquote':
+            # TODO: Deal with nesting
+            return '\n> '.join(
+                self._export_tag(hierarchy, topic, element) for element in tag.contents
+            )
+        else:
+            raise NotImplementedError(f'Unsupported tag: {tag.name}')
+
+    def _export_image(self, hierarchy: Hierarchy, topic: Topic, tag: Tag) -> str:
+        image_uri = tag.get('src')
+        if not image_uri:
+            raise ValueError("Image tag does not have a 'src' attribute")
+        if image_uri.startswith('mmnotes://'):
+            # TODO: Write image to disk, and return the appropriate path
+            image_data = topic.notes.image_data[image_uri].data
+            _hash = hashlib.sha3_256(image_data).hexdigest()
+            file_name = f'{_hash}.png'
+            with open(hierarchy[topic.oid] / file_name, 'wb') as f:
+                f.write(image_data)
+            return file_name
+        else:
+            raise NotImplementedError(f'Unsupported image URI: {image_uri}')
+
+
 class HTMLExporter(Exporter):
     def __init__(self, mind_manager: MindManager):
         self.mind_manager = mind_manager
 
     @staticmethod
-    def compose_topic_body(topic: Topic) -> str:
+    def compose_topic_body(hierarchy: Hierarchy, topic: Topic) -> str:
         body = topic.notes.body
         if '<img ' in body:
             for source in topic.notes.image_data:
@@ -78,21 +198,14 @@ class HTMLExporter(Exporter):
         self.export_links(destination, hierarchy)
 
     def export_topics(self, destination: Path) -> dict[str | None, Path]:
-        topics = self._indexed(self.mind_manager.topics)
-        hierarchy: dict[str | None, Path] = {
-            self.mind_manager.oid: destination,
-        }
-        while topics:
-            topic, index = topics.pop(0)
-            destination = hierarchy[topic.oid] = (
-                hierarchy[topic.parent.oid] / f'{index + 1} - {topic.text}'
-            )
-            destination.mkdir(parents=True, exist_ok=True)
-            if topic.notes:
-                with open(destination / 'index.html', 'w') as f:
-                    f.write(self.compose_topic_body(topic))
-            topics.extend(self._indexed(topic.children))
-        return hierarchy
+        return ExportHelper.export_topics(
+            self.mind_manager,
+            destination,
+            lambda hierarchy, index, topic: hierarchy[topic.parent.oid]
+            / f'{index + 1} - {topic.text}',
+            lambda topic: 'index.html',
+            lambda topic: self.compose_topic_body(topic),
+        )
 
     def export_links(self, destination: Path, hierarchy: dict[str | None, Path]):
         links_destination = destination / 'links'
@@ -116,6 +229,34 @@ class HTMLExporter(Exporter):
     def _link(from_path: Path, to_path: Path):
         with open(from_path, 'w') as f:
             f.write(str(to_path))
+
+
+Hierarchy: TypeAlias = dict[str | None, Path]
+
+
+class ExportHelper:
+    @classmethod
+    def export_topics(
+        cls,
+        mind_manager: MindManager,
+        destination: Path,
+        file_path_func: Callable[[Hierarchy, int, Topic], Path],
+        file_name_func: Callable[[Topic], str],
+        file_content_func: Callable[[Hierarchy, Topic], str],
+    ) -> Hierarchy:
+        topics = cls._indexed(mind_manager.topics)
+        hierarchy: Hierarchy = {
+            mind_manager.oid: destination,
+        }
+        while topics:
+            topic, index = topics.pop(0)
+            destination = hierarchy[topic.oid] = file_path_func(hierarchy, index, topic)
+            destination.mkdir(parents=True, exist_ok=True)
+            if topic.notes:
+                with open(destination / file_name_func(topic), 'w') as f:
+                    f.write(file_content_func(hierarchy, topic))
+            topics.extend(cls._indexed(topic.children))
+        return hierarchy
 
     @staticmethod
     def _indexed(topics: list[Topic]):
@@ -217,8 +358,8 @@ class Connection:
         connection = connections[0]
         cx = float(connection.get('CX'))
         cy = float(connection.get('CY'))
-        end_point_cx = float(connection.get('EndPointCX'))
-        end_point_cy = float(connection.get('EndPointCY'))
+        end_point_cx = float(connection.get('EndPointCX', 0))
+        end_point_cy = float(connection.get('EndPointCY', 0))
         object_reference: OId = cast(
             OId, connection.find('ap:ObjectReference', element.nsmap).get('OIdRef')
         )

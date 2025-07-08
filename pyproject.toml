@@ -34,6 +34,9 @@ dev = [
     'python-dotenv (>=0.19.2,<1.0.0)',
     'typing-extensions (>=4.12.2,<5.0.0)',
 ]
+docs = [
+    "mkdocs-material (>=9.6.20,<10.0.0)",
+]
 
 [build-system]
 requires = ["hatchling", "hatch-vcs", "hatch-build-scripts"]
