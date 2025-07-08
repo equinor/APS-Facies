@@ -2,7 +2,7 @@ from functools import wraps
 from pathlib import Path
 from zipfile import ZipFile
 
-from aps import __version__
+from aps._version import __version__, commit
 from aps.utils.constants.simple import Debug
 from aps.utils.debug import dump_debug_information
 
@@ -79,7 +79,6 @@ def output_version_information(func):
 
         if config.debug_level >= Debug.VERBOSE:
             print(f'APS toolbox (help script) version: {toolbox_version}  ')
-            commit = get_content('COMMIT')
             print(f'Commit SHA: {commit}')
         return func(config)
 

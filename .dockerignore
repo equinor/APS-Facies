@@ -19,9 +19,7 @@
 
 !src/aps/*.py
 !src/aps/api/**/*.py
-!src/aps/api/VERSION
-!src/aps/api/COMMIT
-!src/aps/api/STUB_VERSION
+!src/aps/toolbox/generate_workflow_blocks/STUB_VERSION
 !src/aps/utils/**/*.py
 !src/aps/rms_jobs/**/*.py
 !src/aps/toolbox/**/*.py

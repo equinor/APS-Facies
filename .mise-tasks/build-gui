@@ -33,7 +33,6 @@ function compile_files_for_plugin() {
     done
 
     # Auxiliary files
-    git rev-parse HEAD >"$PLUGIN_DIR/COMMIT"
     cp "$MISE_PROJECT_ROOT/gui/static/info.xml" "$PLUGIN_DIR"
 
     # Adjust pydist / 'dependencies'
