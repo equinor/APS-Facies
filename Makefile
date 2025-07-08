@@ -12,16 +12,13 @@ CURRENT_OS := $(shell uname -s)
 EMPTY :=
 
 ifeq ($(CURRENT_OS),Linux)
-NUMBER_OF_PROCESSORS := $(shell cat /proc/cpuinfo | grep processor | wc -l)
 TAR := tar
 SED := sed
 else  # Darwin
-NUMBER_OF_PROCESSORS := $(shell sysctl -n hw.ncpu)
 TAR := gtar
 SED := gsed
 endif
 
-TAR_EXTRACT := $(TAR) -xf
 # Mode may be 'production', or 'development'
 MODE ?= production
 CODE_DIR ?= $(shell pwd)
@@ -83,8 +80,6 @@ PLUGIN_DIR := $(BUILD_DIR)/$(PLUGIN_NAME)
 DEPLOY_VERSION_PATH = $(CODE_DIR)/DEPLOY_VERSION.txt
 WEB_DIR := $(CODE_DIR)/gui
 TRUNCATION_RULE_VISUALIZATIONS := $(WEB_DIR)/public/truncation-rules
-LIB_PREFIX := $(CODE_DIR)/aps/libraries
-LIB_SOURCE := $(LIB_PREFIX)/sources
 EXAMPLES_FOLDER := $(CODE_DIR)/examples
 TEST_FOLDER := $(SOURCE_DIR)/tests
 INTEGRATION_TESTS := $(TEST_FOLDER)/integration
@@ -100,8 +95,6 @@ endif
 PYTHON ?= $(RUN) python3
 PIP ?= $(PYTHON) -m pip
 PY.TEST := $(RUN) python -m pytest
-FLASK := $(RUN) flask
-REQUIREMENTS.TXT := $(POETRY) export --dev --format 'requirements.txt'
 
 VUE_APP_APS_PROTOCOL ?= http
 VUE_APP_APS_SERVER := localhost
@@ -115,8 +108,6 @@ else
 VUE_APP_API_URL := $(VUE_APP_APS_PROTOCOL)://$(VUE_APP_APS_SERVER):$(VUE_APP_APS_API_PORT)
 VUE_APP_GUI_URL := $(VUE_APP_APS_PROTOCOL)://$(VUE_APP_APS_SERVER):$(VUE_APP_APS_GUI_PORT)
 endif
-
-PYTHON_PREFIX = $(shell dirname $(PYTHON))/..
 
 UI.PY := $(PYTHON_API_DIR)/ui.py
 MAIN.PY := $(PYTHON_API_DIR)/main.py
@@ -291,13 +282,6 @@ dotenv:
 
 
 links: clean-links create-workflow-dir changelog-link
-	ln -sf $(CODE_DIR)/depricated/APS_make_gauss_IPL.py $(BIN_DIR)
-	ln -sf $(CODE_DIR)/depricated/APSGaussFieldJobs.py $(SOURCE_DIR)/algorithms
-	ln -sf $(CODE_DIR)/depricated/APSupdateVarioAsimuth.py $(SOURCE_DIR)/utils
-	ln -sf $(CODE_DIR)/depricated/getRMSProjectData.py $(SOURCE_DIR)/utils/roxar
-	ln -sf $(CODE_DIR)/depricated/DefineTruncStructure.py $(CODE_DIR)/examples
-	ln -sf $(CODE_DIR)/depricated/to_be_deleted/APS_simulate_gauss_multiprocessing.ipl $(CODE_DIR)/workflow
-	ln -sf $(CODE_DIR)/depricated/to_be_deleted/Cleanup_tmpdir.ipl $(CODE_DIR)/workflow
 	ln -sf $(CODE_DIR)/workflow/APS_simulate_gauss_multiprocessing.py $(BIN_DIR)
 	ln -sf $(CODE_DIR)/workflow/APS_simulate_gauss_singleprocessing.py $(BIN_DIR)
 	ln -sf $(CODE_DIR)/aps/utils/ConvertBitMapToRMS.py $(CODE_DIR)/workflow
@@ -356,12 +340,6 @@ copy-source:
 	$(TAR) --exclude-vcs-ignore \
 	    -cvzf code.tar.gz .
 
-check-node-dependencies:
-	$(YARN) outdated
-
-check-node-dependencies-for-vulnerabilities:
-	$(YARN) run improved-yarn-audit --fail-on-missing-exclutions  --ignore-dev-deps
-
 update-dependencies: update-node-dependencies update-python-dependencies
 
 update-node-dependencies:
@@ -396,15 +374,12 @@ clean-example-link:
 
 unit-tests: clean-tests run-tests clean-tests
 
-run-tests: python-unit-tests javascript-unit-tests
+run-tests: python-unit-tests
 
 python-unit-tests:
 	cd $(TEST_FOLDER) && \
 	PYTHONPATH=$(PYTHONPATH) \
 	$(PY.TEST) --import-mode=importlib
-
-javascript-unit-tests:
-	$(YARN) test:unit
 
 clean-tests: clean-integration
 	cd $(TEST_FOLDER) && \
@@ -425,45 +400,7 @@ find-circular-dependencies:
 	          --extensions js,ts \
 	          $(WEB_DIR)/src
 
-linting: javascript-linting
-
-javascript-linting:
-	$(YARN) lint
-
-web-start: $(PACKAGE.JSON)
-	VUE_APP_API_URL=$(VUE_APP_API_URL) \
-	$(YARN) serve:gui --port=$(VUE_APP_APS_GUI_PORT) \
-	                  --host=$(VUE_APP_APS_SERVER)
-
-web-e2e:
-	$(YARN) test:e2e
-
-web-test:
-	$(YARN) test:unit
-
-web-lint:
-	$(YARN) lint
-
-web-build:
-	$(YARN) build
-
-web-install-dev: $(PACKAGE.JSON)
-
 package.json:
 	$(YARN) install --dev --frozen-lockfile
-
-api-start: run-rms.uipy-mock
-
-run-rms.uipy-mock:
-	FLASK_APP=$(SOURCE_DIR)/api/app.py \
-	FLASK_DEBUG=1 \
-	APS_MODE='develop' \
-	VUE_APP_GUI_URL=$(VUE_APP_GUI_URL) \
-	$(RUN) flask \
-		--app $(SOURCE_DIR)/api/app.py \
-		run \
-		--port=$(VUE_APP_APS_API_PORT) \
-		--host=$(VUE_APP_APS_SERVER)
-
 
 print-%  : ; @echo $($*)
