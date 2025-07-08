@@ -489,12 +489,10 @@ def get_workflows(use_plugin_dir: bool = False) -> Dict[str, List[str]]:
         'depricated': [],
         'aps/rms_jobs': [
             'APS_main',
-            'APS_simulate_gauss_multiprocessing',
             'APS_simulate_gauss_singleprocessing',
             'defineFaciesProbMapDepTrend',
             'defineFaciesProbTrend',
             'APS_normalize_prob_cubes',
-            'APS_set_seed_file_for_multiprocessing_workflow',
             'bitmap2rms',
             'Compare_files_with_uncertainty_parameters',
             'updateAPSModelFromFMU',
