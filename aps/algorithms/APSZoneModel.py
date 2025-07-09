@@ -134,6 +134,7 @@ class APSZoneModel:
         debug_level: Debug = Debug.OFF,
         keyResolution: int = 100,
         grid_layout: Optional[Union[str, Conform]] = None,
+        ertbox_layers: Optional[int] = None,
     ) -> None:
         """
         If the object is created by reading the xml tree for model parameters, it is required that
@@ -161,6 +162,7 @@ class APSZoneModel:
         self.__keyResolution = keyResolution
         self.__debug_level = debug_level
         self.grid_layout = grid_layout
+        self.ertbox_layers = ertbox_layers
 
         if ET_Tree is not None:
             self.__interpretXMLTree(
@@ -221,6 +223,12 @@ class APSZoneModel:
                 zone, 'GridLayout', 'Zone', modelFile=modelFileName, required=False
             )
             self.grid_layout = grid_layout
+
+            ertbox_grid_layers = getIntCommand(
+                zone, 'NLayersInErtbox', 'Zone', minValue=1, modelFile=modelFileName,
+                defaultValue=1, required=False
+            )
+            self.ertbox_layers = ertbox_grid_layers
 
             if zone_number == self.zone_number and region_number == self.region_number:
                 useConstProb = getBoolCommand(
@@ -353,6 +361,16 @@ class APSZoneModel:
         if value is not None:
             value = Conform(value)
         self._grid_layout = value
+
+    @property
+    def ertbox_layers(self) -> Optional[Conform]:
+        return self._ertbox_layers
+
+    @ertbox_layers.setter
+    def ertbox_layers(self, value: Optional[int]):
+        if value is not None:
+            value = int(value)
+        self._ertbox_layers = value
 
     @property
     def zone_number(self) -> int:
@@ -1028,6 +1046,12 @@ class APSZoneModel:
         if self.grid_layout:
             elem = Element('GridLayout')
             elem.text = self.grid_layout.value
+            zoneElement.append(elem)
+
+        # Add number of layers for ERTBOX for this zone
+        if self.ertbox_layers
+            elem = Element('NLayerInErtbox')
+            elem.text = f' {self._ertbox_layers} '
             zoneElement.append(elem)
 
         # Add child command UseConstProb
