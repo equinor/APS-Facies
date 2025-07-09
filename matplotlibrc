@@ -1,1 +1,3 @@
-backend: Agg
+backend             : Agg
+savefig.facecolor   : white
+savefig.transparent : False

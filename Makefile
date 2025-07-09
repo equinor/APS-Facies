@@ -11,22 +11,14 @@ SHELL := /bin/bash
 CURRENT_OS := $(shell uname -s)
 EMPTY :=
 
-ifneq ("$(wildcard /.dockerenv)","")
-MATPLOTLIB_BACKEND ?= Agg
-endif
 ifeq ($(CURRENT_OS),Linux)
-NUMBER_OF_PROCESSORS := $(shell cat /proc/cpuinfo | grep processor | wc -l)
 TAR := tar
 SED := sed
-MATPLOTLIB_BACKEND ?= Agg
 else  # Darwin
-NUMBER_OF_PROCESSORS := $(shell sysctl -n hw.ncpu)
 TAR := gtar
 SED := gsed
-MATPLOTLIB_BACKEND ?= Agg
 endif
 
-TAR_EXTRACT := $(TAR) -xf
 # Mode may be 'production', or 'development'
 MODE ?= production
 CODE_DIR ?= $(shell pwd)
@@ -88,11 +80,8 @@ PLUGIN_DIR := $(BUILD_DIR)/$(PLUGIN_NAME)
 DEPLOY_VERSION_PATH = $(CODE_DIR)/DEPLOY_VERSION.txt
 WEB_DIR := $(CODE_DIR)/gui
 TRUNCATION_RULE_VISUALIZATIONS := $(WEB_DIR)/public/truncation-rules
-LIB_PREFIX := $(CODE_DIR)/aps/libraries
-LIB_SOURCE := $(LIB_PREFIX)/sources
 EXAMPLES_FOLDER := $(CODE_DIR)/examples
 TEST_FOLDER := $(SOURCE_DIR)/tests
-INTEGRATION_TESTS := $(TEST_FOLDER)/integration
 AUXILLARY := $(CODE_DIR)/auxillary
 # Paths local to the compiled app
 REQUESTS_CA_BUNDLE ?= $(SSL_CERT_FILE)
@@ -105,10 +94,6 @@ endif
 PYTHON ?= $(RUN) python3
 PIP ?= $(PYTHON) -m pip
 PY.TEST := $(RUN) python -m pytest
-PIPROT := $(RUN) piprot
-SAFETY_CHECK := $(POETRY) check
-FLASK := $(RUN) flask
-REQUIREMENTS.TXT := $(POETRY) export --dev --format 'requirements.txt'
 
 VUE_APP_APS_PROTOCOL ?= http
 VUE_APP_APS_SERVER := localhost
@@ -122,8 +107,6 @@ else
 VUE_APP_API_URL := $(VUE_APP_APS_PROTOCOL)://$(VUE_APP_APS_SERVER):$(VUE_APP_APS_API_PORT)
 VUE_APP_GUI_URL := $(VUE_APP_APS_PROTOCOL)://$(VUE_APP_APS_SERVER):$(VUE_APP_APS_GUI_PORT)
 endif
-
-PYTHON_PREFIX = $(shell dirname $(PYTHON))/..
 
 UI.PY := $(PYTHON_API_DIR)/ui.py
 MAIN.PY := $(PYTHON_API_DIR)/main.py
@@ -149,16 +132,9 @@ RMS_PROJECT_PATH=""
 endef
 export STANDARD_DOTENV
 
-define MATPLOTLIBRC
-backend             : $(MATPLOTLIB_BACKEND)
-savefig.facecolor   : white
-savefig.transparent : False
-endef
-export MATPLOTLIBRC
-
 COLOR = \033[32;01m
 NO_COLOR = \033[0m
-.PHONY: help run package.json matplotlibrc dotenv VERSION COMMIT STUB_VERSION
+.PHONY: help run package.json dotenv VERSION COMMIT STUB_VERSION
 
 # Build / clean / run
 build: clean-all init
@@ -228,7 +204,7 @@ _build-front-end:
 copy-changelog.md:
 	cp $(WEB_DIR)/public/CHANGELOG.md $(PLUGIN_DIR)/CHANGELOG.md
 
-truncation-rule-vislualization-dir: relink-matplotlibrc
+truncation-rule-vislualization-dir:
 	$(MKDIR) $(TRUNCATION_RULE_VISUALIZATIONS)
 	ln -sf $(CODE_DIR)/matplotlibrc $(TRUNCATION_RULE_VISUALIZATIONS)/matplotlibrc
 
@@ -245,7 +221,6 @@ generate-truncation-rule-images: clean-generated-truncation-rules truncation-rul
 	HIDE_TITLE='yes' \
 	DONT_WRITE_OVERVIEW='yes' \
 	WRITE_TO_DIRECTORIES='yes' \
-	MPLBACKEND=$(MATPLOTLIB_BACKEND) \
 	$(RUN) python3 $(SOURCE_DIR)/algorithms/setupInteractiveTruncationSetting.py
 	rm -f $(TRUNCATION_RULE_VISUALIZATIONS)/matplotlibrc
 
@@ -305,14 +280,7 @@ dotenv:
 	ln -sf $(CODE_DIR)/.env $(WEB_DIR)/.env
 
 
-links: clean-links create-workflow-dir matplotlibrc-links changelog-link
-	ln -sf $(CODE_DIR)/depricated/APS_make_gauss_IPL.py $(BIN_DIR)
-	ln -sf $(CODE_DIR)/depricated/APSGaussFieldJobs.py $(SOURCE_DIR)/algorithms
-	ln -sf $(CODE_DIR)/depricated/APSupdateVarioAsimuth.py $(SOURCE_DIR)/utils
-	ln -sf $(CODE_DIR)/depricated/getRMSProjectData.py $(SOURCE_DIR)/utils/roxar
-	ln -sf $(CODE_DIR)/depricated/DefineTruncStructure.py $(CODE_DIR)/examples
-	ln -sf $(CODE_DIR)/depricated/to_be_deleted/APS_simulate_gauss_multiprocessing.ipl $(CODE_DIR)/workflow
-	ln -sf $(CODE_DIR)/depricated/to_be_deleted/Cleanup_tmpdir.ipl $(CODE_DIR)/workflow
+links: clean-links create-workflow-dir changelog-link
 	ln -sf $(CODE_DIR)/workflow/APS_simulate_gauss_multiprocessing.py $(BIN_DIR)
 	ln -sf $(CODE_DIR)/workflow/APS_simulate_gauss_singleprocessing.py $(BIN_DIR)
 	ln -sf $(CODE_DIR)/aps/utils/ConvertBitMapToRMS.py $(CODE_DIR)/workflow
@@ -325,7 +293,7 @@ changelog-link:
 create-workflow-dir:
 	$(MKDIR) $(CODE_DIR)/workflow
 
-clean-links: clean-matplotlibrc clean-changelog-link
+clean-links: clean-changelog-link
 	rm -f $(BIN_DIR)/APS_make_gauss_IPL.py
 	rm -f $(SOURCE_DIR)/algorithms/APSGaussFieldJobs.py
 	rm -f $(SOURCE_DIR)/utils/APSupdateVarioAsimuth.py
@@ -346,23 +314,8 @@ generate-workflow-files: $(CREATE_WORKFLOW_DIR)
 
 dependencies: requirements
 
-requirements: matplotlibrc
+requirements:
 	$(POETRY) install --no-root
-
-relink-matplotlibrc: clean-matplotlibrc matplotlibrc matplotlibrc-links
-
-matplotlibrc:
-	echo "$$MATPLOTLIBRC" > $(CODE_DIR)/matplotlibrc
-
-clean-matplotlibrc:
-	rm -f $(CODE_DIR)/matplotlibrc \
-	      $(TEST_FOLDER)/matplotlibrc \
-	      $(INTEGRATION_TESTS)/matplotlibrc
-
-matplotlibrc-links: matplotlibrc
-	# Matplotlibrc (Force use of Agg in tests)
-	ln -sf $(CODE_DIR)/matplotlibrc $(TEST_FOLDER)/matplotlibrc
-	ln -sf $(CODE_DIR)/matplotlibrc $(INTEGRATION_TESTS)/matplotlibrc
 
 clean: clean-links clean-workflow-blocks
 	rm -rf $(BUILD_DIR)
@@ -386,18 +339,6 @@ copy-source:
 	$(TAR) --exclude-vcs-ignore \
 	    -cvzf code.tar.gz .
 
-check-requirements:
-	$(POETRY) lock --dev --requirements | $(PIPROT) --outdated -
-
-check-node-dependencies:
-	$(YARN) outdated
-
-safety-check:
-	$(POETRY) check
-
-check-node-dependencies-for-vulnerabilities:
-	$(YARN) run improved-yarn-audit --fail-on-missing-exclutions  --ignore-dev-deps
-
 update-dependencies: update-node-dependencies update-python-dependencies
 
 update-node-dependencies:
@@ -406,45 +347,16 @@ update-node-dependencies:
 update-python-dependencies:
 	$(POETRY) update --dev
 
-integration-tests: clean-integration init-workflow links link-example-files
-	MATPLOTLIB_BACKEND="Agg" \
-	make clean-matplotlibrc matplotlibrc-links
-	cd $(INTEGRATION_TESTS) && \
-	RMS_PROJECT="$(RMS_PROJECT)" \
-	APS_RESOURCES="$(INTEGRATION_TESTS)" \
-	APS_ROOT="$(CODE_DIR)" \
-	./test_workflows_in_rms11.sh
-
-clean-integration: clean-workflow-blocks clean-example-link clean-matplotlibrc
-	cd $(INTEGRATION_TESTS) && \
-	rm -f examples \
-	      matplotlibrc && \
-	rm -f *.log \
-	      *.html \
-	      *.xml \
-	      *.irap \
-	      *.roff \
-	      *.dat
-
-link-example-files: clean-example-link
-	ln -s $(EXAMPLES_FOLDER) $(INTEGRATION_TESTS)/examples
-
-clean-example-link:
-	rm -f $(INTEGRATION_TESTS)/examples
-
 unit-tests: clean-tests run-tests clean-tests
 
-run-tests: python-unit-tests javascript-unit-tests
+run-tests: python-unit-tests
 
 python-unit-tests:
 	cd $(TEST_FOLDER) && \
 	PYTHONPATH=$(PYTHONPATH) \
 	$(PY.TEST) --import-mode=importlib
 
-javascript-unit-tests:
-	$(YARN) test:unit
-
-clean-tests: clean-integration
+clean-tests:
 	cd $(TEST_FOLDER) && \
 	rm -rf .cache && \
 	rm -f  *.dat \
@@ -463,55 +375,7 @@ find-circular-dependencies:
 	          --extensions js,ts \
 	          $(WEB_DIR)/src
 
-linting: javascript-linting
-
-javascript-linting:
-	$(YARN) lint
-
-web-start: $(PACKAGE.JSON)
-	VUE_APP_API_URL=$(VUE_APP_API_URL) \
-	$(YARN) serve:gui --port=$(VUE_APP_APS_GUI_PORT) \
-	                  --host=$(VUE_APP_APS_SERVER)
-
-web-e2e:
-	$(YARN) test:e2e
-
-web-test:
-	$(YARN) test:unit
-
-web-lint:
-	$(YARN) lint
-
-web-build:
-	$(YARN) build
-
-web-install-dev: $(PACKAGE.JSON)
-
 package.json:
 	$(YARN) install --dev --frozen-lockfile
-
-
-run-api-gunicorn:
-	gunicorn --workers 8 \
-	         --chdir $(CODE_DIR)/aps/api \
-	         --bind $(VUE_APP_APS_SERVER):$(VUE_APP_APS_API_PORT) \
-	         --timeout 1200 \
-	         --graceful-timeout 1200 \
-	         --reload \
-	         app:app
-
-api-start: run-rms.uipy-mock
-
-run-rms.uipy-mock: matplotlibrc
-	FLASK_APP=$(SOURCE_DIR)/api/app.py \
-	FLASK_DEBUG=1 \
-	APS_MODE='develop' \
-	VUE_APP_GUI_URL=$(VUE_APP_GUI_URL) \
-	$(RUN) flask \
-		--app $(SOURCE_DIR)/api/app.py \
-		run \
-		--port=$(VUE_APP_APS_API_PORT) \
-		--host=$(VUE_APP_APS_SERVER)
-
 
 print-%  : ; @echo $($*)
