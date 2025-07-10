@@ -512,7 +512,6 @@ def get_workflows(use_plugin_dir: bool = False) -> Dict[str, List[str]]:
             'testPreview',
         ],
         'aps/utils/roxar': [
-            'APS_update_gauss_rms',
             'getGridModelAttributes',
             'compare_files',
         ],
@@ -528,11 +527,6 @@ def get_rms_mapping(suffix: str = '') -> Dict[str, Optional[str]]:
             ('APS_test_preview', 'testPreview.py'),
             ('APS_update_from_FMU', 'updateAPSModelFromFMU.py'),
             ('APS_define_depositional_trend', 'defineFaciesProbMapDepTrend.py'),
-            (
-                'APS_simulate_gauss_fields_multiprocessing',
-                'APS_simulate_gauss_multiprocessing.py',
-            ),
-            ('APS_import_simulated_gauss_fields', 'APS_update_gauss_rms.py'),
             ('APS_simulate_gauss_fields', 'APS_simulate_gauss_singleprocessing.py'),
             ('APS_export_grid_model_info', 'getGridModelAttributes.py'),
             ('test_welldata_api', None),
@@ -554,10 +548,6 @@ def get_rms_mapping(suffix: str = '') -> Dict[str, Optional[str]]:
             ('Compare_files_updated_with_FMU_parameters', None),
             ('APS_normalize_prob_cubes', 'APS_normalize_prob_cubes.py'),
             ('APS_bitmap2rms', 'bitmap2rms.py'),
-            (
-                'APS_set_seed_file_for_multiprocessing_workflow',
-                'APS_set_seed_file_for_multiprocessing_workflow.py',
-            ),
             ('APS_compare_files', 'compare_files.py'),
             ('APS_resample_to_ertbox', 'copy_rms_param_to_fmu_grid.py'),
             ('APS_run_workflow', 'test_jobs_and_workflow.py'),
