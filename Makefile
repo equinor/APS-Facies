@@ -281,7 +281,6 @@ dotenv:
 
 
 links: clean-links create-workflow-dir changelog-link
-	ln -sf $(CODE_DIR)/workflow/APS_simulate_gauss_multiprocessing.py $(BIN_DIR)
 	ln -sf $(CODE_DIR)/workflow/APS_simulate_gauss_singleprocessing.py $(BIN_DIR)
 	ln -sf $(CODE_DIR)/aps/utils/ConvertBitMapToRMS.py $(CODE_DIR)/workflow
 	ln -sf $(CODE_DIR)/aps/rms_jobs/bitmap2rms.py $(BIN_DIR)/bitmap2rms_xml.py
@@ -294,14 +293,9 @@ create-workflow-dir:
 	$(MKDIR) $(CODE_DIR)/workflow
 
 clean-links: clean-changelog-link
-	rm -f $(BIN_DIR)/APS_make_gauss_IPL.py
-	rm -f $(SOURCE_DIR)/algorithms/APSGaussFieldJobs.py
 	rm -f $(SOURCE_DIR)/utils/APSupdateVarioAsimuth.py
 	rm -f $(SOURCE_DIR)/utils/roxar/getRMSProjectData.py
 	rm -f $(CODE_DIR)/examples/DefineTruncStructure.py
-	rm -f $(CODE_DIR)/workflow/APS_simulate_gauss_multiprocessing.ipl
-	rm -f $(CODE_DIR)/workflow/Cleanup_tmpdir.ipl
-	rm -f $(BIN_DIR)/APS_simulate_gauss_multiprocessing.py
 	rm -f $(BIN_DIR)/APS_simulate_gauss_singleprocessing.py
 	rm -f $(CODE_DIR)/workflow/ConvertBitMapToRMS.py
 	rm -f $(BIN_DIR)/bitmap2rms_xml.py
