@@ -148,6 +148,7 @@ class APSModel:
         prob_settings_tolerance: float = ProbabilityTolerances.MAX_ALLOWED_DEVIATION_BEFORE_ERROR,
         transform_type: TransformType = TransformType.EMPIRIC,
         fmu_use_residual_fields: bool = False,
+        fmu_use_ertbox_per_zone: bool = False,
         check_with_grid_model: bool = False,
         project=None,
         save_job_name=True,
@@ -241,6 +242,7 @@ class APSModel:
         self.__prob_settings_tolerance = prob_settings_tolerance
         self.__transform_type = transform_type
         self.__fmu_use_residual_fields = fmu_use_residual_fields
+        self.__fmu_use_ertbox_per_zone = fmu_use_ertbox_per_zone
         self.__fmu_use_non_standard_dir_and_files = fmu_use_non_standard_dir_and_files
         self.__fmu_export_ertbox_grid = fmu_export_ertbox_grid
         self.__save_job_name = save_job_name
@@ -1104,6 +1106,10 @@ class APSModel:
         return self.__fmu_use_residual_fields
 
     @property
+    def fmu_use_ertbox_per_zone(self) -> bool:
+        return self.__fmu_use_ertbox_per_zone
+
+    @property
     def fmu_use_non_standard_files(self) -> bool:
         return self.__fmu_use_non_standard_dir_and_files
 
@@ -1737,6 +1743,23 @@ class APSModel:
                                 f'Job Settings parameter for {kw_ertbox} must be a name of a grid model.'
                             )
 
+                        kw_use_ertbox_per_zone = 'UseErtboxPerZone'
+                        use_ertbox_per_zone_settings = getKeyword(
+                            update_grf_settings,
+                            kw_use_ertbox_per_zone,
+                            modelFile=model_file_name,
+                            required=False,
+                        )
+                        if use_ertbox_per_zone_settings is not None:
+                            value = use_ertbox_per_zone_settings.text.strip().upper()
+                            legal_values = ['YES', 'NO']
+                            if value not in legal_values:
+                                raise ValueError(
+                                    f'Job settings for keyword {kw_use_ertbox_per_zone} must be one of {legal_values}. '
+                                )
+                            # Default is that self.__fmu_use_ertbox_per_zone = False
+                            self.__fmu_use_ertbox_per_zone = value == 'YES'
+
                         kw_export_ertbox = 'ExportErtBoxGrid'
                         use_export_ertbox_settings = getKeyword(
                             update_grf_settings,
@@ -1928,6 +1951,9 @@ class APSModel:
         print(f'    FMU settings:\n     FMU mode: {self.__fmu_mode}')
         if self.__fmu_mode == 'FIELDS':
             print('     Update fields in ERT:')
+            print(
+                f'      Use individual ERTBOX per zone: {self.__fmu_use_ertbox_per_zone}'
+            )
             print(f'      ERTBOX: {self.__fmu_ertbox_name}')
             print(f'      Export ERTBOX grid: {self.__fmu_export_ertbox_grid} ')
             print(f'      Exchange mode: {self.__fmu_exchange_mode}')
@@ -1961,6 +1987,15 @@ class APSModel:
         if self.__fmu_mode == 'FIELDS':
             fmu_update_grf_element = ET.Element('UpdateGRF')
             fmu_settings_element.append(fmu_update_grf_element)
+
+            if self.__fmu_use_ertbox_per_zone:
+                fmu_update_grf_element.append(
+                    create_node('UseErtBoxPerZone', text='YES')
+                )
+            else:
+                fmu_update_grf_element.append(
+                    create_node('UseErtBoxPerZone', text='NO')
+                )
 
             fmu_update_grf_element.append(
                 create_node('ErtBoxGrid', text=self.__fmu_ertbox_name)

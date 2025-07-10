@@ -225,8 +225,13 @@ class APSZoneModel:
             self.grid_layout = grid_layout
 
             ertbox_grid_layers = getIntCommand(
-                zone, 'NLayersInErtbox', 'Zone', minValue=1, modelFile=modelFileName,
-                defaultValue=1, required=False
+                zone,
+                'NLayersInErtbox',
+                'Zone',
+                minValue=1,
+                modelFile=modelFileName,
+                defaultValue=1,
+                required=False,
             )
             self.ertbox_layers = ertbox_grid_layers
 
@@ -363,7 +368,7 @@ class APSZoneModel:
         self._grid_layout = value
 
     @property
-    def ertbox_layers(self) -> Optional[Conform]:
+    def ertbox_layers(self) -> Optional[int]:
         return self._ertbox_layers
 
     @ertbox_layers.setter
@@ -1049,8 +1054,8 @@ class APSZoneModel:
             zoneElement.append(elem)
 
         # Add number of layers for ERTBOX for this zone
-        if self.ertbox_layers
-            elem = Element('NLayerInErtbox')
+        if self.ertbox_layers:
+            elem = Element('NLayersInErtbox')
             elem.text = f' {self._ertbox_layers} '
             zoneElement.append(elem)
 
