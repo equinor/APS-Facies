@@ -39,7 +39,6 @@ from fmu.tools.rms.copy_rms_param_to_ertbox_grid import (
 from fmu.tools.rms.zone_mapping import ZoneMapping
 from roxar import Direction
 
-# from roxar import Direction
 from aps.algorithms.APSModel import APSModel
 from aps.utils.aps_config import APSConfig
 from aps.utils.constants.simple import Debug
