@@ -10,6 +10,7 @@ If facies interpretation is not certain, but a conditional probability for it is
 Some help scripts from the APS toolbox is available for this task, see APS toolbox -> Probability logs.
 
 Example of a blocked well facies log and overprinted by the probability log (with value 0 or 1) for one of the facies types.
+
 ![](d564dee105ddcf02fdacd5e144f3a70acb8aafa478c17624a2817290a9345965.png)
 
 If blocked well grid cells are larger than typical length of facies intervals in the original facies log, it is possible to calculate the volume fraction of facies from facies logs in each blocked well grid cells and use the volume fraction of each facies as the facies probability for the blocked well grid cells.
