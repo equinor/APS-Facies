@@ -210,6 +210,9 @@ markdown_extensions:
   - pymdownx.details
   - pymdownx.superfences
 
+# Definitions
+  - def_list
+
 # MathJax
 extra_javascript:
   - javascripts/mathjax.js

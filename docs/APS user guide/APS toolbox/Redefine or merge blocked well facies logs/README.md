@@ -3,23 +3,29 @@ title: Redefine or merge blocked well facies logs
 ---
 ## Utility script to redefine or merge facies in blocked well logs
 
-**Description**: Python script to merge or redefine blocked well facies logs.
+**Description**
+: Python script to merge or redefine blocked well facies logs.
 
-**Dependency**: The API `rmsapi` following the RMS installation and the python module `aps.toolbox` following the APS plugin installation.
+**Dependency**
+: The API `rmsapi` following the RMS installation and the python module `aps.toolbox` following the APS plugin installation.
 
-**Input**: Blocked well set, facies log, specification of new facies names and code, specification of how to map original to new facies.
+**Input**
+: Blocked well set, facies log, specification of new facies names and code, specification of how to map original to new facies.
 
-**Output**: A new blocked well facies log.
+**Output**
+: A new blocked well facies log.
 
 The utility script `create_redefined_blocked_facies_log.py`:
 
-**Alternative ways to implement the use of this script:**
+### Alternative ways to implement the use of this script
 - Make your own Python script, define all input in your script with an input dictionary and call the utility scripts run function with the input dictionary
 
 
 - Make your own Python script and specify the keyword `model_file_name` and a yml model file specifying the input.
 
-**NOTE**: Use the Python script as a Python job in RMS since it applies the API `rmsapi` from RMS.
+!!! NOTE
+
+    Use the Python script as a Python job in RMS since it applies the API `rmsapi` from RMS.
 
 ### Example of a Python script using a yml configuration file (model file) as input
 
@@ -43,7 +49,8 @@ params = {
 create_redefined_blocked_facies_log.run(params)
 ```
 
-### **Example 1 yml file format:**This example will merge and rename facies.
+### Example 1 yml file format
+This example will merge and rename facies.
 
 ```yaml
 MergeFaciesLog:
