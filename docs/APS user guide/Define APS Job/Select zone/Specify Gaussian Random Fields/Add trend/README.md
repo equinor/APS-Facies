@@ -1,7 +1,12 @@
 ---
 title: Add trend
 ---
-Toggle on "Apply trend to field" to use GRF trends. Select trend type from drop down list. When using trends, one need to specify the relative standard deviation of the Gaussian residual field relative to the variability of the trend.The absolute standard deviation is defined by
+Toggle on "Apply trend to field" to use GRF trends.
+Select trend type from drop down list.
+When using trends,
+one need to specify the relative standard deviation of the Gaussian residual field relative to the variability of the trend.
+
+The absolute standard deviation is defined by
  $\text{relative_std_dev} * ( \max(\text{Trend}) - \min(\text{Trend}) )$.
 
 If Relative standard deviation is very small or 0, no gaussian residual field is simulated and the GRF realization is equal to the trend.

@@ -4,10 +4,12 @@ title: Set parameters for simulating GRF
 
 The settings for GRF consists of a previewer and various settings related to the variogram and trends.
 When using APS in FMU settings with ERT (Ensemble Reservoir Tool),
-it is possible to activate/deactivate which model parameter that can be modified by ERT through the file for global variables.The local previewer for GRF has the option to draw new realization
-(The dice icon),
-update the preview image after parameters are changed (the circular arrow icon), and change grid size for preview
-(the wheels icon).
+it is possible to activate/deactivate which model parameter that can be modified by ERT through the file for global variables.
+
+The local previewer for GRF has the option to draw new realization
+(The dice icon, :fontawesome-solid-dice:),
+update the preview image after parameters are changed (the circular arrow icon, :fontawesome-solid-refresh:),
+and change grid size for preview (the gears icon, :fontawesome-solid-gears:).
 
 ![](b3061d535861ac5f45f8649d2e096a8597a10c24c6604b8ead919bf13309b89d.png)
 

@@ -2,7 +2,9 @@
 title: Edit selected template
 ---
 
-Editing of selected template for "cubic" truncation rule is possible.It is possible to:
+Editing of selected template for "cubic" truncation rule is possible.
+
+It is possible to:
 
 - split a polygon horizontally or vertically
 
