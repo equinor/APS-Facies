@@ -1,7 +1,9 @@
 ---
 title: Prepare facies probabilities
 ---
-Preparation of facies probabilities is a necessary step prior to defining an APS job. Typical workflow is:- Make probability logs
+Preparation of facies probabilities is a necessary step prior to defining an APS job. Typical workflow is:
+
+- Make probability logs
 
 - Make probability trends
 

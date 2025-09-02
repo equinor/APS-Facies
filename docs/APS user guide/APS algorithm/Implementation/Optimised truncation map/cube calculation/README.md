@@ -1,7 +1,9 @@
 ---
 title: Optimised truncation map/cube calculation
 ---
-To speed up the algorithm, calculation of truncation maps are optimized:- Reduce the number of calculations of truncation maps by grouping all grid cells having almost the same facies probability distribution together and use the same truncation map/cube for all of them instead of re-calculating the same truncation map many times.
+To speed up the algorithm, calculation of truncation maps are optimized:
+
+- Reduce the number of calculations of truncation maps by grouping all grid cells having almost the same facies probability distribution together and use the same truncation map/cube for all of them instead of re-calculating the same truncation map many times.
 
 - Numpy vectorization of all calculations as far a possible.
 
