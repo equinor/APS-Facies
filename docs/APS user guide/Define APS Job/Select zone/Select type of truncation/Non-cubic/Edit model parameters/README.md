@@ -2,7 +2,9 @@
 title: Edit model parameters
 ---
 For non-cubic truncation rules, the polygons are in general not rectangular.
-The lines that define the boundaries between each polygon is defined by an angle and the sequence they are specified define how the polygons are defined.The selected template can be edited.
+The lines that define the boundaries between each polygon is defined by an angle and the sequence they are specified define how the polygons are defined.
+
+The selected template can be edited.
 Each line in the table shown below corresponds to a polygon in the truncation map.
 Angles for normal vectors normal to the boundary lines between the polygons are specified.
  The example below shows a case with 5 facies and 6 polygons.

@@ -1,7 +1,9 @@
 ---
 title: Customized 3D trend
 ---
-Customized trend must be prepared in some RMS workflow prior to running APS.From a drop-down list,
+Customized trend must be prepared in some RMS workflow prior to running APS.
+
+From a drop-down list,
 select the 3D continuous RMS parameter to be used as trend for the GRF.
 
 ![](71c990643d581af2f15387304c07908aa8e7ec76be306093bf72d9ee3477cfd5.png)
@@ -13,10 +15,11 @@ The problem with it, is that ERT assumes that the GRF's are normally distributed
 which will not be the case if the Gaussian field is added to a stochastic trend that varies a lot from realization to realization.
 If the trend, on the other hand, has small variation from realization to realization it will probably work ok.
 
-**Non-stationary local anisotropy created by trends**
+### Non-stationary local anisotropy created by trends
 
 In combination with ERT,
 the gaussian fields from APS should ideally have fixed trend to ensure that the ensemble of GRF's from APS satisfy the assumption of multinormal distribution.
+
 The use trends can create locally varying anisotropy direction.
 In the example below RMS was used to create a trend by digitizing polygon lines,
 create a vector field and use that in RMS petrosim with 2D anisotropy specification of azimuth.
