@@ -3,13 +3,17 @@ title: Check normalisation of facies probabilities
 ---
 ## Utility script to check and normalize 3D facies probability parameters from RMS
 
-**Description**: Python script to check and normalize facies probabilities.
+**Description**
+: Python script to check and normalize facies probabilities.
 
-**Dependency**: The API `rmsapi` following the RMS installation and the python module `aps.toolbox` following the APS plugin installation.
+**Dependency**
+: The API `rmsapi` following the RMS installation and the python module `aps.toolbox` following the APS plugin installation.
 
-**Input**: Modelling facies names for each zone, name of facies probability parameters, tolerance parameters. Optionally, an APS model file can be input.
+**Input**
+: Modelling facies names for each zone, name of facies probability parameters, tolerance parameters. Optionally, an APS model file can be input.
 
-**Output**: Modified or new facies probability parameters.
+**Output**
+: Modified or new facies probability parameters.
 
 
 The utility script `check_and_normalise_probability.py`:
@@ -21,7 +25,9 @@ The utility script `check_and_normalise_probability.py`:
 
 - Make your own Python script and specify the keyword `model_file_name` and a yml model file specifying the input.
 
-**NOTE**: Use the Python script as a Python job in RMS since it applies the API `rmsapi`from RMS.
+!!! NOTE
+
+    Use the Python script as a Python job in RMS since it applies the API `rmsapi`from RMS.
 
 ### Example of a Python script using APS model file as input
 In this case the input data directory contains the keyword `model_file_name` to specify an existing APS model file.

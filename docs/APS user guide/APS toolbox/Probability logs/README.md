@@ -3,15 +3,20 @@ title: Probability logs
 ---
 ## Utility script to create blocked well probability logs
 
-**Description**: Python script to create probability logs
+**Description**
+: Python script to create probability logs
 
-**Dependency**: The API `rmsapi` following the RMS installation and the python module `aps.toolbox` following the APS plugin installation.
+**Dependency**
+: The API `rmsapi` following the RMS installation and the python module `aps.toolbox` following the APS plugin installation.
 
-**Input**: Blocked well facies log and specification of which facies to model and which zones to use.
+**Input**
+: Blocked well facies log and specification of which facies to model and which zones to use.
 
-**Output**: One blocked well log per facies. For each grid cell in the blocked well, the probability log value takes a value from 0 to 1.
+**Output**
+: One blocked well log per facies. For each grid cell in the blocked well, the probability log value takes a value from 0 to 1.
 
-**Usage of the probability logs**: A probability log containing only 0 or 1 can be used to condition probability cubes to reproduce blocked well facies logs 100% while probabilities between 0 and 1 represents uncertainties in blocked well facies.
+**Usage of the probability logs**
+: A probability log containing only 0 or 1 can be used to condition probability cubes to reproduce blocked well facies logs 100% while probabilities between 0 and 1 represents uncertainties in blocked well facies.
 
 
 The utility script `create_probability_logs.py`:
@@ -78,7 +83,9 @@ Facies chosen to be modelled for zone 1: F1, F2, F4
 
 Facies chosen to be modelled for zone 6: F1, F4, F5
 
-**Note**: The name of modelled facies does not have to be a subset of the interpreted/observed facies.
+!!! Note
+
+    The name of modelled facies does not have to be a subset of the interpreted/observed facies.
 
 In this example, modelled facies names are same as interpreted facies names.
 
