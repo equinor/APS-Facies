@@ -74,7 +74,11 @@ class MarkdownExporter(Exporter):
             self.mind_manager,
             destination,
             lambda hierarchy, index, topic: hierarchy[topic.parent.oid]
-            / topic.text.replace('\n', '').strip(),
+            / topic.text.replace('\n', '')
+            .strip()
+            .replace('/', '-')
+            .replace(' ', '-')
+            .lower(),
             lambda topic: 'README.md',
             lambda hierarchy, topic: self.export_topic(hierarchy, topic),
         )

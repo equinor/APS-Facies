@@ -1,0 +1,181 @@
+site_name: APS Documentation
+docs_dir: aps-user-guide
+
+nav:
+  - README.md
+  - Define APS Job:
+      - define-aps-job/README.md
+      - define-aps-job/select-grid-model/README.md
+      - define-aps-job/choose-name-of-facies-realization/README.md
+      - Select zone:
+          - define-aps-job/select-zone/README.md
+          - define-aps-job/select-zone/select-bw/README.md
+          - Select facies log:
+              - define-aps-job/select-zone/select-facies-log/README.md
+              - define-aps-job/select-zone/select-facies-log/select-facies-to-model/README.md
+          - Specify facies probabilities:
+              - define-aps-job/select-zone/specify-facies-probabilities/README.md
+              - Use constant probabilities:
+                  - define-aps-job/select-zone/specify-facies-probabilities/use-constant-probabilities/README.md
+              - Use probability cubes:
+                  - define-aps-job/select-zone/specify-facies-probabilities/use-probability-cubes/README.md
+          - Select type of truncation:
+              - define-aps-job/select-zone/select-type-of-truncation/README.md
+              - Cubic:
+                  - define-aps-job/select-zone/select-type-of-truncation/cubic/README.md
+                  - Select template:
+                      - define-aps-job/select-zone/select-type-of-truncation/cubic/select-template/README.md
+                  - define-aps-job/select-zone/select-type-of-truncation/cubic/edit-selected-template/README.md
+              - Non-cubic:
+                  - define-aps-job/select-zone/select-type-of-truncation/non-cubic/README.md
+                  - Select template:
+                      - define-aps-job/select-zone/select-type-of-truncation/non-cubic/select-template/README.md
+                  - define-aps-job/select-zone/select-type-of-truncation/non-cubic/edit-model-parameters/README.md
+              - Bayfill:
+                  - define-aps-job/select-zone/select-type-of-truncation/bayfill/README.md
+                  - Edit model parameters:
+                      - define-aps-job/select-zone/select-type-of-truncation/bayfill/edit-model-parameters/README.md
+              - Overlay facies rule:
+                  - define-aps-job/select-zone/select-type-of-truncation/overlay-facies-rule/README.md
+                  - define-aps-job/select-zone/select-type-of-truncation/overlay-facies-rule/select-background-facies/README.md
+                  - define-aps-job/select-zone/select-type-of-truncation/overlay-facies-rule/select-grf/README.md
+                  - define-aps-job/select-zone/select-type-of-truncation/overlay-facies-rule/select-facies/README.md
+          - Specify Gaussian Random Fields:
+              - define-aps-job/select-zone/specify-gaussian-random-fields/README.md
+              - Set parameters for simulating GRF:
+                  - define-aps-job/select-zone/specify-gaussian-random-fields/set-parameters-for-simulating-grf/README.md
+                  - define-aps-job/select-zone/specify-gaussian-random-fields/set-parameters-for-simulating-grf/variogram/README.md
+                  - define-aps-job/select-zone/specify-gaussian-random-fields/set-parameters-for-simulating-grf/correlation-ranges/README.md
+                  - Anisotropy direction (azimuth):
+                      - define-aps-job/select-zone/specify-gaussian-random-fields/set-parameters-for-simulating-grf/anisotropy-direction-azimuth/README.md
+                  - Anisotropy direction (dip):
+                      - define-aps-job/select-zone/specify-gaussian-random-fields/set-parameters-for-simulating-grf/anisotropy-direction-dip/README.md
+              - Add trend:
+                  - define-aps-job/select-zone/specify-gaussian-random-fields/add-trend/README.md
+                  - define-aps-job/select-zone/specify-gaussian-random-fields/add-trend/linear-linear-coastline/README.md
+                  - define-aps-job/select-zone/specify-gaussian-random-fields/add-trend/elliptic-curved-coastline/README.md
+                  - define-aps-job/select-zone/specify-gaussian-random-fields/add-trend/hyperbolic-channel-between-two-coastlines/README.md
+                  - define-aps-job/select-zone/specify-gaussian-random-fields/add-trend/customized-3d-trend/README.md
+                  - define-aps-job/select-zone/specify-gaussian-random-fields/add-trend/customized-2d-trend/README.md
+      - Job setting:
+          - define-aps-job/job-setting/README.md
+          - Select mode:
+              - define-aps-job/job-setting/select-mode/README.md
+              - define-aps-job/job-setting/select-mode/ordinary-mode/README.md
+              - define-aps-job/job-setting/select-mode/fmu-uncertainty-parameter-mode/README.md
+              - FMU assisted history matching mode:
+                  - define-aps-job/job-setting/select-mode/fmu-assisted-history-matching-mode/README.md
+                  - Select ERTBOX grid model:
+                      - define-aps-job/job-setting/select-mode/fmu-assisted-history-matching-mode/select-ertbox-grid-model/README.md
+                      - Grid model:
+                          - define-aps-job/job-setting/select-mode/fmu-assisted-history-matching-mode/select-ertbox-grid-model/grid-model/README.md
+                      - Number of layers:
+                          - define-aps-job/job-setting/select-mode/fmu-assisted-history-matching-mode/select-ertbox-grid-model/number-of-layers/README.md
+                      - define-aps-job/job-setting/select-mode/fmu-assisted-history-matching-mode/select-ertbox-grid-model/the-ertbox-mapping-explained/README.md
+                  - define-aps-job/job-setting/select-mode/fmu-assisted-history-matching-mode/file-format-for-grf-fields/README.md
+                  - define-aps-job/job-setting/select-mode/fmu-assisted-history-matching-mode/simulate-grf-only/README.md
+                  - define-aps-job/job-setting/select-mode/fmu-assisted-history-matching-mode/check-ert-iteration-and-simulate-export-or-import-grf-fields/README.md
+                  - define-aps-job/job-setting/select-mode/fmu-assisted-history-matching-mode/check-ert-iteration-and-simulate-export-or-import-grf-fields/README.md
+                  - define-aps-job/job-setting/select-mode/fmu-assisted-history-matching-mode/split-trend-and-residuals-when-updating-in-ert/README.md
+                  - define-aps-job/job-setting/select-mode/fmu-assisted-history-matching-mode/extrapolate-3d-custom-trend-in-ertbox/README.md
+          - define-aps-job/job-setting/log-setting/README.md
+          - define-aps-job/job-setting/transformation-setting/README.md
+          - define-aps-job/job-setting/probability-check-setting/README.md
+          - define-aps-job/job-setting/non-standard-fmu-setting/README.md
+          - define-aps-job/job-setting/preview-related-settings/README.md
+          - Generate files for FMU / ERT configuration:
+              - define-aps-job/job-setting/generate-files-for-fmu-ert-configuration/README.md
+              - define-aps-job/job-setting/generate-files-for-fmu-ert-configuration/global-master-config-include-file-with-aps-parameters/README.md
+              - define-aps-job/job-setting/generate-files-for-fmu-ert-configuration/gen-kw-distribution-template-for-aps-parameters/README.md
+              - define-aps-job/job-setting/generate-files-for-fmu-ert-configuration/ert-config-include-file-with-field-and-grid-keywords/README.md
+      - Preview:
+          - define-aps-job/preview/README.md
+          - define-aps-job/preview/views/README.md
+  - Configuration of APS with AHM using ERT:
+      - configuration-of-aps-with-ahm-using-ert/README.md
+      - FMU config:
+          - configuration-of-aps-with-ahm-using-ert/fmu-config/README.md
+          - global_master_config:
+              - configuration-of-aps-with-ahm-using-ert/fmu-config/global-master-config/README.md
+      - ERT config:
+          - configuration-of-aps-with-ahm-using-ert/ert-config/README.md
+          - GEN_KW:
+              - configuration-of-aps-with-ahm-using-ert/ert-config/gen-kw/README.md
+              - Parameter probability distributions:
+                  - configuration-of-aps-with-ahm-using-ert/ert-config/gen-kw/parameter-probability-distributions/README.md
+          - DESIGN_KW:
+              - configuration-of-aps-with-ahm-using-ert/ert-config/design-kw/README.md
+              - Parameter values:
+                  - configuration-of-aps-with-ahm-using-ert/ert-config/design-kw/parameter-values/README.md
+          - FIELD / GRID:
+              - configuration-of-aps-with-ahm-using-ert/ert-config/field-grid/README.md
+              - GRF fields per zone:
+                  - configuration-of-aps-with-ahm-using-ert/ert-config/field-grid/grf-fields-per-zone/README.md
+  - APS algorithm:
+      - aps-algorithm/README.md
+      - Implementation:
+          - aps-algorithm/implementation/README.md
+          - aps-algorithm/implementation/trends-in-grf/README.md
+          - aps-algorithm/implementation/overlay-facies/README.md
+          - aps-algorithm/implementation/optimised-truncation-map-cube-calculation/README.md
+  - Prepare facies probabilities:
+      - prepare-facies-probabilities/README.md
+      - Probability logs:
+          - prepare-facies-probabilities/probability-logs/README.md
+          - Facies log:
+              - prepare-facies-probabilities/probability-logs/facies-log/README.md
+          - prepare-facies-probabilities/probability-logs/conditional-probabilities-given-facies/README.md
+      - Probability trends:
+          - prepare-facies-probabilities/probability-trends/README.md
+          - Trends from seismic data:
+              - prepare-facies-probabilities/probability-trends/trends-from-seismic-data/README.md
+          - prepare-facies-probabilities/probability-trends/trends-from-geological-interpretations/README.md
+      - Conditioned probability cubes:
+          - prepare-facies-probabilities/conditioned-probability-cubes/README.md
+          - prepare-facies-probabilities/conditioned-probability-cubes/rms-petrosim-to-condition-3d-probability-parameters/README.md
+      - prepare-facies-probabilities/normalisation/README.md
+  - APS toolbox:
+      - aps-toolbox/README.md
+      - aps-toolbox/probability-logs/README.md
+      - aps-toolbox/probability-trends/README.md
+      - aps-toolbox/redefine-or-merge-blocked-well-facies-logs/README.md
+      - aps-toolbox/convert-bitmap-to-rms-surface-format/README.md
+      - aps-toolbox/check-normalisation-of-facies-probabilities/README.md
+      - aps-toolbox/copy-3d-parameters-to-or-from-ertbox/README.md
+
+markdown_extensions:
+  - smarty
+  - toc:
+      permalink: 
+  - sane_lists
+
+  # For MathJax
+  - pymdownx.arithmatex:
+      generic: true
+
+  # Abbreviation
+  - abbr
+  - attr_list
+  - pymdownx.snippets
+
+  # Icons and emojis
+  - attr_list
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+
+  # Admonitions
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+
+  # Definitions
+  - def_list
+
+# MathJax
+extra_javascript:
+  - javascripts/mathjax.js
+  - https://unpkg.com/mathjax@3/es5/tex-mml-chtml.js
+
+theme:
+  name: material
