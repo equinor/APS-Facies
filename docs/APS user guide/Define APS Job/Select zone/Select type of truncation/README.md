@@ -1,7 +1,7 @@
 ---
 title: Select type of truncation
 ---
-Select type of truncation rule from a drop down list.
+Select type of truncation rule from a dropdown list.
 
 ![](2d8b811d83865a6b8b25e60a58c785d4395a1528263b00cea20e87663ca66912.png)
 
@@ -9,16 +9,16 @@ There are three "families" of truncation rule settings for what we call backgrou
 A background facies will use two GRF fields, and the horizontal and vertical axis of the truncation map corresponds to the two transformed GRF fields.
 The three types of truncation rules are:
 
-- Cubic
+- [Cubic](Cubic/README.md)
 
-- Non-cubic
+- [Non-cubic](Non-cubic/README.md)
 
-- Bayfill
+- [Bayfill](Bayfill/README.md)
 
-In addition it is possible to add "overlay" facies.
+In addition, it is possible to add "overlay" facies.
 By overlay facies we mean facies that erodes into the background facies.
 
-**The cubic truncation rule type**:
+## The cubic truncation rule type
 
 - The unit square truncation map will be subdivided into a nested set of rectangular polygons up to three levels.
 
@@ -30,12 +30,12 @@ By overlay facies we mean facies that erodes into the background facies.
 
 - It is possible to have more polygons than facies since the same facies can be assigned to multiple polygons.
   If this is done, a number of probability fraction will appear for those polygons with default value that is to equally share the probability for the facies on the polygons.
-  For instance, if the facies probability for a facies F is 0.4 and there are 3 different polygons assigned to the facies F, they will per default get 1/3 each of the facies probability, which will then be 0.4/3 as the probability for each of the polygons for facies F.
-  The user can modify this but the sum of the probability fraction for each of the polygons must sum up to 1.
+  For instance, if the facies probability for a facies $F$ is $0.4$ and there are $3$ different polygons assigned to the facies $F$, they will per default get $1/3$ each of the facies probability, which will then be $0.4/3$ as the probability for each of the polygons for facies $F$.
+  The user can modify this but the sum of the probability fraction for each of the polygons must sum up to $1$.
 
 - If the number of facies to be modelled is larger than number of polygons, they must be defined as overlay facies.
 
-**The non-cubic truncation rule type**:
+## The non-cubic truncation rule type
 
 - The unit square truncation map will be subdivided into polygons that may not be rectangular.
 
@@ -47,8 +47,8 @@ By overlay facies we mean facies that erodes into the background facies.
 
 - If the number of facies to be modelled is larger than number of polygons, they must be defined as overlay facies.
 
-**Bayfill truncation rule type**:
--
+## Bayfill truncation rule type
+
 - This option requires exactly 5 facies.
   Each facies is assigned a role where the roles are "Floodplain", "Subbay", "Wave influenced Bayfill", "Bayhead Delta" and "Lagoon".
 
@@ -56,5 +56,7 @@ By overlay facies we mean facies that erodes into the background facies.
 
 - A very similar but not exactly the same truncation rule can also be made by using the non-cubic type.
 
-- When the bayfill truncation rule was first designed, the first axis of the truncation map should correspond to a transformed GRF (alpha1) with a lateral/vertical trend to represent the facies sequence from proximal to distal deposition.
+- When the bayfill truncation rule was first designed,
+  the first axis of the truncation map should correspond to a transformed GRF (alpha1)
+  with a lateral / vertical trend to represent the facies sequence from proximal to distal deposition.
   It is therefore recommended to use trend in alpha1 here.

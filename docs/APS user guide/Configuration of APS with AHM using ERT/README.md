@@ -48,3 +48,25 @@ Steps to setup an APS job for use in AHM
   - Add `GEN_KW` or `DESIGN_KW` keyword for the APS parameters
 
   - Test it by running single realization run in ERT
+
+## FMU config
+
+### `global_master_config`
+
+see also [`global_master_config` include file with APS parameters](../../APS%20user%20guide/Define%20APS%20Job/Job%20setting/Generate%20files%20for%20FMU/ERT%20configuration/global_master_config%20include%20file%20with%20APS%20parameters/README.md)
+
+## ERT config
+
+### `GEN_KW`
+
+#### Parameter probability distributions
+see also [`GEN_KW` distribution template for APS parameters](../../APS%20user%20guide/Define%20APS%20Job/Job%20setting/Generate%20files%20for%20FMU/ERT%20configuration/GEN_KW%20distribution%20template%20for%20APS%20parameters/README.md)
+
+### `DESIGN_KW`
+
+#### Parameter values
+
+### `FIELD` / `GRID`
+
+#### GRF fields per zone
+see also [ERT config include file with `FIELD` and `GRID` keywords](../../APS%20user%20guide/Define%20APS%20Job/Job%20setting/Generate%20files%20for%20FMU/ERT%20configuration/ERT%20config%20include%20file%20with%20FIELD%20and%20GRID%20keywords/README.md)
