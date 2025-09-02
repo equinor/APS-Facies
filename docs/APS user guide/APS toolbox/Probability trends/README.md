@@ -3,15 +3,20 @@ title: Probability trends
 ---
 ## Utility script to create trends for probability cubes (RMS3D continuous parameter for facies probabilities)
 
-**Description**: Python script to create simple probability trends from deterministic 3D facies interpretation using conditional probabilities.
+**Description**
+: Python script to create simple probability trends from deterministic 3D facies interpretation using conditional probabilities.
 
-**Dependency**: The API `rmsapi` following the RMS installation and the python module `aps.toolbox` following the APS plugin installation.
+**Dependency**
+: The API `rmsapi` following the RMS installation and the python module `aps.toolbox` following the APS plugin installation.
 
-**Input**: Deterministic 3D discrete parameter with facies interpretation, list of zones to make facies trend for, optionally conditional facies probabilities.
+**Input**
+: Deterministic 3D discrete parameter with facies interpretation, list of zones to make facies trend for, optionally conditional facies probabilities.
 
-**Output**: A 3D trend parameter for each of the specified facies.
+**Output**
+: A 3D trend parameter for each of the specified facies.
 
-**Usage of the 3D facies probability trend parameters**: The trend parameters can be input to e.g. RMS petrosim where the trend is combined with facies probability logs to create facies probability cubes.
+**Usage of the 3D facies probability trend parameters**
+: The trend parameters can be input to e.g. RMS petrosim where the trend is combined with facies probability logs to create facies probability cubes.
 
 The utility script `define_facies_prob_trend.py`:
 
@@ -21,7 +26,9 @@ The utility script `define_facies_prob_trend.py`:
 
 - Make your own Python script and specify the keyword `model_file_name` and a yml model file specifying the input.
 
-**NOTE**: Use the Python script as a Python job in RMS since it applies the API `rmsapi` from RMS.
+!!! NOTE
+
+    Use the Python script as a Python job in RMS since it applies the API `rmsapi` from RMS.
 
 
 ### Example of a Python script using a yml configuration file (model file) as input

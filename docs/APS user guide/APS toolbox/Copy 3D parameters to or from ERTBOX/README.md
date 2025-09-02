@@ -4,16 +4,20 @@ title: Copy 3D parameters to or from ERTBOX
 
 ## Utility script to copy discrete and continuous 3D parameters to/from ERTBOX
 
-**Description**: Python script to copy from geomodel grid to ERTBOX grid or from ERTBOX grid to geomodel grid.
+**Description**
+: Python script to copy from geomodel grid to ERTBOX grid or from ERTBOX grid to geomodel grid.
 The application can be to use ERTBOX but update petrophysical 3D parameters by ERT when not using APS,
 or it can be to copy realizations from geomodel grid to ERTBOX grid to do statistical calculation of ensembles in ERTBOX.
 
-**Dependency**: The API `rmsapi` following the RMS installation and the python module `aps.toolbox` following the APS plugin installation.
+**Dependency**
+: The API `rmsapi` following the RMS installation and the python module `aps.toolbox` following the APS plugin installation.
 
-**Input**: Name of geogrid parameters and corresponding name in ERTBOX grid,
+**Input**
+: Name of geogrid parameters and corresponding name in ERTBOX grid,
 grid conformity type for each zone, grid model names zone parameter name.
 
-**Output**: 3D parameters copied either from geomodel grid to ERTBOX grid or the other way.
+**Output**
+: 3D parameters copied either from geomodel grid to ERTBOX grid or the other way.
 When copying to ERTBOX,
 also a parameter with value 0 / 1 with value 1 for each grid cell in ERTBOX grid having original value coming from the geomodel grid can be made.
 This parameter is useful to filter out all extrapolated values in the ERTBOX and only use the values corresponding to geomodel grid cell values in for instance ensemble statistical calculations in ERTBOX grid.
@@ -27,7 +31,9 @@ The utility script `copy_rms_param_to_ertbox_grid.py`:
 
 - Make your own Python script and specify the keyword `model_file_name` and a yml model file specifying the input.
 
-**NOTE**: Use the Python script as a Python job in RMS since it applies the API `rmsapi` from RMS.
+!!! NOTE
+
+    Use the Python script as a Python job in RMS since it applies the API `rmsapi` from RMS.
 
 ### Example of a Python script using a yml configuration file (model file) as input
 In this case the input data directory contains the keyword "model_file_name" to specify the input yml configuration file.

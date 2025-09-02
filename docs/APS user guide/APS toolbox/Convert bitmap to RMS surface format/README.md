@@ -3,13 +3,17 @@ title: Convert bitmap to RMS surface format
 ---
 ## Utility script to convert 8-bit bitmap file to RMS surface file format
 
-**Description**: Python script to convert a 8-bit bitmap file to RMS readable 2D map file. Purpose is to get hand-drawn maps into RMS as part of building 3D deterministic facies parameters.
+**Description**
+: Python script to convert a 8-bit bitmap file to RMS readable 2D map file. Purpose is to get hand-drawn maps into RMS as part of building 3D deterministic facies parameters.
 
-**Dependency**: The API `rmsapi` following the RMS installation and the python module `aps.toolbox` following the APS plugin installation.
+**Dependency**
+: The API `rmsapi` following the RMS installation and the python module `aps.toolbox` following the APS plugin installation.
 
-**Input**: Bitmap files, coordinates for positioning of the bitmap, grid resolution.
+**Input**
+: Bitmap files, coordinates for positioning of the bitmap, grid resolution.
 
-**Output**: RMS readable files for maps from hand-drawn maps.
+**Output**
+: RMS readable files for maps from hand-drawn maps.
 
 The utility script `bitmap_to_rms.py`:
 
@@ -20,7 +24,9 @@ The utility script `bitmap_to_rms.py`:
 
 - Make your own Python script and specify the keyword `model_file_name` and a yml model file specifying the input.
 
-**NOTE**: Use the Python script as a Python job in RMS since it applies the API `rmsapi` from RMS.
+!!! NOTE
+
+    Use the Python script as a Python job in RMS since it applies the API `rmsapi` from RMS.
 
 ### Example of a Python script using a yml configuration file (model file) as input
 
