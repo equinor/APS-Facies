@@ -1,7 +1,9 @@
 ---
 title: Transformation setting
 ---
-Gaussian Random Fields (GRF's) are transformed to take values between 0 and 1 before they are used as "coordinates" to look up the facies from the adapted truncation map.There are two implemented transformations:
+Gaussian Random Fields (GRF's) are transformed to take values between 0 and 1 before they are used as "coordinates" to look up the facies from the adapted truncation map.
+
+There are two implemented transformations:
 
 - Empiric transformation (to be used when using trends i GRF fields, and can be used as default also for GRF's not using trend)
 
