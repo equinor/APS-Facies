@@ -25,3 +25,5 @@ In addition slopes for boundary lines between the polygons are specified.
 Note that a similar (although not identical) truncation can be modelled using non-cubic truncation rule.
 
 ![](66a944873e3d59674069d89f80f891f3b8fb1add0809f0c4c68bf33c045d6c9c.png)
+
+## Edit model parameters

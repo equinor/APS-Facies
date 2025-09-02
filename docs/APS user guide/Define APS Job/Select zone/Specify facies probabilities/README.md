@@ -35,3 +35,7 @@ Probabilities must be normalized:
 Preview probability:
 
 - When using probability cubes, the button "Average" can be used to calculate the average probability over all grid cells in the current zone for each of the specified facies. This average value is then used as the constant probabilities in the previewer.
+
+## Use constant probabilities
+
+## Use probability cubes
