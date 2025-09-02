@@ -102,7 +102,7 @@ title: {topic.text}
 """
         for tag in soup.body:
             content += self._export_tag(hierarchy, topic, tag)
-        return content.replace('\xc2', '').replace('\xa0', '')
+        return content.replace('\xc2', '\n').replace('\xa0', '\n')
 
     def _export_tag(
         self, hierarchy: Hierarchy, topic: Topic, tag: Tag | PageElement
