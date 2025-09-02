@@ -1,5 +1,20 @@
 ---
 title: Probability trends
 ---
-The basic input to make probability trends are typically:- Geological conceptual model:<ul style="margin-top: 0mm; margin-bottom: 0mm; list-style-type: disc; "><li style="margin-left: 4pt; margin-right: 0pt; padding-left: 0pt; ">Which facies are interpreted</li><li style="margin-left: 4pt; margin-right: 0pt; padding-left: 0pt; ">Facies relationship</li><li style="margin-left: 4pt; margin-right: 0pt; padding-left: 0pt; ">Depositional directions and interpretation of lateral and vertical facies proportions</li><li style="margin-left: 4pt; margin-right: 0pt; padding-left: 0pt; ">Stacking pattern</li><li style="margin-left: -30pt; margin-right: 0pt; padding-left: 0pt; ">Estimates of seismic facies probabilities and its relation to geological facies:<ul style="margin-top: 0mm; margin-bottom: 0mm; list-style-type: disc; "><li style="margin-left: 34pt; margin-right: 0pt; padding-left: 0pt; ">seismic inversions</li><li style="margin-left: 34pt; margin-right: 0pt; padding-left: 0pt; ">seismic scale versus geological facies</li><li style="margin-left: 34pt; margin-right: 0pt; padding-left: 0pt; ">Fluid distribution and relation between geological facies within different fluids and seismic response and interpreted seismic facies.</li></ul></li><li style="margin-left: -30pt; margin-right: 0pt; padding-left: 0pt; ">Well logs and distribution of facies volume fractions:<ul style="margin-top: 0mm; margin-bottom: 0mm; list-style-type: disc; "><li style="margin-left: 34pt; margin-right: 0pt; padding-left: 0pt; ">Vertical proportion curves</li><li style="margin-left: 34pt; margin-right: 0pt; padding-left: 0pt; ">Lateral volume fraction trends from well to well</li></ul></li></ul>
-Convert a deterministic 3D facies interpretation into a probability trend:- A possible way to map a deterministic facies interpretation into a probability trend is to specify and apply conditional probabilities for modelled facies given interpreted facies like P(modelled facies M | interpreted facies F)<span></span>
+The basic input to make probability trends are typically:
+
+- Geological conceptual model:
+    - Which facies are interpreted
+    - Facies relationship
+    - Depositional directions and interpretation of lateral and vertical facies proportions
+    - Stacking pattern
+    - Estimates of seismic facies probabilities and its relation to geological facies:
+        - seismic inversions
+        - seismic scale versus geological facies
+        - Fluid distribution and relation between geological facies within different fluids and seismic response and interpreted seismic facies.
+    - Well logs and distribution of facies volume fractions:
+        - Vertical proportion curves
+        - Lateral volume fraction trends from well to well
+
+Convert a deterministic 3D facies interpretation into a probability trend:
+- A possible way to map a deterministic facies interpretation into a probability trend is to specify and apply conditional probabilities for modelled facies given interpreted facies like $P(\text{modelled facies} \space M \mid \text{interpreted facies} \space F)$
