@@ -5,89 +5,64 @@ nav:
   - README.md
   - Define APS Job:
       - Define APS Job/README.md
-      - Select Gridmodel:
-          - Define APS Job/Select Gridmodel/README.md
-      - Choose name of facies realization:
-          - Define APS Job/Choose name of facies realization/README.md
+      - Define APS Job/Select Gridmodel/README.md
+      - Define APS Job/Choose name of facies realization/README.md
       - Select zone:
           - Define APS Job/Select zone/README.md
-          - Select BW:
-              - Define APS Job/Select zone/Select BW/README.md
+          - Define APS Job/Select zone/Select BW/README.md
           - Select facies log:
               - Define APS Job/Select zone/Select facies log/README.md
-              - Select facies to model:
-                  - Define APS Job/Select zone/Select facies log/Select
-                    facies to model/README.md
+              - Define APS Job/Select zone/Select facies log/Select facies to model/README.md
           - Specify facies probabilities:
               - Define APS Job/Select zone/Specify facies probabilities/README.md
               - Use constant probabilities:
-                  - Define APS Job/Select zone/Specify facies probabilities/Use
-                    constant probabilities/README.md
+                  - Define APS Job/Select zone/Specify facies probabilities/Use constant probabilities/README.md
               - Use probability cubes:
-                  - Define APS Job/Select zone/Specify facies probabilities/Use
-                    probability cubes/README.md
+                  - Define APS Job/Select zone/Specify facies probabilities/Use probability cubes/README.md
           - Select type of truncation:
               - Define APS Job/Select zone/Select type of truncation/README.md
               - Cubic:
                   - Define APS Job/Select zone/Select type of truncation/Cubic/README.md
                   - Select template:
-                      - Define APS Job/Select zone/Select type of truncation/Cubic/Select
-                        template/README.md
-                  - Edit selected template:
-                      - Define APS Job/Select zone/Select type of truncation/Cubic/Edit
-                        selected template/README.md
+                      - Define APS Job/Select zone/Select type of truncation/Cubic/Select template/README.md
+                  - Define APS Job/Select zone/Select type of truncation/Cubic/Edit selected template/README.md
               - Non-cubic:
                   - Define APS Job/Select zone/Select type of truncation/Non-cubic/README.md
                   - Select template:
                       - Define APS Job/Select zone/Select type of truncation/Non-cubic/Select template/README.md
-                  - Edit model parameters:
-                      - Define APS Job/Select zone/Select type of truncation/Non-cubic/Edit
-                        model parameters/README.md
+                  - Define APS Job/Select zone/Select type of truncation/Non-cubic/Edit model parameters/README.md
               - Bayfill:
                   - Define APS Job/Select zone/Select type of truncation/Bayfill/README.md
                   - Edit model parameters:
                       - Define APS Job/Select zone/Select type of truncation/Bayfill/Edit model parameters/README.md
               - Overlay facies rule:
                   - Define APS Job/Select zone/Select type of truncation/Overlay facies rule/README.md
-                  - Select background facies:
-                      - Define APS Job/Select zone/Select type of truncation/Overlay facies rule/Select background facies/README.md
-                  - Select GRF:
-                      - Define APS Job/Select zone/Select type of truncation/Overlay facies rule/Select GRF/README.md
-                  - Select facies:
-                      - Define APS Job/Select zone/Select type of truncation/Overlay
-                        facies rule/Select facies/README.md
+                  - Define APS Job/Select zone/Select type of truncation/Overlay facies rule/Select background facies/README.md
+                  - Define APS Job/Select zone/Select type of truncation/Overlay facies rule/Select GRF/README.md
+                  - Define APS Job/Select zone/Select type of truncation/Overlay facies rule/Select facies/README.md
           - Specify Gaussian Random Fields:
               - Define APS Job/Select zone/Specify Gaussian Random Fields/README.md
               - Set parameters for simulating GRF:
                   - Define APS Job/Select zone/Specify Gaussian Random Fields/Set parameters for simulating GRF/README.md
-                  - Variogram:
-                      - Define APS Job/Select zone/Specify Gaussian Random Fields/Set parameters for simulating GRF/Variogram/README.md
-                  - Correlation ranges:
-                      - Define APS Job/Select zone/Specify Gaussian Random Fields/Set parameters for simulating GRF/Correlation ranges/README.md
+                  - Define APS Job/Select zone/Specify Gaussian Random Fields/Set parameters for simulating GRF/Variogram/README.md
+                  - Define APS Job/Select zone/Specify Gaussian Random Fields/Set parameters for simulating GRF/Correlation ranges/README.md
                   - Anisotropy direction (azimuth):
                       - Define APS Job/Select zone/Specify Gaussian Random Fields/Set parameters for simulating GRF/Anisotropy direction (azimuth)/README.md
                   - Anisotropy direction (dip):
                       - Define APS Job/Select zone/Specify Gaussian Random Fields/Set parameters for simulating GRF/Anisotropy direction (dip)/README.md
               - Add trend:
                   - Define APS Job/Select zone/Specify Gaussian Random Fields/Add trend/README.md
-                  - Linear (linear coast line):
-                      - Define APS Job/Select zone/Specify Gaussian Random Fields/Add trend/Linear (linear coast line)/README.md
-                  - Elliptic (Curved coastline):
-                      - Define APS Job/Select zone/Specify Gaussian Random Fields/Add trend/Elliptic (Curved coastline)/README.md
-                  - Hyperbolic (Channel between two coastlines):
-                      - Define APS Job/Select zone/Specify Gaussian Random Fields/Add trend/Hyperbolic (Channel between two coastlines)/README.md
-                  - Customized 3D trend:
-                      - Define APS Job/Select zone/Specify Gaussian Random Fields/Add trend/Customized 3D trend/README.md
-                  - Customized 2D trend:
-                      - Define APS Job/Select zone/Specify Gaussian Random Fields/Add trend/Customized 2D trend/README.md
+                  - Define APS Job/Select zone/Specify Gaussian Random Fields/Add trend/Linear (linear coast line)/README.md
+                  - Define APS Job/Select zone/Specify Gaussian Random Fields/Add trend/Elliptic (Curved coastline)/README.md
+                  - Define APS Job/Select zone/Specify Gaussian Random Fields/Add trend/Hyperbolic (Channel between two coastlines)/README.md
+                  - Define APS Job/Select zone/Specify Gaussian Random Fields/Add trend/Customized 3D trend/README.md
+                  - Define APS Job/Select zone/Specify Gaussian Random Fields/Add trend/Customized 2D trend/README.md
       - Job setting:
           - Define APS Job/Job setting/README.md
           - Select mode:
               - Define APS Job/Job setting/Select mode/README.md
-              - Ordinary mode:
-                  - Define APS Job/Job setting/Select mode/Ordinary mode/README.md
-              - FMU uncertainty parameter mode:
-                  - Define APS Job/Job setting/Select mode/FMU uncertainty parameter mode/README.md
+              - Define APS Job/Job setting/Select mode/Ordinary mode/README.md
+              - Define APS Job/Job setting/Select mode/FMU uncertainty parameter mode/README.md
               - FMU assisted history matching mode:
                   - Define APS Job/Job setting/Select mode/FMU assisted history matching mode/README.md
                   - Select ERTBOX grid model:
@@ -96,46 +71,30 @@ nav:
                           - Define APS Job/Job setting/Select mode/FMU assisted history matching mode/Select ERTBOX grid model/Grid model/README.md
                       - Number of layers:
                           - Define APS Job/Job setting/Select mode/FMU assisted history matching mode/Select ERTBOX grid model/Number of layers/README.md
-                      - The ERTBOX mapping explained:
-                          - Define APS Job/Job setting/Select mode/FMU assisted history matching mode/Select ERTBOX grid model/The ERTBOX mapping explained/README.md
-                  - File format for GRF fields:
-                      - Define APS Job/Job setting/Select mode/FMU assisted history matching mode/File format for GRF fields/README.md
-                  - Simulate GRF only:
-                      - Define APS Job/Job setting/Select mode/FMU assisted history matching mode/Simulate GRF only/README.md
-                  - Check ERT iteration and simulate:
-                      - Define APS Job/Job setting/Select mode/FMU assisted history matching mode/Check ERT iteration and simulate/export or import GRF fields/README.md
-                  - export or import GRF fields:
-                      - Define APS Job/Job setting/Select mode/FMU assisted history matching mode/Check ERT iteration and simulate/export or import GRF fields/README.md
-                  - Split trend and residuals when updating in ERT:
-                      - Define APS Job/Job setting/Select mode/FMU assisted history matching mode/Split trend and residuals when updating in ERT/README.md
-                  - Extrapolate 3D custom trend in ERTBOX:
-                      - Define APS Job/Job setting/Select mode/FMU assisted history matching mode/Extrapolate 3D custom trend in ERTBOX/README.md
-          - Log setting:
-              - Define APS Job/Job setting/Log setting/README.md
-          - Transformation setting:
-              - Define APS Job/Job setting/Transformation setting/README.md
-          - Probability check setting:
-              - Define APS Job/Job setting/Probability check setting/README.md
-          - Non-standard FMU setting:
-              - Define APS Job/Job setting/Non-standard FMU setting/README.md
-          - Preview related settings:
-              - Define APS Job/Job setting/Preview related settings/README.md
+                      - Define APS Job/Job setting/Select mode/FMU assisted history matching mode/Select ERTBOX grid model/The ERTBOX mapping explained/README.md
+                  - Define APS Job/Job setting/Select mode/FMU assisted history matching mode/File format for GRF fields/README.md
+                  - Define APS Job/Job setting/Select mode/FMU assisted history matching mode/Simulate GRF only/README.md
+                  - Define APS Job/Job setting/Select mode/FMU assisted history matching mode/Check ERT iteration and simulate/export or import GRF fields/README.md
+                  - Define APS Job/Job setting/Select mode/FMU assisted history matching mode/Check ERT iteration and simulate/export or import GRF fields/README.md
+                  - Define APS Job/Job setting/Select mode/FMU assisted history matching mode/Split trend and residuals when updating in ERT/README.md
+                  - Define APS Job/Job setting/Select mode/FMU assisted history matching mode/Extrapolate 3D custom trend in ERTBOX/README.md
+          - Define APS Job/Job setting/Log setting/README.md
+          - Define APS Job/Job setting/Transformation setting/README.md
+          - Define APS Job/Job setting/Probability check setting/README.md
+          - Define APS Job/Job setting/Non-standard FMU setting/README.md
+          - Define APS Job/Job setting/Preview related settings/README.md
           - Generate files for FMU:
               - Define APS Job/Job setting/Generate files for FMU/ERT configuration/README.md
               - ERT configuration:
                   - Define APS Job/Job setting/Generate files for FMU/ERT configuration/global_master_config include file with APS parameters/README.md
-                  - GEN_KW distribution template for APS parameters:
-                      - Define APS Job/Job setting/Generate files for FMU/ERT configuration/GEN_KW distribution template for APS parameters/README.md
-                  - ERT config include file with FIELD and GRID keywords:
-                      - Define APS Job/Job setting/Generate files for FMU/ERT configuration/ERT config include file with FIELD and GRID keywords/README.md
-              - global_master_config include file with APS parameters:
-                  - Define APS Job/Job setting/Generate files for FMU/ERT configuration/global_master_config include file with APS parameters/README.md
+                  - Define APS Job/Job setting/Generate files for FMU/ERT configuration/GEN_KW distribution template for APS parameters/README.md
+                  - Define APS Job/Job setting/Generate files for FMU/ERT configuration/ERT config include file with FIELD and GRID keywords/README.md
+              - Define APS Job/Job setting/Generate files for FMU/ERT configuration/global_master_config include file with APS parameters/README.md
           - ERT configuration:
               - Define APS Job/Job setting/Generate files for FMU/ERT configuration/README.md
       - Preview:
           - Define APS Job/Preview/README.md
-          - Views:
-              - Define APS Job/Preview/Views/README.md
+          - Define APS Job/Preview/Views/README.md
   - Configuration of APS with AHM using ERT:
       - Configuration of APS with AHM using ERT/README.md
       - FMU config:
@@ -150,65 +109,43 @@ nav:
                   - Configuration of APS with AHM using ERT/ERT config/GEN_KW/Parameter probability distributions/README.md
           - DESIGN_KW:
               - Configuration of APS with AHM using ERT/ERT config/DESIGN_KW/README.md
-              - Parameter  values:
-                  - Configuration of APS with AHM using ERT/ERT config/DESIGN_KW/Parameter  values/README.md
-          - 'FIELD ':
-              - Configuration of APS with AHM using ERT/ERT config/FIELD
-                / GRID/README.md
-              - ' GRID':
-                  - Configuration of APS with AHM using ERT/ERT config/FIELD
-                    / GRID/GRF fields per zone/README.md
+              - Parameter values:
+                  - Configuration of APS with AHM using ERT/ERT config/DESIGN_KW/Parameter values/README.md
+          - FIELD / GRID:
+              - Configuration of APS with AHM using ERT/ERT config/FIELD/GRID/README.md
               - GRF fields per zone:
-                  - Configuration of APS with AHM using ERT/ERT config/FIELD
-                    / GRID/GRF fields per zone/README.md
-          - ' GRID':
-              - Configuration of APS with AHM using ERT/ERT config/FIELD / GRID/README.md
+                  - Configuration of APS with AHM using ERT/ERT config/FIELD/GRID/GRF fields per zone/README.md
   - APS algorithm:
       - APS algorithm/README.md
       - Implementation:
           - APS algorithm/Implementation/README.md
-          - Trends in GRF:
-              - APS algorithm/Implementation/Trends in GRF/README.md
-          - Overlay facies:
-              - APS algorithm/Implementation/Overlay facies/README.md
-          - Optimised truncation map:
-              - APS algorithm/Implementation/Optimised truncation map/cube calculation/README.md
-          - cube calculation:
-              - APS algorithm/Implementation/Optimised truncation map/cube calculation/README.md
+          - APS algorithm/Implementation/Trends in GRF/README.md
+          - APS algorithm/Implementation/Overlay facies/README.md
+          - APS algorithm/Implementation/Optimised truncation map/cube calculation/README.md
   - Prepare facies probabilities:
       - Prepare facies probabilities/README.md
       - Probability logs:
           - Prepare facies probabilities/Probability logs/README.md
           - Facies log:
               - Prepare facies probabilities/Probability logs/Facies log/README.md
-          - Conditional probabilities given facies:
-              - Prepare facies probabilities/Probability logs/Conditional probabilities given facies/README.md
+          - Prepare facies probabilities/Probability logs/Conditional probabilities given facies/README.md
       - Probability trends:
           - Prepare facies probabilities/Probability trends/README.md
           - Trends from seismic data:
               - Prepare facies probabilities/Probability trends/Trends from seismic data/README.md
-          - Trends from geological interpretations:
-              - Prepare facies probabilities/Probability trends/Trends from geological interpretations/README.md
+          - Prepare facies probabilities/Probability trends/Trends from geological interpretations/README.md
       - Conditioned probability cubes:
           - Prepare facies probabilities/Conditioned probability cubes/README.md
-          - RMS petrosim to condition 3D probability parameters:
-              - Prepare facies probabilities/Conditioned probability cubes/RMS petrosim to condition 3D probability parameters/README.md
-      - Normalisation:
-          - Prepare facies probabilities/Normalisation/README.md
+          - Prepare facies probabilities/Conditioned probability cubes/RMS petrosim to condition 3D probability parameters/README.md
+      - Prepare facies probabilities/Normalisation/README.md
   - APS toolbox:
       - APS toolbox/README.md
-      - Probability logs:
-          - APS toolbox/Probability logs/README.md
-      - Probability trends:
-          - APS toolbox/Probability trends/README.md
-      - Redefine or merge blocked well facies logs:
-          - APS toolbox/Redefine or merge blocked well facies logs/README.md
-      - Convert bitmap to RMS surface format:
-          - APS toolbox/Convert bitmap to RMS surface format/README.md
-      - Check normalisation of facies probabilities:
-          - APS toolbox/Check normalisation of facies probabilities/README.md
-      - Copy 3D parameters to or from ERTBOX:
-          - APS toolbox/Copy 3D parameters to or from ERTBOX/README.md
+      - APS toolbox/Probability logs/README.md
+      - APS toolbox/Probability trends/README.md
+      - APS toolbox/Redefine or merge blocked well facies logs/README.md
+      - APS toolbox/Convert bitmap to RMS surface format/README.md
+      - APS toolbox/Check normalisation of facies probabilities/README.md
+      - APS toolbox/Copy 3D parameters to or from ERTBOX/README.md
 
 markdown_extensions:
   - smarty
