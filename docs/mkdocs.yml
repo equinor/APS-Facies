@@ -144,6 +144,7 @@ nav:
       - aps-toolbox/copy-3d-parameters-to-or-from-ertbox/README.md
   - APS model file format:
       - aps-model-file-format/README.md
+  - Mind Manager map: mind-manager/index.html
 
 markdown_extensions:
   - smarty
