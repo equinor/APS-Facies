@@ -510,3 +510,8 @@ local.settings.json
 
 # Documentation
 docs/out/
+docs/site/
+_site/
+
+# Mise related
+!.mise-tasks/build
