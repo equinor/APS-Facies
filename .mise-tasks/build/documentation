@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+#MISE description="Build the documentation"
+#MISE depends=["dependencies:docs"]
+
+function main() {
+  pushd "$MISE_PROJECT_ROOT" >/dev/null
+  uv run \
+  	  --no-project \
+      mkdocs build \
+          --site-dir "$MISE_PROJECT_ROOT/_site" \
+          --strict
+  popd >/dev/null
+}
+
+main "$@"
