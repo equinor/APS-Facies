@@ -3,6 +3,11 @@ run = "uv sync --no-install-project"
 sources = ["pyproject.toml", "uv.lock"]
 outputs = [".venv/"]
 
+[tasks."dependencies:docs"]
+run = "uv sync --group=docs --no-install-project"
+sources = ["pyproject.toml", "uv.lock"]
+outputs = [".venv"]
+
 [tasks."dependencies:node"]
 run = """
 corepack enable
