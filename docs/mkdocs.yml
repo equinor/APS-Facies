@@ -185,3 +185,8 @@ theme:
   name: material
   icon:
     repo: fontawesome/brands/github
+
+plugins:
+  - search
+  - git-revision-date-localized:
+      enable_creation_date: true
