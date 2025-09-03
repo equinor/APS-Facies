@@ -29,4 +29,4 @@ Other implications:
 
 - The empiric transformation will in general create realisations satisfying the specified facies proportions more accurately than using the CDF method. The sampling error will be smaller.
 
-![](a2de2afd8d10b70b9fb9c068fe7a17ec88ec9a972082ed5d92f95c0d37057460.png)
+![](assets/images/a2de2afd8d10b70b9fb9c068fe7a17ec88ec9a972082ed5d92f95c0d37057460.png)

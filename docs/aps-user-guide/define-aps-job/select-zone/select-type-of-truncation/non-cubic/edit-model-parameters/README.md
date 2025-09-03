@@ -13,10 +13,10 @@ a probability fraction
 (how much of the probability associated with a facies is to be assigned to each polygon that belongs to the facies)
 is specified.
 
-![](b1fe5ebb39c6f416ce4d4e4647f5434f4648892e2c4e6921fcd39dde7a6de8b3.png)
+![](assets/images/b1fe5ebb39c6f416ce4d4e4647f5434f4648892e2c4e6921fcd39dde7a6de8b3.png)
 
 
-![](23f9c6cbea99d53e2d22f6837d5add3a8a69cc12b125d4b6d82a610555bcabb8.png)
+![](assets/images/23f9c6cbea99d53e2d22f6837d5add3a8a69cc12b125d4b6d82a610555bcabb8.png)
 
 The user specify an _angle between the normal vector to the boundary line and the horizontal line_, see figure below.
 The algorithm to define the polygons are as follows:
@@ -43,9 +43,9 @@ In the example below the sequence of the boundary lines are:
 
 It is clear from this algorithm that the sequence of the specified boundary lines define the geometry of the polygons.
 
-![](24bf38c3fcecbfb0446b03e1fa5e25c1e0a87309cf4e9d47b29c564dd30d6f40.png)
+![](assets/images/24bf38c3fcecbfb0446b03e1fa5e25c1e0a87309cf4e9d47b29c564dd30d6f40.png)
 
 The effect of having a slope with angle different from 0 or 90 degrees is to mix the effect of both the GRF corresponding to alpha1 and the GRF corresponding to alpha2.
 This can be shown in the figures below where the angle is changed gradually.
 Here GRF1 has a linear trend and corresponds to alpha1 (horizontal axis of truncation map) and GRF2 to alpha2.
-![](b6e673f5d4f5d15a518bf79ec34aeffadaf55d1d32cf57aaa1d4220dbe8ddbf4.png)
+![](assets/images/b6e673f5d4f5d15a518bf79ec34aeffadaf55d1d32cf57aaa1d4220dbe8ddbf4.png)

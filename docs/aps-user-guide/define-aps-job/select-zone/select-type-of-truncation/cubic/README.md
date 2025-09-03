@@ -12,4 +12,4 @@ The name "Cubic" truncation rule is related to the polygons the truncation map i
 In this case the polygons have rectangular shape (two-dimensional when two Alpha's (GRF's) are used)
 and rectangular boxes in 3 or more dimensions if overlay facies is used.
 
-![](25ec5cedc2918e0de4ce8ec42a51046019dd7399da9b945524459784b5e7c61a.png)
+![](assets/images/25ec5cedc2918e0de4ce8ec42a51046019dd7399da9b945524459784b5e7c61a.png)

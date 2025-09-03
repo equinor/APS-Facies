@@ -3,7 +3,7 @@ title: Select type of truncation
 ---
 Select type of truncation rule from a dropdown list.
 
-![](2d8b811d83865a6b8b25e60a58c785d4395a1528263b00cea20e87663ca66912.png)
+![](assets/images/2d8b811d83865a6b8b25e60a58c785d4395a1528263b00cea20e87663ca66912.png)
 
 There are three "families" of truncation rule settings for what we call background facies.
 A background facies will use two GRF fields, and the horizontal and vertical axis of the truncation map corresponds to the two transformed GRF fields.

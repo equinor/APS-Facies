@@ -2,7 +2,7 @@
 title: Bayfill
 ---
 
-![](50ac51ad2178c6509f4ca9ab214b966140f2cdfd97d2e0cfbfd2d415bccdc1e3.png)
+![](assets/images/50ac51ad2178c6509f4ca9ab214b966140f2cdfd97d2e0cfbfd2d415bccdc1e3.png)
 
 The Bayfill truncation rule was originally made for a case with 5 facies:
 
@@ -24,6 +24,6 @@ In addition slopes for boundary lines between the polygons are specified.
 
 Note that a similar (although not identical) truncation can be modelled using non-cubic truncation rule.
 
-![](66a944873e3d59674069d89f80f891f3b8fb1add0809f0c4c68bf33c045d6c9c.png)
+![](assets/images/66a944873e3d59674069d89f80f891f3b8fb1add0809f0c4c68bf33c045d6c9c.png)
 
 ## Edit model parameters

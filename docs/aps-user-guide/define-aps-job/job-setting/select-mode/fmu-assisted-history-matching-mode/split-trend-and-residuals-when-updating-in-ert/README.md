@@ -18,4 +18,4 @@ When running APS the following will happen:
 
 - APS will apply truncation using the GRF's with trend
 
-![](4b5ddc01e8d6a64b648d643c91deb35755e34b95409f1961ab197059afb074b6.png)
+![](assets/images/4b5ddc01e8d6a64b648d643c91deb35755e34b95409f1961ab197059afb074b6.png)

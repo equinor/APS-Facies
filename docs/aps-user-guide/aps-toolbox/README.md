@@ -32,4 +32,4 @@ The subdirectories under `aps/toolbox` are:
   Since the name of the model files here are hardcoded, symlinks (`ln -sf targetfile linkfilename`) must be used.
   For more documentation, see APS wiki documentation.
 
-![](5ce76574339b34986551f361db8051c5ef28eedd0c7c32fd8c0137b89fc69b76.png)
+![](assets/images/5ce76574339b34986551f361db8051c5ef28eedd0c7c32fd8c0137b89fc69b76.png)
