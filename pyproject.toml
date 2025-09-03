@@ -9,7 +9,7 @@ authors = [
 ]
 
 [tool.poetry.dependencies]
-python = "^3.9"
+python = "^3.11"
 matplotlib = "^3.6.0"
 numpy = "^1.19.5"
 Pillow = "^10.3.0"
