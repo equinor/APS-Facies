@@ -33,6 +33,7 @@ repos:
             'json',
             'yaml',
           ]
+        exclude: docs/aps-user-guide/mind-manager/index.html
 
   - repo: https://github.com/pre-commit/mirrors-eslint
     rev: v9.30.1
