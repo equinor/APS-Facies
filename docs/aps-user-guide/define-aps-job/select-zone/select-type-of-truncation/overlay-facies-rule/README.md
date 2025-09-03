@@ -4,7 +4,7 @@ title: Overlay facies rule
 
 Overlay facies is activated by toggle on "**Include Overlay Facies**"
 
-![](97dcee81abf4f4f525b11d4657eb6dd48e5c02398d57fa530438a7fcadb0f4e6.png)
+![](assets/images/97dcee81abf4f4f525b11d4657eb6dd48e5c02398d57fa530438a7fcadb0f4e6.png)
 
 Overlay facies are facies defined to erode into the background facies.
 There can in principle be multiple overlay facies and they will use their own GRF fields to define the shape.

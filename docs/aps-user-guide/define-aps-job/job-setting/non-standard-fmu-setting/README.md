@@ -11,6 +11,6 @@ _APS will as long as the non-standard setting is toggled on, check if there are 
 
 Example of how the default version of the `aps_config.yml` file will look like.
 The red colored directory names, filenames and file extensions can be modified to follow a non-standard FMU setting.
-![](420d36a35dc6b06dda1f79942ca27c179c5b4848d3dbb79b7fe4caff6b6acbb9.png)
+![](assets/images/420d36a35dc6b06dda1f79942ca27c179c5b4848d3dbb79b7fe4caff6b6acbb9.png)
 
-![](09b9b5abf21350db7baa3889915da176f9ae1fb446092d81a81269403ff3acda.png)
+![](assets/images/09b9b5abf21350db7baa3889915da176f9ae1fb446092d81a81269403ff3acda.png)

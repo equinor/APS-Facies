@@ -2,7 +2,7 @@
 title: FMU assisted history matching mode
 ---
 
-![](fdd7e9d30009a95b0ea964b523b50bba08002abb08b7ff2c9de33f35fabfc2bc.png)
+![](assets/images/fdd7e9d30009a95b0ea964b523b50bba08002abb08b7ff2c9de33f35fabfc2bc.png)
 
 This mode is suitable when running APS in an RMS project in ERT where ERT update the GRF fields that is used by APS.
 This mode requires that APS and ERT exchange GRF fields.
@@ -29,7 +29,7 @@ The workflow is as follows when running APS:
     - APS will update the facies realization in RMS
     - NOTE: Since APS will not run the GRF simulation again, but use the updated GRF fields from ERT, it will not apply any of the APS parameters related to simulation of GRF fields, but only the APS parameters related to the truncation rule if they are specified to be updated by ERT.
 
-![](3fd81875fe98f5e91767accc1c0fd4da36d1de03bcbab8a879fb8bd6a961cea6.png)
+![](assets/images/3fd81875fe98f5e91767accc1c0fd4da36d1de03bcbab8a879fb8bd6a961cea6.png)
 
 The figure show the data flow when running APS as part of RMS in forward model in ERT for iteration=0.
 The steps are:

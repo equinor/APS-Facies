@@ -8,4 +8,4 @@ Select how APS should interact with ERT:
 
 - If none of the above is toggled on, APS will always use the specified model parameters in the APS GUI and not modify them behind the scenes.
 
-![](eeffc698560352f36850cc828efe06427aacc2350a4cb89a2330754d8ac30c29.png)
+![](assets/images/eeffc698560352f36850cc828efe06427aacc2350a4cb89a2330754d8ac30c29.png)

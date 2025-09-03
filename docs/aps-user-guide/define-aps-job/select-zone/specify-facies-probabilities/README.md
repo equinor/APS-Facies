@@ -7,7 +7,7 @@ To test APS models, constant probabilities can be chosen.
 For production runs, choose to use predefined facies probabilities represented as 3D continuous parameters for the current zone to be modelled.
 In this case toggle on **Use cubes** and select which 3D parameter to use for each facies.
 
-![](76be850cfa05d4a75258d387bf9c503eda7b192a828b80c4adc1376cf1781291.png)
+![](assets/images/76be850cfa05d4a75258d387bf9c503eda7b192a828b80c4adc1376cf1781291.png)
 
 Preliminary testing to find a suitable setting for the APS model:
 

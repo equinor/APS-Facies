@@ -23,4 +23,4 @@ When using blocked well set and facies log:
     In APS, the well conditioning must be taken care of by the probability cubes for each facies, and grid cells belonging to blocked well grid cells can be given probability 1 or 0.
     This must be done in the workflow preparing the probability cubes.
 
-![](db7aaf81403660b23b789d76528a4d3491b364ed357a9c18049d528957529139.png)
+![](assets/images/db7aaf81403660b23b789d76528a4d3491b364ed357a9c18049d528957529139.png)

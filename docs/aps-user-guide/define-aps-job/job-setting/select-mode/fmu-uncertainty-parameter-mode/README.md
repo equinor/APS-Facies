@@ -15,4 +15,4 @@ APS will work as follows when running in this mode:
 
 5. Save facies realization
 
-![](4b4fdc2dacea65a266a5a39be6fe53dd4bb7d768be1c846dc7c22b1d4aa5e3ad.png)
+![](assets/images/4b4fdc2dacea65a266a5a39be6fe53dd4bb7d768be1c846dc7c22b1d4aa5e3ad.png)

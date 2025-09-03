@@ -14,4 +14,4 @@ The "screen" (:fontawesome-solid-display:) icon indicated that the facies is fou
 The user can also add facies not found in the blocked wells at all if this is wanted.
 If facies log is not available or specified, the user must use the "+" icon to add facies names to be modelled.
 
-![](db7aaf81403660b23b789d76528a4d3491b364ed357a9c18049d528957529139.png)
+![](assets/images/db7aaf81403660b23b789d76528a4d3491b364ed357a9c18049d528957529139.png)
