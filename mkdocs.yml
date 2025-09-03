@@ -1,5 +1,7 @@
 site_name: APS Documentation
 docs_dir: docs/aps-user-guide
+repo_url: https://github.com/equinor/APS-Facies
+repo_name: equinor/APS-Facies
 
 nav:
   - README.md
@@ -162,3 +164,5 @@ extra_javascript:
 
 theme:
   name: material
+  icon:
+    repo: fontawesome/brands/github
