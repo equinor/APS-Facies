@@ -142,6 +142,8 @@ nav:
       - aps-toolbox/convert-bitmap-to-rms-surface-format/README.md
       - aps-toolbox/check-normalisation-of-facies-probabilities/README.md
       - aps-toolbox/copy-3d-parameters-to-or-from-ertbox/README.md
+  - APS model file format:
+      - aps-model-file-format/README.md
 
 markdown_extensions:
   - smarty
