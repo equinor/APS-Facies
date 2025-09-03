@@ -28,4 +28,4 @@ To avoid mixing real physical grid cell values with unphysical values from grid 
 the extrapolated values are a better choice than to assign unrealistic values like `0`,
 `NaN` or similar since the extrapolated values may be used in linear combination in the update step in ERT.
 
-![](db0d2aadf31517960f2ee4b25ea971862569eb359543cefc26c065107641affe.png)
+![](assets/images/db0d2aadf31517960f2ee4b25ea971862569eb359543cefc26c065107641affe.png)

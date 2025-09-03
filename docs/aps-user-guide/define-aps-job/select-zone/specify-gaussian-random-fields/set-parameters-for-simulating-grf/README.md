@@ -11,7 +11,7 @@ The local previewer for GRF has the option to draw new realization
 update the preview image after parameters are changed (the circular arrow icon, :fontawesome-solid-refresh:),
 and change grid size for preview (the gears icon, :fontawesome-solid-gears:).
 
-![](b3061d535861ac5f45f8649d2e096a8597a10c24c6604b8ead919bf13309b89d.png)
+![](assets/images/b3061d535861ac5f45f8649d2e096a8597a10c24c6604b8ead919bf13309b89d.png)
 
 The number of Gaussian Random fields are per default two, but when using overlay facies, this number must be increased.
 The GRF field specification:

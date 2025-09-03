@@ -11,4 +11,4 @@ it can be useful to select this model to get the call stack from python and comp
 The `VERBOSE` settings is useful to get more information about what is happening when running.
 E.g. more info about parameter exchanged with ERT and the global_variables.yml file is logged to screen in this case.
 
-![](4d2fada62a4ce540eb9af6817bf3103f210de9fc07b239b3a91a6fca4e508362.png)
+![](assets/images/4d2fada62a4ce540eb9af6817bf3103f210de9fc07b239b3a91a6fca4e508362.png)

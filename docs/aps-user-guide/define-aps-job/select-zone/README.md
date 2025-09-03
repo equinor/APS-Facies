@@ -8,7 +8,7 @@ Then the GUI elements needed for specification of the APS settings for the zone 
 It is possible to activate and deactivate a zone by toggle on/off "Use".
 If toggle off, the specification is still available but when running the job, the zone will not be modelled.
 
-![](f362e30ae58103883258530b0d6771094ca4cbe37148a48cf31122ffe9a10677.png)
+![](assets/images/f362e30ae58103883258530b0d6771094ca4cbe37148a48cf31122ffe9a10677.png)
 
 The APS job is designed such that the user specify the settings for the APS model per zone if a multi-zone grid is chosen.
 An option to use regions is also available.

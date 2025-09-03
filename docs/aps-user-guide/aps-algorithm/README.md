@@ -31,4 +31,4 @@ When using (GRF1, GRF2) as coordinates to find the polygon, we see here that the
 The second example is grid block in lower left corner with probabilities $P(F_1) = 0.5$, $P(F_2) = 0.2$ and $P(F_3) = 0.3$.
 The point (GRF1, GRF2) for this grid block will be located in a polygon belonging to faces F2 marked with red color.
 
-![](71308213a804a8e6999d26d344af3d301527c66df4e844aba47876320bb4fab2.png)
+![](assets/images/71308213a804a8e6999d26d344af3d301527c66df4e844aba47876320bb4fab2.png)

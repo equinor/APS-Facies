@@ -3,7 +3,7 @@ title: Preview
 ---
 The preview update button.
 
-![](05a3fad6ae03bd53726cd6d3b8c24a5f9c83f9b11b4dbcdf9875ec1632a6aeca.png)
+![](assets/images/05a3fad6ae03bd53726cd6d3b8c24a5f9c83f9b11b4dbcdf9875ec1632a6aeca.png)
 
 To refresh the preview, use the circular arrow icon.
 If this icon is grey and inactive,

@@ -18,4 +18,4 @@ The GUI has expandable sections.
 The view below shows a case where all sections are collapsed.
 At the bottom of the main window, the log window is located.
 
-![](ad4cd033f75660def9f9c06fb73715f77da6f2d5b33c767b42106ec5970e13d7.png)
+![](assets/images/ad4cd033f75660def9f9c06fb73715f77da6f2d5b33c767b42106ec5970e13d7.png)
