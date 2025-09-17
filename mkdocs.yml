@@ -12,9 +12,7 @@ nav:
       - Select zone:
           - define-aps-job/select-zone/README.md
           - define-aps-job/select-zone/select-bw/README.md
-          - Select facies log:
-              - define-aps-job/select-zone/select-facies-log/README.md
-              - define-aps-job/select-zone/select-facies-log/select-facies-to-model/README.md
+          - define-aps-job/select-zone/select-facies-log/README.md
           - Specify facies probabilities:
               - define-aps-job/select-zone/specify-facies-probabilities/README.md
               - Use constant probabilities:
