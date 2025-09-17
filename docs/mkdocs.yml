@@ -45,11 +45,7 @@ nav:
   - configuration-of-aps-with-ahm-using-ert/README.md
   - APS algorithm:
       - aps-algorithm/README.md
-      - Implementation:
-          - aps-algorithm/implementation/README.md
-          - aps-algorithm/implementation/trends-in-grf/README.md
-          - aps-algorithm/implementation/overlay-facies/README.md
-          - aps-algorithm/implementation/optimised-truncation-map-cube-calculation/README.md
+      - aps-algorithm/implementation/README.md
   - Prepare facies probabilities:
       - prepare-facies-probabilities/README.md
       - Probability logs:
