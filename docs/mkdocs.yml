@@ -16,11 +16,7 @@ nav:
           - define-aps-job/select-zone/specify-facies-probabilities/README.md
           - Select type of truncation:
               - define-aps-job/select-zone/select-type-of-truncation/README.md
-              - Cubic:
-                  - define-aps-job/select-zone/select-type-of-truncation/cubic/README.md
-                  - Select template:
-                      - define-aps-job/select-zone/select-type-of-truncation/cubic/select-template/README.md
-                  - define-aps-job/select-zone/select-type-of-truncation/cubic/edit-selected-template/README.md
+              - define-aps-job/select-zone/select-type-of-truncation/cubic/README.md
               - Non-cubic:
                   - define-aps-job/select-zone/select-type-of-truncation/non-cubic/README.md
                   - Select template:
