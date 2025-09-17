@@ -1,4 +1,5 @@
 site_name: APS Documentation
+site_url: https://equinor.github.io/APS-Facies/
 repo_url: https://github.com/equinor/APS-Facies
 repo_name: equinor/APS-Facies
 edit_uri: 'edit/main/docs/'
