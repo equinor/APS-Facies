@@ -27,13 +27,7 @@ nav:
           - Specify Gaussian Random Fields:
               - define-aps-job/select-zone/specify-gaussian-random-fields/README.md
               - define-aps-job/select-zone/specify-gaussian-random-fields/set-parameters-for-simulating-grf/README.md
-              - Add trend:
-                  - define-aps-job/select-zone/specify-gaussian-random-fields/add-trend/README.md
-                  - define-aps-job/select-zone/specify-gaussian-random-fields/add-trend/linear-linear-coastline/README.md
-                  - define-aps-job/select-zone/specify-gaussian-random-fields/add-trend/elliptic-curved-coastline/README.md
-                  - define-aps-job/select-zone/specify-gaussian-random-fields/add-trend/hyperbolic-channel-between-two-coastlines/README.md
-                  - define-aps-job/select-zone/specify-gaussian-random-fields/add-trend/customized-3d-trend/README.md
-                  - define-aps-job/select-zone/specify-gaussian-random-fields/add-trend/customized-2d-trend/README.md
+              - define-aps-job/select-zone/specify-gaussian-random-fields/add-trend/README.md
       - Job setting:
           - define-aps-job/job-setting/README.md
           - Select mode:
