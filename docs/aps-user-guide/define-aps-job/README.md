@@ -11,9 +11,6 @@ The main APS gui window has three main columns:
 
 In addition there is a separate window for configuration of APS in ERT / FMU workflows and other job settings.
 
-*[ERT]: Ensemble Reservoir Tool
-*[FMU]: Fast Model Update
-
 The GUI has expandable sections.
 The view below shows a case where all sections are collapsed.
 At the bottom of the main window, the log window is located.
