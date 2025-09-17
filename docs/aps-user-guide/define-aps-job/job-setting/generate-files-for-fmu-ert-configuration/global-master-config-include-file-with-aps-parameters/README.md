@@ -28,10 +28,6 @@ but it is up to the user to modify these names as long as they are unique within
 But they must be consistent with the distribution file for GEN_KW if the APS parameters is to be drawn for initial ensemble by ERT or consistent with the parameter names used in `DESIGN_KW` if experimental design setup is used.
 
 Example of a parameter file:
-![](assets/images/408be8b53c8c023876403ad6569bc17bc941e4fdc71cbf14d9dcb91412c37eec.png)
-
-
-----
 
 ```yaml
 # file: VALYSAR_aps-params.yml
@@ -66,8 +62,5 @@ VALYSAR:
 
 Example of include file made by APS that can be included into the `global_master_config.yml` file.
 See the note (comments at top of the file below).
-
-![](assets/images/408be8b53c8c023876403ad6569bc17bc941e4fdc71cbf14d9dcb91412c37eec.png)
-
 
 [->](../../../../configuration-of-aps-with-ahm-using-ert/fmu-config/global-master-config/README.md)
