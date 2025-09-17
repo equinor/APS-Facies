@@ -53,14 +53,14 @@ The dimension of the truncation cube is defined by $2 +N$ where $N$ is number of
 
 The algorithm for how to look up facies when using overlay facies is roughly as follows:
 
-1. Look up in which background facies the coordinate (Alpha1, Alpha2) is located.
+1. Look up in which background facies the coordinate ($\alpha_{1}$, $\alpha_{2}$) is located.
 
-2. If the background facies is background for the overlay facies, look up in which interval along the Alpha3 axis the coordinate Alpha3 belongs
-    1. If the Alpha3 coordinate is within the interval belonging to the overlay facies, the overlay facies is assigned to the grid cell.
-    2. If the Alpha3 coordinate is not within the interval belonging to the overlay facies, the background facies is kept.
+2. If the background facies is background for the overlay facies, look up in which interval along the $\alpha_{3}$ axis the coordinate $\alpha_{3}$ belongs
+    1. If the $\alpha_{3}$ coordinate is within the interval belonging to the overlay facies, the overlay facies is assigned to the grid cell.
+    2. If the $\alpha_{3}$ coordinate is not within the interval belonging to the overlay facies, the background facies is kept.
 
 The interval along the $\text{Alpah}_3$ axis is divided into $[0, s]$ for overlay facies and $[s, 1]$ where background facies is used, and s is a calculated threshold value that depends on the facies probability.
-The parameter "Center" is a parameter for modifying the intervals along the Alpha3 axis such that three intervals
+The parameter "Center" is a parameter for modifying the intervals along the $\alpha_{3}$ axis such that three intervals
 
 
 $[0, \max(c - s / 2, 0)]$ belongs to background facies, $[\max(c-s/2,0), \min(c+ s/2,1)]$ belongs to overlay facies, $[\min( c + s / 2, 1), 1]$ belongs to background facies.
