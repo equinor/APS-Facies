@@ -1,0 +1,54 @@
+:root > * {
+  --mossgreen: #007079;
+  --md-text-font-family: 'Equinor';
+  --md-primary-fg-color: var(--mossgreen);
+  --md-primary-fg-color--light: var(--mossgreen);
+  --md-primary-fg-color--dark: var(--mossgreen);
+}
+
+[data-md-color-scheme='slate'] {
+  --md-typeset-a-color: hsl(184, 100%, 34%);
+}
+
+.md-typeset .admonition {
+  font-size: 1em;
+}
+
+.float-left {
+  float: left;
+  margin: 10px;
+}
+
+.float-right {
+  float: right;
+  margin: 10px;
+}
+
+.width300 {
+  width: 300px;
+}
+
+.width400 {
+  width: 400px;
+}
+
+.width500 {
+  width: 500px;
+}
+
+.width600 {
+  width: 600px;
+}
+
+.width700 {
+  width: 700px;
+}
+
+.width800 {
+  width: 800px;
+}
+
+/**
+Using Equinor font from link below, defined in mkdocks.yml
+https://cdn.eds.equinor.com/font/equinor-font.css
+**/
