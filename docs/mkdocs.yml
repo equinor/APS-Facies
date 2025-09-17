@@ -151,7 +151,7 @@ nav:
 markdown_extensions:
   - smarty
   - toc:
-      permalink: 
+      permalink: true
   - sane_lists
 
   # For MathJax
