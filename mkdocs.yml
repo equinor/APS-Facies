@@ -41,9 +41,7 @@ nav:
           - define-aps-job/job-setting/non-standard-fmu-setting/README.md
           - define-aps-job/job-setting/preview-related-settings/README.md
           - define-aps-job/job-setting/generate-files-for-fmu-ert-configuration/README.md
-      - Preview:
-          - define-aps-job/preview/README.md
-          - define-aps-job/preview/views/README.md
+      - define-aps-job/preview/README.md
   - configuration-of-aps-with-ahm-using-ert/README.md
   - APS algorithm:
       - aps-algorithm/README.md
