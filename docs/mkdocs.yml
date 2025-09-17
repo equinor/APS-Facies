@@ -18,10 +18,7 @@ nav:
               - define-aps-job/select-zone/select-type-of-truncation/README.md
               - define-aps-job/select-zone/select-type-of-truncation/cubic/README.md
               - define-aps-job/select-zone/select-type-of-truncation/non-cubic/README.md
-              - Bayfill:
-                  - define-aps-job/select-zone/select-type-of-truncation/bayfill/README.md
-                  - Edit model parameters:
-                      - define-aps-job/select-zone/select-type-of-truncation/bayfill/edit-model-parameters/README.md
+              - define-aps-job/select-zone/select-type-of-truncation/bayfill/README.md
               - Overlay facies rule:
                   - define-aps-job/select-zone/select-type-of-truncation/overlay-facies-rule/README.md
                   - define-aps-job/select-zone/select-type-of-truncation/overlay-facies-rule/select-background-facies/README.md
