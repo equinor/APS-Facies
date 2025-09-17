@@ -47,11 +47,7 @@ nav:
       - Prepare facies probabilities:
           - aps-user-guide/prepare-facies-probabilities/README.md
           - aps-user-guide/prepare-facies-probabilities/probability-logs/README.md
-          - Probability trends:
-              - aps-user-guide/prepare-facies-probabilities/probability-trends/README.md
-              - Trends from seismic data:
-                  - aps-user-guide/prepare-facies-probabilities/probability-trends/trends-from-seismic-data/README.md
-              - aps-user-guide/prepare-facies-probabilities/probability-trends/trends-from-geological-interpretations/README.md
+          - aps-user-guide/prepare-facies-probabilities/probability-trends/README.md
           - Conditioned probability cubes:
               - aps-user-guide/prepare-facies-probabilities/conditioned-probability-cubes/README.md
               - aps-user-guide/prepare-facies-probabilities/conditioned-probability-cubes/rms-petrosim-to-condition-3d-probability-parameters/README.md
