@@ -26,14 +26,7 @@ nav:
                   - define-aps-job/select-zone/select-type-of-truncation/overlay-facies-rule/select-facies/README.md
           - Specify Gaussian Random Fields:
               - define-aps-job/select-zone/specify-gaussian-random-fields/README.md
-              - Set parameters for simulating GRF:
-                  - define-aps-job/select-zone/specify-gaussian-random-fields/set-parameters-for-simulating-grf/README.md
-                  - define-aps-job/select-zone/specify-gaussian-random-fields/set-parameters-for-simulating-grf/variogram/README.md
-                  - define-aps-job/select-zone/specify-gaussian-random-fields/set-parameters-for-simulating-grf/correlation-ranges/README.md
-                  - Anisotropy direction (azimuth):
-                      - define-aps-job/select-zone/specify-gaussian-random-fields/set-parameters-for-simulating-grf/anisotropy-direction-azimuth/README.md
-                  - Anisotropy direction (dip):
-                      - define-aps-job/select-zone/specify-gaussian-random-fields/set-parameters-for-simulating-grf/anisotropy-direction-dip/README.md
+              - define-aps-job/select-zone/specify-gaussian-random-fields/set-parameters-for-simulating-grf/README.md
               - Add trend:
                   - define-aps-job/select-zone/specify-gaussian-random-fields/add-trend/README.md
                   - define-aps-job/select-zone/specify-gaussian-random-fields/add-trend/linear-linear-coastline/README.md

@@ -43,3 +43,20 @@ Use the previewer for the GRF fields to check the effect of the settings:
 !!! warning "Always check the facies realization in RMS after running the APS job"
 
     Remember that any trends in probability cubes are not shown in the previewer.
+
+## Variogram
+
+Choose between common variogram models from drop down list.
+
+## Correlation ranges
+
+Spatial correlation lengths parallel to azimuth direction (Main range),
+orthogonal to azimuth direction (Perpendicular range)
+or vertical direction can be specified as well as azimuth direction and dip direction.
+The dip is the angle between the horizontal plane (of simulation box)
+and the dipped plane measured in the azimuth direction.
+The two angles azimuth and dip together define the direction for the main range.
+
+## Anisotropy direction (azimuth)
+
+## Anisotropy direction (dip)
