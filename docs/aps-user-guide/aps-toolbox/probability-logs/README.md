@@ -27,7 +27,9 @@ The utility script `create_probability_logs.py`:
 
 - Make your own Python script and specify the keyword `model_file_name` and a yml model file specifying the input.
 
-- NOTE: Use the Python script as a Python job in RMS since it applies the API `rmsapi` from RMS.
+!!! NOTE
+
+    Use the Python script as a Python job in RMS since it applies the API `rmsapi` from RMS.
 
 
 ### Example of a Python script using a yml configuration file (model file) as input
