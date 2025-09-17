@@ -40,3 +40,114 @@ The steps are:
 **(4)** copy the simulated GRF's from ERTBOX to geomodel grid,
 **(5)** check facies probabilities,
 **(6)** apply truncations and create/update facies realization parameter in RMS.
+
+
+## Select ERTBOX grid model
+
+APS can generate the ERTBOX grid if it does not exist.
+Be sure to specify a number of layers that are large enough to contain the zone with most layers that you intend to model with APS.
+If the FMU project also model uncertainty of the structural model,
+be sure that ERTBOX grid is large enough for all realizations of the zone with most layers.
+
+![](assets/images/891be09f64eff5cbaa171177c3e83914cf6ce0db1be2888f6b9809bb60f83595.png)
+
+!!! info
+
+    If the RMS model contains multiple APS jobs, all these jobs should use the same ERTBOX since ERT can only handle one ERTBOX grid (all realizations in ERT must be of the same size).
+
+### Grid model
+
+### Number of layers
+
+### The ERTBOX mapping explained
+
+The ERTBOX is a help grid used when exchanging GRF's between APS and ERT.
+
+The mapping between the geomodel grid and ERTBOX grid is illustrated in the figure below.
+
+The ERTBOX is very similar to the RMS simulation box.
+The main difference is that the ERTBOX has often more layers than the number of layers for a RMS zone since it must be large enough to be able to contain the GRF values for any of the RMS grid model zones that are used in APS modelling.
+The figure illustrates a mapping from ERTBOX grid to geomodel grid (or the RMS simulation box for the zone).
+
+![](assets/images/354276e2b30ca962cb6f6c4b28f33d09c964d43f6a1e1e229022010699eeded1.png)
+
+
+## File format for GRF fields
+
+Default file format for export/import to/from ERT is `ROFF` format.
+The alternative is Eclipse ASCII format (`GRDECL`).
+It is recommended to use the `ROFF` format (binary format).
+
+![](assets/images/1d9d53c1f332cc0915df4b0510d80cd3c3ae4c71ce664b62a2e5a7bcd9b80353.png)
+
+## Simulate GRF only
+
+In this mode APS will always simulate the GRF's and export the GRF's to files.
+
+### Typically usage
+When testing the setup of a new APS job and the workflow including ERT.
+
+![](assets/images/12a5a0415cb630f30be55094df07d7a18b17a4812c3235165b8a5751b0bbc17a.png)
+
+## Check ERT iteration and simulate/export or import GRF fields
+
+In this model APS will check the `_ERT_ITERATION_NUMBER` environment variable which is defined by ERT.
+This variable contains the iteration number in ES-MDA in ERT.
+Depending on the iteration number,
+the APS job will and simulate and export GRF's to file if iteration is $0$ and import updated GRF's from ERT if $\text{iteration number} > 0$.
+
+![](assets/images/32f187acc0179e1fe1f62ff2bb0e1d9d506fd4cf311be72466526af7dbb8b16d.png)
+
+## Split trend and residuals when updating in ERT
+
+When running APS in AHM mode, GRF fields (with optionally trends) is updated by ERT,
+and APS will use the updated GRF fields to calculate updated facies realization.
+APS will not use any updates of APS parameters other than those related to the truncation rules.
+To enable use of updated trend parameters,
+this option will let ERT update trend parameters from APS and the residual fields of the GRF's that has trends.
+When running APS the following will happen:
+
+- APS will read APS parameters (if any) from `global_variables.yml`
+
+- APS will import the residual GRF fields updated by ERT
+
+- APS will calculate a trend using the updated APS parameters related to the trend
+
+- APS will combine the calculated trend with imported residual GRF's from ERT to get GRF's with trend
+
+- APS will apply truncation using the GRF's with trend
+
+![](assets/images/4b5ddc01e8d6a64b648d643c91deb35755e34b95409f1961ab197059afb074b6.png)
+
+## Extrapolate 3D custom trend in ERTBOX
+
+When using user defined trends (`RMS_PARAM` or `RMS_TRENDMAP`) which is defined in the geomodel, APS has to copy this from the geomodel to the ERTBOX grid.
+The following steps will be done by APS:
+
+- Copy RMS 3D continuous parameter for trend from geomodel grid to ERTBOX grid
+
+- Fill the grid cells in the ERTBOX grid that was not filled after the trend was copied from the geomodel.
+
+- Calculate a discrete 3D parameter for the ERTBOX with value 1 for grid cells that are copied from the geomodel grid and 0 for the grid cells that are not (but filled by APS)
+
+- Alternative ways of filling in undefined grid cell values for the trend:
+    - Assign a constant
+    - Alternative extrapolation methods
+
+The user can choose between various extrapolation methods like:
+
+- Assigning constant value
+
+- Extrapolated upwards or downwards column by column from the nearest defined grid cell in that column
+
+- Extrapolated by using layer average
+
+- Extrapolate by repeating the values that are defined in opposite order (mirror extrapolation)
+
+It will only be for grid cells close to the zone border for zones with top or base conform griding that the extrapolation may have any effect.
+ERT will in the update step make linear combinations of the realization vectors.
+To avoid mixing real physical grid cell values with unphysical values from grid cells that are not present in some realization,
+the extrapolated values are a better choice than to assign unrealistic values like `0`,
+`NaN` or similar since the extrapolated values may be used in linear combination in the update step in ERT.
+
+![](assets/images/db0d2aadf31517960f2ee4b25ea971862569eb359543cefc26c065107641affe.png)
