@@ -47,5 +47,5 @@ It is clear from this algorithm that the sequence of the specified boundary line
 
 The effect of having a slope with angle different from 0 or 90 degrees is to mix the effect of both the GRF corresponding to alpha1 and the GRF corresponding to alpha2.
 This can be shown in the figures below where the angle is changed gradually.
-Here GRF1 has a linear trend and corresponds to alpha1 (horizontal axis of truncation map) and GRF2 to alpha2.
+Here GRF<sub>1</sub> has a linear trend and corresponds to alpha1 (horizontal axis of truncation map) and GRF<sub>2</sub> to alpha2.
 ![](assets/images/b6e673f5d4f5d15a518bf79ec34aeffadaf55d1d32cf57aaa1d4220dbe8ddbf4.png)

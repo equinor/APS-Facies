@@ -6,7 +6,7 @@ The icons show the layout of the polygons in the truncation map.
 Depending on the number of facies, there will be more or less available templates.
 Remember that the horizontal axis of the truncation map corresponds to Alpha1
 (transformed gaussian field) and vertical axis of Alpha2.
-Which GRF that corresponds to Alpha1 and Alpha2 can be selected, but as default Alpha1 is transformed GRF1 and Alpha2 is transformed GRF2.
+Which GRF that corresponds to Alpha1 and Alpha2 can be selected, but as default Alpha1 is transformed GRF<sub>1</sub> and Alpha2 is transformed GRF<sub>2</sub>.
 
 The name "Cubic" truncation rule is related to the polygons the truncation map is split into.
 In this case the polygons have rectangular shape (two-dimensional when two Alpha's (GRF's) are used)
