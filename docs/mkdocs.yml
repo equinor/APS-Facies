@@ -161,7 +161,9 @@ markdown_extensions:
   # Abbreviation
   - abbr
   - attr_list
-  - pymdownx.snippets
+  - pymdownx.snippets:
+      auto_append:
+        - includes/abbreviations.md
 
   # Icons and emojis
   - attr_list
@@ -190,3 +192,6 @@ plugins:
   - search
   - git-revision-date-localized:
       enable_creation_date: true
+
+watch:
+  - includes
