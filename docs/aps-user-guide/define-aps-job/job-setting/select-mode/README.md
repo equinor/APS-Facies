@@ -2,6 +2,7 @@
 title: Select mode
 ---
 Select how APS should interact with ERT:
+
 - Run APS facies update in AHM/ERT:  Toggle on this if you want to let ERT draw APS model parameters and update the GRF's in Ensemble Smoother or ES-MDA.
 
 - Only run uncertainty update: Toggle on this if you want to let ERT draw and update APS model parameters.

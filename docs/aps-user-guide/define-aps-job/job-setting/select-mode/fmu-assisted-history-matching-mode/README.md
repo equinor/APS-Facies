@@ -15,6 +15,7 @@ This mode requires:
 - That APS will read and use updated versions of the GRF's to calculate updated facies realization.
 
 The workflow is as follows when running APS:
+
 - If ERT iteration = 0 which means that initial ensemble of realizations is created in the ERT FORWARD model when running RMS:
     - APS will read the `global_variables.yml` file that is created by ERT
     - APS will check if any of the APS parameters that are enabled to be updated in APS GUI is available in `global_variables.yml` file.
@@ -22,7 +23,7 @@ The workflow is as follows when running APS:
     - The APS simulation of the GRF's will be done in the ERTBOX grid and copied back to the geogrid before truncation is applied.
     - The GRF's simulated in the ERTBOX grid will also be exported to files to be used by the FIELD keyword in ERT configuration file.
     - ERT will after the FORWARD model is finished for iteration = 0 in ERT run, update the GRF fields specified in the FIELD keyword in ERT by conditioning to available observations. ERT will also update the parameters in the `global_variables.yml` file including the APS model parameters in that file.
-    - If ERT iteration &gt; 0 which means that ERT will run FORWARD model using the updated ensemble of realizations of parameters, the following will happen when APS job is run in RMS as a part of the FORWARD model in ERT:
+- If ERT iteration &gt; 0 which means that ERT will run FORWARD model using the updated ensemble of realizations of parameters, the following will happen when APS job is run in RMS as a part of the FORWARD model in ERT:
     - APS will read the `global_variables.yml` file that is updated by ERT.
     - APS will read the updated GRF's from file into ERTBOX and further into the geomodel.
     - APS will use updated parameters related to truncation rules (if any) and apply the truncation rule on the updated version of the GRF fields that was imported from ERT.
