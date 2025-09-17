@@ -14,7 +14,9 @@ The following steps will be done by APS:
     - Assign a constant
     - Alternative extrapolation methods
 
-The user can choose between various extrapolation methods like:- Assigning constant value
+The user can choose between various extrapolation methods like:
+
+- Assigning constant value
 
 - Extrapolated upwards or downwards column by column from the nearest defined grid cell in that column
 

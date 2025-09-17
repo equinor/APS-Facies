@@ -15,6 +15,7 @@ This mode requires:
 - That APS will read and use updated versions of the GRF's to calculate updated facies realization.
 
 The workflow is as follows when running APS:
+
 - If ERT iteration = 0 which means that initial ensemble of realizations is created in the ERT FORWARD model when running RMS:
     - APS will read the `global_variables.yml` file that is created by ERT
     - APS will check if any of the APS parameters that are enabled to be updated in APS GUI is available in `global_variables.yml` file.
