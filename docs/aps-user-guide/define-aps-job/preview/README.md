@@ -14,38 +14,40 @@ Note that when using GRF trends of type `RMS_PARAM` or `RMS_TRENDMAP`, the previ
 
 There are four expandable sections in the preview:
 
-- **The truncation map** that shows the specified truncation rule for the background facies:
+### The truncation map
 
-  - If overlay facies is specified on top of any background facies, they will not be visible in this 2D preview.
+Shows the specified truncation rule for the background facies:
 
-  - The areal fraction of the polygons is defined by the constant probabilities for the various background facies.
+- If overlay facies is specified on top of any background facies, they will not be visible in this 2D preview.
 
-  - If probability cubes are specified, the preview will use the average probability over the zone for the facies as the area fraction of the polygon.
+- The areal fraction of the polygons is defined by the constant probabilities for the various background facies.
 
-  - Note that probability trends within the probability cubes cannot be visualized by the preview since the preview only uses the constant average probability to scale the size of the polygons. Run the case and visualize the result in RMS to see the result.
+- If probability cubes are specified, the preview will use the average probability over the zone for the facies as the area fraction of the polygon.
 
-  - If overlay facies is specified to be placed on top of a background facies, the truncation map in the previewer will scale the area of the polygon with the background facies to be the sum of the probabilities of both the background facies and the overlay facies.
+- Note that probability trends within the probability cubes cannot be visualized by the preview since the preview only uses the constant average probability to scale the size of the polygons. Run the case and visualize the result in RMS to see the result.
 
-- **The realization section**:
+- If overlay facies is specified to be placed on top of a background facies, the truncation map in the previewer will scale the area of the polygon with the background facies to be the sum of the probabilities of both the background facies and the overlay facies.
 
-  - The previewer is based on a 2D simulation and is meant as a quick way to get a rough impression of what the realisation may look like except for trends in probability cubes.
+### The realization section
 
-  - It is possible to see both a map view and cross-section view.
+- The previewer is based on a 2D simulation and is meant as a quick way to get a rough impression of what the realisation may look like except for trends in probability cubes.
 
-- **The transformed Gaussian fields**:
+- It is possible to see both a map view and cross-section view.
 
-  - This is a preview of the simulated GRF's with the same view as for the facies realization in the previewer. The transformed Gaussian field values are in the range from 0 to 1.
+### The transformed Gaussian field
 
-- **Cross plots**:
+- This is a preview of the simulated GRF's with the same view as for the facies realization in the previewer. The transformed Gaussian field values are in the range from 0 to 1.
 
-  - The cross plots of the GRF fields is meant to be used to check systematic relations or correlations between the different GRF's used.
-    If there is a systematic clear trend and cluster of points that seems to be located in the same place even when drawing new realizations of the GRF's,
-    it indicates that one may expect biased sampling of the facies.
-    The perfect situation is when the points are evenly spread over the whole unit square.
-    This will ensure that the proportions of the facies is sampled according to the facies probabilities.
-    Try to avoid clustering that is not random effects (seed dependent) but systematic.
-   Long correlation lengths of the GRF's tend to create clustering effects in the cross plot,
-    but as long as the clusters are not located at the same place for different realizations,
-    the average volume fractions over a large ensemble will match the specified facies probabilities
-    (unbiased sampling) even though they may not for individual realizations.
-    The variance of the ensemble estimated facies volume fractions will be larger when using large correlation lengths than when using short correlation lengths for the GRF's.
+### Cross plots
+
+The cross plots of the GRF fields is meant to be used to check systematic relations or correlations between the different GRF's used.
+If there is a systematic clear trend and cluster of points that seems to be located in the same place even when drawing new realizations of the GRF's,
+it indicates that one may expect biased sampling of the facies.
+The perfect situation is when the points are evenly spread over the whole unit square.
+This will ensure that the proportions of the facies is sampled according to the facies  probabilities.
+Try to avoid clustering that is not random effects (seed dependent) but systematic.
+Long correlation lengths of the GRF's tend to create clustering effects in the cross plot,
+but as long as the clusters are not located at the same place for different realizations,
+the average volume fractions over a large ensemble will match the specified facies probabilities
+(unbiased sampling) even though they may not for individual realizations.
+The variance of the ensemble estimated facies volume fractions will be larger when using large correlation lengths than when using short correlation lengths for the GRF's.

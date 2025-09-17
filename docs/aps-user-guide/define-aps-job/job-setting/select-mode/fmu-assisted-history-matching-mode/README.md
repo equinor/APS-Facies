@@ -34,9 +34,9 @@ The workflow is as follows when running APS:
 
 The figure show the data flow when running APS as part of RMS in forward model in ERT for iteration=0.
 The steps are:
-(1) update APS model by using parameters read from `global_variables.yml` file,
-(2) simulate GRF's,
-(3) export simulated GRF's to files readable by ERT,
-(4) copy the simulated GRF's from ERTBOX to geomodel grid,
-(5) check facies probabilities,
-(6) apply truncations and create/update facies realization parameter in RMS.
+**(1)** update APS model by using parameters read from `global_variables.yml` file,
+**(2)** simulate GRF's,
+**(3)** export simulated GRF's to files readable by ERT,
+**(4)** copy the simulated GRF's from ERTBOX to geomodel grid,
+**(5)** check facies probabilities,
+**(6)** apply truncations and create/update facies realization parameter in RMS.

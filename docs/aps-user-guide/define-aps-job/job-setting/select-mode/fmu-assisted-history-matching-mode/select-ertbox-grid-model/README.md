@@ -8,4 +8,6 @@ be sure that ERTBOX grid is large enough for all realizations of the zone with m
 
 ![](assets/images/891be09f64eff5cbaa171177c3e83914cf6ce0db1be2888f6b9809bb60f83595.png)
 
-Note: If the RMS model contains multiple APS jobs, all these jobs should use the same ERTBOX since ERT can only handle one ERTBOX grid (all realizations in ERT must be of the same size).
+!!! info
+
+    If the RMS model contains multiple APS jobs, all these jobs should use the same ERTBOX since ERT can only handle one ERTBOX grid (all realizations in ERT must be of the same size).
