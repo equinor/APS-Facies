@@ -17,11 +17,7 @@ nav:
           - Select type of truncation:
               - define-aps-job/select-zone/select-type-of-truncation/README.md
               - define-aps-job/select-zone/select-type-of-truncation/cubic/README.md
-              - Non-cubic:
-                  - define-aps-job/select-zone/select-type-of-truncation/non-cubic/README.md
-                  - Select template:
-                      - define-aps-job/select-zone/select-type-of-truncation/non-cubic/select-template/README.md
-                  - define-aps-job/select-zone/select-type-of-truncation/non-cubic/edit-model-parameters/README.md
+              - define-aps-job/select-zone/select-type-of-truncation/non-cubic/README.md
               - Bayfill:
                   - define-aps-job/select-zone/select-type-of-truncation/bayfill/README.md
                   - Edit model parameters:
