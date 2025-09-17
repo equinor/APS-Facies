@@ -57,6 +57,6 @@ By overlay facies we mean facies that erodes into the background facies.
 - A very similar but not exactly the same truncation rule can also be made by using the non-cubic type.
 
 - When the bayfill truncation rule was first designed,
-  the first axis of the truncation map should correspond to a transformed GRF (alpha1)
+  the first axis of the truncation map should correspond to a transformed GRF ($\alpha_{1}$)
   with a lateral / vertical trend to represent the facies sequence from proximal to distal deposition.
-  It is therefore recommended to use trend in alpha1 here.
+  It is therefore recommended to use trend in $\alpha_{1}$ here.

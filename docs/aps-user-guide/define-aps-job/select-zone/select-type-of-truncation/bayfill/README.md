@@ -16,7 +16,7 @@ The Bayfill truncation rule was originally made for a case with 5 facies:
 
 5. Lagoon facies
 
-The first gaussian field (corresponding to Alpha1) typically would have a depositional trend when using this truncation rule.
+The first gaussian field (corresponding to $\alpha_{1}$) typically would have a depositional trend when using this truncation rule.
 
 The 5 different polygons which are specified here are given a name reflecting the role the polygon has in this model.
 The user will have to assign a facies to each of the polygons which here play the role of the 5 original bayfill facies.
