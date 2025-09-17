@@ -48,9 +48,7 @@ nav:
           - aps-user-guide/prepare-facies-probabilities/README.md
           - aps-user-guide/prepare-facies-probabilities/probability-logs/README.md
           - aps-user-guide/prepare-facies-probabilities/probability-trends/README.md
-          - Conditioned probability cubes:
-              - aps-user-guide/prepare-facies-probabilities/conditioned-probability-cubes/README.md
-              - aps-user-guide/prepare-facies-probabilities/conditioned-probability-cubes/rms-petrosim-to-condition-3d-probability-parameters/README.md
+          - aps-user-guide/prepare-facies-probabilities/conditioned-probability-cubes/README.md
           - aps-user-guide/prepare-facies-probabilities/normalisation/README.md
   - APS toolbox:
       - aps-toolbox/README.md
