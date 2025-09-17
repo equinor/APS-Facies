@@ -21,7 +21,7 @@ Steps to setup an APS job for use in AHM
 
 - For each zone, select grid conformity (Should be the same as used when building the grid in RMS)
 
-- For each zone to be modelled, toggle on the APS parameters ERT should draw using GEN_KW or set by DESIGN_KW.
+- For each zone to be modelled, toggle on the APS parameters ERT should draw using `GEN_KW` or set by `DESIGN_KW`.
 
 - Save the job
 
