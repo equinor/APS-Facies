@@ -40,6 +40,6 @@ Use the previewer for the GRF fields to check the effect of the settings:
 
 - Note that trend type `RMS_PARAM` and `RMS_TRENDMAP` does not have any preview functionality implemented.
 
-**Always check the facies realization in RMS after running the APS job**:
+!!! warning "Always check the facies realization in RMS after running the APS job"
 
-- Remember that any trends in probability cubes are not shown in the previewer.
+    Remember that any trends in probability cubes are not shown in the previewer.
