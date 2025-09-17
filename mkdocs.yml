@@ -46,11 +46,7 @@ nav:
       - aps-user-guide/aps-algorithm/README.md
       - Prepare facies probabilities:
           - aps-user-guide/prepare-facies-probabilities/README.md
-          - Probability logs:
-              - aps-user-guide/prepare-facies-probabilities/probability-logs/README.md
-              - Facies log:
-                  - aps-user-guide/prepare-facies-probabilities/probability-logs/facies-log/README.md
-              - aps-user-guide/prepare-facies-probabilities/probability-logs/conditional-probabilities-given-facies/README.md
+          - aps-user-guide/prepare-facies-probabilities/probability-logs/README.md
           - Probability trends:
               - aps-user-guide/prepare-facies-probabilities/probability-trends/README.md
               - Trends from seismic data:
