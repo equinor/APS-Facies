@@ -43,9 +43,7 @@ nav:
           - define-aps-job/job-setting/generate-files-for-fmu-ert-configuration/README.md
       - define-aps-job/preview/README.md
   - configuration-of-aps-with-ahm-using-ert/README.md
-  - APS algorithm:
-      - aps-algorithm/README.md
-      - aps-algorithm/implementation/README.md
+  - aps-algorithm/README.md
   - Prepare facies probabilities:
       - prepare-facies-probabilities/README.md
       - Probability logs:
