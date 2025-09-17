@@ -13,12 +13,7 @@ nav:
           - define-aps-job/select-zone/README.md
           - define-aps-job/select-zone/select-bw/README.md
           - define-aps-job/select-zone/select-facies-log/README.md
-          - Specify facies probabilities:
-              - define-aps-job/select-zone/specify-facies-probabilities/README.md
-              - Use constant probabilities:
-                  - define-aps-job/select-zone/specify-facies-probabilities/use-constant-probabilities/README.md
-              - Use probability cubes:
-                  - define-aps-job/select-zone/specify-facies-probabilities/use-probability-cubes/README.md
+          - define-aps-job/select-zone/specify-facies-probabilities/README.md
           - Select type of truncation:
               - define-aps-job/select-zone/select-type-of-truncation/README.md
               - Cubic:
