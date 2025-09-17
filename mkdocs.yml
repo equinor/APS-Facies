@@ -40,11 +40,7 @@ nav:
           - define-aps-job/job-setting/probability-check-setting/README.md
           - define-aps-job/job-setting/non-standard-fmu-setting/README.md
           - define-aps-job/job-setting/preview-related-settings/README.md
-          - Generate files for FMU / ERT configuration:
-              - define-aps-job/job-setting/generate-files-for-fmu-ert-configuration/README.md
-              - define-aps-job/job-setting/generate-files-for-fmu-ert-configuration/global-master-config-include-file-with-aps-parameters/README.md
-              - define-aps-job/job-setting/generate-files-for-fmu-ert-configuration/gen-kw-distribution-template-for-aps-parameters/README.md
-              - define-aps-job/job-setting/generate-files-for-fmu-ert-configuration/ert-config-include-file-with-field-and-grid-keywords/README.md
+          - define-aps-job/job-setting/generate-files-for-fmu-ert-configuration/README.md
       - Preview:
           - define-aps-job/preview/README.md
           - define-aps-job/preview/views/README.md
