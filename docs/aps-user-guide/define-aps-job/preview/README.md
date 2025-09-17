@@ -1,6 +1,8 @@
 ---
 title: Preview
 ---
+## Preview
+
 The preview update button.
 
 ![](assets/images/05a3fad6ae03bd53726cd6d3b8c24a5f9c83f9b11b4dbcdf9875ec1632a6aeca.png)
@@ -51,3 +53,10 @@ but as long as the clusters are not located at the same place for different real
 the average volume fractions over a large ensemble will match the specified facies probabilities
 (unbiased sampling) even though they may not for individual realizations.
 The variance of the ensemble estimated facies volume fractions will be larger when using large correlation lengths than when using short correlation lengths for the GRF's.
+
+## Views
+
+The preview can show map view (`IJ`) or cross-section views (`IK` or `JK`).
+This is chosen under the specification of Gaussian Random Fields (GRF).
+
+![](assets/images/c1da5fb21c562c11d7c211873c739c4f8a5ba6cdc07389ff3dda82e4549a0d07.png)
