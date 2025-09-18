@@ -35,6 +35,7 @@ function publish_bleeding_release() {
         echo "Bleeding release already exists, deleting it first"
         gh release delete "$tag_name" --yes
     fi
+    mv -f "$(cat DEPLOY_VERSION.txt)" aps_gui.plugin
     # The notes are in MarkDown and we use backticks '`' which has a special meaning in bash
     # shellcheck disable=SC2016
     gh release create "$tag_name" \
@@ -43,7 +44,7 @@ function publish_bleeding_release() {
         --notes 'The latest version of the APS-Facies GUI
         Built from `main`' \
         --generate-notes \
-        "$(cat DEPLOY_VERSION.txt)" \
+        aps_gui.plugin \
         DEPLOY_VERSION.txt
 }
 
