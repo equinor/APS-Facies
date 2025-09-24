@@ -48,7 +48,7 @@ Use the previewer for the GRF fields to check the effect of the settings:
 
 Choose between common variogram models from drop down list.
 
-## Correlation ranges
+## Correlation ranges and anisotropy direction
 
 Spatial correlation lengths parallel to azimuth direction (Main range),
 orthogonal to azimuth direction (Perpendicular range)
@@ -56,7 +56,3 @@ or vertical direction can be specified as well as azimuth direction and dip dire
 The dip is the angle between the horizontal plane (of simulation box)
 and the dipped plane measured in the azimuth direction.
 The two angles azimuth and dip together define the direction for the main range.
-
-## Anisotropy direction (azimuth)
-
-## Anisotropy direction (dip)

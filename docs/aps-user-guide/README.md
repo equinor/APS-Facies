@@ -8,7 +8,8 @@ title: APS user guide
 
 ## APS user guide
 
-This guide (designed as a mind map with tree structure) reflects the nested structure of the settings in the GUI as documented in the item "Define APS job".
+
+This user guide reflects the workflow associated with APS and the structure settings of the APS GUI (RMS plugin).
 
 Other items are:
 
