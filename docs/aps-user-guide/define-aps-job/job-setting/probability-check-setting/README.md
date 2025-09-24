@@ -12,7 +12,6 @@ APS will normalize the probabilities for the grid cells that are not normalized 
 !!! warning
 
     If there exists grid cells where all facies probabilities are 0, an error message will occur and a RMS parameter with such grid cells will be generated.
-
-It is not possible to correct or adjust facies probabilities to be normalized if all facies probabilities for one or more grid cells is 0 and the user must always correct this.
+    It is not possible to correct or adjust facies probabilities to be normalized if all facies probabilities for one or more grid cells is 0 and the user must always correct this.
 
 ![](assets/images/6baa691b726c2bb2ae402eef978ac818298994206ee2479aea0d75d97921c364.png)

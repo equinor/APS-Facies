@@ -33,7 +33,9 @@ The ERT parameter names (template parameter names) are also generated here by AP
 but it is up to the user to modify these names as long as they are unique within the ERT configuration.
 But they must be consistent with the distribution file for GEN_KW if the APS parameters is to be drawn for initial ensemble by ERT or consistent with the parameter names used in `DESIGN_KW` if experimental design setup is used.
 
-### Example of a parameter file
+
+[//]: # (TODO: Make this into a caption)
+Example of a parameter file
 
 ```yaml
 # file: VALYSAR_aps-params.yml
@@ -66,9 +68,11 @@ VALYSAR:
 
 [//]: # (This is part of the link for this node)
 
-Example of include file made by APS that can be included into the `global_master_config.yml` file.
+Example of include file made by APS that can be included into the [`global_master_config.yml` file](../../job-setting/generate-files-for-fmu-ert-configuration/README.md#global_master_config-include-file-with-aps-parameters).
 See the note (comments at top of the file above).
 
+
+[//]: # (TODO: Discuss with Oddvar on the -> links)
 [->](../../../configuration-of-aps-with-ahm-using-ert/README.md#fmu-config-global-master-config)
 
 ## `GEN_KW` distribution template for APS parameters
@@ -82,7 +86,7 @@ The APS generated model parameter names for ERT consists of a prefix that is the
 Note that the user can modify these names and make them shorter as long as they are unique within the ERT configuration.
 But it is important that the parameter names are the same as those defined in the `global_master_config` file for the FMU project.
 
-### Example of a template file for ERT distributions
+Example of a template file for ERT distributions
 
 ```text
 VALYSAR_APS_1_0_GF_GRF1_RESIDUAL_MAINRANGE    <prob dist>

@@ -12,7 +12,7 @@ But now it is possible to edit this file to adapt to the non-standard directory 
     APS will as long as the non-standard setting is toggled on, check if there are any aps_config.yml file in the same directory as the RMS project is located and read that file and use the paths and file names defined there.
 
 Example of how the default version of the `aps_config.yml` file will look like.
-The red colored directory names, filenames and file extensions can be modified to follow a non-standard FMU setting.
+The directory names, filenames and file extensions can be modified to follow a non-standard FMU setting.
 
 ```yaml
 # File in YAML format defining FMU directory structure and some file names
