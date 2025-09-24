@@ -55,10 +55,6 @@ be sure that ERTBOX grid is large enough for all realizations of the zone with m
 
     If the RMS model contains multiple APS jobs, all these jobs should use the same ERTBOX since ERT can only handle one ERTBOX grid (all realizations in ERT must be of the same size).
 
-### Grid model
-
-### Number of layers
-
 ### The ERTBOX mapping explained
 
 The ERTBOX is a help grid used when exchanging GRF's between APS and ERT.
@@ -84,8 +80,7 @@ It is recommended to use the `ROFF` format (binary format).
 
 In this mode APS will always simulate the GRF's and export the GRF's to files.
 
-### Typically usage
-When testing the setup of a new APS job and the workflow including ERT.
+Typical usage is when testing the setup of a new APS job and the workflow including ERT.
 
 ![](assets/images/12a5a0415cb630f30be55094df07d7a18b17a4812c3235165b8a5751b0bbc17a.png)
 
@@ -103,8 +98,10 @@ the APS job will and simulate and export GRF's to file if iteration is $0$ and i
 When running APS in AHM mode, GRF fields (with optionally trends) is updated by ERT,
 and APS will use the updated GRF fields to calculate updated facies realization.
 APS will not use any updates of APS parameters other than those related to the truncation rules.
+
 To enable use of updated trend parameters,
 this option will let ERT update trend parameters from APS and the residual fields of the GRF's that has trends.
+
 When running APS the following will happen:
 
 - APS will read APS parameters (if any) from `global_variables.yml`
