@@ -5,13 +5,11 @@ A script to create the stubs of Python scripts that will be used in a RMS workfl
 The stubs read the various files from disk (in this repo), so that the various workflows do not need to
 be imported whenever there is a change in it, or in one of its dependencies.
 
-This is called when running 'make init', and 'make generate-workflow-files'.
-
 The resulting stubs are given in the 'workflow' directory (which again is inside the root of the repo)
 
 Usage:
-    ./bin/generate_workflow_blocks.py [--read-only] [--use-temporary-workflow-dir] [--suffix <endig to all files>] [--copy-to-rms-project <path to rms project>]
-    ./generate_workflow_blocks.py <path to project folder> [--read-only] [--use-temporary-workflow-dir] [--suffix <endig to all files>] [--copy-to-rms-project <path to rms project>]
+    generate-workflow-blocks [--read-only] [--use-temporary-workflow-dir] [--suffix <endig to all files>] [--copy-to-rms-project <path to rms project>]
+    .aps/toolbox/generate_workflow_blocks/__main__.py <path to project folder> [--read-only] [--use-temporary-workflow-dir] [--suffix <endig to all files>] [--copy-to-rms-project <path to rms project>]
 
 The suffix MUST include a dot if a file ending is intended.
 """
@@ -23,7 +21,7 @@ from pathlib import Path
 from shutil import copy
 from sys import argv
 from tempfile import gettempdir
-from typing import Any, Callable, Dict, Iterable, Iterator, List, Optional, Tuple
+from typing import Any, Callable, Iterable, Iterator, Optional
 
 
 def run() -> None:
@@ -465,25 +463,11 @@ def get_root_path(use_plugin_dir=False) -> Path:
 
 
 def get_toolbox_version() -> str:
-    file_paths = ['bin/STUB_VERSION', 'aps_gui/STUB_VERSION']
-    version = None
-    for file_path in file_paths:
-        if Path(file_path).exists():
-            with open(file_path, 'r', encoding='utf-8') as file:
-                for line in file.readlines():
-                    if line:
-                        version = line.strip()
-                        break
-    if not version:
-        raise IOError(
-            'Did not find the file: STUB_VERSION.\n'
-            'Run from top directory of source code repo  (bin/generate_workflow_blocks.py)\n'
-            'or run from directory for unpacked version of the plugin (aps_gui/generate_workflow_blocks.py --normal-install).'
-        )
-    return version
+    with open(Path(__file__).parent / 'STUB_VERSION', 'r', encoding='utf-8') as file:
+        return file.read().strip()
 
 
-def get_workflows(use_plugin_dir: bool = False) -> Dict[str, List[str]]:
+def get_workflows(use_plugin_dir: bool = False) -> dict[str, list[str]]:
     return {
         'bin': [],
         'depricated': [],
@@ -518,7 +502,7 @@ def get_workflows(use_plugin_dir: bool = False) -> Dict[str, List[str]]:
     }
 
 
-def get_rms_mapping(suffix: str = '') -> Dict[str, Optional[str]]:
+def get_rms_mapping(suffix: str = '') -> dict[str, Optional[str]]:
     return {
         rms_name + suffix: stub
         for rms_name, stub in [
@@ -563,7 +547,7 @@ def get_random_name(length=5):
     return ''.join([random.choice(characters) for _ in range(length)])
 
 
-def get_file_mapping(suffix: str = '') -> Dict[str, str]:
+def get_file_mapping(suffix: str = '') -> dict[str, str]:
     return {
         file: rms_name for rms_name, file in get_rms_mapping(suffix).items() if file
     }
@@ -611,7 +595,7 @@ def create_workflow_block_file(
         f.write(workflow_block)
 
 
-def get_ipl_scripts(root_path: Path) -> List[Path]:
+def get_ipl_scripts(root_path: Path) -> list[Path]:
     ipl_dir = root_path / 'aps/IPL'
     return [ipl_dir / ipl_script for ipl_script in _OS.listdir(ipl_dir)]
 
@@ -637,7 +621,7 @@ def _set_read_only(workflow_path: Path) -> None:
 
 class _OS:
     @staticmethod
-    def walk(path: Path) -> Iterator[Tuple[str, List[str], List[str]]]:
+    def walk(path: Path) -> Iterator[tuple[str, list[str], list[str]]]:
         return os.walk(_OS._get_absolute_path(path))
 
     @staticmethod

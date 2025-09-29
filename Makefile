@@ -37,21 +37,6 @@ BUILD_NUMBER := $(shell date "+%y%j%H%M")
 
 RMS_DIR := $(CODE_DIR)/.rms
 RMS_PROJECT ?= $(RMS_DIR)/testAPSWorkflow_new.rms11.0.0
-WORKFLOWS_TO_PROJECT := $(EMPTY)
-CREATE_WORKFLOW_DIR := create-workflow-dir
-WRITE_WORKFLOW_FILES_TO_PROJECT ?= no
-ifeq ($(WRITE_WORKFLOW_FILES_TO_PROJECT),yes)
-WORKFLOWS_TO_PROJECT := --copy-to-rms-project $(RMS_PROJECT)
-USE_TEMORARY_DIR ?= no
-ifeq ($(USE_TEMORARY_DIR),yes)
-WORKFLOWS_TO_PROJECT := --use-temporary-workflow-dir $(WORKFLOWS_TO_PROJECT)
-CREATE_WORKFLOW_DIR := $(EMPTY)
-endif
-endif
-STUB_SUFFIX ?= $(EMPTY)
-ifneq ($(STUB_PREFIX),$(EMPTY))
-WORKFLOWS_TO_PROJECT := --suffix $(STUB_SUFFIX) $(WORKFLOWS_TO_PROJECT)
-endif
 
 APS_VERSION_FROM_GIT =  $(shell git describe --match='v*' --abbrev=0 --tags)
 APS_VERSION = $(shell echo $(APS_VERSION_FROM_GIT) | $(SED) -e "s/v//g")
@@ -124,9 +109,6 @@ clean-links: clean-changelog-link
 
 clean-changelog-link:
 	rm -f $(CODE_DIR)/CHANGELOG.md
-
-generate-workflow-files: $(CREATE_WORKFLOW_DIR)
-	$(PYTHON) $(BIN_DIR)/generate_workflow_blocks.py $(CODE_DIR) $(WORKFLOWS_TO_PROJECT)
 
 clean: clean-links clean-workflow-blocks
 	rm -f $(CODE_DIR)/build.txt

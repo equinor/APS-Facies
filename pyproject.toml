@@ -19,6 +19,9 @@ dependencies = [
     'fmu-tools (>=1.21.0,<2.0.0)',
 ]
 
+[project.scripts]
+generate-workflow-blocks = "aps.toolbox.generate_workflow_blocks.__main__:run"
+
 [dependency-groups]
 dev = [
     'pytest (>=6.2.5,<7.0.0)',

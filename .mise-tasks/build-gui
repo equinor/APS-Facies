@@ -14,7 +14,6 @@ function compile_files_for_plugin() {
     local BUILD_NUMBER="$1"
     local PLUGIN_DIR="$2"
     python3 "$MISE_PROJECT_ROOT/bin/gather-python-files.py" "$MISE_PROJECT_ROOT" "$PLUGIN_DIR"
-    cp "$MISE_PROJECT_ROOT/bin/generate_workflow_blocks.py" "$PLUGIN_DIR"
     touch "$PLUGIN_DIR/__init__.py"
 
     for file in "ui.py" "main.py"; do
@@ -27,7 +26,6 @@ function compile_files_for_plugin() {
     # Auxiliary files
     echo "$(aps_version).$BUILD_NUMBER" >"$PLUGIN_DIR/VERSION"
     git rev-parse HEAD >"$PLUGIN_DIR/COMMIT"
-    cp "$MISE_PROJECT_ROOT/bin/STUB_VERSION" "$PLUGIN_DIR/VERSION_STUB"
     cp "$MISE_PROJECT_ROOT/gui/static/info.xml" "$PLUGIN_DIR"
 
     # Adjust pydist / 'dependencies'
