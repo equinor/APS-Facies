@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import atexit
 from os import environ, urandom
 
 from flask import Flask, jsonify, request
@@ -34,23 +35,32 @@ def favicon():
     return ''
 
 
-if __name__ == 'app':
-    # That is on when flask loads the app
-    try:
-        project
-    except NameError:
-        if 'RMS_PROJECT_PATH' in environ:
-            # Ensure "project" is available as a global variable
-            # similar to what ui.py expects
-            import roxar
+def _ensure_project_is_available(rms_project: str):
+    import roxar
 
-            __builtins__ = globals()['__builtins__']  # load the module
-            if 'project' not in __builtins__:
-                __builtins__['project'] = roxar.Project.open(
-                    environ['RMS_PROJECT_PATH']
-                )
-        else:
-            raise RuntimeError('No project available, and RMS_PROJECT_PATH is not set')
+    project = roxar.Project.open(rms_project)
+    __builtins__ = globals()['__builtins__']  # load the module
+    if not hasattr(__builtins__, 'project'):
+        setattr(__builtins__, 'project', project)
+
+
+try:
+    project
+except NameError:
+    if 'RMS_PROJECT_PATH' in environ:
+        # Ensure "project" is available as a global variable
+        # similar to what ui.py expects
+        _ensure_project_is_available(environ['RMS_PROJECT_PATH'])
+    else:
+        raise RuntimeError('No project available, and RMS_PROJECT_PATH is not set')
+
+
+@atexit.register
+def shutdown():
+    __builtins__ = globals()['__builtins__']
+    project = getattr(__builtins__, 'project', None)
+    if project:
+        project.close()
 
 
 if __name__ == '__main__':

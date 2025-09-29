@@ -10,7 +10,7 @@ services:
       - 'roxenv'
       - 'poetry'
       - 'run'
-      - 'python'
+      - 'python3'
       - 'aps/api/app.py'
       - 'run'
       - '--host'
