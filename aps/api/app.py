@@ -35,28 +35,32 @@ def favicon():
     return ''
 
 
+def _ensure_project_is_available(rms_project: str):
+    import roxar
+
+    project = roxar.Project.open(rms_project)
+    __builtins__ = globals()['__builtins__']  # load the module
+    if not hasattr(__builtins__, 'project'):
+        setattr(__builtins__, 'project', project)
+
+
 try:
     project
 except NameError:
     if 'RMS_PROJECT_PATH' in environ:
         # Ensure "project" is available as a global variable
         # similar to what ui.py expects
-        import roxar
-
-        project = roxar.Project.open(environ['RMS_PROJECT_PATH'])
-        __builtins__ = globals()['__builtins__']  # load the module
-        if not hasattr(__builtins__, 'project'):
-            setattr(__builtins__, 'project', project)
+        _ensure_project_is_available(environ['RMS_PROJECT_PATH'])
     else:
         raise RuntimeError('No project available, and RMS_PROJECT_PATH is not set')
 
 
 @atexit.register
 def shutdown():
-    try:
+    __builtins__ = globals()['__builtins__']
+    project = getattr(__builtins__, 'project', None)
+    if project:
         project.close()
-    except NameError:
-        pass
 
 
 if __name__ == '__main__':
