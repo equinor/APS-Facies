@@ -1,5 +1,5 @@
-nodejs 20.19.3
-python 3.11.13
-poetry 1.8.5
-yarn 1.22.22
+nodejs     20.19.3
+python     3.11.13
+yarn       1.22.22
 pre-commit 4.1.0
+uv         0.8.22

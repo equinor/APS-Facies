@@ -2,7 +2,7 @@
 # Dependencies
 !.tool-versions
 # Python
-!poetry.lock
+!uv.lock
 !pyproject.toml
 # Node.js
 !gui/package.json

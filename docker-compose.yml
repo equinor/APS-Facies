@@ -8,7 +8,7 @@ services:
     #      target: truncation-rules
     command:
       - 'roxenv'
-      - 'poetry'
+      - 'uv'
       - 'run'
       - 'python3'
       - 'aps/api/app.py'

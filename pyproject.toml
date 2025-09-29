@@ -1,36 +1,37 @@
-[tool.poetry]
-name = "aps-gui"
+[project]
+name = "aps"
 version = "1.5.1"
 description = ""
 authors = [
-    "Oddvar Lia <olia@equinor.com>",
-    "Sindre Nistad <snis@equinor.com>",
-    "Sebastian Vittersø <svit@equinor.com>",
+    {name = "Oddvar Lia", email = "olia@equinor.com"},
+    {name = "Sindre Nistad", email = "snis@equinor.com"},
+    {name = "Sebastian Vittersø", email = "svit@equinor.com"},
+]
+requires-python = '>=3.11,<4.0'
+dependencies = [
+    'matplotlib (>=3.6.0,<4.0.0)',
+    'numpy (>=1.19.5,<2.0.0)',
+    'Pillow (>=10.3.0,<11.0.0)',
+    'scipy (>=1.10.0,<2.0.0)',
+    'xtgeo (>=4.3.3,<5.0.0)',
+    'PyYAML (>=6.0,<7.0)',
+    'gaussianfft (>=1.1.2,<2.0.0)',
+    'fmu-tools (>=1.21.0,<2.0.0)',
 ]
 
-[tool.poetry.dependencies]
-python = "^3.11"
-matplotlib = "^3.6.0"
-numpy = "^1.19.5"
-Pillow = "^10.3.0"
-scipy = "^1.10.0"
-xtgeo = "^4.3.3"
-PyYAML = "^6.0"
-gaussianfft = "^1.1.2"
-fmu-tools = "^1.21.0"
-
-[tool.poetry.dev-dependencies]
-pytest = "^6.2.5"
-graphviz = "^0.19.1"
-mypy = "^0.931"
-Flask = "^3.0.0"
-python-dotenv = "^0.19.2"
-typing-extensions = "^4.12.2"
+[dependency-groups]
+dev = [
+    'pytest (>=6.2.5,<7.0.0)',
+    'graphviz (>=0.19.1,<1.0.0)',
+    'mypy (>=0.931,<1.0.0)',
+    'Flask (>=3.0.0,<4.0.0)',
+    'python-dotenv (>=0.19.2,<1.0.0)',
+    'typing-extensions (>=4.12.2,<5.0.0)',
+]
 
 [build-system]
-requires = ["poetry-core>=1.0.0"]
-build-backend = "poetry.core.masonry.api"
-
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
 [tool.ruff]
 [tool.ruff.format]
