@@ -1,8 +1,8 @@
 server {
     listen 8080;
     server_name localhost;
-    access_log /opt/bitnami/nginx/logs/yourapp_access.log;
-    error_log /opt/bitnami/nginx/logs/yourapp_error.log;
+    access_log /var/log/nginx/aps_access.log;
+    error_log /var/log/nginx/aps_error.log;
 
     location / {
         proxy_set_header X-Real-IP  $remote_addr;
