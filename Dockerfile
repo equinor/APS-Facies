@@ -30,7 +30,7 @@ COPY pyproject.toml uv.lock ./
 # Necessary for placing the auto-generated _version.py file
 RUN --mount=type=cache,target=$XDG_CACHE_HOME/uv \
     roxenv uv venv --system-site-packages && \
-    roxenv uv sync --no-install-project
+    roxenv uv sync --all-extras --no-install-project
 
 FROM python AS aps
 ENV PYTHONPATH=/code
