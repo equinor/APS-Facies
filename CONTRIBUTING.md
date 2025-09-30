@@ -17,6 +17,28 @@ This is only relevant if the plugin is unable to handle some specific data in th
 Do you find the documentation lacking?
 Please reach out, create an issue, pull request, or suggest changes.
 
+The documentation uses [`mkdocs-material`](https://squidfunk.github.io/mkdocs-material/),
+and is located in the `docs` folder.
+
+To work on the documentation, execute (assuming [`mise`](https://mise.jdx.dev/getting-started.html) is installed)
+
+```bash
+mise tasks run serve:docs
+```
+
+to render it locally.
+
+If `mise` is not installed, execute
+
+```bash
+python -m venv .venv
+source .venv/bin/activate
+pip install --group docs
+mkdocs serve
+```
+
+instead.
+
 
 ## Setting up a local developer environment
 
