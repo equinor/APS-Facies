@@ -21,6 +21,10 @@ outputs = ["gui/node_modules/"]
 [tasks.dependencies]
 depends = ["dependencies:python", "dependencies:node"]
 
+[tasks."serve:docs"]
+run = "uv run --no-project mkdocs serve"
+depends = ["dependencies:docs"]
+
 [tasks.build-containers]
 run = 'docker compose build --build-arg="RMS_IMAGE=$RMS_IMAGE" {{option(name="only", var=true)}}'
 env = { _.file = ".env" }
