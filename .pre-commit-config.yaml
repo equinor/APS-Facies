@@ -73,3 +73,15 @@ repos:
           - --fix
       # Run the formatter.
       - id: ruff-format
+
+  - repo: https://github.com/koalaman/shellcheck-precommit
+    rev: v0.10.0
+    hooks:
+      - id: shellcheck
+        exclude: '^(bin/|aps/unit_test/integration).*\.sh$' # These will be dealt with in due time.
+
+  - repo: https://github.com/scop/pre-commit-shfmt
+    rev: v3.11.0-1
+    hooks:
+      - id: shfmt # prebuilt upstream executable
+        args: ['-w', '-i', '4']

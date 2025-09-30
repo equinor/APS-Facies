@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
 
-
 uv sync
 yarn --cwd ./gui/ install
 
