@@ -16,5 +16,13 @@ outputs = ["gui/node_modules/"]
 [tasks.dependencies]
 depends = ["dependencies:python", "dependencies:node"]
 
+[tasks.build-containers]
+run = 'docker compose build --build-arg="RMS_IMAGE=$RMS_IMAGE" {{option(name="only", var=true)}}'
+env = { _.file = ".env" }
+
+[tasks."unit-test:python"]
+depends = ["build-containers --only api"]
+run = "docker compose run --rm api uv run pytest aps/tests"
+
 [settings]
 python.uv_venv_auto = true

@@ -45,13 +45,11 @@ LATEST_COMMIT_HASH_LONG = $(shell git rev-parse HEAD)
 
 WEB_DIR := $(CODE_DIR)/gui
 EXAMPLES_FOLDER := $(CODE_DIR)/examples
-TEST_FOLDER := $(SOURCE_DIR)/tests
 AUXILLARY := $(CODE_DIR)/auxillary
 # Paths local to the compiled app
 RUN := PYTHONPATH=$(PYTHONPATH) uv run
 PYTHON ?= $(RUN) python3
 PIP ?= $(PYTHON) -m pip
-PY.TEST := $(RUN) python -m pytest
 
 VUE_APP_APS_PROTOCOL ?= http
 VUE_APP_APS_SERVER := localhost
@@ -116,7 +114,7 @@ clean: clean-links clean-workflow-blocks
 clean-workflow-blocks:
 	rm -rf $(CODE_DIR)/workflow
 
-clean-all: clean clean-tests clean-cache
+clean-all: clean clean-cache
 
 clean-cache: clean-__pycache__ clean-pyc
 
@@ -130,24 +128,6 @@ update-dependencies: update-node-dependencies
 
 update-node-dependencies:
 	$(YARN) upgrade
-
-unit-tests: clean-tests run-tests clean-tests
-
-run-tests: python-unit-tests
-
-python-unit-tests:
-	cd $(TEST_FOLDER) && \
-	PYTHONPATH=$(PYTHONPATH) \
-	$(PY.TEST) --import-mode=importlib
-
-clean-tests:
-	cd $(TEST_FOLDER) && \
-	rm -rf .cache && \
-	rm -f  *.dat \
-	       *.xml \
-	       *.png \
-	       fmu_attributes.yaml \
-	       fmu_attributes.txt
 
 find-circular-dependencies:
 	cd $(WEB_DIR) && \
