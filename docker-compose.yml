@@ -36,8 +36,6 @@ services:
       - './gui/src:/code/src'
       - 'yarn-cache:/yarn'
       - 'node-cache:/code/node_modules/.cache'
-    env_file:
-      - gui/.env
 
   proxy:
     build:
