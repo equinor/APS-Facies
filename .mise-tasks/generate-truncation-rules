@@ -28,7 +28,7 @@ function create_example_truncation_rule_json() {
     mkdir -p "$(dirname "$target_file")"
     rm -f "$target_file"
 
-    uv run --script "$MISE_PROJECT_ROOT/bin/parse-truncation-rule-templates.py" "$target_file"
+    uv run parse-truncation-rule-templates "$truncation_settings" "$target_file"
 }
 
 function main() {

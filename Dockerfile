@@ -51,7 +51,6 @@ COPY --from=aps /code/aps/ aps/
 
 COPY .mise-tasks .mise-tasks/
 COPY mise.toml ./
-COPY bin/parse-truncation-rule-templates.py ./bin/
 COPY examples/truncation_settings.dat ./examples/
 
 ENV MISE_AUTO_INSTALL=false
