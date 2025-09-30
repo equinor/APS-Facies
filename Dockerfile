@@ -72,7 +72,7 @@ WORKDIR $CODE
 
 COPY gui/package.json gui/yarn.lock ./
 
-RUN yarn install
+RUN yarn install --frozen-lockfile
 
 FROM node AS gui
 
