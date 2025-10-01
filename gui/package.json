@@ -28,7 +28,7 @@
     "pinia": "^2.1.7",
     "plotly.js-dist-min": "^2.29.1",
     "roboto-fontface": "*",
-    "uuid": "^8.1.0",
+    "uuid": "^13.0.0",
     "vite-plugin-vuetify": "^2.0.1",
     "vue": "^3.4.20",
     "vue-swatches": "^2.1.1",
