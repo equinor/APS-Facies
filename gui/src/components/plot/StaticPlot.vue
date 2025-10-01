@@ -91,7 +91,7 @@ const _content = computed<Partial<PlotData>[]>(() => {
 
 function getScaleRatio(data: Partial<PlotData>[]): number {
   if (!notEmpty(data) || data.length === 0) return 1
-  const { x, y } = data[0]
+  const { x, y } = data[0] as PlotData
   if (!x || !y) return 1
   if (x?.length === 0 || y?.length === 0) return 1
   return x.length / y.length

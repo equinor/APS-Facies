@@ -69,7 +69,7 @@ export const useConstantsFaciesColorsStore = defineStore(
     const byCode = computed(() => {
       return (code: number): Color => {
         const colors = availableColors.value
-        return colors[code % colors.length]
+        return colors[code % colors.length] as Color
       }
     })
 
@@ -115,7 +115,7 @@ export const useConstantsFaciesColorsStore = defineStore(
           `The color library called ${newCurrentId} does not exist`,
         )
 
-      store.currentId.value = newCurrent.id
+      store.currentId.value = newCurrent.id!
     }
 
     function set(colorLibrary: ColorLibrary) {

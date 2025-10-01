@@ -20,7 +20,7 @@ function polygon2svg(
     .reduce(
       (path, point): string =>
         path.concat(` L ${svgPoint(point, width, height)}`),
-      `M ${svgPoint(polygon[0], width, height)}`,
+      `M ${svgPoint(polygon[0]!, width, height)}`,
     )
     .concat(' Z')
 }
@@ -77,7 +77,7 @@ function luminance({ red, green, blue }: RGB): number {
     v /= 255
     return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4)
   })
-  return 0.2126 * x + 0.7152 * y + 0.0722 * z
+  return 0.2126 * x! + 0.7152 * y! + 0.0722 * z!
 }
 
 function contrast(color: string, other: string): number {

@@ -32,7 +32,7 @@ export default abstract class Simulation extends ZoneRegionDependent {
 
   public get simulated(): boolean {
     return this._simulation
-      ? this._simulation.length > 0 && this._simulation[0].length > 0
+      ? this._simulation.length > 0 && this._simulation[0]!.length > 0
       : false
   }
 

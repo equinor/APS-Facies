@@ -241,7 +241,7 @@ async function importModelFile(): Promise<void> {
     input.type = 'file'
     input.onchange = (event: Event): void => {
       const { files } = event.target as HTMLInputElement
-      if (files) {
+      if (files && files.length >= 1 && files[0]) {
         const file = files[0]
         file.text().then((content) => loadModelFile(file.name, content))
       }

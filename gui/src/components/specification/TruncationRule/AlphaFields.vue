@@ -72,7 +72,7 @@ async function update(
   { channel }: AlphaField,
   fieldId: ID | null,
 ): Promise<void> {
-  const field = fieldId ? fieldStore.identifiedAvailable[fieldId] : null
+  const field = (fieldId && fieldStore.identifiedAvailable[fieldId]) || null
   ruleStore.updateBackgroundField(props.value, channel - 1, field)
 }
 </script>

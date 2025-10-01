@@ -274,7 +274,7 @@ export function deserializePolygons<
             ? gaussianRandomFieldStore.byId(polygon.field)
             : null,
           group: faciesGroupStore.byId(polygon.group),
-        }
+        } as PartiallySpecifiedPolygonSpecification
       } else
         return {
           ...polygon,

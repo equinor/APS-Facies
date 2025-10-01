@@ -619,7 +619,7 @@ function makeCubicTruncationRule(
           )
 
         parent.children.forEach((child) => {
-          child.order = orderMapping[child.order]
+          child.order = orderMapping[child.order]!
         })
       }
     })

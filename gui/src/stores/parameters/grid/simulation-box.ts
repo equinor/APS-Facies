@@ -25,7 +25,7 @@ export const useParameterGridSimulationBoxStore = defineStore(
         simulationBoxes.value[gridModelStore.current.name]
       if (!relevantSimulationBoxes /* may be undefined */) return null
       return (
-        simulationBoxes.value[gridModelStore.current.name][
+        simulationBoxes.value[gridModelStore.current.name]![
           rough.value ? 'true' : 'false'
         ] ?? null
       )

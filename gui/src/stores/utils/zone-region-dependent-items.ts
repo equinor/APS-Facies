@@ -24,13 +24,13 @@ export function useZoneRegionDependentStore<
 
   const currentId = ref<string | null>(null)
   const current = computed<T | null>({
-    get: () => {
+    get: (): T | null => {
       if (!currentZone) return null
 
       const relevant = available.value.filter((item) =>
         hasParents(item, currentZone as Zone, currentRegion as Region),
       )
-      if (relevant.length === 0) return relevant[0]
+      if (relevant.length === 0) return relevant[0]!
       return relevant.find(({ id }) => id === currentId.value) ?? null
     },
     set: (value: T | null) => {

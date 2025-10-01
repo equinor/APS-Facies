@@ -41,7 +41,7 @@ export const useParameterGridSimulationBoxesStore = defineStore(
       }
       waiting.value = true
       try {
-        if (!_simulationBoxes.value[gridModel.name][roughKey]) {
+        if (!_simulationBoxes.value[gridModel.name]![roughKey]) {
           setTimeout(async () => {
             if (waiting.value) {
               const rmsVersion = await rms.rmsVersion()
@@ -52,7 +52,7 @@ export const useParameterGridSimulationBoxesStore = defineStore(
               }
             }
           }, 5_000)
-          _simulationBoxes.value[gridModel.name][roughKey] =
+          _simulationBoxes.value[gridModel.name]![roughKey] =
             await rms.simulationBoxOrigin(gridModel.name, rough.value)
         }
       } finally {

@@ -99,7 +99,7 @@ export const useFaciesGroupStore = defineStore('facies-groups', () => {
   }
 
   function update(group: FaciesGroup, facies: Facies[]) {
-    identifiedAvailable.value[group.id].facies = facies
+    identifiedAvailable.value[group.id]!.facies = facies
   }
 
   return {

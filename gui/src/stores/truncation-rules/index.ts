@@ -71,7 +71,7 @@ export interface RuleName {
 
 export function deserializeTruncationRule<S extends PolygonSerialization>(
   rule: TruncationRuleSerialization<S>,
-  byId?: (field: ID) => GaussianRandomField,
+  byId?: (field: ID) => GaussianRandomField | undefined,
 ) {
   if (!byId) {
     const gaussianRandomFieldStore = useGaussianRandomFieldStore()
@@ -279,7 +279,7 @@ export const useTruncationRuleStore = defineStore('truncation-rules', () => {
 
       const faciesGroupStore = useFaciesGroupStore()
       if (typeof group === 'string') {
-        group = faciesGroupStore.identifiedAvailable[group]
+        group = faciesGroupStore.identifiedAvailable[group]!
       }
       polygon = new OverlayPolygon({ group, field, order })
     } else if (rule.type === 'non-cubic') {
@@ -356,6 +356,7 @@ export const useTruncationRuleStore = defineStore('truncation-rules', () => {
     if (polygon instanceof OverlayPolygon) {
       const group = faciesGroupStore.identifiedAvailable[polygon.group.id]
       if (
+        group &&
         rule.overlayPolygons.filter((p) => p.group.id === group.id).length === 0
       ) {
         faciesGroupStore.remove(group)
@@ -528,7 +529,7 @@ export const useTruncationRuleStore = defineStore('truncation-rules', () => {
     faciesStore.selected
       .map((f) => rule.polygons.filter((p) => getId(p.facies) === getId(f)))
       .filter((polygonList) => polygonList.length === 1)
-      .map((polygonList) => polygonList[0])
+      .map((polygonList): Polygon => polygonList[0]!)
       .forEach((polygon) => (polygon.fraction = 1))
   }
 

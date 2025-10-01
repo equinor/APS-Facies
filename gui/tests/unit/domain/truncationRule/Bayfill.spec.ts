@@ -26,7 +26,7 @@ const polygons = identify(
     (config, index) =>
       new BayfillPolygon({
         ...config,
-        facies: new Facies({ facies: facies[index], zone }),
+        facies: new Facies({ facies: facies[index]!, zone }),
         order: index,
       }),
   ),

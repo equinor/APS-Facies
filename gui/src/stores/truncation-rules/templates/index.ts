@@ -225,7 +225,7 @@ export const useTruncationRuleTemplateStore = defineStore(
         template.overlay.forEach((item) =>
           faciesGroupStore.get(
             /* creates new if none is found */
-            item.background.map((facies) => selectedFacies[facies.index]),
+            item.background.map((facies) => selectedFacies[facies.index]!),
             parent!,
           ),
         )

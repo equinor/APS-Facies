@@ -27,7 +27,7 @@ export function attachRMSListeners() {
           const { available, select } = useGridModelStore()
           const gridModelNames = available.map((model) => model.name)
           for (const model of gridModelNames) {
-            if (gridModel.includes(model)) {
+            if (gridModel!.includes(model)) {
               gridModel = model
               break
             }

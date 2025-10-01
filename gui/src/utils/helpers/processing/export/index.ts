@@ -895,7 +895,7 @@ function addTruncationRuleOverlay<
       (obj, polygon) => {
         const groupId = polygon.group.id
         if (!hasOwnProperty(obj, groupId)) obj[groupId] = []
-        obj[groupId].push(polygon)
+        obj[groupId]!.push(polygon)
         return obj
       },
       {} as Identified<OverlayPolygon[]>,
@@ -908,7 +908,7 @@ function addTruncationRuleOverlay<
       const groupElement = createElement(doc, 'Group')
       overLayModelElem.append(groupElement)
 
-      overlayGroups[overlayGroup].forEach((polygon): void => {
+      overlayGroups[overlayGroup]!.forEach((polygon): void => {
         const alphaFieldElement = createElement(doc, 'AlphaField', null, [
           {
             name: 'name',
@@ -932,7 +932,7 @@ function addTruncationRuleOverlay<
       })
       const faciesGroupStore = useFaciesGroupStore()
 
-      const group = faciesGroupStore.identifiedAvailable[overlayGroup]
+      const group = faciesGroupStore.identifiedAvailable[overlayGroup]!
       group.facies.forEach(({ name }) =>
         groupElement.append(createElement(doc, 'BackGround', name)),
       )
@@ -1097,7 +1097,7 @@ function addZoneModel(
   if (simboxHeight === null) {
     zValue = 0
   } else if (typeof simboxHeight === 'object') {
-    zValue = simboxHeight[zone.code]
+    zValue = simboxHeight[zone.code]!
   } /*if (typeof  simboxHeight === 'number') */ else {
     // Assuming it is a number
     zValue = simboxHeight
