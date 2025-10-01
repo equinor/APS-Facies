@@ -6,7 +6,7 @@ ENV CODE=/code
 ENV NODE_MODULES=$CODE/node_modules
 ENV TRUNCATION_RULES=src/stores/truncation-rules/templates/truncationRules.json
 
-FROM bitnami/nginx:1.27.3-debian-12-r5 AS nginx
+FROM nginx:1.27.3-bookworm AS nginx
 
 FROM ${RMS_IMAGE} AS python
 # RMS 12.0 and earlier uses Python 3.6.1, but it is so old that I was unable to update the CA certificates,
@@ -124,7 +124,37 @@ COPY gui/src src
 CMD ["yarn", "run", "serve:gui"]
 
 FROM nginx AS server
-USER 0
-RUN rm -f /app/*.html
+RUN <<EOF
+#!/usr/bin/env sh
+set -eu
+
+# Ensure that the nginx-user has a uid >= 1000
+# that way, it is not a privileged user, and radix will be happy
+deluser "nginx"
+adduser \
+    --disabled-password \
+    --no-create-home \
+    --gecos "" \
+    --uid 1001 \
+    "nginx"
+
+# Create log directory if not present, set permissions
+mkdir -p /var/log/nginx
+chown -R "nginx:nginx" /var/log/nginx
+
+# Create tmp directory if not present, set permissions
+mkdir -p /tmp/nginx
+chown -R "nginx:nginx" /tmp/nginx
+
+# Create pidfile, set permissions
+touch /var/run/nginx.pid
+chown -R "nginx:nginx" /var/run/nginx.pid
+
+# Allow writing to the cache
+mkdir -p /var/cache/nginx
+chown -R "nginx:nginx" /var/cache/nginx/
+chmod -R +w /var/cache/nginx/
+EOF
+
 USER 1001
-COPY ./nginx/local.nginx /opt/bitnami/nginx/conf/server_blocks/local.conf
+COPY ./nginx/local.nginx /etc/nginx/conf.d/local.conf
