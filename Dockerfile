@@ -6,7 +6,7 @@ ENV CODE=/code
 ENV NODE_MODULES=$CODE/node_modules
 ENV TRUNCATION_RULES=src/stores/truncation-rules/templates/truncationRules.json
 
-FROM nginx:1.27.3-bookworm AS nginx
+FROM nginx:1.29.1-bookworm AS nginx
 
 FROM ${RMS_IMAGE} AS base
 # RMS 12.0 and earlier uses Python 3.6.1, but it is so old that I was unable to update the CA certificates,
