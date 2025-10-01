@@ -3,7 +3,7 @@
   "compilerOptions": {
     "allowJs": true,
     "target": "esnext",
-    "module": "esnext",
+    "module": "ES2022",
     "strict": true,
     "forceConsistentCasingInFileNames": true,
     "noUnusedLocals": true,
@@ -12,7 +12,7 @@
     "jsxImportSource": "vue",
     "emitDecoratorMetadata": true,
     "importHelpers": true,
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "experimentalDecorators": true,
     "esModuleInterop": true,
     "strictPropertyInitialization": false, // https://github.com/kaorun343/vue-property-decorator/issues/81

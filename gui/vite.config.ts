@@ -12,6 +12,9 @@ export default defineConfig({
   plugins: [
     legacy({
       renderModernChunks: false,
+      targets: [
+        'chrome >= 69', // RMS 14.2 uses Chromium 69
+      ],
     }),
     vue(),
     vuetify({
@@ -28,9 +31,6 @@ export default defineConfig({
     },
   },
   envPrefix: ['VUE_', 'NODE_'],
-  build: {
-    target: 'es2015',
-  },
   server: {
     proxy: /* CODESPACE_NAME? */ {
       // eslint-disable-next-line @typescript-eslint/naming-convention
