@@ -28,22 +28,10 @@ jobs:
           path: gui/node_modules
           key: ${{ runner.os }}-yarn-${{ hashFiles('gui/yarn.lock', 'gui/package.json') }}
 
-      - name: Set up dependencies
-        run: |
-          if [[ ! -d .venv ]]; then
-            uv sync --no-install-project
-          fi
-
-      - name: Initialize project
-        run: |
-          source .venv/bin/activate
-          make --directory=${{ github.workspace }} init
-
       - name: Build GUI
         run: |
-          source .venv/bin/activate
           export NODE_OPTIONS=--max_old_space_size=4096
-          make --directory=${{ github.workspace }} ${{ inputs.stable && 'build-stable-gui' || 'build-gui' }}
+          mise run build-gui ${{ inputs.stable && '--stable' || '' }}
 
       - name: Store GUI artifact
         uses: actions/upload-artifact@v4

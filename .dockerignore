@@ -10,6 +10,8 @@
 
 # Initialization
 !Makefile
+!mise.toml
+!.mise-tasks/
 
 # For the containers
 !bin/parse-truncation-rule-templates.py

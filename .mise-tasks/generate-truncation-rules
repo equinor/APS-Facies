@@ -1,0 +1,41 @@
+#!/usr/bin/env bash
+set -euo pipefail
+#MISE depends=["dependencies:python"]
+#MISE sources=["aps/algorithms/setupInteractiveTruncationSetting.py", "examples/truncation_settings.dat"]
+#MISE outputs="gui/src/stores/truncation-rules/templates/truncationRules.json"
+
+function create_example_truncation_rule_images() {
+    local truncation_settings="$1"
+    local target_directory="$MISE_PROJECT_ROOT/gui/public/truncation-rules"
+    mkdir -p "$target_directory"
+    rm -rf "${target_directory:?}"/*
+
+    pushd "$target_directory" >/dev/null || exit 1
+    printf "r\n%s\nm\nf\nsvg\na\nq\nq\n" "$truncation_settings" |
+        HIDE_TITLE='yes' \
+            DONT_WRITE_OVERVIEW='yes' \
+            WRITE_TO_DIRECTORIES='yes' \
+            MPLBACKEND=Agg \
+            PYTHONPATH="$MISE_PROJECT_ROOT" \
+            uv run --script "$MISE_PROJECT_ROOT/aps/algorithms/setupInteractiveTruncationSetting.py"
+
+    popd >/dev/null || exit 1
+}
+
+function create_example_truncation_rule_json() {
+    local truncation_settings="$1"
+    local target_file="$MISE_PROJECT_ROOT/gui/src/stores/truncation-rules/templates/truncationRules.json"
+    mkdir -p "$(dirname "$target_file")"
+    rm -f "$target_file"
+
+    uv run parse-truncation-rule-templates "$truncation_settings" "$target_file"
+}
+
+function main() {
+    local truncation_settings="$MISE_PROJECT_ROOT/examples/truncation_settings.dat"
+    create_example_truncation_rule_images "$truncation_settings"
+
+    create_example_truncation_rule_json "$truncation_settings"
+}
+
+main "$@"

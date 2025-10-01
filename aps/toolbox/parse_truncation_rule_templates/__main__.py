@@ -419,14 +419,14 @@ def _get_all_facies_indices(rule):
     return _indices(facies)
 
 
-def parse(data: str):
+def parse(data: list[str]):
     return Parser.parse(data)
 
 
-def run(dump_site: Path):
-    truncation_rules_path = (
-        Path(__file__).parent / '..' / 'examples/truncation_settings.dat'
-    )
+def run(
+    truncation_rules_path: Path,
+    dump_site: Path,
+):
     with open(truncation_rules_path, 'r', encoding='utf-8') as f:
         data = f.readlines()
 
@@ -442,5 +442,12 @@ def run(dump_site: Path):
         json.dump(rules, f)
 
 
+def main():
+    run(
+        Path(sys.argv[1]),
+        Path(sys.argv[2]),
+    )
+
+
 if __name__ == '__main__':
-    run(Path(sys.argv[1]))
+    main()

@@ -21,7 +21,7 @@ dependencies = [
     { name = "xtgeo" },
 ]
 
-[package.optional-dependencies]
+[package.dev-dependencies]
 dev = [
     { name = "flask" },
     { name = "graphviz" },
@@ -33,22 +33,25 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "flask", marker = "extra == 'dev'", specifier = ">=3.0.0,<4.0.0" },
     { name = "fmu-tools", specifier = ">=1.21.0,<2.0.0" },
     { name = "gaussianfft", specifier = ">=1.1.2,<2.0.0" },
-    { name = "graphviz", marker = "extra == 'dev'", specifier = ">=0.19.1,<1.0.0" },
     { name = "matplotlib", specifier = ">=3.6.0,<4.0.0" },
-    { name = "mypy", marker = "extra == 'dev'", specifier = ">=0.931,<1.0.0" },
     { name = "numpy", specifier = ">=1.19.5,<2.0.0" },
     { name = "pillow", specifier = ">=10.3.0,<11.0.0" },
-    { name = "pytest", marker = "extra == 'dev'", specifier = ">=6.2.5,<7.0.0" },
-    { name = "python-dotenv", marker = "extra == 'dev'", specifier = ">=0.19.2,<1.0.0" },
     { name = "pyyaml", specifier = ">=6.0,<7.0" },
     { name = "scipy", specifier = ">=1.10.0,<2.0.0" },
-    { name = "typing-extensions", marker = "extra == 'dev'", specifier = ">=4.12.2,<5.0.0" },
     { name = "xtgeo", specifier = ">=4.3.3,<5.0.0" },
 ]
-provides-extras = ["dev"]
+
+[package.metadata.requires-dev]
+dev = [
+    { name = "flask", specifier = ">=3.0.0,<4.0.0" },
+    { name = "graphviz", specifier = ">=0.19.1,<1.0.0" },
+    { name = "mypy", specifier = ">=0.931,<1.0.0" },
+    { name = "pytest", specifier = ">=6.2.5,<7.0.0" },
+    { name = "python-dotenv", specifier = ">=0.19.2,<1.0.0" },
+    { name = "typing-extensions", specifier = ">=4.12.2,<5.0.0" },
+]
 
 [[package]]
 name = "atomicwrites"
