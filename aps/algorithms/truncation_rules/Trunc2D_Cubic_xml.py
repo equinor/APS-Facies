@@ -87,7 +87,6 @@ class Trunc2D_Cubic(Trunc2D_Base):
         mainFaciesTable: Optional[APSMainFaciesTable] = None,
         faciesInZone: Optional[List[str]] = None,
         gaussFieldsInZone: Optional[List[str]] = None,
-        keyResolution: int = 100,
         debug_level: Debug = Debug.OFF,
         modelFileName: Optional[str] = None,
         zoneNumber: Optional[int] = None,
@@ -147,7 +146,6 @@ class Trunc2D_Cubic(Trunc2D_Base):
             debug_level,
             modelFileName,
             nGaussFieldsInBackGroundModel=2,
-            keyResolution=keyResolution,
         )
         # Variables containing truncations for the 2D truncation map
         self.__truncStructure = []
@@ -505,7 +503,9 @@ class Trunc2D_Cubic(Trunc2D_Base):
         # there are no model parameters for the truncation model (except facies probability)
         return True
 
-    def setTruncRule(self, faciesProb: List[float], cellIndx: int = 0) -> None:
+    def setTruncRule(
+        self, faciesProb: List[float], cellIndx: int = 0, resolution: int = 100
+    ) -> None:
         """
         Calculate how truncation map is to be divided into polygons or threshold values.
         This function must be called each time the facies probability changes, so it must
@@ -516,6 +516,10 @@ class Trunc2D_Cubic(Trunc2D_Base):
         :param faciesProb: Probability for each facies.
         :param cellIndx: Is not used here , but may be used in other algorithms where there are
                          model parameters  that may vary from cell to cell in the 3D modelling grid.
+        :param resolution: The key resolution is a resolution of how to round off facies probability.
+                           The facies probability rounded off is used as key to classify which grid cells
+                           have the same facies probability and can be treated simultaneously when looking
+                           up facies in the truncation cubes.
         """
 
         # Call common functions from base class
@@ -525,7 +529,7 @@ class Trunc2D_Cubic(Trunc2D_Base):
         if self._isFaciesProbEqualOne(faciesProb):
             return
 
-        faciesProbRoundOff = self._makeRoundOffFaciesProb(faciesProb)
+        faciesProbRoundOff = self._makeRoundOffFaciesProb(faciesProb, resolution)
         sumProb = faciesProbRoundOff.sum()
         if np.abs(sumProb - 1.0) > 0.00001:
             print(
@@ -1179,7 +1183,6 @@ class Trunc2D_Cubic(Trunc2D_Base):
         alphaFieldNameForBackGroundFacies: List[str],
         truncStructureList: CubicTruncationRuleStructureType,
         overlayGroups: Optional[OverlayGroupType] = None,
-        keyResolution: int = 100,
         debug_level: Debug = Debug.OFF,
     ) -> None:
         """
@@ -1199,7 +1202,7 @@ class Trunc2D_Cubic(Trunc2D_Base):
                   overlayGroups - List of overlay facies with associated alphaFields and probability fractions.
         """
         # Initialize (base) class variables
-        self.__init__(keyResolution=keyResolution, debug_level=debug_level)
+        self.__init__(debug_level=debug_level)
 
         if self._debug_level >= Debug.VERY_VERBOSE:
             print(f'--- Call the initialize function in {self._className}')
