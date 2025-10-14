@@ -93,6 +93,8 @@ def run(project, **kwargs):
                 )
 
             for field_name in zone.gaussian_fields_in_truncation_rule:
+                # Split the field_name and get the zone_name
+                zone_name = get_zone_name(field_name)
                 if fmu_use_residual_fields and zone.hasTrendModel(field_name):
                     field_name = field_name + '_residual'
                 field_properties = fmu_grid_model.properties
@@ -119,13 +121,14 @@ def run(project, **kwargs):
                         sub_string, field_name
                     ):
                         file_name_active = str(
-                            field_location / f'{property.name}.{file_format}'
+                            field_location / f'aps_{zone_name}_active.{file_format}'
                         )
+                        field_name_active = f'{zone_name}_active'
                         if file_name_active not in active_params_save_to_file:
                             active_params_save_to_file.append(file_name_active)
                             write_field_name_to_file(
                                 file_name_active,
-                                field_name,
+                                field_name_active,
                                 file_format,
                                 field_properties,
                                 field_property,
@@ -151,6 +154,15 @@ def run(project, **kwargs):
                 )
 
     APSProgressBar.increment()
+
+
+def get_zone_name(field_name: str):
+    # Assume standard naming convention for APS field_name
+    # Note: The field_name is assumed to be of the form
+    #       aps_<zone_name>_<grf_name> here
+    words = field_name.split('_')
+    zone_name = words[1]
+    return zone_name
 
 
 def write_field_name_to_file(
