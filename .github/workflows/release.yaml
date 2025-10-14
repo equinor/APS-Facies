@@ -26,6 +26,10 @@ jobs:
         with:
           fetch-depth: 0
 
+      - uses: jdx/mise-action@v2
+        with:
+          install: false
+
       - uses: actions/download-artifact@v5
         with:
           pattern: build-artifacts-*
@@ -33,6 +37,6 @@ jobs:
 
       - name: Publish the APS-Facies plugin to GitHub
         run: |
-          ./.mise-tasks/publish ${{ startsWith(github.ref, 'refs/tags/v') && '--stable' || '' }}
+          mise tasks run publish ${{ startsWith(github.ref, 'refs/tags/v') && '--stable' || '' }}
         env:
           GH_TOKEN: ${{ github.token }}
