@@ -86,10 +86,10 @@ const groups = computed(() => {
     polygons.forEach((polygon): void => {
       if (!hasOwnProperty(groupRecord, polygon.group.id))
         groupRecord[polygon.group.id] = []
-      groupRecord[polygon.group.id].push(polygon)
+      groupRecord[polygon.group.id]!.push(polygon)
     })
     overlay = Object.keys(groupRecord).map((groupId) => {
-      return { group: groupId, polygons: groupRecord[groupId] }
+      return { group: groupId, polygons: groupRecord[groupId] || [] }
     })
   }
   if (

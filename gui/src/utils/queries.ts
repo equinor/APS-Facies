@@ -24,7 +24,7 @@ export function hasFaciesSpecifiedForMultiplePolygons(
       const id = getId(facies)
       if (ignoreEmptyFacies && !id) return counts
       if (hasOwnProperty(counts, id)) {
-        counts[id] += 1
+        counts[id]! += 1
       } else {
         counts[id] = 1
       }

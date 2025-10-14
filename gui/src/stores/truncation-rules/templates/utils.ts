@@ -235,13 +235,13 @@ function organizeCubicPolygons(
       const levelSpecification = levels[i]!
       let current = root
       for (let j = 0; j < levelSpecification.length; j++) {
-        const level = levelSpecification[j]
+        const level = levelSpecification[j]!
         if (level <= 0) continue
         let polygon = current.children.find(({ order }) => order === level)
         if (!polygon) {
           if (
             j + 1 < levelSpecification.length &&
-            levelSpecification[`${j + 1}`] > 0
+            levelSpecification[`${j + 1}`]! > 0
           ) {
             polygon = new CubicPolygon({ parent: current, order: level })
           } else {

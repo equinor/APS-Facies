@@ -36,7 +36,7 @@ export function createFacies(num: number): GlobalFacies[] {
       (conf) =>
         new GlobalFacies({
           ...conf,
-          color: apsColors[conf.code % apsColors.length],
+          color: apsColors[conf.code % apsColors.length]!,
         }),
     )
 }

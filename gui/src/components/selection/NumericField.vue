@@ -325,7 +325,7 @@ function updateValue(event: Exclude<InternalValue, null> | InputEvent): void {
     fieldValue.value = value
   } else if (/^[+-]?\d+\.\d+0+$/.test((value || '').toString())) {
     fieldValue.value = (numericValue || 0).toFixed(
-      (value || '').toString().split('.')[1].length,
+      (value || '').toString().split('.')[1]!.length,
     )
   } else if (/^[+-]$/.test((value || '').toString())) {
     fieldValue.value = value

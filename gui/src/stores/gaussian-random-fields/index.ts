@@ -95,7 +95,7 @@ export const useGaussianRandomFieldStore = defineStore(
         return {
           ...globalSettings,
           ...fieldSettings,
-        }
+        } as SimulationSettings & GaussianRandomField['settings']
       }
     })
 
@@ -122,7 +122,7 @@ export const useGaussianRandomFieldStore = defineStore(
         const trend = new Trend(unpackTrend(field.trend))
         const crossSection = crossSectionStore.byId(
           field.settings.crossSection.id,
-        )
+        )!
         const parent = resolveParentReference(field.parent)
 
         field = new GaussianRandomField({
@@ -211,7 +211,7 @@ export const useGaussianRandomFieldStore = defineStore(
       all: boolean = false,
     ) {
       const _fields: GaussianRandomField[] = fields.map((field) =>
-        typeof field === 'string' ? identifiedAvailable.value[field] : field,
+        typeof field === 'string' ? identifiedAvailable.value[field]! : field,
       )
       const notSimulated = all
         ? _fields

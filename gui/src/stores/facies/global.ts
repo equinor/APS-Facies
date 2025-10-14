@@ -40,10 +40,10 @@ export const useGlobalFaciesStore = defineStore('facies-global', () => {
   const loading = ref(false)
   const rmsFacies = ref([]) as Ref<RmsFacies[]>
 
-  const selected = computed(() => {
+  const selected = computed<GlobalFacies[]>(() => {
     const faciesStore = useFaciesStore()
     return faciesStore.selected.map(
-      (facies) => identifiedAvailable.value[facies.facies.id],
+      (facies) => identifiedAvailable.value[facies.facies.id] as GlobalFacies,
     )
   })
 

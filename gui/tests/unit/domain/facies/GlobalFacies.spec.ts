@@ -50,9 +50,9 @@ describe('When reading from RMS', () => {
 
   it('Should have the same values as from RMS', () => {
     facies.forEach((facies, index) => {
-      expect(facies.code).toBe(rmsFacies[index].code)
-      expect(facies.name).toBe(rmsFacies[index].name)
-      expect(facies.color).toBe(rmsFacies[index].color)
+      expect(facies.code).toBe(rmsFacies[index]!.code)
+      expect(facies.name).toBe(rmsFacies[index]!.name)
+      expect(facies.color).toBe(rmsFacies[index]!.color)
     })
   })
 })

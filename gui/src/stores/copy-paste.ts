@@ -145,7 +145,7 @@ export const useCopyPasteStore = defineStore('copy-paste', () => {
       )
       for (const [key, items] of Object.entries(JSON.parse(serialization))) {
         ;(items as DependentConfiguration[]).forEach((item) =>
-          actionMapping[key].add(item),
+          actionMapping[key]!.add(item),
         )
       }
       setPasting(targetParent, false)

@@ -43,19 +43,21 @@ const available = computed<ListItem<ID>[]>(() =>
   })),
 )
 
-const combinations = computed<GaussianRandomField[][]>(() => {
-  const pairs: GaussianRandomField[][] = []
-  const available = selected.value.map(
-    (id) => fieldStore.identifiedAvailable[id],
-  )
-  if (!available) return pairs
-  for (let i = 0; i < available.length; i++) {
-    for (let j = i + 1; j < available.length; j++) {
-      pairs.push([available[i], available[j]])
+const combinations = computed<[GaussianRandomField, GaussianRandomField][]>(
+  () => {
+    const pairs: [GaussianRandomField, GaussianRandomField][] = []
+    const available = selected.value.map(
+      (id) => fieldStore.identifiedAvailable[id],
+    )
+    if (!available) return pairs
+    for (let i = 0; i < available.length; i++) {
+      for (let j = i + 1; j < available.length; j++) {
+        pairs.push([available[i]!, available[j]!])
+      }
     }
-  }
-  return pairs
-})
+    return pairs
+  },
+)
 
 watch(selected, (value: ID[]) => fieldStore.updateSimulations(value), {
   deep: true,

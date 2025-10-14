@@ -33,7 +33,7 @@ const selectedJob = computed({
     if (!job) {
       rootStore.$reset()
     } else {
-      rootStore.populate(jobMapping.value[job])
+      rootStore.populate(jobMapping.value[job]!)
     }
   },
 })

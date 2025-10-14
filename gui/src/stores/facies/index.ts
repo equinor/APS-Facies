@@ -69,7 +69,7 @@ export const useFaciesStore = defineStore('facies', () => {
   const _constantProbability = ref<Identified<boolean>>({})
 
   const byId = computed(() => {
-    return (item: ID | Identifiable): Facies | null => {
+    return (item: ID | Identifiable): Facies | GlobalFacies | null => {
       const globalStore = useGlobalFaciesStore()
       const id = getId(item)
       const facies =
@@ -88,7 +88,7 @@ export const useFaciesStore = defineStore('facies', () => {
       _constantProbability.value[parentId(parent)] ?? true
   })
 
-  const selected = computed(() => {
+  const selected = computed<Facies[]>(() => {
     const { current: zone } = useZoneStore()
     const { current: region } = useRegionStore()
     if (!zone) return []
@@ -255,8 +255,8 @@ export const useFaciesStore = defineStore('facies', () => {
       (f) => f.isChildOf(parent) && f.probabilityCube !== null,
     )
     for (const facies of relevantFacies) {
-      const previewProb = cubeAverages[facies.probabilityCube!]
-      identifiedAvailable.value[facies.id].previewProbability = previewProb
+      const previewProb = cubeAverages[facies.probabilityCube!]!
+      identifiedAvailable.value[facies.id]!.previewProbability = previewProb
     }
     normalize(relevantFacies)
   }
@@ -345,7 +345,9 @@ export const useFaciesStore = defineStore('facies', () => {
 
   function populateConstantProbability(parentToggledness: Record<ID, boolean>) {
     for (const parentId in parentToggledness) {
-      _constantProbability.value[parentId] = parentToggledness[parentId]
+      _constantProbability.value[parentId] = parentToggledness[
+        parentId
+      ] as boolean
     }
   }
 

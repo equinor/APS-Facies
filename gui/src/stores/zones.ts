@@ -37,7 +37,7 @@ export const useZoneStore = defineStore('zones', () => {
 
   const selected = computed(() =>
     Object.keys(identifiedAvailable.value).filter(
-      (id) => !!identifiedAvailable.value[id].selected,
+      (id) => !!identifiedAvailable.value[id]!.selected,
     ),
   )
 
@@ -74,14 +74,14 @@ export const useZoneStore = defineStore('zones', () => {
     return (parent: { zone: Zone | ID; region?: Region | ID | null }) => {
       const zone = identifiedAvailable.value[getId(parent.zone)]
       if (!parent.region) return zone
-      return zone.regions.find((region) => region.id === getId(parent.region))
+      return zone!.regions.find((region) => region.id === getId(parent.region))
     }
   })
 
   function select(selected: Zone[]) {
     for (const zone of Object.values(identifiedAvailable.value)) {
       const toggled = includes(selected, zone)
-      identifiedAvailable.value[zone.id].selected = toggled
+      identifiedAvailable.value[zone.id]!.selected = toggled
     }
   }
 
@@ -118,7 +118,7 @@ export const useZoneStore = defineStore('zones', () => {
   }
 
   function setConformity(zone: Zone, conformity: ZoneConformOption) {
-    identifiedAvailable.value[zone.id].conformity = conformity
+    identifiedAvailable.value[zone.id]!.conformity = conformity
   }
 
   function touch(parent: Parent) {

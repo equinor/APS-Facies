@@ -88,7 +88,7 @@ function update(facies: Facies[]): void {
         props.rule,
         props.rule.polygons.find(
           (polygon) =>
-            'group' in polygon && polygon.group.id === group.value.id,
+            'group' in polygon && polygon.group.id === group.value!.id,
         )!,
       )
     } else {

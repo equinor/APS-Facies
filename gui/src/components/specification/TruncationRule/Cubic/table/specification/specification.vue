@@ -139,8 +139,8 @@ function clicked(e: MouseEvent): void {
 
 function relativeClickPosition(e: MouseEvent): { x: number; y: number } {
   const element = plot.value!.$el as HTMLElement
-  const { top, bottom, left, right } = element
-    .getElementsByClassName('svg-container')[0]
+  const { top, bottom, left, right } = element!
+    .getElementsByClassName('svg-container')[0]!
     .getBoundingClientRect()
   const getMax = (direction: 'X' | 'Y'): number =>
     Math.max(

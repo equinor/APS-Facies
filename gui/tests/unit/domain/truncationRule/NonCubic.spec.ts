@@ -23,7 +23,7 @@ const polygons = identify(
       new NonCubicPolygon({
         ...config,
         facies: new Facies({
-          facies: facies[config.facies],
+          facies: facies[config.facies]!,
           zone,
         }),
         order: index,

@@ -139,11 +139,11 @@ const simulationBoxOrigin = computed(() => parameterSimboxStore.origin)
 const simulationBox = computed<Coordinate3D & { hint: string }>(() => {
   const z = parameterSimboxStore.size.z
   let hint: string = 'The height of the simulation box'
-  let zValue: number
+  let zValue: number | null
   if (z !== null) {
     if (typeof z === 'object') {
       if (zoneStore.current) {
-        zValue = z[zoneStore.current.code]
+        zValue = z[zoneStore.current.code] || null
         hint = `The height of the simulation box in zone '${zoneStore.current.name}'`
       } else {
         zValue = Math.max(...Object.values(z))

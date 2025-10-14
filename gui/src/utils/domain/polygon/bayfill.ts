@@ -101,7 +101,7 @@ export default class BayfillPolygon extends Polygon {
       )
     return {
       ...super.specification,
-      name: _mapping[this.name],
+      name: _mapping[this.name]!,
       polygon: this.name,
       factor: this.slantFactor,
     }
