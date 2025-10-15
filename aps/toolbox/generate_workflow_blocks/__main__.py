@@ -389,7 +389,7 @@ def prepend_absolute_path(file):
 
 
 def get_fmu_file_format():
-    return _get_file(APS_FMU_FILE_FORMAT, 'grdecl')
+    return _get_file(APS_FMU_FILE_FORMAT, 'roff')
 
 
 # Keywords to pass along to the various modules

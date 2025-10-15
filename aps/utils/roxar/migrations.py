@@ -157,7 +157,7 @@ class Migration:
     @staticmethod
     def add_field_export_format(state: dict):
         state['fmu']['fieldFileFormat'] = {
-            'value': 'grdecl',
+            'value': 'roff',
         }
         return state
 
