@@ -6,6 +6,9 @@ on:
         default: false
         description: 'Toggles whether a stable (full release) or a beta should be build'
 
+permissions:
+  contents: read
+
 jobs:
   build-gui:
     runs-on: ubuntu-latest
