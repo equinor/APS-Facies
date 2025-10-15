@@ -130,6 +130,10 @@ theme:
   features:
     - navigation.indexes
 
+validation:
+  links:
+    absolute_links: relative_to_docs
+
 plugins:
   - search
   - git-revision-date-localized:

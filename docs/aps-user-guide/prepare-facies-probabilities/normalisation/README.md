@@ -7,4 +7,4 @@ A normalisation must be done as the last step in the preparation of facies proba
 Since the normalization must be done separately per zone (and per zone and region if regions also are used),
 a script to do that is available from the APS toolbox.
 
-see [APS Toolbox -> Check normalization](../../../aps-toolbox/check-normalisation-of-facies-probabilities/README.md) of facies probabilities.
+see [APS Toolbox -> Check normalization](/aps-toolbox/check-normalisation-of-facies-probabilities/README.md) of facies probabilities.
