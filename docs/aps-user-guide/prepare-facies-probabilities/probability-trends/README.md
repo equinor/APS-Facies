@@ -20,8 +20,6 @@ Convert a deterministic 3D facies interpretation into a probability trend:
 
 - A possible way to map a deterministic facies interpretation into a probability trend is to specify and apply conditional probabilities for modelled facies given interpreted facies like $P(\text{modelled facies} \space M \mid \text{interpreted facies} \space F)$
 
-## Trend from seismic data
-
 ## Trends from geological interpretations
 
 An example of a workflow based on 3D deterministic facies interpretation:
