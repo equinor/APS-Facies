@@ -17,6 +17,7 @@
 #          aps_<zone_name>_<region_name>_active
 
 import copy
+import warnings
 
 import numpy as np
 import roxar
@@ -50,6 +51,13 @@ def run(project, **kwargs):
     file_format = aps_model.fmu_field_file_format
     fmu_use_residual_fields = aps_model.fmu_use_residual_fields
 
+    if file_format.upper() == 'GRDECL':
+        warnings.warn(
+            f'The file format {file_format} for field parameters is deprecated. '
+            "Please use 'roff' format instead.",
+            FutureWarning,
+        )
+        print(f"Warning: File format 'grdecl' is deprecated. Use 'roff' format.")
     print(' ')
     print(f'Export 3D parameter files from {fmu_grid_name}')
     if debug_level >= Debug.ON:
@@ -59,6 +67,9 @@ def run(project, **kwargs):
             )
         else:
             print('- GRF files are written to files to be read by ERT')
+
+    if debug_level >= Debug.VERBOSE:
+        print(f'-- Use file format: {file_format} for export of field parameters.')
 
     # Get the ERTBOX grid from RMS
     fmu_grid_model = project.grid_models[fmu_grid_name]
@@ -120,10 +131,11 @@ def run(project, **kwargs):
                     if sub_string and is_active_param_defined_for_zone(
                         sub_string, field_name
                     ):
+                        field_name_active = 'aps_' + zone_name + '_active'
                         file_name_active = str(
-                            field_location / f'aps_{zone_name}_active.{file_format}'
+                            field_location / f'{field_name_active}.{file_format}'
                         )
-                        field_name_active = f'{zone_name}_active'
+
                         if file_name_active not in active_params_save_to_file:
                             active_params_save_to_file.append(file_name_active)
                             write_field_name_to_file(
@@ -186,6 +198,7 @@ def write_field_name_to_file(
             file_name, field_name, format=roxar.FileFormat.ROFF_BINARY
         )
     else:
+        warnings.warn("File format 'grdecl' is deprecated", FutureWarning)
         # Use xtgeo for other formats not available from roxar.grids
         values = field_property.get_values()
         values3d = np.reshape(values, (nx, ny, nz))
@@ -211,12 +224,11 @@ def write_field_name_to_file(
                 values=values3d,
                 name=field_name,
             )
-
-            xtgeo_object.to_file(
-                file_name,
-                fformat=file_format,
-                name=field_name,
-            )
+        xtgeo_object.to_file(
+            file_name,
+            fformat=file_format,
+            name=field_name,
+        )
 
 
 def is_active_param_name(property_name: str):

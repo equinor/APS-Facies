@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 import collections
 import copy
+import warnings
 import xml.etree.ElementTree as ET
 from pathlib import Path
 from typing import TYPE_CHECKING, Dict, List, Optional, Tuple, Union
@@ -1806,6 +1807,15 @@ class APSModel:
                             legal_values = ['roff', 'grdecl']
                             if value in legal_values:
                                 self.__fmu_file_format = value
+                                if value == 'grdecl':
+                                    warnings.warn(
+                                        "The file format using 'grdecl' for field parameters is deprecated."
+                                        "Please use 'roff' format.",
+                                        FutureWarning,
+                                    )
+                                    print(
+                                        f"Warning: File format 'grdecl' is deprecated. Use 'roff' format."
+                                    )
                             else:
                                 raise ValueError(
                                     f'Job settings parameter for {kw_fileformat} '

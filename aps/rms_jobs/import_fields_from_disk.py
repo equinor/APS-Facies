@@ -28,6 +28,7 @@
 # if they are specified to be updated by ERT). And finally all the imported GRF fields
 # (including the added trends for those that should have trends) is then copied back to the geomodel grid.
 
+import warnings
 from pathlib import Path
 
 import numpy as np
@@ -111,6 +112,12 @@ def field_name_from_full_name(full_field_name, zone_name, region_name=''):
 
 def load_field_values(field_name: str, path: Path, grid=None, debug_level=Debug.OFF):
     if path.suffix.upper() == '.GRDECL':
+        warnings.warn(
+            "The file format 'grdecl' for field parameters is deprecated. "
+            "Please use 'roff' format instead.",
+            FutureWarning,
+        )
+        print(f"Warning: File format 'grdecl' is deprecated. Use 'roff' format.")
         return _load_field_values_grdecl(
             field_name, path, grid=grid, debug_level=debug_level
         )
