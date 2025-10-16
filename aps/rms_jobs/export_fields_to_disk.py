@@ -121,21 +121,14 @@ def run(project, **kwargs):
                         f'The parameter  {field_name} does not exist in grid model {fmu_grid_name}'
                     )
 
-                file_name_active = None
+                field_name_active = zone_name + '_active'
                 for property in field_properties:
-                    # sub_string is None if the property_name does not end with '_active'
-                    # and contain the property_name except the '_active' else
-                    sub_string = is_active_param_name(property.name)
-
-                    # Check if the sub_string match the first part of field_name
-                    if sub_string and is_active_param_defined_for_zone(
-                        sub_string, field_name
-                    ):
-                        field_name_active = 'aps_' + zone_name + '_active'
+                    if property.name == field_name_active:
+                        # Found a parameter containing active=1 or inactive=0 values for the grid
                         file_name_active = str(
                             field_location / f'{field_name_active}.{file_format}'
                         )
-
+                        # Write this if not yet already written
                         if file_name_active not in active_params_save_to_file:
                             active_params_save_to_file.append(file_name_active)
                             write_field_name_to_file(
@@ -143,7 +136,7 @@ def run(project, **kwargs):
                                 field_name_active,
                                 file_format,
                                 field_properties,
-                                field_property,
+                                property,
                                 handedness,
                                 nx,
                                 ny,
@@ -173,7 +166,14 @@ def get_zone_name(field_name: str):
     # Note: The field_name is assumed to be of the form
     #       aps_<zone_name>_<grf_name> here
     words = field_name.split('_')
+    nwords = len(words)
+    # Zone name or zone + region name is everything after 'aps_' and before '_GRF'
     zone_name = words[1]
+    for i in range(2, nwords):
+        tmp_string = words[i].upper()
+        if tmp_string[:3] == 'GRF':
+            break
+        zone_name = zone_name + '_' + words[i]
     return zone_name
 
 
