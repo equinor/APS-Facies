@@ -1,8 +1,8 @@
 #!/bin/env python
 # -*- coding: utf-8 -*-
 from aps.rms_jobs.updateAPSModelFromFMU import update_aps_model_from_fmu
-from aps.tests.helpers import assert_identical_files
 from aps.utils.constants.simple import Debug
+from tests.helpers import assert_identical_files
 
 
 def test_update_aps_model(data_directory, output_directory):

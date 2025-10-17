@@ -15,6 +15,7 @@ ENV XDG_CACHE_HOME=/var/cahce
 
 WORKDIR /code
 FROM base AS python
+RUN dnf install -y git
 ENV PATH="/root/.local/bin:$PATH"
 
 COPY .tool-versions ./
@@ -35,19 +36,14 @@ RUN --mount=type=cache,target=$XDG_CACHE_HOME/uv \
 FROM python AS aps
 ENV PYTHONPATH=/code
 
-COPY aps/algorithms ./aps/algorithms
-COPY aps/toolbox ./aps/toolbox
-COPY aps/api ./aps/api
-COPY aps/utils ./aps/utils
-COPY aps/rms_jobs ./aps/rms_jobs
-COPY aps/__init__.py ./aps/
+COPY src/aps ./src/aps/
 
 
 FROM python AS truncation-rules
 SHELL ["/bin/bash", "-euo", "pipefail", "-c"]
 RUN curl https://mise.run | MISE_INSTALL_PATH=/usr/local/bin/mise sh
 
-COPY --from=aps /code/aps/ aps/
+COPY --from=aps /code/src/aps/ src/aps/
 
 COPY .mise-tasks .mise-tasks/
 COPY mise.toml ./

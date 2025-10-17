@@ -20,17 +20,6 @@ from aps.algorithms.truncation_rules import (
     Trunc2D_Cubic,
     Trunc3D_bayfill,
 )
-from aps.tests.constants import (
-    FACIES_REAL_PARAM_NAME_RESULT,
-    GRID_MODEL_NAME,
-    NO_VERBOSE_DEBUG,
-    REGION_PARAM_NAME,
-    RMS_PROJECT,
-    RMS_WORKFLOW,
-    SEED_FILE_NAME,
-    VERY_VERBOSE_DEBUG,
-    ZONE_PARAM_NAME,
-)
 from aps.utils.checks import compare
 from aps.utils.constants.simple import (
     Debug,
@@ -44,6 +33,17 @@ from aps.utils.types import (
     FaciesTableType,
     NonCubicTruncationRuleStructureType,
     OverlayGroupType,
+)
+from tests.constants import (
+    FACIES_REAL_PARAM_NAME_RESULT,
+    GRID_MODEL_NAME,
+    NO_VERBOSE_DEBUG,
+    REGION_PARAM_NAME,
+    RMS_PROJECT,
+    RMS_WORKFLOW,
+    SEED_FILE_NAME,
+    VERY_VERBOSE_DEBUG,
+    ZONE_PARAM_NAME,
 )
 
 

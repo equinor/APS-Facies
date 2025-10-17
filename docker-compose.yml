@@ -11,7 +11,7 @@ services:
       - 'uv'
       - 'run'
       - 'python3'
-      - 'aps/api/app.py'
+      - 'src/aps/api/app.py'
       - 'run'
       - '--host'
       - '0.0.0.0'
@@ -19,9 +19,10 @@ services:
       FLASK_DEBUG: '1'
       RMS_PROJECT_PATH: '${RMS_PROJECT_PATH}'
     volumes:
-      - './aps:/code/aps'
+      - './src/aps:/code/src/aps'
       - './models/private:/private'
       - './models/project:/project'
+      - './.git:/code/.git:ro' # Used by hatch-vcs to create _version.py
     env_file:
       - .env
 

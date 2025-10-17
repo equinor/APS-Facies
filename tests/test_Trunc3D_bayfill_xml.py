@@ -9,19 +9,19 @@ import pytest
 
 from aps.algorithms.APSMainFaciesTable import APSMainFaciesTable
 from aps.algorithms.truncation_rules import Trunc3D_bayfill
-from aps.tests.constants import (
+from aps.utils.constants.simple import Debug
+from aps.utils.types import FaciesListType, FaciesTableType, GaussianFieldsListType
+from aps.utils.xmlUtils import prettify
+from tests.constants import (
     NO_VERBOSE_DEBUG,
 )
-from aps.tests.helpers import (
+from tests.helpers import (
     apply_truncations,
     apply_truncations_vectorized,
     getFaciesInTruncRule,
     truncMapPolygons,
     writePolygons,
 )
-from aps.utils.constants.simple import Debug
-from aps.utils.types import FaciesListType, FaciesTableType, GaussianFieldsListType
-from aps.utils.xmlUtils import prettify
 
 
 def interpretXMLModelFileAndWrite(

@@ -2,6 +2,7 @@ from functools import wraps
 from pathlib import Path
 from zipfile import ZipFile
 
+from aps._version import __version__, commit
 from aps.utils.constants.simple import Debug
 from aps.utils.debug import dump_debug_information
 
@@ -35,7 +36,7 @@ def loggable(func):
 def _root_path() -> Path:
     plugin_root = Path(__file__).parent.parent.parent
     if Path('/.dockerenv').exists():
-        return plugin_root / 'aps' / 'api' / 'pydist'
+        return plugin_root / 'src' / 'aps' / 'api' / 'pydist'
     return plugin_root
 
 
@@ -70,16 +71,14 @@ def output_version_information(func):
         if config.debug_level >= Debug.VERBOSE:
             print(f'Plugin running from: {plugin_root.parent}')
 
-        version = get_content('VERSION')
         try:
             toolbox_version = get_content('STUB_VERSION')
         except:
             toolbox_version = ' '
-        print(f'GUI version: {version}')
+        print(f'GUI version: {__version__}')
 
         if config.debug_level >= Debug.VERBOSE:
             print(f'APS toolbox (help script) version: {toolbox_version}  ')
-            commit = get_content('COMMIT')
             print(f'Commit SHA: {commit}')
         return func(config)
 
