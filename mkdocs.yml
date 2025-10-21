@@ -55,11 +55,13 @@ nav:
   - APS toolbox:
       - aps-toolbox/README.md
       - aps-toolbox/probability-logs/README.md
+      - aps-toolbox/probability-logs-from-facies-logs/estimate-prob-logs.md
       - aps-toolbox/probability-trends/README.md
       - aps-toolbox/redefine-or-merge-blocked-well-facies-logs/README.md
       - aps-toolbox/convert-bitmap-to-rms-surface-format/README.md
       - aps-toolbox/check-normalisation-of-facies-probabilities/README.md
       - aps-toolbox/copy-3d-parameters-to-or-from-ertbox/README.md
+
   - APS model file format:
       - aps-model-file-format/README.md
   - Mind Manager map: mind-manager/index.html
