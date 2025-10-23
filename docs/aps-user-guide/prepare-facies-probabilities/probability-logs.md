@@ -7,7 +7,7 @@ In this case we assume that $P(\text{modelled facies} \mid \text{interpreted fac
 
 If facies interpretation is not certain, but a conditional probability for it is specified such that $P(\text{modelled facies} \mid \text{interpreted facies})$ is known for all modelled facies and interpreted facies, it is possible to assign a probability reflecting uncertainty in the facies interpretation of the blocked well facies log.
 
-Some help scripts from the APS toolbox is available for this task, see [APS toolbox -> Probability logs](/aps-toolbox/probability-logs/README.md).
+Some help scripts from the APS toolbox is available for this task, see [APS toolbox -> Probability logs](/aps-toolbox/probability-logs.md).
 
 Example of a blocked well facies log and overprinted by the probability log (with value 0 or 1) for one of the facies types.
 

@@ -9,57 +9,57 @@ nav:
       - aps-user-guide/README.md
       - Define APS Job:
           - aps-user-guide/define-aps-job/README.md
-          - aps-user-guide/define-aps-job/select-grid-model/README.md
-          - aps-user-guide/define-aps-job/choose-name-of-facies-realization/README.md
+          - aps-user-guide/define-aps-job/select-grid-model.md
+          - aps-user-guide/define-aps-job/choose-name-of-facies-realization.md
           - Select zone:
               - aps-user-guide/define-aps-job/select-zone/README.md
-              - aps-user-guide/define-aps-job/select-zone/select-bw/README.md
-              - aps-user-guide/define-aps-job/select-zone/select-facies-log/README.md
-              - aps-user-guide/define-aps-job/select-zone/specify-facies-probabilities/README.md
+              - aps-user-guide/define-aps-job/select-zone/select-bw.md
+              - aps-user-guide/define-aps-job/select-zone/select-facies-log.md
+              - aps-user-guide/define-aps-job/select-zone/specify-facies-probabilities.md
               - Select type of truncation:
                   - aps-user-guide/define-aps-job/select-zone/select-type-of-truncation/README.md
-                  - aps-user-guide/define-aps-job/select-zone/select-type-of-truncation/cubic/README.md
-                  - aps-user-guide/define-aps-job/select-zone/select-type-of-truncation/non-cubic/README.md
-                  - aps-user-guide/define-aps-job/select-zone/select-type-of-truncation/bayfill/README.md
+                  - aps-user-guide/define-aps-job/select-zone/select-type-of-truncation/cubic.md
+                  - aps-user-guide/define-aps-job/select-zone/select-type-of-truncation/non-cubic.md
+                  - aps-user-guide/define-aps-job/select-zone/select-type-of-truncation/bayfill.md
                   - Overlay facies rule:
                       - aps-user-guide/define-aps-job/select-zone/select-type-of-truncation/overlay-facies-rule/README.md
-                      - aps-user-guide/define-aps-job/select-zone/select-type-of-truncation/overlay-facies-rule/select-background-facies/README.md
-                      - aps-user-guide/define-aps-job/select-zone/select-type-of-truncation/overlay-facies-rule/select-grf/README.md
-                      - aps-user-guide/define-aps-job/select-zone/select-type-of-truncation/overlay-facies-rule/select-facies/README.md
+                      - aps-user-guide/define-aps-job/select-zone/select-type-of-truncation/overlay-facies-rule/select-background-facies.md
+                      - aps-user-guide/define-aps-job/select-zone/select-type-of-truncation/overlay-facies-rule/select-grf.md
+                      - aps-user-guide/define-aps-job/select-zone/select-type-of-truncation/overlay-facies-rule/select-facies.md
               - Specify Gaussian Random Fields:
                   - aps-user-guide/define-aps-job/select-zone/specify-gaussian-random-fields/README.md
-                  - aps-user-guide/define-aps-job/select-zone/specify-gaussian-random-fields/set-parameters-for-simulating-grf/README.md
-                  - aps-user-guide/define-aps-job/select-zone/specify-gaussian-random-fields/add-trend/README.md
+                  - aps-user-guide/define-aps-job/select-zone/specify-gaussian-random-fields/set-parameters-for-simulating-grf.md
+                  - aps-user-guide/define-aps-job/select-zone/specify-gaussian-random-fields/add-trend.md
           - Job setting:
               - aps-user-guide/define-aps-job/job-setting/README.md
               - Select mode:
                   - aps-user-guide/define-aps-job/job-setting/select-mode/README.md
-                  - aps-user-guide/define-aps-job/job-setting/select-mode/ordinary-mode/README.md
-                  - aps-user-guide/define-aps-job/job-setting/select-mode/fmu-uncertainty-parameter-mode/README.md
-                  - aps-user-guide/define-aps-job/job-setting/select-mode/fmu-assisted-history-matching-mode/README.md
-              - aps-user-guide/define-aps-job/job-setting/log-setting/README.md
-              - aps-user-guide/define-aps-job/job-setting/transformation-setting/README.md
-              - aps-user-guide/define-aps-job/job-setting/probability-check-setting/README.md
-              - aps-user-guide/define-aps-job/job-setting/non-standard-fmu-setting/README.md
-              - aps-user-guide/define-aps-job/job-setting/preview-related-settings/README.md
-              - aps-user-guide/define-aps-job/job-setting/generate-files-for-fmu-ert-configuration/README.md
-          - aps-user-guide/define-aps-job/preview/README.md
-      - aps-user-guide/configuration-of-aps-with-ahm-using-ert/README.md
-      - aps-user-guide/aps-algorithm/README.md
+                  - aps-user-guide/define-aps-job/job-setting/select-mode/ordinary-mode.md
+                  - aps-user-guide/define-aps-job/job-setting/select-mode/fmu-uncertainty-parameter-mode.md
+                  - aps-user-guide/define-aps-job/job-setting/select-mode/fmu-assisted-history-matching-mode.md
+              - aps-user-guide/define-aps-job/job-setting/log-setting.md
+              - aps-user-guide/define-aps-job/job-setting/transformation-setting.md
+              - aps-user-guide/define-aps-job/job-setting/probability-check-setting.md
+              - aps-user-guide/define-aps-job/job-setting/non-standard-fmu-setting.md
+              - aps-user-guide/define-aps-job/job-setting/preview-related-settings.md
+              - aps-user-guide/define-aps-job/job-setting/generate-files-for-fmu-ert-configuration.md
+          - aps-user-guide/define-aps-job/preview.md
+      - aps-user-guide/configuration-of-aps-with-ahm-using-ert.md
+      - aps-user-guide/aps-algorithm.md
       - Prepare facies probabilities:
           - aps-user-guide/prepare-facies-probabilities/README.md
-          - aps-user-guide/prepare-facies-probabilities/probability-logs/README.md
-          - aps-user-guide/prepare-facies-probabilities/probability-trends/README.md
-          - aps-user-guide/prepare-facies-probabilities/conditioned-probability-cubes/README.md
-          - aps-user-guide/prepare-facies-probabilities/normalisation/README.md
+          - aps-user-guide/prepare-facies-probabilities/probability-logs.md
+          - aps-user-guide/prepare-facies-probabilities/probability-trends.md
+          - aps-user-guide/prepare-facies-probabilities/conditioned-probability-cubes.md
+          - aps-user-guide/prepare-facies-probabilities/normalisation.md
   - APS toolbox:
       - aps-toolbox/README.md
-      - aps-toolbox/probability-logs/README.md
-      - aps-toolbox/probability-trends/README.md
-      - aps-toolbox/redefine-or-merge-blocked-well-facies-logs/README.md
-      - aps-toolbox/convert-bitmap-to-rms-surface-format/README.md
-      - aps-toolbox/check-normalisation-of-facies-probabilities/README.md
-      - aps-toolbox/copy-3d-parameters-to-or-from-ertbox/README.md
+      - aps-toolbox/probability-logs.md
+      - aps-toolbox/probability-trends.md
+      - aps-toolbox/redefine-or-merge-blocked-well-facies-logs.md
+      - aps-toolbox/convert-bitmap-to-rms-surface-format.md
+      - aps-toolbox/check-normalisation-of-facies-probabilities.md
+      - aps-toolbox/copy-3d-parameters-to-or-from-ertbox.md
   - APS model file format:
       - aps-model-file-format/README.md
   - Mind Manager map: mind-manager/index.html

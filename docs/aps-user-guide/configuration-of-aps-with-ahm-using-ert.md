@@ -53,14 +53,14 @@ Steps to setup an APS job for use in AHM
 
 ### `global_master_config` {#fmu-config-global-master-config}
 
-see also [`global_master_config` include file with APS parameters](../define-aps-job/job-setting/generate-files-for-fmu-ert-configuration/README.md#global_master_config-include-file-with-aps-parameters)
+see also [`global_master_config` include file with APS parameters](define-aps-job/job-setting/generate-files-for-fmu-ert-configuration.md#global_master_config-include-file-with-aps-parameters)
 
 ## ERT config
 
 ### `GEN_KW`
 
 #### Parameter probability distributions {#ert-config-gen-kw-parameter-probability-distributions}
-see also [`GEN_KW` distribution template for APS parameters](../define-aps-job/job-setting/generate-files-for-fmu-ert-configuration/README.md#ert-config-include-file-with-field-and-grid-keywords)
+see also [`GEN_KW` distribution template for APS parameters](define-aps-job/job-setting/generate-files-for-fmu-ert-configuration.md#ert-config-include-file-with-field-and-grid-keywords)
 
 ### `DESIGN_KW`
 
@@ -69,4 +69,4 @@ see also [`GEN_KW` distribution template for APS parameters](../define-aps-job/j
 ### `FIELD` / `GRID`
 
 #### GRF fields per zone {#ert-config-field-grid-grf-fields-per-zone}
-see also [ERT config include file with `FIELD` and `GRID` keywords](../define-aps-job/job-setting/generate-files-for-fmu-ert-configuration/README.md#ert-config-include-file-with-field-and-grid-keywords)
+see also [ERT config include file with `FIELD` and `GRID` keywords](define-aps-job/job-setting/generate-files-for-fmu-ert-configuration.md#ert-config-include-file-with-field-and-grid-keywords)

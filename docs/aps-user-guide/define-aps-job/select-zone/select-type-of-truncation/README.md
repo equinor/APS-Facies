@@ -9,11 +9,11 @@ There are three "families" of truncation rule settings for what we call backgrou
 A background facies will use two GRF fields, and the horizontal and vertical axis of the truncation map corresponds to the two transformed GRF fields.
 The three types of truncation rules are:
 
-- [Cubic](cubic/README.md)
+- [Cubic](cubic.md)
 
-- [Non-cubic](non-cubic/README.md)
+- [Non-cubic](non-cubic.md)
 
-- [Bayfill](bayfill/README.md)
+- [Bayfill](bayfill.md)
 
 In addition, it is possible to add "overlay" facies.
 By overlay facies we mean facies that erodes into the background facies.
