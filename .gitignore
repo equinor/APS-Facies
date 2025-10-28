@@ -507,3 +507,11 @@ local.settings.json
 
 # Local projects
 /models/
+
+# Documentation
+docs/out/
+docs/site/
+_site/
+
+# Mise related
+!.mise-tasks/build

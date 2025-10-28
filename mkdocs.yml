@@ -1,0 +1,143 @@
+site_name: APS Documentation
+site_url: https://equinor.github.io/APS-Facies/
+repo_url: https://github.com/equinor/APS-Facies
+repo_name: equinor/APS-Facies
+edit_uri: 'edit/main/docs/'
+
+nav:
+  - APS user guide:
+      - aps-user-guide/README.md
+      - Define APS Job:
+          - aps-user-guide/define-aps-job/README.md
+          - aps-user-guide/define-aps-job/select-grid-model.md
+          - aps-user-guide/define-aps-job/choose-name-of-facies-realization.md
+          - Select zone:
+              - aps-user-guide/define-aps-job/select-zone/README.md
+              - aps-user-guide/define-aps-job/select-zone/select-bw.md
+              - aps-user-guide/define-aps-job/select-zone/select-facies-log.md
+              - aps-user-guide/define-aps-job/select-zone/specify-facies-probabilities.md
+              - Select type of truncation:
+                  - aps-user-guide/define-aps-job/select-zone/select-type-of-truncation/README.md
+                  - aps-user-guide/define-aps-job/select-zone/select-type-of-truncation/cubic.md
+                  - aps-user-guide/define-aps-job/select-zone/select-type-of-truncation/non-cubic.md
+                  - aps-user-guide/define-aps-job/select-zone/select-type-of-truncation/bayfill.md
+                  - Overlay facies rule:
+                      - aps-user-guide/define-aps-job/select-zone/select-type-of-truncation/overlay-facies-rule/README.md
+                      - aps-user-guide/define-aps-job/select-zone/select-type-of-truncation/overlay-facies-rule/select-background-facies.md
+                      - aps-user-guide/define-aps-job/select-zone/select-type-of-truncation/overlay-facies-rule/select-grf.md
+                      - aps-user-guide/define-aps-job/select-zone/select-type-of-truncation/overlay-facies-rule/select-facies.md
+              - Specify Gaussian Random Fields:
+                  - aps-user-guide/define-aps-job/select-zone/specify-gaussian-random-fields/README.md
+                  - aps-user-guide/define-aps-job/select-zone/specify-gaussian-random-fields/set-parameters-for-simulating-grf.md
+                  - aps-user-guide/define-aps-job/select-zone/specify-gaussian-random-fields/add-trend.md
+          - Job setting:
+              - aps-user-guide/define-aps-job/job-setting/README.md
+              - Select mode:
+                  - aps-user-guide/define-aps-job/job-setting/select-mode/README.md
+                  - aps-user-guide/define-aps-job/job-setting/select-mode/ordinary-mode.md
+                  - aps-user-guide/define-aps-job/job-setting/select-mode/fmu-uncertainty-parameter-mode.md
+                  - aps-user-guide/define-aps-job/job-setting/select-mode/fmu-assisted-history-matching-mode.md
+              - aps-user-guide/define-aps-job/job-setting/log-setting.md
+              - aps-user-guide/define-aps-job/job-setting/transformation-setting.md
+              - aps-user-guide/define-aps-job/job-setting/probability-check-setting.md
+              - aps-user-guide/define-aps-job/job-setting/non-standard-fmu-setting.md
+              - aps-user-guide/define-aps-job/job-setting/preview-related-settings.md
+              - aps-user-guide/define-aps-job/job-setting/generate-files-for-fmu-ert-configuration.md
+          - aps-user-guide/define-aps-job/preview.md
+      - aps-user-guide/configuration-of-aps-with-ahm-using-ert.md
+      - aps-user-guide/aps-algorithm.md
+      - Prepare facies probabilities:
+          - aps-user-guide/prepare-facies-probabilities/README.md
+          - aps-user-guide/prepare-facies-probabilities/probability-logs.md
+          - aps-user-guide/prepare-facies-probabilities/probability-trends.md
+          - aps-user-guide/prepare-facies-probabilities/conditioned-probability-cubes.md
+          - aps-user-guide/prepare-facies-probabilities/normalisation.md
+  - APS toolbox:
+      - aps-toolbox/README.md
+      - aps-toolbox/probability-logs.md
+      - aps-toolbox/probability-trends.md
+      - aps-toolbox/redefine-or-merge-blocked-well-facies-logs.md
+      - aps-toolbox/convert-bitmap-to-rms-surface-format.md
+      - aps-toolbox/check-normalisation-of-facies-probabilities.md
+      - aps-toolbox/copy-3d-parameters-to-or-from-ertbox.md
+  - APS model file format:
+      - aps-model-file-format/README.md
+  - Mind Manager map: mind-manager/index.html
+
+markdown_extensions:
+  - smarty
+  - toc:
+      permalink: true
+  - sane_lists
+
+  # For MathJax
+  - pymdownx.arithmatex:
+      generic: true
+
+  # Abbreviation
+  - abbr
+  - attr_list
+  - pymdownx.snippets:
+      auto_append:
+        - docs/includes/abbreviations.md
+
+  # Icons and emojis
+  - attr_list
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+
+  # Definitions
+  - def_list
+
+# MathJax
+extra_javascript:
+  - assets/javascripts/mathjax.js
+  - https://unpkg.com/mathjax@3/es5/tex-mml-chtml.js
+
+extra_css:
+  - 'assets/stylesheets/mkdocs-eq.css'
+  - 'https://cdn.eds.equinor.com/font/equinor-font.css'
+
+theme:
+  name: material
+  icon:
+    repo: fontawesome/brands/github
+
+  palette:
+    # Palette toggle for automatic mode
+    - media: '(prefers-color-scheme)'
+      toggle:
+        icon: material/brightness-auto
+        name: Switch to light mode
+    # Palette toggle for light mode
+    - media: '(prefers-color-scheme: light)'
+      scheme: default
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+
+    # Palette toggle for dark mode
+    - media: '(prefers-color-scheme: dark)'
+      scheme: slate
+      toggle:
+        icon: material/brightness-4
+        name: Switch to system preference
+  features:
+    - navigation.indexes
+
+validation:
+  links:
+    absolute_links: relative_to_docs
+
+plugins:
+  - search
+  - git-revision-date-localized:
+      enable_creation_date: true
+
+watch:
+  - docs/includes

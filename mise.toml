@@ -3,6 +3,11 @@ run = "uv sync --no-install-project"
 sources = ["pyproject.toml", "uv.lock"]
 outputs = [".venv/"]
 
+[tasks."dependencies:docs"]
+run = "uv sync --group=docs --no-install-project"
+sources = ["pyproject.toml", "uv.lock"]
+outputs = [".venv"]
+
 [tasks."dependencies:node"]
 run = """
 corepack enable
@@ -16,6 +21,10 @@ outputs = ["gui/node_modules/"]
 [tasks.dependencies]
 depends = ["dependencies:python", "dependencies:node"]
 
+[tasks."serve:docs"]
+run = "uv run --no-project mkdocs serve"
+depends = ["dependencies:docs"]
+
 [tasks.build-containers]
 run = 'docker compose build --build-arg="RMS_IMAGE=$RMS_IMAGE" {{option(name="only", var=true)}}'
 env = { _.file = ".env" }
@@ -24,5 +33,5 @@ env = { _.file = ".env" }
 depends = ["build-containers --only api"]
 run = "docker compose run --rm api uv run pytest aps/tests"
 
-[settings]
-python.uv_venv_auto = true
+[env]
+_.python.venv = { path = ".venv", create = false }
