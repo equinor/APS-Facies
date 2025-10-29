@@ -1,7 +1,7 @@
 #!/bin/env python
 # -*- coding: utf-8 -*-
 from functools import wraps
-from typing import Any, Callable, List, Optional, Tuple, Union
+from typing import Any, Callable, List, Optional, Tuple, TypeVar, Union
 from xml.dom import minidom
 from xml.etree import ElementTree as ET
 from xml.etree.ElementTree import Element
@@ -33,13 +33,9 @@ def minify(elem: Element) -> str:
 
 
 def get_fmu_value_from_xml(
-    xml_tree: Element, keyword: str, _type: type = float, **kwargs
+    xml_tree: Element, keyword: str, _type: type[float | int] = float, **kwargs
 ) -> Tuple[float, bool]:
-    types = {
-        float: getFloatCommand,
-        int: getIntCommand,
-    }
-    value = types[_type](xml_tree, keyword, **kwargs)
+    value = get_numeric_value(xml_tree, keyword, _type, **kwargs)
     fmu_updatable = isFMUUpdatable(xml_tree, keyword)
     return value, fmu_updatable
 
@@ -111,19 +107,23 @@ def getTextCommand(
     return text
 
 
-def getFloatCommand(
+Kind = TypeVar('Kind', bound=int | float)
+
+
+def get_numeric_value(
     parent: Element,
     keyword: str,
-    parentKeyword: str = '',
-    minValue: Optional[float] = None,
-    maxValue: Optional[float] = None,
-    defaultValue: Optional[Union[int, float]] = None,
-    modelFile: Optional[str] = None,
+    type_: type[Kind],
+    parent_keyword: str = '',
+    min_value: Kind | None = None,
+    max_value: Kind | None = None,
+    default_value: Kind | None = None,
+    model_file: FilePath | None = None,
     required: bool = True,
-    moduloAngle: Optional[float] = None,
-) -> Optional[float]:
+    modulo_angle: Kind | None = None,
+) -> Kind | None:
     """
-    Return the float value specified in the keyword. If the keyword is required,
+    Return the <type_> value specified in the keyword. If the keyword is required,
     but the keyword does not exist, error message is called.
     If the keyword is not required and the keyword is not found, the default value is returned.
     If minValue and/or maxValue is specified, the value read is checked against these.
@@ -132,69 +132,30 @@ def getFloatCommand(
     as an angle taking values in interval 0 to moduloAngle degrees.
     Ensure that default value is set if the command is not required.
     """
-
     obj = parent.find(keyword)
-    value = defaultValue
+    value = default_value
     if required and obj is None:
-        raise ReadingXmlError(keyword, parentKeyword, modelFile)
+        raise ReadingXmlError(keyword, parent_keyword, model_file)
     if obj is not None:
         text = obj.text
         if text is None:
             if required:
-                raise MissingRequiredValue(keyword, parentKeyword, modelFile)
+                raise MissingRequiredValue(keyword, parent_keyword, model_file)
             return None
-        value = float(text.strip())
-        if minValue is not None and minValue != NotImplemented and value < minValue:
-            raise LessThanExpected(keyword, value, minValue, parentKeyword, modelFile)
-        if maxValue is not None and maxValue != NotImplemented and value > maxValue:
-            raise MoreThanExpected(keyword, value, maxValue, parentKeyword, modelFile)
-        if moduloAngle is not None and moduloAngle != NotImplemented:
-            if moduloAngle > 0:
-                value = value % moduloAngle
-                if value < 0.0:
-                    value = value + moduloAngle
-            else:
-                raise ValueError('Modulo angle must be positive')
-    return value
-
-
-def getIntCommand(
-    parent: Element,
-    keyword: str,
-    parentKeyword: str = '',
-    minValue: Optional[int] = None,
-    maxValue: Optional[int] = None,
-    defaultValue: Optional[int] = None,
-    modelFile: Optional[str] = None,
-    required: bool = True,
-    moduloAngle: Optional[float] = None,
-) -> int:
-    """
-    Return the int value specified in the keyword. If the keyword is required,
-    but the keyword does not exist, error message is called.
-    If the keyword is not required and the keyword is not found, the default value is returned.
-    If minValue and/or maxValue is specified, the value read is checked against these.
-    Error message is called if the value <= minValue or value >= maxValue.
-    If moduloAngle is defined (and a postive number is required), the input value is regarded
-    as an angle taking values in interval 0 to moduloAngle degrees.
-    Ensure that default value is set if the command is not required.
-    """
-    obj = parent.find(keyword)
-    value = defaultValue
-    if required and obj is None:
-        raise ReadingXmlError(keyword, parentKeyword, modelFile)
-    if obj is not None:
-        text = obj.text
-        value = int(text.strip())
-        if minValue is not None and minValue != NotImplemented and value < minValue:
-            raise LessThanExpected(keyword, value, minValue, parentKeyword, modelFile)
-        if maxValue is not None and maxValue != NotImplemented and value > maxValue:
-            raise MoreThanExpected(keyword, value, maxValue, parentKeyword, modelFile)
-        if moduloAngle is not None and moduloAngle != NotImplemented:
-            if moduloAngle > 0:
-                value = value % moduloAngle
-                if value < 0.0:
-                    value = value + moduloAngle
+        value = type_(text.strip())
+        if min_value is not None and min_value != NotImplemented and value < min_value:
+            raise LessThanExpected(
+                keyword, value, min_value, parent_keyword, model_file
+            )
+        if max_value is not None and max_value != NotImplemented and value > max_value:
+            raise MoreThanExpected(
+                keyword, value, max_value, parent_keyword, model_file
+            )
+        if modulo_angle is not None and modulo_angle != NotImplemented:
+            if modulo_angle > 0:
+                value = value % modulo_angle
+                if value < 0:
+                    value = value + modulo_angle
             else:
                 raise ValueError('Modulo angle must be positive')
     return value
@@ -212,7 +173,7 @@ def getBoolCommand(
     value = default
     if required and obj is None:
         raise ReadingXmlError(keyword, parent_keyword, model_file_name)
-    if obj is not None:
+    if obj is not None and obj.text is not None:
         text = obj.text.strip().lower()
         if text in ['true', '1', 'yes', 'y']:
             value = True

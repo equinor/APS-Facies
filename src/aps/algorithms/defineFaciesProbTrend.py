@@ -16,7 +16,7 @@ from aps.utils.roxar.grid_model import (
     getCellValuesFilteredOnDiscreteParam,
     getDiscrete3DParameterValues,
 )
-from aps.utils.xmlUtils import getIntCommand
+from aps.utils.xmlUtils import get_numeric_value
 from aps.utils.ymlUtils import get_bool_value, get_dict
 
 
@@ -66,11 +66,12 @@ class DefineFaciesProb(BaseDefineFacies):
 
     def _read_model_from_xml_root(self, debug_level: Debug = Debug.OFF):
         self._use_const_prob = (
-            getIntCommand(
+            get_numeric_value(
                 self._trend_root,
                 'UseConstantProbFromVolumeFraction',
-                minValue=0,
-                maxValue=1,
+                int,
+                min_value=0,
+                max_value=1,
                 required=True,
             )
             == 1

@@ -56,7 +56,7 @@ from aps.utils.xmlUtils import (
     createFMUvariableNameForResidual,
     createFMUvariableNameForTrend,
     get_fmu_value_from_xml,
-    getIntCommand,
+    get_numeric_value,
     getKeyword,
     isFMUUpdatable,
 )
@@ -1180,8 +1180,12 @@ class APSGaussModel:
                 )
 
             # Read preview seed for current GF
-            seed = getIntCommand(
-                gf, 'SeedForPreview', 'GaussField', modelFile=self.__model_file_name
+            seed = get_numeric_value(
+                gf,
+                'SeedForPreview',
+                int,
+                parent_keyword='GaussField',
+                model_file=self.__model_file_name,
             )
 
             # Add gauss field parameters to data structure
@@ -1231,14 +1235,14 @@ class APSGaussModel:
     def _get_value_from_xml(
         self, property_name: str, xml_tree: Element
     ) -> Tuple[Number, bool]:
-        kwargs = {'parentKeyword': 'Vario', 'modelFile': self.__model_file_name}
+        kwargs = {'parent_keyword': 'Vario', 'model_file': self.__model_file_name}
 
         if property_name in MaximumValues:
-            kwargs['maxValue'] = MaximumValues[property_name]
+            kwargs['max_value'] = MaximumValues[property_name]
         if property_name in MinimumValues:
-            kwargs['minValue'] = MinimumValues[property_name]
+            kwargs['min_value'] = MinimumValues[property_name]
         if property_name in ModuloValues:
-            kwargs['moduloAngle'] = ModuloValues[property_name]
+            kwargs['modulo_angle'] = ModuloValues[property_name]
 
         keyword = self.__xml_keyword[property_name]
         return get_fmu_value_from_xml(xml_tree, keyword, **kwargs)

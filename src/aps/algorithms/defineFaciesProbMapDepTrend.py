@@ -13,7 +13,7 @@ from aps.utils.roxar.generalFunctionsUsingRoxAPI import (
     set_continuous_3d_parameter_values,
 )
 from aps.utils.roxar.grid_model import getDiscrete3DParameterValues
-from aps.utils.xmlUtils import getIntCommand
+from aps.utils.xmlUtils import get_numeric_value
 
 
 class DefineFaciesProbMapDep(BaseDefineFacies):
@@ -42,12 +42,13 @@ class DefineFaciesProbMapDep(BaseDefineFacies):
             selected_zones=selected_zones,
         )
         if model_file_name is not None:
-            self._resolution = getIntCommand(
+            self._resolution = get_numeric_value(
                 self._trend_root,
                 'Resolution',
-                minValue=1,
-                maxValue=200,
-                defaultValue=100,
+                int,
+                min_value=1,
+                max_value=200,
+                default_value=100,
                 required=False,
             )
 

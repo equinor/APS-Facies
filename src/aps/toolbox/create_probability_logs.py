@@ -267,7 +267,7 @@ from aps.utils.constants.simple import Debug
 from aps.utils.exceptions.xml import MissingKeyword
 from aps.utils.methods import check_missing_keywords_list, get_cond_prob_dict
 from aps.utils.roxar.modifyBlockedWellData import createProbabilityLogs
-from aps.utils.xmlUtils import getIntCommand, getKeyword, getTextCommand
+from aps.utils.xmlUtils import get_numeric_value, getKeyword, getTextCommand
 from aps.utils.ymlUtils import get_bool_value, get_dict, get_text_value, readYml
 
 
@@ -516,13 +516,16 @@ def _read_model_file_xml(model_file_name: str):
     region_log_name = getTextCommand(
         root, 'RegionLogName', defaultText='', modelFile=model_file_name, required=False
     )
-    use_conditioned_probabilities = getIntCommand(
+    use_conditioned_probabilities = get_numeric_value(
         root,
         'UseConditionalProbabilities',
-        minValue=0,
-        maxValue=1,
-        defaultValue=0,
-        **kwargs,
+        int,
+        min_value=0,
+        max_value=1,
+        default_value=0,
+        parent_keyword=main_keyword,
+        model_file=model_file_name,
+        required=True,
     )
     use_regions = False
     if region_log_name:

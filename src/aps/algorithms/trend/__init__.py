@@ -48,8 +48,8 @@ from aps.utils.xmlUtils import (
     createFMUvariableNameForTrend,
     fmu_xml_element,
     get_fmu_value_from_xml,
+    get_numeric_value,
     get_origin_type_from_model_file,
-    getIntCommand,
     getTextCommand,
 )
 
@@ -150,15 +150,15 @@ class Trend3D:
     ) -> 'Trend3D':
         """Read common parameters from xml tree for all trend types"""
         azimuth, is_azimuth_fmu_updatable = get_fmu_value_from_xml(
-            trend_rule_xml, 'azimuth', modelFile=model_file_name
+            trend_rule_xml, 'azimuth', model_file=model_file_name
         )
         stacking_angle, is_stack_angle_fmu_updatable = get_fmu_value_from_xml(
             trend_rule_xml,
             'stackAngle',
-            modelFile=model_file_name,
+            model_file=model_file_name,
         )
-        stacking_direction = getIntCommand(
-            trend_rule_xml, 'directionStacking', modelFile=model_file_name
+        stacking_direction = get_numeric_value(
+            trend_rule_xml, 'directionStacking', int, model_file=model_file_name
         )
         if debug_level >= Debug.VERY_VERBOSE:
             print('--- Trend parameters:')
@@ -1086,7 +1086,7 @@ class Trend3D_conic(Trend3D):
         curvature, is_curvature_fmu_updatable = get_fmu_value_from_xml(
             trend_rule_xml,
             'curvature',
-            modelFile=model_file_name,
+            model_file=model_file_name,
             required=True,
         )
 
@@ -1095,22 +1095,22 @@ class Trend3D_conic(Trend3D):
             migration_angle, is_migration_angle_fmu_updatable = get_fmu_value_from_xml(
                 trend_rule_xml,
                 'migrationAngle',
-                modelFile=model_file_name,
+                model_file=model_file_name,
                 required=False,
-                defaultValue=0,
+                default_value=0,
             )
 
         origin_x, is_origin_x_fmu_updatable = get_fmu_value_from_xml(
             trend_rule_xml,
             'origin_x',
-            modelFile=model_file_name,
+            model_file=model_file_name,
             required=True,
         )
 
         origin_y, is_origin_y_fmu_updatable = get_fmu_value_from_xml(
             trend_rule_xml,
             'origin_y',
-            modelFile=model_file_name,
+            model_file=model_file_name,
             required=True,
         )
 
@@ -1119,7 +1119,7 @@ class Trend3D_conic(Trend3D):
             origin_z, is_origin_z_fmu_updatable = get_fmu_value_from_xml(
                 trend_rule_xml,
                 'origin_z_simbox',
-                modelFile=model_file_name,
+                model_file=model_file_name,
                 required=True,
             )
 
@@ -2058,9 +2058,9 @@ class Trend3D_elliptic_cone(Trend3D_conic):
             get_fmu_value_from_xml(
                 trend_rule_xml,
                 'relativeSize',
-                modelFile=model_file_name,
+                model_file=model_file_name,
                 required=False,
-                defaultValue=1.0,
+                default_value=1.0,
             )
         )
         representation = conic_trunc.as_dict()

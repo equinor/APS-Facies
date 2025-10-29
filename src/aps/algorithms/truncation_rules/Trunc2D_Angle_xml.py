@@ -14,7 +14,7 @@ from aps.utils.containers import FmuAttribute
 from aps.utils.numeric import isNumber
 from aps.utils.xmlUtils import (
     createFMUvariableNameForNonCubicTruncation,
-    getFloatCommand,
+    get_numeric_value,
     getKeyword,
     getTextCommand,
     isFMUUpdatable,
@@ -252,8 +252,13 @@ class Trunc2D_Angle(Trunc2D_Base):
             kw3 = 'ProbFrac'
             # Input prob fraction must be in interval [0,1] and for each facies this fraction must
             # sum up to 1.0 when summing over all polygons with the same facies.
-            probFrac = getFloatCommand(
-                faciesObj, kw3, 'Facies', modelFile=modelFileName, required=True
+            probFrac = get_numeric_value(
+                faciesObj,
+                kw3,
+                float,
+                parent_keyword='Facies',
+                model_file=modelFileName,
+                required=True,
             )
             if probFrac < 0.0 or probFrac > 1.0:
                 raise IOError(

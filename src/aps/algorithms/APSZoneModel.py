@@ -34,10 +34,9 @@ from aps.utils.constants.simple import Conform, Debug, VariogramType
 from aps.utils.containers import FmuAttribute
 from aps.utils.types import FaciesName, FilePath
 from aps.utils.xmlUtils import (
+    get_numeric_value,
     get_region_number,
     getBoolCommand,
-    getFloatCommand,
-    getIntCommand,
     getKeyword,
     getTextCommand,
 )
@@ -181,25 +180,27 @@ class APSZoneModel:
             root, 'Optimization', 'Root', modelFile=modelFileName, required=False
         )
         if obj is not None:
-            useMemoization = getIntCommand(
+            useMemoization = get_numeric_value(
                 obj,
                 'UseMemoization',
-                'Optimization',
-                minValue=0,
-                maxValue=1,
-                defaultValue=1,
-                modelFile=modelFileName,
+                int,
+                parent_keyword='Optimization',
+                min_value=0,
+                max_value=1,
+                default_value=1,
+                model_file=modelFileName,
                 required=False,
             )
 
-            nIntervalForProbabilityInMemoizationKey = getIntCommand(
+            nIntervalForProbabilityInMemoizationKey = get_numeric_value(
                 obj,
                 'MemoizationResolution',
-                'Optimization',
-                minValue=50,
-                maxValue=1000,
-                defaultValue=100,
-                modelFile=modelFileName,
+                int,
+                parent_keyword='Optimization',
+                min_value=50,
+                max_value=1000,
+                default_value=100,
+                model_file=modelFileName,
                 required=False,
             )
             if useMemoization == 1:
@@ -229,8 +230,13 @@ class APSZoneModel:
                 self.__useConstProb = useConstProb
 
                 kw = 'SimBoxThickness'
-                simBoxThickness = getFloatCommand(
-                    zone, kw, 'Zone', minValue=0.0, modelFile=modelFileName
+                simBoxThickness = get_numeric_value(
+                    zone,
+                    kw,
+                    float,
+                    parent_keyword='Zone',
+                    min_value=0.0,
+                    model_file=modelFileName,
                 )
                 self.__simBoxThickness = simBoxThickness
 

@@ -10,7 +10,7 @@ import numpy as np
 from aps.algorithms.APSMainFaciesTable import APSMainFaciesTable
 from aps.algorithms.Memoization import RoundOffConstant
 from aps.utils.constants.simple import Debug
-from aps.utils.xmlUtils import getFloatCommand, getKeyword
+from aps.utils.xmlUtils import get_numeric_value, getKeyword
 
 """
 -----------------------------------------------------------------------
@@ -666,13 +666,14 @@ class Trunc2D_Base:
                         )
 
                     kw3 = 'TruncIntervalCenter'
-                    truncIntervalCenter = getFloatCommand(
+                    truncIntervalCenter = get_numeric_value(
                         alphaObj,
                         kw3,
-                        kw2,
-                        minValue=0.0,
-                        maxValue=1.0,
-                        modelFile=modelFileName,
+                        float,
+                        parent_keyword=kw2,
+                        min_value=0.0,
+                        max_value=1.0,
+                        model_file=modelFileName,
                         required=True,
                     )
                     centerList.append(truncIntervalCenter)
@@ -700,13 +701,14 @@ class Trunc2D_Base:
                     if isNew == 1:
                         self._orderIndex.append(fIndx)
 
-                    probFracValue = getFloatCommand(
+                    probFracValue = get_numeric_value(
                         alphaObj,
                         kw4,
-                        kw2,
-                        minValue=0.0,
-                        maxValue=1.0,
-                        modelFile=modelFileName,
+                        float,
+                        parent_keyword=kw2,
+                        min_value=0.0,
+                        max_value=1.0,
+                        model_file=modelFileName,
                         required=True,
                     )
                     probFracList.append(probFracValue)
