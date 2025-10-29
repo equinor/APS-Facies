@@ -111,13 +111,13 @@ class BaseDefineFacies:
     def __init__(
         self,
         project=None,
-        model_file_name: str = None,
-        trend_keyword: str = None,
+        model_file_name: str | None = None,
+        trend_keyword: str | None = None,
         debug_level: Debug = Debug.OFF,
-        grid_model_name: str = None,
-        zone_param_name: str = None,
-        facies_interpretation_param_name: str = None,
-        prefix: str = None,
+        grid_model_name: str | None = None,
+        zone_param_name: str | None = None,
+        facies_interpretation_param_name: str | None = None,
+        prefix: str | None = None,
         selected_zones: List[int] = [],
     ):
         assert project

@@ -245,7 +245,7 @@ def import_and_update_ertbox_and_geogrid(
     file_format: str,
     xtgeo_fmu_grid: xtgeo.Grid,
     region_names: dict = None,
-    region_param_name: str = None,
+    region_param_name: str | None = None,
     debug_level: Debug = Debug.OFF,
 ):
     # Loop over all zones defined in aps model
@@ -366,7 +366,7 @@ def import_and_update_ertbox_and_geogrid_with_residuals(
     xtgeo_fmu_grid: xtgeo.Grid,
     handedness=Direction.right,
     region_names: dict = None,
-    region_param_name: str = None,
+    region_param_name: str | None = None,
     debug_level: Debug = Debug.OFF,
 ):
     use_residuals = True

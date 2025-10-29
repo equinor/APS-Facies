@@ -4,7 +4,7 @@ import os
 
 
 def get_text_value(
-    input_dict: dict, parent_kw: str, kw: str, default: str = None
+    input_dict: dict, parent_kw: str, kw: str, default: str | None = None
 ) -> str:
     value = input_dict[kw] if kw in input_dict else None
     if value is None:
@@ -35,14 +35,18 @@ def get_bool_value(input_dict: dict, kw: str, default_value: bool = False) -> bo
     return value
 
 
-def get_dict(input_dict: dict, parent_kw: str = None, kw: str = None) -> dict:
+def get_dict(
+    input_dict: dict, parent_kw: str | None = None, kw: str | None = None
+) -> dict:
     value = input_dict[kw] if kw in input_dict else None
     if value is None:
         raise ValueError(f"Missing keyword '{kw}' under keyword '{parent_kw}' ")
     return value
 
 
-def get_list(input_dict: dict, parent_kw: str = None, kw: str = None) -> list:
+def get_list(
+    input_dict: dict, parent_kw: str | None = None, kw: str | None = None
+) -> list:
     value = input_dict[kw] if kw in input_dict else None
     if value is None:
         raise ValueError(f"Missing keyword '{kw}' under keyword '{parent_kw}' ")

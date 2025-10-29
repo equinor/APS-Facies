@@ -38,7 +38,7 @@ class FaciesRecord(NamedTuple):
     Code: FaciesCode
 
 class FaciesProbabilityRecord(NamedTuple):
-    Name: str
+    Name: FaciesName
     Probability: Union[str, float]
 
 class Probability:
