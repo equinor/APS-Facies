@@ -321,6 +321,7 @@ def import_and_update_ertbox_and_geogrid(
                     print(
                         f'--- Load parameter {name} from file into {fmu_grid_model.name}'
                     )
+            # fmu_mode must be True here when calling this function, the grid is the ertbox grid
             zone_index_fmu_grid = 0
             set_continuous_3d_parameter_values_in_zone_region(
                 fmu_grid_model,
@@ -329,6 +330,7 @@ def import_and_update_ertbox_and_geogrid(
                 zone_index_fmu_grid,
                 realisation_number=project.current_realisation,
                 is_shared=fmu_grid_model.shared,
+                fmu_mode=True,
             )
 
             # Update geogrid. Has often multiple zones
@@ -342,6 +344,7 @@ def import_and_update_ertbox_and_geogrid(
                         print(
                             f'--- Update parameter {name} for zone number {zone.zone_number} in {geo_grid_model.name}'
                         )
+            # fmu_mode must be set to False here when calling this function, the grid is the geogrid
             zone_index = zone_mapping.get_zone_index_for_zone_number(zone.zone_number)
             set_continuous_3d_parameter_values_in_zone_region(
                 geo_grid_model,
@@ -432,6 +435,7 @@ def import_and_update_ertbox_and_geogrid_with_residuals(
                     print(
                         f'--- Load parameter {name} from file into {fmu_grid_model.name}'
                     )
+            # update the ertbox grid, fmu_mode=True
             zone_index_fmu_grid = 0
             set_continuous_3d_parameter_values_in_zone_region(
                 fmu_grid_model,
@@ -440,6 +444,7 @@ def import_and_update_ertbox_and_geogrid_with_residuals(
                 zone_index_fmu_grid,
                 realisation_number=project.current_realisation,
                 is_shared=fmu_grid_model.shared,
+                fmu_mode=True,
             )
 
             add_trends(
