@@ -55,6 +55,7 @@ nav:
   - APS toolbox:
       - aps-toolbox/README.md
       - aps-toolbox/probability-logs.md
+      - aps-toolbox/probability-logs-from-facies-logs.md
       - aps-toolbox/probability-trends.md
       - aps-toolbox/redefine-or-merge-blocked-well-facies-logs.md
       - aps-toolbox/convert-bitmap-to-rms-surface-format.md
