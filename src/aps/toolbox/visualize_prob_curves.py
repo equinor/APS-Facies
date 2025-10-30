@@ -27,7 +27,7 @@ def run(params):
     model_file_name = params['model_file_name']
     params = read_model_file(model_file_name)
     if params['plot_vpc']:
-        vpc, maxnvalues, zone_name = read_vpc(params)
+        vpc, maxnvalues, zone_name = read_vpc(**params)
         plot_vpc(vpc, maxnvalues, zone_name)
 
     else:
@@ -65,7 +65,7 @@ def plot_probability_logs(
     rel_width = np.zeros(2 * nwells, dtype=np.float32)
     for i in range(2 * nwells):
         n = i + 1
-        if (n // 2) * 2 == n:
+        if (n % 2) == 0:
             rel_width[i] = 1
         else:
             rel_width[i] = 0.4
@@ -235,35 +235,34 @@ def _read_model_file_yml(model_file_name):
 
     params = {}
     plot_vpc = get_bool_value(spec, 'PlotEstimatedVPC', False)
-    params['plot_vpc'] = plot_vpc
     if not plot_vpc:
-        params['debug_level'] = get_int_value(
-            spec, kw_parent, 'DebugLevel', has_default=True, default_value=Debug.OFF
-        )
-        params['grid_model_name'] = get_text_value(spec, kw_parent, 'GridModelName')
-        params['bw_set_name'] = get_text_value(spec, kw_parent, 'BlockedWellSetName')
-        params['zone_log_name'] = get_text_value(spec, kw_parent, 'ZoneLogName')
-        params['max_zone_number'] = get_int_value(spec, kw_parent, 'MaxZoneNumber')
-        params['well_list'] = get_list(spec, kw_parent, 'WellList')
-        params['prob_log_names'] = get_list(spec, kw_parent, 'ProbLogNames')
+        return {
+            'plot_vpc': plot_vpc,
+            'debug_level': get_int_value(
+                spec, kw_parent, 'DebugLevel', has_default=True, default_value=Debug.OFF
+            ),
+            'grid_model_name': get_text_value(spec, kw_parent, 'GridModelName'),
+            'bw_set_name': get_text_value(spec, kw_parent, 'BlockedWellSetName'),
+            'zone_log_name': get_text_value(spec, kw_parent, 'ZoneLogName'),
+            'max_zone_number': get_int_value(spec, kw_parent, 'MaxZoneNumber'),
+            'well_list': get_list(spec, kw_parent, 'WellList'),
+            'prob_log_names': get_list(spec, kw_parent, 'ProbLogNames'),
+        }
     else:
-        params['average_prob_log_prefix'] = get_text_value(
-            spec, kw_parent, 'AverageProbLogPrefix'
-        )
-        params['average_prob_log_file_path'] = get_text_value(
-            spec, kw_parent, 'AverageProbLogFilePath'
-        )
-        params['facies_names'] = get_list(spec, kw_parent, 'Facies')
-        params['zone_name'] = get_text_value(spec, kw_parent, 'ZoneName')
-    return params
+        return {
+            'plot_vpc': plot_vpc,
+            'average_prob_log_prefix': get_text_value(
+                spec, kw_parent, 'AverageProbLogPrefix'
+            ),
+            'average_prob_log_file_path': get_text_value(
+                spec, kw_parent, 'AverageProbLogFilePath'
+            ),
+            'facies_names': get_list(spec, kw_parent, 'Facies'),
+            'zone_name': get_text_value(spec, kw_parent, 'ZoneName'),
+        }
 
 
-def read_vpc(params: dict):
-    facies_list = params['facies_names']
-    zone_name = params['zone_name']
-    prefix = params['average_prob_log_prefix']
-    path = params['average_prob_log_file_path']
-
+def read_vpc(facies_list, zone_name, prefix, path):
     maxnvalues = 0
     vpc_dict = {}
     for fname in facies_list:
