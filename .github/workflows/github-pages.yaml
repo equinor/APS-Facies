@@ -40,7 +40,7 @@ jobs:
         run: mise tasks run build:documentation
 
       - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/upload-pages-artifact@v4
 
   # Deployment job
   deploy:
