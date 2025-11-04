@@ -37,7 +37,7 @@ jobs:
           mise run build-gui ${{ inputs.stable && '--stable' || '' }}
 
       - name: Store GUI artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: build-artifacts-gui
           path: |
@@ -46,7 +46,7 @@ jobs:
           compression-level: '0' # The plugin is already a zip file, so we don't need to compress it again
 
       - name: Store metadata about the build
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: build-artifacts-metadata
           path: |
