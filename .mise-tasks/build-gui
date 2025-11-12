@@ -116,7 +116,7 @@ function main() {
             echo "Usage: $0 [--help|-h]"
             exit 0
             ;;
-        --release)
+        --stable)
             BUILD_MODE='stable'
             ;;
         *)
