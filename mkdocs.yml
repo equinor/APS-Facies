@@ -5,6 +5,7 @@ repo_name: equinor/APS-Facies
 edit_uri: 'edit/main/docs/'
 
 nav:
+  - index.md
   - APS user guide:
       - aps-user-guide/README.md
       - Define APS Job:
