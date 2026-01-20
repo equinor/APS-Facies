@@ -285,8 +285,17 @@ class RMSData:
     def get_zones(self, grid_model_name: GridName) -> List[dict]:
         grid = self.get_grid(grid_model_name)
         grid_model = self.get_grid_model(grid_model_name)
-        zone_mapping = ZoneMapping(grid_model, grid, self.project.current_realisation)
-
+        create_zone_parameter(
+            grid_model,
+            realization_number=self.project.current_realisation,
+            debug_level=Debug.VERBOSE,
+        )
+        zone_mapping = ZoneMapping(
+            grid_model,
+            grid,
+            self.project.current_realisation,
+            debug_level=Debug.OFF,
+        )
         # Get existing zone parameter or create a new one if not existing
         nzones = zone_mapping.get_number_of_zones_in_grid()
         zones = []

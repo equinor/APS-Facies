@@ -518,6 +518,7 @@ class APSModel:
             if grid_model.is_empty(project.current_realisation):
                 raise ValueError(f'Grid model {self.grid_model_name} is empty.')
             grid = grid_model.get_grid(project.current_realisation)
+            self.check_or_create_zone_parameter(project, debug_level=Debug.VERBOSE)
             zone_mapping = ZoneMapping(
                 grid_model, grid, real_number=project.current_realisation
             )
@@ -654,6 +655,8 @@ class APSModel:
                 raise ValueError(
                     'Keyword ZoneNumber under keyword SelectedZonesAndRegions is not defined.\n'
                     'Specify at least one zone to be selected to be used.'
+                    'Maybe some zone numbers in the code_name table in the zone parameter does not exists'
+                    'in any grid cells? Check the zone parameter.'
                 )
         else:
             # Keyword is not specified. This means that one should choose the default
