@@ -2,6 +2,11 @@
 
 This document described the changes between versions of the APS GUI.
 
+## 1.6.1
+
+### Fixes
+- Zone parameter is created if it does not exist
+
 ## 1.6.0
 
 ### What's new
