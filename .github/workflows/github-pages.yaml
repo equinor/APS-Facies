@@ -28,7 +28,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         # We include the creation and edit time in the documentation, so we need the full history
 
       - uses: jdx/mise-action@v3
