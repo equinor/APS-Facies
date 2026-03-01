@@ -30,7 +30,7 @@ jobs:
         with:
           install: false
 
-      - uses: actions/download-artifact@v6
+      - uses: actions/download-artifact@v8
         with:
           pattern: build-artifacts-*
           merge-multiple: true
