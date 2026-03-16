@@ -14,10 +14,15 @@
 !.mise-tasks/
 
 # For the containers
+
+# necessary for getting the version information when building the aps package
+!.git/
+
 !bin/parse-truncation-rule-templates.py
 !examples/truncation_settings.dat
 
 !src/aps/*.py
+!src/aps/_version/.gitkeep
 !src/aps/api/**/*.py
 !src/aps/toolbox/generate_workflow_blocks/STUB_VERSION
 !src/aps/utils/**/*.py
