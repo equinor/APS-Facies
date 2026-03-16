@@ -50,10 +50,9 @@ COPY mise.toml ./
 COPY examples/truncation_settings.dat ./examples/
 
 ENV MISE_AUTO_INSTALL=false
-RUN <<EOF
-mise trust
-roxenv mise tasks run generate-truncation-rules
-EOF
+RUN mise trust
+RUN --mount=type=bind,source=.git,target=/code/.git,readonly \
+    roxenv mise tasks run generate-truncation-rules
 
 FROM node AS install
 
