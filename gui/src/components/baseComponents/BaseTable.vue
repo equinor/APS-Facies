@@ -13,7 +13,6 @@
     :class="`elevation-${elevation}`"
     :items-per-page="-1"
     hide-default-footer
-    hide-default-header
   >
     <template #headers="{ columns }">
       <tr>
