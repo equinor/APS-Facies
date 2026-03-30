@@ -19,7 +19,11 @@ from aps.utils.constants.simple import (
     TransformType,
 )
 from aps.utils.decorators import cached
-from aps.utils.fmu import get_export_location, is_initial_iteration
+from aps.utils.fmu import (
+    get_export_location,
+    is_initial_iteration,
+    is_running_in_ERT,
+)
 from aps.utils.roxar._config_getters import get_debug_level
 from aps.utils.roxar.migrations import Migration
 from aps.utils.roxar.progress_bar import APSProgressBar
@@ -202,19 +206,17 @@ class JobConfig:
         # The stored value has two values: True or False
         # If this is True and also in FMU mode to update GRF fields:
         #  It means that it should be checked if the ERT iteration is 0 or not.
-        #  If no folder with iteration exists, the default is to return True which means to simulate and export GRF files.
-        #  If folder with name 0 exist, also in this case return True.
-        #  If there exist a folder with name equal to an integer > 0, the return is False
-        #  since in this case ERT iteration is > 0 and APS must use the updated GRF coming from ERT.
-        #  In this case the GRF's should be imported into APS instead.
+        #  ERT environment variable is checked to find in which ES-MDA iteration the APS
+        #  job is running. APS will export GRF parameters to file to be used by ERT
+        #  if iteration is 0 and import from files updated by ERT if iteration > 0.
         # If this is False:
         #  It means that the fields should be simulated and exported regardless
         #  of whether there exist any directory with positive integer number as name or not at
         #  the top level of the FMU directory structure.
-
+        run_in_ert = is_running_in_ERT()
         if self.fmu_mode:
             # Check if simulate/export  or import
-            if self._config['options']['importFields']:
+            if run_in_ert or self._config['options']['importFields']:
                 # Automatic detect
                 if is_initial_iteration(self.debug_level):
                     # Simulate and export
@@ -242,6 +244,7 @@ class JobConfig:
                             )
                     return False
             else:
+                # Not running in ERT AHM and not auto detect whether to export or import field params
                 if self.debug_level >= Debug.ON:
                     print(
                         '- APS is running in FMU mode for AHM and simulate GRF files and export to FMU'
