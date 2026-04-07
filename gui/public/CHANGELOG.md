@@ -2,6 +2,15 @@
 
 This document described the changes between versions of the APS GUI.
 
+## 1.6.2
+
+### Fixes
+- Table headers are no longer hidden
+- Fixed a bug that caused the development version to not generate version information
+
+### Miscellaneous
+- Update dependencies for development and CI/CD
+
 ## 1.6.1
 
 ### Fixes
