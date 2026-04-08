@@ -57,37 +57,21 @@ def is_initial_iteration(debug_level: Debug = Debug.OFF) -> bool:
             print(f'-- ERT iteration: {iteration} ')
         return iteration <= 0
     else:
-        print(f'Warning: The environment variable: {key} is not defined.')
-        print('         Assume the RMS job is not run in ERT as a FORWARD model or')
-        print('         using an old version of ERT < 5.0.')
+        if debug_level > Debug.ON:
+            print(f'WARNING: The environment variable: {key} is not defined.')
+            print('         Assume the RMS job is not run in ERT as a FORWARD model')
 
-        return is_initial_iteration_check_file(debug_level=debug_level)
+        return True
 
 
-def is_initial_iteration_check_file(debug_level: Debug = Debug.OFF) -> bool:
+def is_running_in_ERT() -> None:
     """
-    Check if folder with name equal to a non-negative integer exists.
-    If a folder with name 0 is found or no folder with integer exists,
-    the APS mode is to simulate and export GRF files to be used in ERT
-    and this function return True.
-    If a folder with name 1 or 2 or 3 or ... MAXITER is found,
-    the APS mode is import updated GRF from ERT and this function return False
+    Check if ERT environment variables are set (which indicates that APS is run within ERT)
     """
-    MAXITER = 100
-    toplevel = Path(APSConfig.top_dir())
-    iterfolder = -1
-    for folder in range(MAXITER):
-        if (toplevel / str(folder)).exists():
-            iterfolder = folder
-            break
-    if iterfolder == -1:
-        print('Warning: When running ERT version < 5.0 specify a forward model')
-        print('         creating a directory with name equal to iteration number.')
-        print('         If folder does not exists, APS will assume iteration = 0.')
-
-    if debug_level >= Debug.VERBOSE:
-        print(f'-- ERT iteration: {iterfolder} ')
-    return iterfolder <= 0
+    return (
+        '_ERT_ITERATION_NUMBER' in os.environ
+        and '_ERT_REALIZATION_NUMBER' in os.environ
+    )
 
 
 def get_export_location(create: bool = True) -> Path:
@@ -341,26 +325,26 @@ class UpdateFieldNamesInZones(UpdateModel):
 
     def before(self):
         self._change_names(
-            name_getter=lambda zone_model,
-            field_model,
-            field_index: self._get_fmu_field_name(zone_model, field_model),
+            name_getter=lambda zone_model, field_model, field_index: (
+                self._get_fmu_field_name(zone_model, field_model)
+            ),
         )
         self._change_name_of_trend_params(
-            name_getter=lambda zone_model,
-            field_model,
-            field_index: self._get_fmu_trend_param_name(zone_model, field_model),
+            name_getter=lambda zone_model, field_model, field_index: (
+                self._get_fmu_trend_param_name(zone_model, field_model)
+            ),
         )
 
     def after(self):
         self._change_names(
-            name_getter=lambda zone_model,
-            field_model,
-            field_index: self._get_original_field_name(zone_model, field_index),
+            name_getter=lambda zone_model, field_model, field_index: (
+                self._get_original_field_name(zone_model, field_index)
+            ),
         )
         self._change_name_of_trend_params(
-            name_getter=lambda zone_model,
-            field_model,
-            field_index: self._get_original_trend_param_name(zone_model, field_index),
+            name_getter=lambda zone_model, field_model, field_index: (
+                self._get_original_trend_param_name(zone_model, field_index)
+            ),
         )
 
     def _change_names(
