@@ -1,4 +1,5 @@
 import json
+import os
 import sys
 from base64 import b64decode
 from functools import wraps
@@ -114,6 +115,8 @@ class JobConfig:
             'export_fmu_config_files': self.export_fmu_config_files,
             'extrapolation_method': self.rms_param_trend_extrapolation_method,
             'fmu_use_residual_fields': self.fmu_use_residual_fields,
+            'ert_iteration': self.ert_iteration,
+            'ert_realization_number': self.ert_realization_number,
         }
 
     @property
@@ -344,6 +347,24 @@ class JobConfig:
         return ExtrapolationMethod(
             self._config['fmu']['customTrendExtrapolationMethod']
         )
+
+    @property
+    def ert_iteration(self):
+        # Check ERT iteration
+        iteration = 0
+        key = '_ERT_ITERATION_NUMBER'
+        if key in os.environ:
+            iteration = int(os.environ[key])
+        return iteration
+
+    @property
+    def ert_realization_number(self):
+        # Check ERT iteration
+        real_number = 0
+        key = '_ERT_REALIZATION_NUMBER'
+        if key in os.environ:
+            real_number = int(os.environ[key])
+        return real_number
 
     def to_json(self):
         return json.dumps(self._config)

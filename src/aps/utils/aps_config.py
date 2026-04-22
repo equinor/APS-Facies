@@ -36,6 +36,7 @@ class APSConfig:
             'rms_model': 'rms/model',
             'rms_field': 'rms/output/aps',
             'aps_model_export': 'rms/input/config/aps',
+            'aps_initial_ensemble_path': '../iter-0/rms/output/aps',
         },
         'aps_file_extensions': {
             'fmu_master_config': '_aps_params.yml',
@@ -177,6 +178,14 @@ class APSConfig:
     @classmethod
     def rms_field_dir_for_run_path(cls):
         return cls.config['relative_paths']['rms_field']
+
+    @classmethod
+    def aps_initial_ensemble_path(cls):
+        return (
+            cls.top_dir()
+            + '/'
+            + cls.config['relative_paths']['aps_initial_ensemble_path']
+        )
 
     @classmethod
     def fmu_master_config_extension(cls):

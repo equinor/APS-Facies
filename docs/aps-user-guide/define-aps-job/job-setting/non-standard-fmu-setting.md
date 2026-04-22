@@ -35,6 +35,7 @@ relative_paths:
     rms_model: rms/model
     rms_field: rms/output/aps
     aps_model_export: rms/input/config/aps
+    aps_initial_ensemble_path: ../iter-0/rms/output/aps
 aps_file_extensions:
     fmu_master_config: _aps_params.yml
     fmu_contig: _aps_fmu_params.yml
