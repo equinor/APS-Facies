@@ -7,6 +7,9 @@
 # Node.js
 !gui/package.json
 !gui/yarn.lock
+!gui/.yarnrc.yml
+#!gui/.pnp.cjs
+#!gui/.pnp.loader.mjs
 
 # Initialization
 !Makefile

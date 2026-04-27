@@ -46,6 +46,7 @@ onMounted(() => {
   loading.value = true
   getJobs()
     .then((receivedJobs) => {
+      console.log(receivedJobs)
       jobMapping.value = receivedJobs.reduce((jobDict, job) => {
         jobDict[job.instance_name] = JSON.parse(job.jobinputjson)
         return jobDict

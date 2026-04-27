@@ -27,21 +27,32 @@ import NumericField from '@/components/selection/NumericField.vue'
 import { hasOwnProperty } from '@/utils/helpers'
 import { computed } from 'vue'
 import { useGaussianRandomFieldStore } from '@/stores/gaussian-random-fields'
+import type { FmuUpdatable } from '@/utils/domain/bases/fmuUpdatable.ts'
 
-function getValue<T extends Trend | Variogram>(
+function getValue<
+  T extends Trend | Variogram,
+  PROPERTY extends keyof T,
+  SUB_PROPERTY extends keyof T[keyof T] | undefined,
+>(
   field: T,
-  property: keyof T,
-  subProperty?: keyof T[keyof T] & string,
-) {
-  return !!subProperty && hasOwnProperty(field[property], subProperty)
-    ? field[property][subProperty]
-    : field[property]
+  property: PROPERTY,
+  subProperty?: SUB_PROPERTY,
+): number | FmuUpdatable<number> | null {
+  const value =
+    !!subProperty && hasOwnProperty(field[property], subProperty)
+      ? field[property][subProperty]
+      : field[property]
+  if (typeof value === 'string') {
+    throw new Error('')
+  }
+  // @ts-expect-error
+  return value
 }
 
 type TrendProps<T extends Trend = Trend> = {
   trend?: true
   propertyType: keyof T
-  subPropertyType?: keyof T[keyof T] | string
+  subPropertyType?: keyof T[keyof T]
 }
 type VariogramProps<T extends Variogram = Variogram> = {
   trend?: false
@@ -52,7 +63,7 @@ type VariogramProps<T extends Variogram = Variogram> = {
 type Props = (TrendProps | VariogramProps) & {
   value: GaussianRandomField
   trend?: boolean
-  label?: string
+  label: string
   valueType?: string
   unit?: string
   strictlyGreater?: boolean
@@ -91,7 +102,6 @@ const propertyValue = computed({
     getValue(
       field.value,
       props.propertyType as keyof typeof field.value,
-      // @ts-expect-error: Should work as expected
       props.subPropertyType,
     ),
   set: (value) =>
@@ -99,8 +109,8 @@ const propertyValue = computed({
       props.value,
       variogramOrTrend.value,
       props.propertyType as keyof typeof field.value,
-      // @ts-expect-error: Should work as expected
       props.subPropertyType,
+      // @ts-expect-error: Should work as expected
       value,
     ),
 })

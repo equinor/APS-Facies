@@ -67,6 +67,7 @@ export const useGridModelStore = defineStore('grid-models', () => {
       throw new APSTypeError(`The grid model, ${gridModel} does not exist`)
 
     if (names.value.includes(_gridModel.name)) {
+      console.error(_gridModel)
       currentId.value = _gridModel.id
 
       const panelStore = usePanelStore()

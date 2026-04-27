@@ -35,8 +35,8 @@
             v-bind="props"
             :value="item.title"
             :type="type!"
-            :disabled="item.props.disabled"
-            :overlay="item.props.overlay"
+            :disabled="item.props?.disabled"
+            :overlay="item.props?.overlay"
           />
         </template>
       </v-combobox>

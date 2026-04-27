@@ -16,7 +16,7 @@
           variant="accordion"
           multiple
         >
-          <v-expansion-panel expand value="zoneRegion" elevation="0">
+          <v-expansion-panel expand value="zoneRegion" elevation="0" v-scroll>
             <template #title>
               <section-title>Zones and Regions</section-title>
             </template>

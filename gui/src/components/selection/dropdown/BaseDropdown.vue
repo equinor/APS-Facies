@@ -14,13 +14,13 @@
         <hover-helper v-slot="{ isHovering }">
           <v-list-item
             v-bind="_props"
-            :value="item.props.value"
-            :disabled="item.props.disabled"
+            :value="item.props?.value"
+            :disabled="item.props?.disabled"
           >
             <base-tooltip
-              :message="item.props.help"
-              :open="isHovering && !!item.props.help"
-              :disabled="!item.props.disabled && !item.props.help"
+              :message="item.props?.help"
+              :open="isHovering && !!item.props?.help"
+              :disabled="!item.props?.disabled && !item.props?.help"
               trigger="manual"
               class="pa-0 ma-0"
             />

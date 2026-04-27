@@ -35,3 +35,7 @@ run = "docker compose run --rm api uv run pytest aps/tests"
 
 [env]
 _.python.venv = { path = ".venv", create = false }
+
+[tools]
+node = "24.13.1"
+uv = "0.10.12"

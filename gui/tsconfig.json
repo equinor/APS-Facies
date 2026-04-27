@@ -24,17 +24,13 @@
     "sourceMap": true,
     "useDefineForClassFields": true,
     "baseUrl": ".",
-    "types": ["vite/client", "vue", "vuetify", "node"],
+    "types": ["vite/client", "vue", "vuetify", "node", "vitest/globals"],
     "paths": {
       "@/*": ["src/*"]
     },
     "lib": ["es7", "esnext", "dom", "dom.iterable", "scripthost"]
   },
-  "files": [
-    "./node_modules/vuetify/dist/vuetify.d.ts",
-    "./src/vue-shims.d.ts",
-    "./src/api/rms.d.ts"
-  ],
+  "files": ["./src/vue-shims.d.ts", "./src/api/rms.d.ts"],
   "include": [
     "vite.config.ts",
     "src/**/*.ts",

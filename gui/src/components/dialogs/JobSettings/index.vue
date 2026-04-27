@@ -92,7 +92,7 @@
                         <br />
                         <v-row>
                           <v-col
-                            v-for="color in item.value.colors"
+                            v-for="color in item.value?.colors"
                             :key="color"
                             class="pa-2"
                             :style="{ backgroundColor: color }"

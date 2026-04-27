@@ -30,7 +30,7 @@ onBeforeMount(async () => {
 </script>
 
 <style lang="scss" scoped>
-@use 'style/main' as *;
+@use 'styles/main' as *;
 
 #app {
   font-family: $font-family;

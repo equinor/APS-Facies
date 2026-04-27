@@ -13,7 +13,7 @@ In our case, we some time want to toggle a tooltip if an element is disabled
 </template>
 
 <script setup lang="ts">
-import { ref, defineSlots } from 'vue'
+import { ref } from 'vue'
 
 const isHovering = ref(false)
 

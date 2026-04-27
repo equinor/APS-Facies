@@ -1,6 +1,6 @@
 # syntax = docker/dockerfile:1
 ARG RMS_IMAGE
-FROM node:20.19.2-alpine3.22 AS node
+FROM node:24.15.0-alpine3.23 AS node
 
 ENV CODE=/code
 ENV NODE_MODULES=$CODE/node_modules
@@ -58,17 +58,21 @@ FROM node AS install
 
 WORKDIR $CODE
 
-COPY gui/package.json gui/yarn.lock ./
+COPY gui/package.json ./
+RUN corepack enable && \
+    corepack install
+
+COPY gui/yarn.lock gui/.yarnrc.yml ./
 
 RUN yarn install --frozen-lockfile
 
-FROM node AS gui
+FROM install AS gui
 
-ENV YARN_CACHE_FOLDER=/yarn
-RUN yarn config set cache-folder $YARN_CACHE_FOLDER
+#ENV YARN_CACHE_FOLDER=/yarn
+#RUN yarn config set cache-folder $YARN_CACHE_FOLDER
 
 WORKDIR $CODE
-COPY --from=install $NODE_MODULES $NODE_MODULES
+#COPY --from=install $NODE_MODULES $NODE_MODULES
 
 COPY gui/package.json .
 COPY gui/yarn.lock .

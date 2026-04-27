@@ -4,7 +4,7 @@ import { aliases, fa } from 'vuetify/iconsets/fa'
 import * as components from 'vuetify/components'
 import * as directives from 'vuetify/directives'
 
-import '@/style/main.scss'
+import '@/styles/main.scss'
 
 import colors from 'vuetify/util/colors'
 

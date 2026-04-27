@@ -99,7 +99,7 @@ defineSlots<{
 const theme = useTheme()
 const currentStyle = computed(() => {
   return {
-    background: theme.global.current.value.colors.primary,
+    background: theme.global.current.value.colors.primary as string,
     color: 'white',
   }
 })
