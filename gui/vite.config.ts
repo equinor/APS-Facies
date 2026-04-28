@@ -31,6 +31,10 @@ export default defineConfig({
     },
   },
   envPrefix: ['VUE_', 'NODE_'],
+  build: {
+    minify: 'esbuild',
+    cssMinify: 'esbuild',
+  },
   server: {
     proxy: /* CODESPACE_NAME? */ {
       // eslint-disable-next-line @typescript-eslint/naming-convention
