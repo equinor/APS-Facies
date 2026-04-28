@@ -1,11 +1,11 @@
-import _ from 'lodash'
+import { isEmptyish as _isEmpty, isNumber as _isNumber } from 'remeda'
 
 import { ERROR_TOLERANCE, isDevelopmentBuild } from '@/config'
 
 export function isEmpty<T>(
   property: T | null | undefined,
 ): property is null | undefined {
-  return _.isEmpty(property) && !_.isNumber(property)
+  return _isEmpty(property) && !_isNumber(property)
 }
 export function notEmpty<T>(property: T | null | undefined): property is T {
   return !isEmpty(property)

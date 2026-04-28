@@ -1,6 +1,6 @@
 import { acceptHMRUpdate, defineStore } from 'pinia'
 import { computed, reactive } from 'vue'
-import { isArray } from 'lodash'
+import { isArray } from 'remeda'
 
 type PanelStructure = {
   selection: {

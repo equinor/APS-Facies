@@ -16,7 +16,7 @@ import type {
 import type { ID, PROBABILITY } from '@/utils/domain/types'
 import { getId, hasParents, isEmpty, notEmpty, parentId } from '@/utils'
 import { getRelevant } from '@/stores/utils/helpers'
-import { isNumber } from 'lodash'
+import { isNumber } from 'remeda'
 import type GridModel from '@/utils/domain/gridModel'
 import type { IdentifiedStorePopulationData } from '@/stores/utils/identified-items'
 import { useIdentifiedItems } from '@/stores/utils/identified-items'

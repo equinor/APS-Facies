@@ -1,7 +1,7 @@
 import CodeError from '@/utils/domain/bases/discrete/codeError'
 import { APSTypeError } from '@/utils/domain/errors'
 import type { CODE, ID } from '@/utils/domain/types'
-import { isInteger } from 'lodash'
+import { isNumber } from 'remeda'
 import BaseItem, {
   type BaseItemConfiguration,
   type BaseItemSerialization,
@@ -32,7 +32,7 @@ export class Discrete extends BaseItem implements IDiscrete {
   }) {
     super({ id })
     this.name = name
-    if (!isInteger(code))
+    if (!(isNumber(code) && Number.isInteger(code)))
       throw new APSTypeError(
         `A discrete item MUST have an integer as code. Was ${code}`,
       )

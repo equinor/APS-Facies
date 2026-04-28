@@ -24,7 +24,7 @@ import Plotly from 'plotly.js-dist-min'
 import events from './events'
 import { camelize } from './utils/helper'
 import { useResizeObserver } from '@vueuse/core'
-import { cloneDeep, isEqual } from 'lodash'
+import { clone as cloneDeep, isDeepEqual as isEqual } from 'remeda'
 
 const instance = getCurrentInstance()
 if (!instance) throw Error('Bad component initialization')

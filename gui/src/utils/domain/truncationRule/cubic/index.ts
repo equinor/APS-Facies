@@ -13,7 +13,7 @@ import OverlayTruncationRule, {
   type OverlaySpecification,
   type OverlayTruncationRuleArgs,
 } from '@/utils/domain/truncationRule/overlay'
-import { sample } from 'lodash'
+import { sample } from 'remeda'
 export { Orientation } from './direction'
 
 export type CubicTruncationRuleArgs =
@@ -52,7 +52,7 @@ export default class Cubic extends OverlayTruncationRule<
   }
 
   public get root(): CubicPolygon | null {
-    let polygon = sample(this.backgroundPolygons)
+    let polygon = sample(this.backgroundPolygons, 1)[0]
     if (!polygon) {
       if (this.polygons.length === 0) {
         const polygons = Object.values(this._polygons)

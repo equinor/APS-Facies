@@ -15,7 +15,7 @@
 
 <script setup lang="ts">
 import { isDevelopmentBuild } from '@/config'
-import { delay } from 'lodash'
+import { funnel } from 'remeda'
 import type { MessageType } from '@/utils/domain/messages/base'
 import type { Optional } from '@/utils/typing'
 import { computed, ref, watch } from 'vue'
@@ -55,7 +55,10 @@ watch(
       shown.value = true
       const { use, wait } = messageStore.autoDismiss
       if (use) {
-        delay(() => (shown.value = false), wait)
+        funnel(() => (shown.value = false), {
+          minQuietPeriodMs: wait,
+          triggerAt: 'end',
+        })
       }
     }
   },
