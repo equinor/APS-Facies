@@ -1,18 +1,21 @@
 'use strict'
-import axios from 'axios'
 
 function callPythonFunction(method: string, parameters: string): Promise<JSON> {
   return new Promise((resolve, reject) => {
     // execute code, if successful call resolve with the result, otherwise reject
 
     // simple:
-    axios
-      .post(`/${method}`, parameters, {
-        // eslint-disable-next-line @typescript-eslint/naming-convention
-        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      })
+    fetch(`/${method}`, {
+      method: 'POST',
+      body: parameters,
+      // eslint-disable-next-line @typescript-eslint/naming-convention
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+    })
       .then((response) => {
-        resolve(response.data)
+        response
+          .json()
+          .then((data) => resolve(data))
+          .catch((reason) => reject(reason))
       })
       .catch((reason) => reject(reason))
   })
