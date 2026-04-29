@@ -41,6 +41,7 @@
         dominant-baseline="central"
         font-family="Roboto, sans-serif"
         font-size="0.07"
+        :transform="`rotate(${(annotation.angle * 180) / Math.PI} ${annotation.x} ${1 - annotation.y})`"
       >
         {{ annotation.text }}
       </text>
