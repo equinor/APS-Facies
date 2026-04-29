@@ -150,9 +150,19 @@ type FaciesTable = {
   alias: string
 }[]
 
-function majorAngleMoments(polygon: [number, number][]): number {
+function majorAngleMoments(
+  polygon: [number, number][],
+  center?: { x: number; y: number },
+): number {
+  // For more information on Principal component analysis, which this implements, see
+  // https://en.wikipedia.org/wiki/Principal_component_analysis
+
+  // 'Written' by Claude Opus 4.7 via Copilot for PyCharm with the prompt
+  // > Given the function `plotify`, how would you go about determining the major angle of the polygons (list of points)?
+  // > All polygons are convex
+
   // Translate to origin first for numerical stability
-  const { x: cx, y: cy } = centerOfPolygon(polygon)
+  const { x: cx, y: cy } = center || centerOfPolygon(polygon)
   const p = polygon.map(([x, y]) => [x - cx, y - cy] as [number, number])
 
   let a = 0,
@@ -208,7 +218,7 @@ export function plotify(
           color: getTextColor(fillColor || color),
         },
         showarrow: false,
-        angle: majorAngleMoments(polygon),
+        angle: majorAngleMoments(polygon, { x, y }),
       })
 
       return obj
