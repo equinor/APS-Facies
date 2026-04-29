@@ -25,28 +25,37 @@ function polygon2svg(
     .concat(' Z')
 }
 
-function average(arr: number[]): number {
-  return arr.reduce((sum, e): number => sum + e, 0) / arr.length
-}
-
 function centerOfPolygon(polygon: [number, number][]): {
   x: number
   y: number
 } {
-  const points = polygon.reduce(
-    (point, [x, y]) => {
-      point.x.push(x)
-      point.y.push(y)
-      return point
-    },
-    {
-      x: [] as number[],
-      y: [] as number[],
-    },
-  )
+  function accumulate(
+    fn: (current: [number, number], previous: [number, number]) => number,
+  ) {
+    return polygon.reduce((acc, current, idx) => {
+      if (idx === 0) return acc
+      return acc + fn(current, polygon[idx - 1] as [number, number])
+    }, 0)
+  }
+
+  // Using the formula of a Centroid from https://en.wikipedia.org/wiki/Centroid#Of_a_polygon
+  const AREA = accumulate(([x, y], [xPrev, yPrev]) => xPrev * y - x * yPrev) / 2
+
+  const centerX =
+    accumulate(
+      ([x, y], [xPrev, yPrev]) => (x + xPrev) * (xPrev * y - x * yPrev),
+    ) /
+    (6 * AREA)
+
+  const centerY =
+    accumulate(
+      ([x, y], [xPrev, yPrev]) => (y + yPrev) * (xPrev * y - x * yPrev),
+    ) /
+    (6 * AREA)
+
   return {
-    x: average(points.x),
-    y: average(points.y),
+    x: centerX,
+    y: centerY,
   }
 }
 
