@@ -136,6 +136,7 @@ interface AnnotationSpecification {
     color: Color
   }
   showarrow: boolean
+  angle: number
 }
 
 export interface PlotSpecification {
@@ -148,6 +149,28 @@ type FaciesTable = {
   color: Color
   alias: string
 }[]
+
+function majorAngleMoments(polygon: [number, number][]): number {
+  // Translate to origin first for numerical stability
+  const { x: cx, y: cy } = centerOfPolygon(polygon)
+  const p = polygon.map(([x, y]) => [x - cx, y - cy] as [number, number])
+
+  let a = 0,
+    ixx = 0,
+    iyy = 0,
+    ixy = 0
+  for (let i = 0; i < p.length; i++) {
+    const [x0, y0] = p[i]!
+    const [x1, y1] = p[(i + 1) % p.length]!
+    const cross = x0 * y1 - x1 * y0
+    a += cross
+    ixx += (y0 * y0 + y0 * y1 + y1 * y1) * cross
+    iyy += (x0 * x0 + x0 * x1 + x1 * x1) * cross
+    ixy += (x0 * y1 + 2 * x0 * y0 + 2 * x1 * y1 + x1 * y0) * cross
+  }
+  // a is 6 * signed area; normalization constants cancel in the angle formula
+  return 0.5 * Math.atan2(-2 * ixy, iyy - ixx)
+}
 
 export function plotify(
   polygons: PolygonDescription[],
@@ -185,6 +208,7 @@ export function plotify(
           color: getTextColor(fillColor || color),
         },
         showarrow: false,
+        angle: majorAngleMoments(polygon),
       })
 
       return obj
