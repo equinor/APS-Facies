@@ -260,7 +260,7 @@ export class HeatmapController extends DatasetController<'heatmap'> {
       if (!row) continue
       for (let c = 0; c < cols; c++) {
         const t = ((row[c] ?? 0) - min) / range
-        const [pr, pg, pb] = parseColor(getColor(t))
+        const [pr, pg, pb] = getColor(t)
         const offset = (r * cols + c) * 4
         pixels[offset] = pr
         pixels[offset + 1] = pg
@@ -338,89 +338,108 @@ function computeValueRange(grid: number[][]): { min: number; max: number } {
 }
 
 
-type Stops = readonly (readonly [number, string])[]
+type RGB = readonly [number, number, number]
+type NumericStop = readonly [number, RGB]
+type NumericStops = readonly NumericStop[]
 
-function resolveStops(scale: ColorScale): Stops {
+function resolveStops(scale: ColorScale): NumericStops {
+  // Each stop's color string is parsed exactly once here; the returned
+  // [t, [r, g, b]] tuples are then consumed in the hot pixel loop
+  // without any further string handling.
   if (typeof scale === 'string') {
-    return NAMED_SCALES[scale] ?? defaultScale
+    const named = NAMED_SCALES[scale] ?? defaultScale
+    return parseStops(named)
   }
   if (Array.isArray(scale) && scale.length > 0) {
     const denom = Math.max(scale.length - 1, 1)
     return scale.map(
-      (s, i) => [i / denom, s.color] as [number, string],
+      (s, i) => [i / denom, parseColor(s.color)] as NumericStop,
     )
   }
-  return defaultScale
+  return parseStops(defaultScale)
 }
 
-function makeColorGetter(scale: ColorScale): (t: number) => string {
-  const stops = resolveStops(scale)
-  return (t) => interpolateStops(stops, clamp01(t))
-}
-
-function clamp01(t: number): number {
-  if (t < 0) return 0
-  if (t > 1) return 1
-  return Number.isFinite(t) ? t : 0
-}
-
-function interpolateStops(stops: Stops, t: number): string {
-  const first = stops[0]
-  const last = stops[stops.length - 1]
-  if (!first || !last) return '#000000'
-  if (stops.length === 1) return first[1]
-  for (let i = 1; i < stops.length; i++) {
-    const lo = stops[i - 1]
-    const hi = stops[i]
-    if (!lo || !hi) continue
-    if (t <= hi[0]) {
-      const k = (t - lo[0]) / Math.max(hi[0] - lo[0], 1e-9)
-      return mixHex(lo[1], hi[1], k)
-    }
+function parseStops(stops: readonly (readonly [number, string])[]): NumericStops {
+  const out: NumericStop[] = new Array(stops.length)
+  for (let i = 0; i < stops.length; i++) {
+    const stop = stops[i]
+    if (!stop) continue
+    out[i] = [stop[0], parseColor(stop[1])]
   }
-  return last[1]
+  return out
 }
 
-function mixHex(a: string, b: string, t: number): string {
-  const ca = parseColor(a)
-  const cb = parseColor(b)
-  const r = Math.round(ca[0] + (cb[0] - ca[0]) * t)
-  const g = Math.round(ca[1] + (cb[1] - ca[1]) * t)
-  const bl = Math.round(ca[2] + (cb[2] - ca[2]) * t)
-  return `rgb(${r},${g},${bl})`
+/**
+ * Build a `t ∈ [0, 1] → [r, g, b]` color getter.  All string parsing is
+ * done up-front in `resolveStops`; the returned function operates on
+ * numeric tuples only and is safe to call inside tight pixel loops.
+ */
+function makeColorGetter(scale: ColorScale): (t: number) => RGB {
+  const stops = resolveStops(scale)
+  if (stops.length === 0) return () => [0, 0, 0] as const
+  if (stops.length === 1) {
+    const only = stops[0]![1]
+    return () => only
+  }
+  const first = stops[0]!
+  const last = stops[stops.length - 1]!
+  return (t) => {
+    const u = t < 0 ? 0 : t > 1 ? 1 : Number.isFinite(t) ? t : 0
+    if (u <= first[0]) return first[1]
+    if (u >= last[0]) return last[1]
+    for (let i = 1; i < stops.length; i++) {
+      const lo = stops[i - 1]!
+      const hi = stops[i]!
+      if (u <= hi[0]) {
+        const k = (u - lo[0]) / Math.max(hi[0] - lo[0], 1e-9)
+        return mix(lo[1], hi[1], k)
+      }
+    }
+    return last[1]
+  }
 }
 
-function parseHex(c: string): [number, number, number] {
+function mix(a: RGB, b: RGB, t: number): RGB {
+  return [
+    Math.round(a[0] + (b[0] - a[0]) * t),
+    Math.round(a[1] + (b[1] - a[1]) * t),
+    Math.round(a[2] + (b[2] - a[2]) * t),
+  ]
+}
+
+function parseHex(c: string): RGB {
   // Accepts #rgb / #rrggbb.  Falls back to black on unexpected input.
-  if (c.startsWith('#')) {
-    const hex = c.slice(1)
-    if (hex.length === 3) {
-      const r = hex[0] ?? '0'
-      const g = hex[1] ?? '0'
-      const b = hex[2] ?? '0'
-      return [
-        parseInt(r + r, 16),
-        parseInt(g + g, 16),
-        parseInt(b + b, 16),
-      ]
-    }
-    if (hex.length === 6) {
-      return [
-        parseInt(hex.slice(0, 2), 16),
-        parseInt(hex.slice(2, 4), 16),
-        parseInt(hex.slice(4, 6), 16),
-      ]
-    }
+  const hex = c.slice(1)
+  if (hex.length === 3) {
+    const r = hex[0] ?? '0'
+    const g = hex[1] ?? '0'
+    const b = hex[2] ?? '0'
+    return [
+      parseInt(r + r, 16),
+      parseInt(g + g, 16),
+      parseInt(b + b, 16),
+    ]
+  }
+  if (hex.length === 6) {
+    return [
+      parseInt(hex.slice(0, 2), 16),
+      parseInt(hex.slice(2, 4), 16),
+      parseInt(hex.slice(4, 6), 16),
+    ]
   }
   return [0, 0, 0]
 }
 
 /**
- * Parse the strings produced by makeColorGetter — either `#rgb`/`#rrggbb`
- * (raw color stop) or `rgb(r,g,b)` (interpolated mix).
+ * Parse a CSS color literal into an `[r, g, b]` tuple.  Accepts the two
+ * forms produced by our own scales (`#rgb`/`#rrggbb` and `rgb(...)` /
+ * `rgba(...)`); anything else falls back to black.
+ *
+ * Only invoked at scale-resolution time, never inside the per-pixel
+ * loop.
  */
-function parseColor(c: string): [number, number, number] {
-  if (c.startsWith('#')) return parseHex(c)
+function parseColor(c: string): RGB {
+  if (c.charCodeAt(0) === 35 /* '#' */) return parseHex(c)
   const m = /^rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)/.exec(c)
   if (m) {
     return [
