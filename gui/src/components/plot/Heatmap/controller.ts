@@ -249,7 +249,7 @@ export class HeatmapController extends DatasetController<'heatmap'> {
     const { min, max } = computeValueRange(grid)
     const range = max - min || 1
     const getColor = makeColorGetter(
-      (dataset.colorScale ?? 'Greys') as ColorScale,
+      (dataset.colorScale ?? defaultScale) as ColorScale,
     )
 
     // Fill the buffer one pixel per cell.
