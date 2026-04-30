@@ -1,5 +1,5 @@
 /*
-Source: https://raw.githubusercontent.com/plotly/plotly.js/refs/heads/master/src/components/colorscale/scales.js
+Source: https://github.com/plotly/plotly.js/blob/110c53395fb816a5e201769e5f17aeeeec905aa1/src/components/colorscale/scales.js
 Adapted for TypeScript
 
 MIT License
