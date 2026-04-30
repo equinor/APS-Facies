@@ -18,6 +18,7 @@
     :color-scale="_colorScale"
     :width="size?.width"
     :height="size?.height"
+    :disabled="_disabled"
   />
   <!--  <static-plot-->
   <!--    v-else-->

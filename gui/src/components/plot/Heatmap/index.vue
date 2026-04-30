@@ -4,6 +4,7 @@
     :options="chartOptions"
     :width="props.size.width"
     :height="props.size.height"
+    :style="{ opacity }"
   />
 </template>
 
@@ -23,6 +24,7 @@ import {
   HeatmapController,
 } from '@/components/plot/Heatmap/controller.ts'
 import { DEFAULT_SIZE } from '@/config.ts'
+import { getDisabledOpacity } from '@/utils/helpers/simple'
 
 // Register the heatmap controller/element (and the linear scales it
 // depends on) once with Chart.js, then create a typed Vue component
@@ -38,12 +40,16 @@ type Props = {
   data: number[][]
   colorScale?: ColorScale | undefined
   size?: { width: number; height: number }
+  disabled?: boolean
 }
 
 const props = withDefaults(defineProps<Props>(), {
   colorScale: undefined,
   size: () => ({ width: DEFAULT_SIZE.width, height: DEFAULT_SIZE.height }),
+  disabled: false,
 })
+
+const opacity = computed(() => getDisabledOpacity(props.disabled))
 
 const chartData = computed<ChartData<'heatmap'>>(() => ({
   datasets: [
