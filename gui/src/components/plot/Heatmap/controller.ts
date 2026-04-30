@@ -117,8 +117,11 @@ export class HeatmapController extends DatasetController<'heatmap'> {
   }
 
   static readonly overrides = {
-    aspectRatio: 1,
+    // No aspectRatio: the canvas is sized authoritatively by the host
+    // (Vue) component to match the data's aspect, and we want the
+    // rendered heatmap to cover 100% of that canvas.
     animation: false,
+    layout: { padding: 0 },
     plugins: {
       legend: { display: false },
       tooltip: { enabled: false },
@@ -228,18 +231,16 @@ export class HeatmapController extends DatasetController<'heatmap'> {
     const cols = rows && grid[0] ? grid[0].length : 0
     if (!rows || !cols) return
 
-    const xScale = this._cachedMeta.xScale
-    const yScale = this._cachedMeta.yScale
-    if (!xScale || !yScale) return
-
-    const xStart = xScale.getPixelForValue(0)
-    const xEnd = xScale.getPixelForValue(cols)
-    const yStart = yScale.getPixelForValue(0)
-    const yEnd = yScale.getPixelForValue(rows)
-    const dx = Math.min(xStart, xEnd)
-    const dy = Math.min(yStart, yEnd)
-    const dw = Math.abs(xEnd - xStart)
-    const dh = Math.abs(yEnd - yStart)
+    // Render to the full chart canvas — no axes, no layout padding.
+    // The host component is responsible for sizing the <canvas> so that
+    // its aspect matches the data; we trust those dimensions verbatim.
+    //
+    // Use the canvas' physical pixel dimensions and reset any transform
+    // Chart.js may have applied (e.g. devicePixelRatio scaling) so the
+    // blit covers the full backing buffer regardless of DPR.
+    const canvas = this.chart.canvas
+    const dw = canvas.width
+    const dh = canvas.height
     if (dw <= 0 || dh <= 0) return
 
     const buffer = this._ensureBuffer(cols, rows)
@@ -274,24 +275,16 @@ export class HeatmapController extends DatasetController<'heatmap'> {
     const smooth = dataset.smooth !== false
 
     ctx.save()
-    // Clip to the chart area so the blit can't bleed onto axes.
-    const area = this.chart.chartArea
-    ctx.beginPath()
-    ctx.rect(
-      area.left,
-      area.top,
-      area.right - area.left,
-      area.bottom - area.top,
-    )
-    ctx.clip()
-
+    // Identity transform: draw in raw device pixels so the blit always
+    // covers the full canvas backing buffer.
+    ctx.setTransform(1, 0, 0, 1, 0, 0)
     ctx.imageSmoothingEnabled = smooth
     if (smooth) {
       // 'high' triggers bilinear/bicubic in modern browsers, matching
       // Plotly's 'best' setting.
       ctx.imageSmoothingQuality = 'high'
     }
-    ctx.drawImage(buffer, dx, dy, dw, dh)
+    ctx.drawImage(buffer, 0, 0, dw, dh)
     ctx.restore()
   }
 

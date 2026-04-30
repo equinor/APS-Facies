@@ -2,9 +2,9 @@
   <Heatmap
     :data="chartData"
     :options="chartOptions"
-    :width="props.size.width"
-    :height="props.size.height"
-    :style="{ opacity }"
+    :width="canvasSize.width"
+    :height="canvasSize.height"
+    :style="canvasStyle"
   />
 </template>
 
@@ -50,6 +50,32 @@ const props = withDefaults(defineProps<Props>(), {
 })
 
 const opacity = computed(() => getDisabledOpacity(props.disabled))
+
+/**
+ * The canvas is sized to match the data's aspect ratio (cols × rows),
+ * scaled up uniformly so that it is at least `size.width × size.height`.
+ * `props.size` thus acts as a minimum bound rather than a fixed size,
+ * which prevents non-square data from being squashed into a square box.
+ */
+const canvasSize = computed(() => {
+  const data = props.data
+  const rows = data?.length ?? 0
+  const cols = rows > 0 ? (data?.[0]?.length ?? 0) : 0
+  if (rows <= 0 || cols <= 0) {
+    return { width: props.size.width, height: props.size.height }
+  }
+  const scale = Math.max(1, props.size.width / cols, props.size.height / rows)
+  return {
+    width: Math.round(cols * scale),
+    height: Math.round(rows * scale),
+  }
+})
+
+const canvasStyle = computed(() => ({
+  opacity: opacity.value,
+  width: `${canvasSize.value.width}px`,
+  height: `${canvasSize.value.height}px`,
+}))
 
 const chartData = computed<ChartData<'heatmap'>>(() =>
   props.data
