@@ -6,7 +6,7 @@ import {
 } from 'chart.js'
 
 import type { ColorScale } from '../utils'
-import {scales as NAMED_SCALES, defaultScale} from './scales.ts'
+import { scales as NAMED_SCALES, defaultScale } from './scales.ts'
 
 /* ------------------------------------------------------------------ *
  * Chart.js module augmentation                                       *
@@ -277,7 +277,12 @@ export class HeatmapController extends DatasetController<'heatmap'> {
     // Clip to the chart area so the blit can't bleed onto axes.
     const area = this.chart.chartArea
     ctx.beginPath()
-    ctx.rect(area.left, area.top, area.right - area.left, area.bottom - area.top)
+    ctx.rect(
+      area.left,
+      area.top,
+      area.right - area.left,
+      area.bottom - area.top,
+    )
     ctx.clip()
 
     ctx.imageSmoothingEnabled = smooth
@@ -290,10 +295,7 @@ export class HeatmapController extends DatasetController<'heatmap'> {
     ctx.restore()
   }
 
-  private _ensureBuffer(
-    cols: number,
-    rows: number,
-  ): HTMLCanvasElement | null {
+  private _ensureBuffer(cols: number, rows: number): HTMLCanvasElement | null {
     if (cols <= 0 || rows <= 0) return null
     let buffer = this._imageBuffer
     if (!buffer) {
@@ -303,7 +305,9 @@ export class HeatmapController extends DatasetController<'heatmap'> {
     if (buffer.width !== cols) buffer.width = cols
     if (buffer.height !== rows) buffer.height = rows
     if (!this._imageBufferCtx) {
-      this._imageBufferCtx = buffer.getContext('2d', { willReadFrequently: true })
+      this._imageBufferCtx = buffer.getContext('2d', {
+        willReadFrequently: true,
+      })
     }
     return buffer
   }
@@ -337,7 +341,6 @@ function computeValueRange(grid: number[][]): { min: number; max: number } {
   return { min, max }
 }
 
-
 type RGB = readonly [number, number, number]
 type NumericStop = readonly [number, RGB]
 type NumericStops = readonly NumericStop[]
@@ -352,14 +355,14 @@ function resolveStops(scale: ColorScale): NumericStops {
   }
   if (Array.isArray(scale) && scale.length > 0) {
     const denom = Math.max(scale.length - 1, 1)
-    return scale.map(
-      (s, i) => [i / denom, parseColor(s.color)] as NumericStop,
-    )
+    return scale.map((s, i) => [i / denom, parseColor(s.color)] as NumericStop)
   }
   return parseStops(defaultScale)
 }
 
-function parseStops(stops: readonly (readonly [number, string])[]): NumericStops {
+function parseStops(
+  stops: readonly (readonly [number, string])[],
+): NumericStops {
   const out: NumericStop[] = new Array(stops.length)
   for (let i = 0; i < stops.length; i++) {
     const stop = stops[i]
@@ -414,11 +417,7 @@ function parseHex(c: string): RGB {
     const r = hex[0] ?? '0'
     const g = hex[1] ?? '0'
     const b = hex[2] ?? '0'
-    return [
-      parseInt(r + r, 16),
-      parseInt(g + g, 16),
-      parseInt(b + b, 16),
-    ]
+    return [parseInt(r + r, 16), parseInt(g + g, 16), parseInt(b + b, 16)]
   }
   if (hex.length === 6) {
     return [

@@ -8,7 +8,12 @@
 </template>
 
 <script setup lang="ts">
-import { Chart as ChartJS, LinearScale, type ChartData, type ChartOptions } from 'chart.js'
+import {
+  Chart as ChartJS,
+  LinearScale,
+  type ChartData,
+  type ChartOptions,
+} from 'chart.js'
 import { createTypedChart } from 'vue-chartjs'
 import { computed } from 'vue'
 
@@ -24,7 +29,10 @@ import { DEFAULT_SIZE } from '@/config.ts'
 // bound to the 'heatmap' type.  vue-chartjs handles canvas creation,
 // reactivity (data/options diffing) and lifecycle for us.
 ChartJS.register(LinearScale)
-const Heatmap = createTypedChart('heatmap', [HeatmapController, HeatmapCellElement])
+const Heatmap = createTypedChart('heatmap', [
+  HeatmapController,
+  HeatmapCellElement,
+])
 
 type Props = {
   data: number[][]

@@ -19,17 +19,17 @@
     :width="size?.width"
     :height="size?.height"
   />
-<!--  <static-plot-->
-<!--    v-else-->
-<!--    v-tooltip.bottom="-->
-<!--     _disabled ? 'The field has changed since it was simulated' : undefined-->
-<!--    "-->
-<!--    :data-definition="dataDefinition"-->
-<!--    :disabled="_disabled"-->
-<!--    :expand="expand"-->
-<!--    :width="size.width"-->
-<!--    :height="size.height"-->
-<!--  />-->
+  <!--  <static-plot-->
+  <!--    v-else-->
+  <!--    v-tooltip.bottom="-->
+  <!--     _disabled ? 'The field has changed since it was simulated' : undefined-->
+  <!--    "-->
+  <!--    :data-definition="dataDefinition"-->
+  <!--    :disabled="_disabled"-->
+  <!--    :expand="expand"-->
+  <!--    :width="size.width"-->
+  <!--    :height="size.height"-->
+  <!--  />-->
 </template>
 
 <script setup lang="ts">
@@ -58,7 +58,7 @@ type Props = {
 const props = withDefaults(defineProps<Props>(), {
   showScale: false,
   expand: false,
-  size: () => ({width: DEFAULT_SIZE.width, height: DEFAULT_SIZE.height }),
+  size: () => ({ width: DEFAULT_SIZE.width, height: DEFAULT_SIZE.height }),
   disabled: false,
   colorScale: undefined,
 })
