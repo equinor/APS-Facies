@@ -20,29 +20,15 @@
     :height="size?.height"
     :disabled="_disabled"
   />
-  <!--  <static-plot-->
-  <!--    v-else-->
-  <!--    v-tooltip.bottom="-->
-  <!--     _disabled ? 'The field has changed since it was simulated' : undefined-->
-  <!--    "-->
-  <!--    :data-definition="dataDefinition"-->
-  <!--    :disabled="_disabled"-->
-  <!--    :expand="expand"-->
-  <!--    :width="size.width"-->
-  <!--    :height="size.height"-->
-  <!--  />-->
 </template>
 
 <script setup lang="ts">
-import StaticPlot from '@/components/plot/StaticPlot.vue'
 import Heatmap from '@/components/plot/Heatmap/index.vue'
 
 import type { GaussianRandomField } from '@/utils/domain'
 
 import { DEFAULT_SIZE } from '@/config'
-import type { ColorScale, ColorMapping } from '@/components/plot/utils'
-import { colorMapping as mapColors } from '@/components/plot/utils'
-import type { PlotData } from 'plotly.js-dist-min'
+import type { ColorScale } from '@/components/plot/utils'
 import { computed, watch } from 'vue'
 import { useOptionStore } from '@/stores/options'
 import { useParameterGridSimulationBoxStore } from '@/stores/parameters/grid/simulation-box'
@@ -73,18 +59,7 @@ const waiting = computed<boolean>(() => {
 const _colorScale = computed<ColorScale>(
   () => props.colorScale ?? optionStore.options.colorScale,
 )
-const colorMapping = computed<ColorMapping>(() => mapColors(_colorScale.value))
-const data = computed(() => props.value.simulation || undefined)
-const dataDefinition = computed<Partial<PlotData>[]>(() => [
-  {
-    z: props.value.simulation || undefined,
-    zsmooth: 'best',
-    type: 'heatmap',
-    hoverinfo: 'none',
-    colorscale: colorMapping.value,
-    showscale: props.showScale,
-  },
-])
+const data = computed(() => props.value.simulation)
 
 const _disabled = computed(
   () => props.disabled || !props.value.isRepresentative,
