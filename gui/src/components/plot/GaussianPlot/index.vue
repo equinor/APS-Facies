@@ -9,21 +9,32 @@
       </v-row>
     </v-col>
   </v-row>
-  <static-plot
+  <Heatmap
     v-else
     v-tooltip.bottom="
       _disabled ? 'The field has changed since it was simulated' : undefined
     "
-    :data-definition="dataDefinition"
-    :disabled="_disabled"
-    :expand="expand"
-    :width="size.width"
-    :height="size.height"
+    :data="data"
+    :color-scale="_colorScale"
+    :width="size?.width"
+    :height="size?.height"
   />
+<!--  <static-plot-->
+<!--    v-else-->
+<!--    v-tooltip.bottom="-->
+<!--     _disabled ? 'The field has changed since it was simulated' : undefined-->
+<!--    "-->
+<!--    :data-definition="dataDefinition"-->
+<!--    :disabled="_disabled"-->
+<!--    :expand="expand"-->
+<!--    :width="size.width"-->
+<!--    :height="size.height"-->
+<!--  />-->
 </template>
 
 <script setup lang="ts">
 import StaticPlot from '@/components/plot/StaticPlot.vue'
+import Heatmap from '@/components/plot/Heatmap/index.vue'
 
 import type { GaussianRandomField } from '@/utils/domain'
 
@@ -47,7 +58,7 @@ type Props = {
 const props = withDefaults(defineProps<Props>(), {
   showScale: false,
   expand: false,
-  size: () => DEFAULT_SIZE,
+  size: () => ({width: DEFAULT_SIZE.width, height: DEFAULT_SIZE.height }),
   disabled: false,
   colorScale: undefined,
 })
@@ -62,6 +73,7 @@ const _colorScale = computed<ColorScale>(
   () => props.colorScale ?? optionStore.options.colorScale,
 )
 const colorMapping = computed<ColorMapping>(() => mapColors(_colorScale.value))
+const data = computed(() => props.value.simulation || undefined)
 const dataDefinition = computed<Partial<PlotData>[]>(() => [
   {
     z: props.value.simulation || undefined,

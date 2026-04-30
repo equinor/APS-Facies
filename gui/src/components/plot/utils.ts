@@ -1,7 +1,7 @@
 import type { Color } from '@/utils/domain/facies/helpers/colors'
-
+import {type COLORS } from '@/components/plot/Heatmap/scales.ts'
 export type ColorScale =
-  | string
+  | COLORS
   | {
       value: number
       color: Color
