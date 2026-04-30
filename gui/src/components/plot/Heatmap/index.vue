@@ -1,14 +1,30 @@
 <template>
-    <canvas ref="canvas"/>
+  <Heatmap
+    :data="chartData"
+    :options="chartOptions"
+    :width="props.size.width"
+    :height="props.size.height"
+  />
 </template>
 
 <script setup lang="ts">
-import { Chart as ChartJS, type ChartConfiguration, LinearScale } from 'chart.js';
-import { onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { Chart as ChartJS, LinearScale, type ChartData, type ChartOptions } from 'chart.js'
+import { createTypedChart } from 'vue-chartjs'
+import { computed } from 'vue'
 
 import type { ColorScale } from '../utils'
-import { HeatmapCellElement, HeatmapController } from "@/components/plot/Heatmap/controller.ts";
-import { DEFAULT_SIZE } from "@/config.ts";
+import {
+  HeatmapCellElement,
+  HeatmapController,
+} from '@/components/plot/Heatmap/controller.ts'
+import { DEFAULT_SIZE } from '@/config.ts'
+
+// Register the heatmap controller/element (and the linear scales it
+// depends on) once with Chart.js, then create a typed Vue component
+// bound to the 'heatmap' type.  vue-chartjs handles canvas creation,
+// reactivity (data/options diffing) and lifecycle for us.
+ChartJS.register(LinearScale)
+const Heatmap = createTypedChart('heatmap', [HeatmapController, HeatmapCellElement])
 
 type Props = {
   data: number[][]
@@ -18,64 +34,31 @@ type Props = {
 
 const props = withDefaults(defineProps<Props>(), {
   colorScale: undefined,
-  size: () => ({width: DEFAULT_SIZE.width, height: DEFAULT_SIZE.height }),
+  size: () => ({ width: DEFAULT_SIZE.width, height: DEFAULT_SIZE.height }),
 })
 
-const canvas = ref<HTMLCanvasElement | null>(null)
-let chart: ChartJS<'heatmap'> | null = null
-
-function buildConfig(): ChartConfiguration<'heatmap'> {
-  return {
-    type: 'heatmap',
-    data: {
-      datasets: [
-        {
-          data: props.data,
-          colorScale: props.colorScale,
-        },
-      ],
+const chartData = computed<ChartData<'heatmap'>>(() => ({
+  datasets: [
+    {
+      data: props.data,
+      colorScale: props.colorScale,
     },
-    options: {
-      animation: false,
-      transitions: {
-        active: { animation: { duration: 0 } },
-        resize: { animation: { duration: 0 } },
-        show: { animation: { duration: 0 } },
-        hide: { animation: { duration: 0 } },
-      },
-    },
-  }
-}
+  ],
+}))
 
-onMounted(() => {
-  if (!canvas.value) return
-  chart = new ChartJS<'heatmap'>(canvas.value, buildConfig())
-})
-
-watch(() => [props.size.width, props.size.height], () => {
-  if (!chart) return
-  chart.resize(props.size.width, props.size.height)
-})
-
-watch(
-  () => [props.data, props.colorScale],
-  () => {
-    if (!chart) return
-    const ds = chart.data.datasets[0]
-    if (!ds) return
-    ds.data = props.data
-    ds.colorScale = props.colorScale
-    chart.update()
+const chartOptions = computed<ChartOptions<'heatmap'>>(() => ({
+  // Disable Chart.js' ResizeObserver-driven auto-resize: it fights with
+  // an unsized parent and produces the "accordion" effect where the
+  // canvas keeps growing on every layout pass.  Width/height are passed
+  // explicitly via the component's props instead.
+  responsive: false,
+  maintainAspectRatio: false,
+  animation: false,
+  transitions: {
+    active: { animation: { duration: 0 } },
+    resize: { animation: { duration: 0 } },
+    show: { animation: { duration: 0 } },
+    hide: { animation: { duration: 0 } },
   },
-  { deep: false },
-)
-
-onBeforeUnmount(() => {
-  chart?.destroy()
-  chart = null
-})
-
-ChartJS.register(HeatmapCellElement, HeatmapController, LinearScale)
-
+}))
 </script>
-
