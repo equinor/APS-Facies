@@ -37,7 +37,7 @@ const Heatmap = createTypedChart('heatmap', [
 ])
 
 type Props = {
-  data: number[][]
+  data: number[][] | null
   colorScale?: ColorScale | undefined
   size?: { width: number; height: number }
   disabled?: boolean
@@ -51,14 +51,20 @@ const props = withDefaults(defineProps<Props>(), {
 
 const opacity = computed(() => getDisabledOpacity(props.disabled))
 
-const chartData = computed<ChartData<'heatmap'>>(() => ({
-  datasets: [
-    {
-      data: props.data,
-      colorScale: props.colorScale,
-    },
-  ],
-}))
+const chartData = computed<ChartData<'heatmap'>>(() =>
+  props.data
+    ? {
+        datasets: [
+          {
+            data: props.data,
+            colorScale: props.colorScale,
+          },
+        ],
+      }
+    : {
+        datasets: [],
+      },
+)
 
 const chartOptions = computed<ChartOptions<'heatmap'>>(() => ({
   // Disable Chart.js' ResizeObserver-driven auto-resize: it fights with
