@@ -24,7 +24,6 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 * */
-import tinycolor, { type ColorInput } from 'tinycolor2';
 
 export const scales = {
     Greys: [
@@ -158,63 +157,4 @@ export const scales = {
 } as const
 
 export const defaultScale = scales.RdBu;
-
-export function getScale(scl: COLORS | string, dflt?: readonly (readonly [number, string])[]) {
-    if(!dflt) dflt = defaultScale;
-    if(!scl) return dflt;
-
-    function parseScale() {
-        try {
-            scl = scales[scl] || JSON.parse(scl);
-        } catch(e) {
-            scl = dflt;
-        }
-    }
-
-    if(typeof scl === 'string') {
-        parseScale();
-        // occasionally scl is double-JSON encoded...
-        if(typeof scl === 'string') parseScale();
-    }
-
-    if(!isValidScaleArray(scl)) return dflt;
-    return scl;
-}
-
-
-function isValidScaleArray(scl: COLORS | ColorInput) {
-    let highestVal = 0;
-
-    if(!Array.isArray(scl) || scl.length < 2) return false;
-
-    if(!scl[0] || !scl[scl.length - 1]) return false;
-
-    if(+scl[0][0] !== 0 || +scl[scl.length - 1][0] !== 1) return false;
-
-    for(let i = 0; i < scl.length; i++) {
-        let si = scl[i];
-
-        if(si.length !== 2 || +si[0] < highestVal || !tinycolor(si[1]).isValid()) {
-            return false;
-        }
-
-        highestVal = +si[0];
-    }
-
-    return true;
-}
-
 export type COLORS = keyof typeof scales
-
-export function isValidScale(scl: COLORS| ColorInput) {
-    if(scales[scl] !== undefined) return true;
-    else return isValidScaleArray(scl);
-}
-
-export default {
-    scales: scales,
-    defaultScale: defaultScale,
-
-    get: getScale,
-    isValid: isValidScale
-};
