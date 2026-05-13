@@ -33,7 +33,7 @@ import type {
   Zone,
 } from '@/utils/domain'
 import type { TruncationRuleTemplateType } from '@/stores/truncation-rules/templates/types'
-import { isNumber, sample, times } from 'lodash'
+import { isNumber, sample, times } from 'remeda'
 import { useGaussianRandomFieldStore } from '@/stores/gaussian-random-fields'
 import { APSError, APSTypeError } from '@/utils/domain/errors'
 import OverlayTruncationRule, {
@@ -374,7 +374,10 @@ export const useTruncationRuleStore = defineStore('truncation-rules', () => {
   }
 
   function merge(rule: Cubic, polygons: CubicPolygon[]) {
-    const parent = sample(polygons.map((p) => p.parent))
+    const parent = sample(
+      polygons.map((p) => p.parent),
+      1,
+    )[0]
     if (!parent) throw new Error('Must merge at least one polygon.')
     if (!polygons.every((polygon) => getId(polygon.parent) === getId(parent))) {
       throw new APSTypeError(

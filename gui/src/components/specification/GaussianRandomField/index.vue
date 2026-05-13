@@ -58,7 +58,7 @@
 </template>
 
 <script setup lang="ts">
-import cloneDeep from 'lodash/cloneDeep'
+import { clone as cloneDeep } from 'remeda'
 
 import {
   isDevelopmentBuild,

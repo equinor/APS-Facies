@@ -45,7 +45,7 @@
 
 <script setup lang="ts" generic="T extends number = number">
 import type { BigNumber } from 'mathjs'
-import { isNumber } from 'lodash'
+import { isNumber } from 'remeda'
 
 import math from '@/plugins/mathjs'
 
