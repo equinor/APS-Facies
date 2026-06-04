@@ -129,6 +129,9 @@ async function loadModelFile(
         ignoreAttributes: false,
         trimValues: true,
         updateTag(tagName, jPath, attrs) {
+          if (typeof jPath !== 'string') {
+            jPath = jPath.toString()
+          }
           if (jPath.includes('Trunc2D_Cubic.BackGroundModel')) {
             if (/\.L\d+(\.ProbFrac)?$/.test(jPath)) {
               const previousLevel: number =
