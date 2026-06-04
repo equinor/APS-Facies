@@ -19,7 +19,10 @@
   </v-row>
 </template>
 
-<script setup lang="ts">
+<script
+  setup
+  lang="ts"
+>
 import rms from '@/api/rms'
 import { relativeTo as _relativeTo } from '@/utils/queries'
 import { ref, computed, onMounted, watch } from 'vue'

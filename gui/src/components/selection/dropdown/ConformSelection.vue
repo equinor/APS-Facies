@@ -7,7 +7,10 @@
   />
 </template>
 
-<script setup lang="ts">
+<script
+  setup
+  lang="ts"
+>
 import type { Zone } from '@/utils/domain'
 import type { ZoneConformOption } from '@/utils/domain/zone'
 import type { ListItem } from '@/utils/typing'

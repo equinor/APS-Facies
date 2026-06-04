@@ -32,7 +32,10 @@
   </v-row>
 </template>
 
-<script setup lang="ts">
+<script
+  setup
+  lang="ts"
+>
 import WaitBtn from '@/components/baseComponents/WaitButton.vue'
 
 import type { ProbabilityCube } from '@/utils/domain/facies/local'

@@ -4,7 +4,10 @@
   </wait-button>
 </template>
 
-<script setup lang="ts">
+<script
+  setup
+  lang="ts"
+>
 import rms from '@/api/rms'
 import { dumpState } from '@/utils/helpers/processing/export'
 

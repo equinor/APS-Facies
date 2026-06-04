@@ -4,7 +4,10 @@
   </base-tooltip>
 </template>
 
-<script setup lang="ts">
+<script
+  setup
+  lang="ts"
+>
 import BaseTooltip from '@/components/baseComponents/BaseTooltip.vue'
 import type { GlobalFacies } from '@/utils/domain'
 import type { ID } from '@/utils/domain/types'

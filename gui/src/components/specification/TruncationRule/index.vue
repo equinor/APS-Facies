@@ -31,7 +31,10 @@
   </div>
 </template>
 
-<script setup lang="ts">
+<script
+  setup
+  lang="ts"
+>
 import BayfillSpecification from '@/components/specification/TruncationRule/Bayfill/index.vue'
 import NonCubicSpecification from '@/components/specification/TruncationRule/NonCubic/index.vue'
 import CubicSpecification from '@/components/specification/TruncationRule/Cubic/index.vue'

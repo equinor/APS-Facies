@@ -31,7 +31,11 @@
   </div>
 </template>
 
-<script setup lang="ts" generic="T">
+<script
+  setup
+  lang="ts"
+  generic="T"
+>
 import ConfirmationDialog from '@/components/specification/GaussianRandomField/ConfirmationDialog.vue'
 import HoverHelper from '@/components/selection/dropdown/HoverHelper.vue'
 import BaseTooltip from '@/components/baseComponents/BaseTooltip.vue'

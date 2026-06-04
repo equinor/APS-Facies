@@ -70,7 +70,10 @@
   </v-container>
 </template>
 
-<script setup lang="ts">
+<script
+  setup
+  lang="ts"
+>
 import ZoneRegion from '@/components/selection/ZoneRegionSelection.vue'
 import ChooseGridModel from '@/components/selection/dropdown/ChooseGridModel.vue'
 import FaciesSelection from '@/components/selection/FaciesSelection.vue'

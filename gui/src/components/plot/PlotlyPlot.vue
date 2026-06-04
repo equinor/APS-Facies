@@ -7,7 +7,10 @@ Originally licensed under MIT
 <template>
   <div :id="id" ref="plot" />
 </template>
-<script setup lang="ts">
+<script
+  setup
+  lang="ts"
+>
 import type { PropType } from 'vue'
 import {
   ref,

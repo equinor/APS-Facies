@@ -33,7 +33,10 @@
   </v-list-item>
 </template>
 
-<script setup lang="ts">
+<script
+  setup
+  lang="ts"
+>
 import { getDisabledOpacity, isDevelopmentBuild } from '@/utils/helpers/simple'
 import { DEFAULT_TRUNCATION_RULE_TEMPLATE_PREVIEW_SIZE } from '@/config'
 import { computed } from 'vue'

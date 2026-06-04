@@ -12,7 +12,10 @@
   />
 </template>
 
-<script setup lang="ts">
+<script
+  setup
+  lang="ts"
+>
 import BaseDropdown from '@/components/selection/dropdown/BaseDropdown.vue'
 
 import { computed } from 'vue'

@@ -44,7 +44,10 @@
   </v-row>
 </template>
 
-<script setup lang="ts">
+<script
+  setup
+  lang="ts"
+>
 import TruncationRulePreview from './TruncationRulePreview.vue'
 
 import { computed } from 'vue'

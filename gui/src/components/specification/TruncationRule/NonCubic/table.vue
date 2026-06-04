@@ -36,7 +36,10 @@
   </base-table>
 </template>
 
-<script setup lang="ts">
+<script
+  setup
+  lang="ts"
+>
 import BaseTable from '@/components/baseComponents/BaseTable.vue'
 import PolygonFractionField from '@/components/selection/PolygonFractionField.vue'
 import NumericField from '@/components/selection/NumericField.vue'

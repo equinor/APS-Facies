@@ -9,7 +9,10 @@
   />
 </template>
 
-<script setup lang="ts">
+<script
+  setup
+  lang="ts"
+>
 import SelectionTable from '@/components/table/SelectionTable.vue'
 
 import { computed } from 'vue'

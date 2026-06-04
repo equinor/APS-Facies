@@ -5,7 +5,10 @@
   </v-radio-group>
 </template>
 
-<script setup lang="ts">
+<script
+  setup
+  lang="ts"
+>
 import { type Cubic, Direction } from '@/utils/domain'
 import { computed } from 'vue'
 import type { OrientationString } from '@/utils/domain/truncationRule/cubic/direction'

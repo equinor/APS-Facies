@@ -60,7 +60,10 @@
   </v-container>
 </template>
 
-<script setup lang="ts">
+<script
+  setup
+  lang="ts"
+>
 import SectionTitle from '@/components/baseComponents/headings/SectionTitle.vue'
 import TruncationMap from '@/components/plot/TruncationMap.vue'
 import FaciesRealization from '@/components/plot/FaciesRealization.vue'

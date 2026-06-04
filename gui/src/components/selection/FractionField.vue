@@ -15,7 +15,10 @@
   />
 </template>
 
-<script setup lang="ts">
+<script
+  setup
+  lang="ts"
+>
 import type { FmuUpdatable } from '@/utils/domain/bases/fmuUpdatable'
 
 import type { MinMax } from '@/api/types'

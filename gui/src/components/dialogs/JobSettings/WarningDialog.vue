@@ -23,7 +23,10 @@
   </v-dialog>
 </template>
 
-<script setup lang="ts">
+<script
+  setup
+  lang="ts"
+>
 import type { DialogOptions } from '@/utils/domain/bases/interfaces'
 import type { Color } from '@/utils/domain/facies/helpers/colors'
 import { ref } from 'vue'

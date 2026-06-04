@@ -13,7 +13,10 @@
   </div>
 </template>
 
-<script setup lang="ts">
+<script
+  setup
+  lang="ts"
+>
 import { isDevelopmentBuild } from '@/config'
 import { delay } from 'lodash'
 import type { MessageType } from '@/utils/domain/messages/base'

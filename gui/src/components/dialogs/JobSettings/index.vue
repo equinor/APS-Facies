@@ -150,7 +150,10 @@
   </v-dialog>
 </template>
 
-<script setup lang="ts">
+<script
+  setup
+  lang="ts"
+>
 import rms from '@/api/rms'
 import LoggingSettings from '@/components/dialogs/JobSettings/LoggingSettings.vue'
 import SettingsPanel from '@/components/dialogs/JobSettings/SettingsPanel.vue'

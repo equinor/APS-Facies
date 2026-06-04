@@ -33,7 +33,10 @@
   </base-selection-table>
 </template>
 
-<script setup lang="ts">
+<script
+  setup
+  lang="ts"
+>
 import BaseSelectionTable from '@/components/baseComponents/BaseSelectionTable.vue'
 import ColorPicker from '@/components/ColorPicker.vue'
 import FaciesRow from '@/components/table/FaciesTable/FaciesRow.vue'

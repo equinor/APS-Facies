@@ -66,7 +66,10 @@
   </v-dialog>
 </template>
 
-<script setup lang="ts">
+<script
+  setup
+  lang="ts"
+>
 import APSError from '@/utils/domain/errors/base'
 
 import type { DialogOptions } from '@/utils/domain/bases/interfaces'

@@ -8,7 +8,10 @@
   </v-row>
 </template>
 
-<script setup lang="ts">
+<script
+  setup
+  lang="ts"
+>
 import ChooseRegionParameter from '@/components/selection/dropdown/ChooseRegionParameter.vue'
 import RegionSelection from './RegionSelection.vue'
 import ZoneSelection from './ZoneSelection.vue'

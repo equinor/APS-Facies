@@ -23,7 +23,10 @@
   </v-row>
 </template>
 
-<script setup lang="ts">
+<script
+  setup
+  lang="ts"
+>
 import type { ID } from '@/utils/domain/types'
 import type { GlobalFacies } from '@/utils/domain'
 

@@ -12,7 +12,10 @@
   </v-autocomplete>
 </template>
 
-<script setup lang="ts">
+<script
+  setup
+  lang="ts"
+>
 import { getJobs } from '@/components/debugging/utils'
 import { onMounted, computed, ref } from 'vue'
 import type { RootStoreSerialization } from '@/stores'

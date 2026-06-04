@@ -2,7 +2,10 @@
   <static-plot :data-definition="dataDefinition" :max-width="1" />
 </template>
 
-<script setup lang="ts">
+<script
+  setup
+  lang="ts"
+>
 import type { MinMax } from '@/api/types'
 import StaticPlot from './StaticPlot.vue'
 import type { ColorMapping, ColorScale } from './utils'

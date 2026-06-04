@@ -46,7 +46,10 @@
   </v-container>
 </template>
 
-<script setup lang="ts">
+<script
+  setup
+  lang="ts"
+>
 import { DEFAULT_CUBIC_LEVELS } from '@/config'
 import { getId } from '@/utils'
 

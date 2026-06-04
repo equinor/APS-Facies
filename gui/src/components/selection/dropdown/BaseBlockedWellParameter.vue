@@ -9,7 +9,10 @@
   />
 </template>
 
-<script setup lang="ts">
+<script
+  setup
+  lang="ts"
+>
 import ChooseParameter from '@/components/selection/dropdown/ChooseParameter.vue'
 import { computed } from 'vue'
 import { useGlobalFaciesStore } from '@/stores/facies/global'

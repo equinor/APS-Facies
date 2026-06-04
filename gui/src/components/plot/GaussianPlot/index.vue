@@ -22,7 +22,10 @@
   />
 </template>
 
-<script setup lang="ts">
+<script
+  setup
+  lang="ts"
+>
 import StaticPlot from '@/components/plot/StaticPlot.vue'
 
 import type { GaussianRandomField } from '@/utils/domain'

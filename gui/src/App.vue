@@ -12,7 +12,10 @@
   </v-app>
 </template>
 
-<script lang="ts" setup>
+<script
+  setup
+  lang="ts"
+>
 import TheToolBar from '@/components/TheToolBar.vue'
 import TheInformationBar from '@/components/TheInformationBar.vue'
 import MainPage from '@/pages/MainPage.vue'

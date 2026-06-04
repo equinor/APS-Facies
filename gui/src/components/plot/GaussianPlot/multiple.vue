@@ -26,7 +26,10 @@
   </v-container>
 </template>
 
-<script setup lang="ts">
+<script
+  setup
+  lang="ts"
+>
 import GaussianPlot from './index.vue'
 import ColorScale from '@/components/plot/ColorScale.vue'
 import type { GaussianRandomField } from '@/utils/domain'

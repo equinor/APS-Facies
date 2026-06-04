@@ -5,7 +5,10 @@
   </floating-tooltip>
 </template>
 
-<script setup lang="ts">
+<script
+  setup
+  lang="ts"
+>
 import rms from '@/api/rms'
 
 import IconButton from '@/components/selection/IconButton.vue'

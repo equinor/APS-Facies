@@ -27,7 +27,10 @@
   </v-container>
 </template>
 
-<script setup lang="ts">
+<script
+  setup
+  lang="ts"
+>
 import Selection from '@/components/ElementSelection.vue'
 import Settings from '@/components/ElementSettings.vue'
 import Preview from '@/components/ElementPreview.vue'

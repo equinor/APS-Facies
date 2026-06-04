@@ -25,7 +25,10 @@
   </v-dialog>
 </template>
 
-<script setup lang="ts">
+<script
+  setup
+  lang="ts"
+>
 /**
  * Vuetify Confirm Dialog component
  * Borrowed from: https://gist.github.com/eolant/ba0f8a5c9135d1a146e1db575276177d

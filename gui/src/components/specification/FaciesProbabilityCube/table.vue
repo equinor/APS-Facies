@@ -41,7 +41,10 @@
   </base-table>
 </template>
 
-<script setup lang="ts">
+<script
+  setup
+  lang="ts"
+>
 import FractionField from '@/components/selection/FractionField.vue'
 import BaseTable from '@/components/baseComponents/BaseTable.vue'
 

@@ -16,7 +16,11 @@
   </div>
 </template>
 
-<script setup lang="ts" generic="T, N extends boolean">
+<script
+  setup
+  lang="ts"
+  generic="T, N extends boolean"
+>
 import { computed, onBeforeMount, ref } from 'vue'
 
 type OnSubmit = N extends true ? number : string

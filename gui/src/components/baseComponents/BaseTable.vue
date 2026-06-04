@@ -33,7 +33,11 @@
   </v-data-table>
 </template>
 
-<script setup lang="ts" generic="T extends Identifiable">
+<script
+  setup
+  lang="ts"
+  generic="T extends Identifiable"
+>
 import type { ID } from '@/utils/domain/types'
 import type { HeaderItem, VuetifyColumns } from '@/utils/typing'
 import { computed } from 'vue'

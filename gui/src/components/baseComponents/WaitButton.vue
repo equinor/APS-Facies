@@ -23,7 +23,10 @@
   </floating-tooltip>
 </template>
 
-<script setup lang="ts">
+<script
+  setup
+  lang="ts"
+>
 import type { Color } from '@/utils/domain/facies/helpers/colors'
 import type { VBtn } from 'vuetify/components'
 

@@ -49,7 +49,11 @@
   </base-table>
 </template>
 
-<script setup lang="ts" generic="T extends Identifiable">
+<script
+  setup
+  lang="ts"
+  generic="T extends Identifiable"
+>
 import BaseTable from '@/components/baseComponents/BaseTable.vue'
 import SelectableItem from '@/utils/domain/bases/selectableItem'
 import HoverHelper from '@/components/selection/dropdown/HoverHelper.vue'

@@ -41,7 +41,10 @@
   </v-container>
 </template>
 
-<script setup lang="ts">
+<script
+  setup
+  lang="ts"
+>
 import GaussianRandomFields from '@/components/specification/GaussianRandomField/multiple.vue'
 import FaciesProbabilityCube from '@/components/specification/FaciesProbabilityCube/index.vue'
 import TruncationRule from '@/components/specification/TruncationRule/index.vue'

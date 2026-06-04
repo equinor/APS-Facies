@@ -17,7 +17,10 @@
   </v-row>
 </template>
 
-<script setup lang="ts">
+<script
+  setup
+  lang="ts"
+>
 import ChooseParameter from '@/components/selection/dropdown/ChooseParameter.vue'
 import WarningDialog from '@/components/dialogs/JobSettings/WarningDialog.vue'
 

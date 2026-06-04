@@ -18,7 +18,10 @@
   </base-table>
 </template>
 
-<script setup lang="ts">
+<script
+  setup
+  lang="ts"
+>
 import BaseTable from '@/components/baseComponents/BaseTable.vue'
 
 import BackgroundFaciesSpecification from '@/components/specification/Facies/background.vue'

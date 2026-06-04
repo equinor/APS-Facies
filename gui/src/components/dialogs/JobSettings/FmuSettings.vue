@@ -134,7 +134,10 @@
   </settings-panel>
 </template>
 
-<script setup lang="ts">
+<script
+  setup
+  lang="ts"
+>
 import SettingsPanel from '@/components/dialogs/JobSettings/SettingsPanel.vue'
 import NumericField from '@/components/selection/NumericField.vue'
 import WarningDialog from '@/components/dialogs/JobSettings/WarningDialog.vue'

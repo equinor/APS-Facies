@@ -81,7 +81,10 @@
   </v-dialog>
 </template>
 
-<script setup lang="ts">
+<script
+  setup
+  lang="ts"
+>
 import { DEFAULT_MODEL_FILE_NAMES } from '@/config'
 
 import rms from '@/api/rms'

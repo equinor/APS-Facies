@@ -15,7 +15,10 @@
   />
 </template>
 
-<script setup lang="ts">
+<script
+  setup
+  lang="ts"
+>
 import type { MinMax } from '@/api/types'
 import type { Optional } from '@/utils/typing'
 import type { GaussianRandomField } from '@/utils/domain'

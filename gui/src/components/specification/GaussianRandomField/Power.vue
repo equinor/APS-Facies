@@ -10,7 +10,10 @@
   />
 </template>
 
-<script setup lang="ts">
+<script
+  setup
+  lang="ts"
+>
 import type { GaussianRandomField } from '@/utils/domain'
 
 import StorableNumericField from '@/components/specification/StorableNumericField.vue'

@@ -23,7 +23,10 @@
   </v-container>
 </template>
 
-<script setup lang="ts">
+<script
+  setup
+  lang="ts"
+>
 import type { GaussianRandomField } from '@/utils/domain'
 import type { ID } from '@/utils/domain/types'
 

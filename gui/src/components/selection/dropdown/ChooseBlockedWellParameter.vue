@@ -6,6 +6,9 @@
   />
 </template>
 
-<script setup lang="ts">
+<script
+  setup
+  lang="ts"
+>
 import ChooseBwParameter from '@/components/selection/dropdown/BaseBlockedWellParameter.vue'
 </script>

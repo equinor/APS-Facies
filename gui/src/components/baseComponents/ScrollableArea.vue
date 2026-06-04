@@ -4,7 +4,10 @@
   </v-responsive>
 </template>
 
-<script setup lang="ts">
+<script
+  setup
+  lang="ts"
+>
 import { onUnmounted, onMounted, ref } from 'vue'
 
 type Props = {

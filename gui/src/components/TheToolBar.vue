@@ -54,7 +54,10 @@
   </v-toolbar>
 </template>
 
-<script setup lang="ts">
+<script
+  setup
+  lang="ts"
+>
 import { displayError, displaySuccess } from '@/utils/helpers/storeInteraction'
 import ExportDialog from '@/components/dialogs/ExportDialog.vue'
 import ChangelogDialog from '@/components/dialogs/ChangelogDialog.vue'

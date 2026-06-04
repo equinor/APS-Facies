@@ -12,7 +12,10 @@
   </settings-panel>
 </template>
 
-<script setup lang="ts">
+<script
+  setup
+  lang="ts"
+>
 import SettingsPanel from '@/components/dialogs/JobSettings/SettingsPanel.vue'
 import { computed } from 'vue'
 import type { ListItem } from '@/utils/typing'

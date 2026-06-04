@@ -8,7 +8,10 @@
     @blur="v.fieldName.$touch()"
   />
 </template>
-<script setup lang="ts">
+<script
+  setup
+  lang="ts"
+>
 import type { GaussianRandomField } from '@/utils/domain'
 import type { Optional } from '@/utils/typing'
 import { ref, computed, watch, onMounted } from 'vue'

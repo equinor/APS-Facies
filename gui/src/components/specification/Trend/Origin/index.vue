@@ -36,7 +36,10 @@
   </div>
 </template>
 
-<script setup lang="ts">
+<script
+  setup
+  lang="ts"
+>
 import type { GaussianRandomField } from '@/utils/domain'
 import type { OriginType } from '@/utils/domain/gaussianRandomField/trend'
 import OriginCoordinate from './Coordinate.vue'

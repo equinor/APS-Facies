@@ -43,7 +43,11 @@
   </v-row>
 </template>
 
-<script setup lang="ts" generic="T extends number = number">
+<script
+  setup
+  lang="ts"
+  generic="T extends number = number"
+>
 import type { BigNumber } from 'mathjs'
 import { isNumber } from 'lodash'
 

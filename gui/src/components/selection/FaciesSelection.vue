@@ -21,7 +21,10 @@
   </v-row>
 </template>
 
-<script setup lang="ts">
+<script
+  setup
+  lang="ts"
+>
 import FaciesTable from '@/components/table/FaciesTable/index.vue'
 import IconButton from '@/components/selection/IconButton.vue'
 

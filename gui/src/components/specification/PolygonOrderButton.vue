@@ -13,7 +13,10 @@
   </floating-tooltip>
 </template>
 
-<script setup lang="ts">
+<script
+  setup
+  lang="ts"
+>
 defineProps<{
   disabled: boolean
   help: string

@@ -13,7 +13,10 @@
   </v-dialog>
 </template>
 
-<script setup lang="ts">
+<script
+  setup
+  lang="ts"
+>
 import md from '@/plugins/markdown'
 import { onMounted, ref } from 'vue'
 

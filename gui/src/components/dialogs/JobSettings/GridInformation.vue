@@ -116,7 +116,10 @@
   </settings-panel>
 </template>
 
-<script setup lang="ts">
+<script
+  setup
+  lang="ts"
+>
 import { computed } from 'vue'
 import NumericField from '@/components/selection/NumericField.vue'
 

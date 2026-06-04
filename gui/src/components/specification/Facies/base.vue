@@ -7,7 +7,10 @@
   />
 </template>
 
-<script setup lang="ts">
+<script
+  setup
+  lang="ts"
+>
 import type Facies from '@/utils/domain/facies/local'
 import type { ListItem } from '@/utils/typing'
 import { computed } from 'vue'

@@ -11,7 +11,10 @@
   />
 </template>
 
-<script setup lang="ts">
+<script
+  setup
+  lang="ts"
+>
 import { getDisabledOpacity } from '@/utils/helpers/simple'
 import { notEmpty } from '@/utils'
 import { DEFAULT_SIZE } from '@/config'

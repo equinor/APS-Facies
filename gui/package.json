@@ -63,6 +63,8 @@
     "ify-loader": "^1.1.0",
     "improved-yarn-audit": "^3.0.4",
     "lint-staged": "^15.2.4",
+    "oxlint": "^1.68.0",
+    "oxlint-tsgolint": "^0.23.0",
     "sass": "^1.100.0",
     "terser": "^5.48.0",
     "ts-custom-error": "^3.3.1",

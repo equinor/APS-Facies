@@ -14,7 +14,7 @@ interface RmsJob extends SerializedState {
 }
 
 declare namespace rms {
-  declare namespace uipy {
+  namespace uipy {
     function call<T>(name: string, ...args: unknown[]): Promise<T>
   }
   function onPluginSave(func: () => Job): void

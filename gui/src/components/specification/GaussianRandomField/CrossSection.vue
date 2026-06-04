@@ -13,7 +13,10 @@
   </v-row>
 </template>
 
-<script setup lang="ts">
+<script
+  setup
+  lang="ts"
+>
 import type { CrossSectionType } from '@/utils/domain/gaussianRandomField/crossSection'
 
 import { computed } from 'vue'

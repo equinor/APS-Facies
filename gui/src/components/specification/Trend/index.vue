@@ -91,7 +91,10 @@
   </v-col>
 </template>
 
-<script setup lang="ts">
+<script
+  setup
+  lang="ts"
+>
 import type { GaussianRandomField } from '@/utils/domain'
 import type { TrendType } from '@/utils/domain/gaussianRandomField/trend'
 

@@ -10,7 +10,11 @@
   />
 </template>
 
-<script setup lang="ts" generic="T">
+<script
+  setup
+  lang="ts"
+  generic="T"
+>
 import { computed, watch } from 'vue'
 import { useVuelidate } from '@vuelidate/core'
 import { requiredIf } from '@vuelidate/validators'

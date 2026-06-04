@@ -14,7 +14,10 @@
   />
 </template>
 
-<script setup lang="ts">
+<script
+  setup
+  lang="ts"
+>
 import rms from '@/api/rms'
 
 import StaticPlot from '@/components/plot/StaticPlot.vue'

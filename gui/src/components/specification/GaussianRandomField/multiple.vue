@@ -38,7 +38,10 @@
   </v-expansion-panel>
 </template>
 
-<script setup lang="ts">
+<script
+  setup
+  lang="ts"
+>
 import GaussianRandomField from '@/components/specification/GaussianRandomField/index.vue'
 import ConfirmationDialog from '@/components/specification/GaussianRandomField/ConfirmationDialog.vue'
 import GaussianFieldName from '@/components/specification/GaussianRandomField/GaussianFieldName.vue'

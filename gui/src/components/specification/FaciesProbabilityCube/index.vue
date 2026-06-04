@@ -9,7 +9,10 @@
   </v-row>
 </template>
 
-<script setup lang="ts">
+<script
+  setup
+  lang="ts"
+>
 import ProbabilityCubeHeader from './header.vue'
 import FaciesProbabilityCubeTable from './table.vue'
 </script>

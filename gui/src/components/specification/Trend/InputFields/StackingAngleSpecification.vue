@@ -14,7 +14,10 @@
   </div>
 </template>
 
-<script setup lang="ts">
+<script
+  setup
+  lang="ts"
+>
 import type { GaussianRandomField } from '@/utils/domain'
 import type { StackingDirectionType } from '@/utils/domain/gaussianRandomField/trend'
 

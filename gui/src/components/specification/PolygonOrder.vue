@@ -39,7 +39,10 @@
   </v-row>
 </template>
 
-<script setup lang="ts">
+<script
+  setup
+  lang="ts"
+>
 import PolygonOrderButton from './PolygonOrderButton.vue'
 type Props = {
   canIncrease?: boolean

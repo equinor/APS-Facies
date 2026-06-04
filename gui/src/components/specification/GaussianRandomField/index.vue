@@ -57,7 +57,10 @@
   </v-row>
 </template>
 
-<script setup lang="ts">
+<script
+  setup
+  lang="ts"
+>
 import cloneDeep from 'lodash/cloneDeep'
 
 import {

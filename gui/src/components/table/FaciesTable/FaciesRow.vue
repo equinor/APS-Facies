@@ -42,7 +42,10 @@
   />
 </template>
 
-<script setup lang="ts">
+<script
+  setup
+  lang="ts"
+>
 import EditableCell from '@/components/table/EditableCell.vue'
 import InformationalIcons from '@/components/table/FaciesTable/InformationalIcons.vue'
 
