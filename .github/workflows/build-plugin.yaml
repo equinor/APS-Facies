@@ -13,20 +13,20 @@ jobs:
   build-gui:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
           fetch-depth: 0
 
-      - uses: jdx/mise-action@v3
+      - uses: jdx/mise-action@1648a7812b9aeae629881980618f079932869151 # v4.0.1
 
       - name: Cache Python dependencies
-        uses: actions/cache@v4
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         with:
           path: .venv
           key: ${{ runner.os }}-python-uv-${{ hashFiles('pyproject.toml', 'uv.lock') }}
 
       - name: Cache Node.js dependencies
-        uses: actions/cache@v4
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         with:
           path: gui/node_modules
           key: ${{ runner.os }}-yarn-${{ hashFiles('gui/yarn.lock', 'gui/package.json') }}
@@ -37,7 +37,7 @@ jobs:
           mise run build-gui ${{ inputs.stable && '--stable' || '' }}
 
       - name: Store GUI artifact
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: build-artifacts-gui
           path: |
@@ -46,7 +46,7 @@ jobs:
           compression-level: '0' # The plugin is already a zip file, so we don't need to compress it again
 
       - name: Store metadata about the build
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: build-artifacts-metadata
           path: |
