@@ -23,7 +23,7 @@
     "lodash": "^4.18.1",
     "markdown-it": "^14.2.0",
     "markdown-it-footnote": "^3.0.2",
-    "mathjs": "14.8.1",
+    "mathjs": "15.2.0",
     "object-hash": "^3.0.0",
     "pinia": "^2.1.7",
     "plotly.js-dist-min": "^2.29.1",
