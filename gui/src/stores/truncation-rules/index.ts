@@ -256,7 +256,7 @@ export const useTruncationRuleStore = defineStore('truncation-rules', () => {
       const maxOrder = polygons.reduce((max, p) => Math.max(p.order, max), 0)
       order = polygons.length === 0 ? 0 : maxOrder + 1
     }
-    let polygon: NonCubicPolygon | CubicPolygon | OverlayPolygon | null = null
+    let polygon: NonCubicPolygon | CubicPolygon | OverlayPolygon
     if (overlay) {
       if (!(rule instanceof OverlayTruncationRule)) {
         throw new Error("Can't use Overlay without an OverlayTruncationRule")

@@ -76,7 +76,6 @@ export function minFacies<
 >(
   rule: RULE | TruncationRuleTemplateType | TruncationRuleTemplateFromJson,
 ): number {
-  let minFacies = 0
   const type = rule.type
   if (!type) throw new APSError(`There exists no types with the ID ${type}`)
   if (
@@ -101,16 +100,16 @@ export function minFacies<
           }
         })
       }
-      minFacies = uniqueFacies.size
+      return uniqueFacies.size
     } else {
-      minFacies = 2
+      return 2
     }
   } else if ([type, rule.type].includes('bayfill')) {
-    minFacies = 5
+    return 5
   } else {
     throw new Error(`${type} is not implemented`)
   }
-  return minFacies
+  return 0
 }
 
 export function hasEnoughFacies<

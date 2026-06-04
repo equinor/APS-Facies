@@ -5,7 +5,7 @@
     @keydown.esc="cancel()"
     @keydown.enter="agree()"
   >
-    <v-toolbar :color="options.color" dark dense>
+    <v-toolbar :color="options.color" dark density="compact">
       <v-toolbar-title class="text-white">
         {{ title }}
       </v-toolbar-title>

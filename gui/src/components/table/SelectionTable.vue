@@ -107,7 +107,7 @@ const headers = computed<HeaderItem[]>(() => [
 ])
 
 const items = computed<T[]>(() => {
-  let items: T[] = []
+  let items: T[]
   switch (props.itemType) {
     case 'zone':
       items = zoneStore.available as T[]

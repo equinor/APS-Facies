@@ -7,7 +7,7 @@
     :items="items"
     :no-data-text="noDataText"
     :sort-by="sortBy"
-    :dense="dense"
+    :density="dense && 'compact'"
     must-sort
     item-key="id"
     :class="`elevation-${elevation}`"

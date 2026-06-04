@@ -138,7 +138,7 @@ const gridAzimuth = computed(() => parameterGridModelStore.azimuth)
 const simulationBoxOrigin = computed(() => parameterSimboxStore.origin)
 const simulationBox = computed<Coordinate3D & { hint: string }>(() => {
   const z = parameterSimboxStore.size.z
-  let hint: string = 'The height of the simulation box'
+  let hint: string
   let zValue: number | null
   if (z !== null) {
     if (typeof z === 'object') {

@@ -840,86 +840,76 @@ const jobSettings = (
     'FmuSettings',
   )
   const fmuMode = getMandatoryTextValue(fmuSettingsElement, 'FmuMode')
-  let updateGRFElement = null
-  let ertBoxGrid = 'ERTBOX'
-  let exchangeMode = false
-  let fileFormat = 'roff'
-  let extrapolationMethod = 'extend_layer_mean'
-  let exportCheck = false
-  let onlyResidual = false
-  let useAPSConfigFile = false
-  let exportErtBox = true
-  switch (fmuMode) {
-    case 'FIELDS':
-      updateGRFElement = getMandatoryNodeValue(fmuSettingsElement, 'UpdateGRF')
-      ertBoxGrid = getMandatoryTextValue(updateGRFElement, 'ErtBoxGrid')
-      exportErtBox =
-        getTextValue(updateGRFElement, 'ExportErtBoxGrid') === 'YES'
-      exchangeMode =
-        getMandatoryTextValue(updateGRFElement, 'ExchangeMode') === 'AUTO'
-      fileFormat = getMandatoryTextValue(updateGRFElement, 'FileFormat')
-      extrapolationMethod = getMandatoryTextValue(
-        updateGRFElement,
-        'ExtrapolationMethod',
-      )
-      exportCheck =
-        getMandatoryTextValue(fmuSettingsElement, 'ExportConfigFiles') === 'YES'
-      onlyResidual =
-        getMandatoryTextValue(fmuSettingsElement, 'UseResidualFields') === 'YES'
-      useAPSConfigFile =
-        getMandatoryTextValue(fmuSettingsElement, 'UseNonStandardFMU') === 'YES'
-      break
-    case 'NOFIELD':
-      exportCheck =
-        getMandatoryTextValue(fmuSettingsElement, 'ExportConfigFiles') === 'YES'
-      useAPSConfigFile =
-        getMandatoryTextValue(fmuSettingsElement, 'UseNonStandardFMU') === 'YES'
-      break
-  }
-
   const runSettingsElement = getMandatoryNodeValue(
     jobSettingsElement,
     'RunSettings',
   )
-  const maxFractionNotNormalised = getMandatoryNumericValue(
-    runSettingsElement,
-    'MaxFractionNotNormalised',
-  )
-  const toleranceLimitProbability = getMandatoryNumericValue(
-    runSettingsElement,
-    'ToleranceLimitProbability',
-  )
-  const transformationSettings = getMandatoryNumericValue(
-    jobSettingsElement,
-    'TransformationSettings',
-    isTransformType,
-  )
-  const logSetting = getMandatoryNumericValue(
-    jobSettingsElement,
-    'LogSetting',
-    isDebugLevel,
-  )
-
   const settings: JobSettingsParam = {
     runFmuWorkflows: fmuMode === 'FIELDS', // might have to wrap !! around paranthesis to evaluate as false if fmuMode is undefined/null
     onlyUpdateFromFmu: fmuMode === 'NOFIELDS',
-    simulationGrid: fmuMode === 'FIELDS' && ertBoxGrid ? ertBoxGrid : 'ERTBOX',
-    importFields: fmuMode === 'FIELDS' ? exchangeMode : false,
-    fieldFileFormat: (fmuMode === 'FIELDS'
-      ? fileFormat
-      : 'roff') as FieldFormats,
-    customTrendExtrapolationMethod:
-      fmuMode === 'FIELDS' ? extrapolationMethod : 'mean',
-    exportFmuConfigFiles:
-      fmuMode === 'FIELDS' || fmuMode === 'NOFIELDS' ? exportCheck : false,
-    onlyUpdateResidualFields: fmuMode === 'FIELDS' ? onlyResidual : false,
-    useNonStandardFmu:
-      fmuMode === 'FIELDS' || fmuMode === 'NOFIELDS' ? useAPSConfigFile : false,
-    exportErtBoxGrid: fmuMode === 'FIELDS' ? exportErtBox : false,
-    maxAllowedFractionOfValuesOutsideTolerance: maxFractionNotNormalised ?? 0.1,
-    toleranceOfProbabilityNormalisation: toleranceLimitProbability ?? 0.2,
-    transformType: transformationSettings ?? 0,
-    debugLevel: logSetting ?? 0,
+    simulationGrid: 'ERTBOX',
+    importFields: false,
+    fieldFileFormat: 'roff',
+    customTrendExtrapolationMethod: 'mean',
+    exportFmuConfigFiles: false,
+    onlyUpdateResidualFields: false,
+    useNonStandardFmu: false,
+    exportErtBoxGrid: false,
+    maxAllowedFractionOfValuesOutsideTolerance:
+      getMandatoryNumericValue(
+        runSettingsElement,
+        'MaxFractionNotNormalised',
+      ) ?? 0.1,
+    toleranceOfProbabilityNormalisation:
+      getMandatoryNumericValue(
+        runSettingsElement,
+        'ToleranceLimitProbability',
+      ) ?? 0.2,
+    transformType:
+      getMandatoryNumericValue(
+        jobSettingsElement,
+        'TransformationSettings',
+        isTransformType,
+      ) ?? 0,
+    debugLevel:
+      getMandatoryNumericValue(
+        jobSettingsElement,
+        'LogSetting',
+        isDebugLevel,
+      ) ?? 0,
+  }
+  if (fmuMode === 'FIELDS') {
+    const updateGRFElement = getMandatoryNodeValue(
+      fmuSettingsElement,
+      'UpdateGRF',
+    )
+    const ertBoxGrid = getMandatoryTextValue(updateGRFElement, 'ErtBoxGrid')
+    if (ertBoxGrid) {
+      settings.simulationGrid = ertBoxGrid
+    }
+    settings.exportErtBoxGrid =
+      getTextValue(updateGRFElement, 'ExportErtBoxGrid') === 'YES'
+    settings.importFields =
+      getMandatoryTextValue(updateGRFElement, 'ExchangeMode') === 'AUTO'
+    settings.fieldFileFormat = getMandatoryTextValue(
+      updateGRFElement,
+      'FileFormat',
+    ) as FieldFormats
+    settings.customTrendExtrapolationMethod = getMandatoryTextValue(
+      updateGRFElement,
+      'ExtrapolationMethod',
+    )
+    settings.exportFmuConfigFiles =
+      getMandatoryTextValue(fmuSettingsElement, 'ExportConfigFiles') === 'YES'
+    settings.onlyUpdateResidualFields =
+      getMandatoryTextValue(fmuSettingsElement, 'UseResidualFields') === 'YES'
+    settings.useNonStandardFmu =
+      getMandatoryTextValue(fmuSettingsElement, 'UseNonStandardFMU') === 'YES'
+  } else if (fmuMode === 'NOFIELDS') {
+    settings.exportFmuConfigFiles =
+      getMandatoryTextValue(fmuSettingsElement, 'ExportConfigFiles') === 'YES'
+    settings.useNonStandardFmu =
+      getMandatoryTextValue(fmuSettingsElement, 'UseNonStandardFMU') === 'YES'
   }
 
   return settings
@@ -1591,6 +1581,46 @@ export const useModelFileLoaderStore = defineStore('model-file-loader', () => {
     }
   }
 
+  function createTrunctionRule(
+    truncationRuleContainer:
+      | {
+          Trunc3D_Bayfill: TruncationRuleContentBayfill
+        }
+      | {
+          Trunc2D_Angle: TruncationRuleContentNonCubic
+        }
+      | {
+          Trunc2D_Cubic: TruncationRuleContentCubic
+        },
+    parent: Parent,
+  ) {
+    if ('Trunc3D_Bayfill' in truncationRuleContainer) {
+      return {
+        type: 'Bayfill',
+        rule: makeBayfillTruncationRule(
+          getMandatoryNodeValue(truncationRuleContainer, 'Trunc3D_Bayfill'),
+          parent,
+        ),
+      }
+    } else if ('Trunc2D_Angle' in truncationRuleContainer) {
+      return {
+        type: 'Non-Cubic',
+        rule: makeNonCubicTruncationRule(
+          getMandatoryNodeValue(truncationRuleContainer, 'Trunc2D_Angle'),
+          parent,
+        ),
+      }
+    } else {
+      return {
+        type: 'Cubic',
+        rule: makeCubicTruncationRule(
+          getMandatoryNodeValue(truncationRuleContainer, 'Trunc2D_Cubic'),
+          parent,
+        ),
+      }
+    }
+  }
+
   /**
    * Sets up Truncation Rules and connects them to fields as specified in the model file.
    * @param zoneModelsFromFile
@@ -1611,27 +1641,10 @@ export const useModelFileLoaderStore = defineStore('model-file-loader', () => {
           zoneModel,
           'TruncationRule',
         )
-        let type = ''
-        let rule = null
-        if ('Trunc3D_Bayfill' in truncationRuleContainer) {
-          type = 'Bayfill'
-          rule = makeBayfillTruncationRule(
-            getMandatoryNodeValue(truncationRuleContainer, 'Trunc3D_Bayfill'),
-            parent,
-          )
-        } else if ('Trunc2D_Angle' in truncationRuleContainer) {
-          type = 'Non-Cubic'
-          rule = makeNonCubicTruncationRule(
-            getMandatoryNodeValue(truncationRuleContainer, 'Trunc2D_Angle'),
-            parent,
-          )
-        } else {
-          type = 'Cubic'
-          rule = makeCubicTruncationRule(
-            getMandatoryNodeValue(truncationRuleContainer, 'Trunc2D_Cubic'),
-            parent,
-          )
-        }
+        const { type, rule } = createTrunctionRule(
+          truncationRuleContainer,
+          parent,
+        )
         if (rule) {
           // now we should have everything needed to add the truncationRule.
           add(rule)

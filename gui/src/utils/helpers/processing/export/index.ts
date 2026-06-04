@@ -371,7 +371,7 @@ function addFaciesProb(
 
   const relevantFacies = getRelevant(faciesStore.available as Facies[], parent)
   if (relevantFacies.length === 0) {
-    let message = ''
+    let message: string
     if (parent.region) {
       message = `Zone ${parent.zone.code} / region ${parent.region.code}`
     } else {
@@ -736,7 +736,7 @@ function addGaussianRandomFields(
     a.name.localeCompare(b.name, undefined, { numeric: true }),
   )
   if (relevantFields.length < 2) {
-    let message = ''
+    let message: string
     if (parent.region) {
       message = `Zone ${parent.zone.code} / region ${parent.region.code}`
     } else {
