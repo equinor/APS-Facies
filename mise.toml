@@ -26,7 +26,10 @@ run = "uv run --no-project mkdocs serve"
 depends = ["dependencies:docs"]
 
 [tasks.build-containers]
-run = 'docker compose build --build-arg="RMS_IMAGE=$RMS_IMAGE" {{option(name="only", var=true)}}'
+usage = '''
+flag "--only <only>" help="Specify a single container to build"
+'''
+run = 'docker compose build --build-arg="RMS_IMAGE=$RMS_IMAGE" {{usage.only}}'
 env = { _.file = ".env" }
 
 [tasks."unit-test:python"]
