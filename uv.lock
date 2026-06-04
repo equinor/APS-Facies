@@ -1,6 +1,6 @@
 version = 1
 revision = 3
-requires-python = ">=3.11, <4.0"
+requires-python = ">=3.11"
 resolution-markers = [
     "python_full_version >= '3.12'",
     "python_full_version < '3.12'",
@@ -45,28 +45,28 @@ docs = [
 
 [package.metadata]
 requires-dist = [
-    { name = "fmu-tools", specifier = ">=1.21.0,<2.0.0" },
-    { name = "gaussianfft", specifier = ">=1.1.2,<2.0.0" },
-    { name = "matplotlib", specifier = ">=3.6.0,<4.0.0" },
-    { name = "numpy", specifier = ">=1.19.5,<2.0.0" },
-    { name = "pillow", specifier = ">=10.3.0,<11.0.0" },
-    { name = "pyyaml", specifier = ">=6.0,<7.0" },
-    { name = "scipy", specifier = ">=1.10.0,<2.0.0" },
-    { name = "xtgeo", specifier = ">=4.3.3,<5.0.0" },
+    { name = "fmu-tools", specifier = ">=1.21.0" },
+    { name = "gaussianfft", specifier = ">=1.1.2" },
+    { name = "matplotlib", specifier = ">=3.6.0" },
+    { name = "numpy", specifier = ">=1.19.5" },
+    { name = "pillow", specifier = ">=10.3.0" },
+    { name = "pyyaml", specifier = ">=6.0" },
+    { name = "scipy", specifier = ">=1.10.0" },
+    { name = "xtgeo", specifier = ">=4.3.3" },
 ]
 
 [package.metadata.requires-dev]
 dev = [
-    { name = "flask", specifier = ">=3.0.0,<4.0.0" },
-    { name = "graphviz", specifier = ">=0.19.1,<1.0.0" },
-    { name = "mypy", specifier = ">=0.931,<1.0.0" },
-    { name = "pytest", specifier = ">=6.2.5,<7.0.0" },
-    { name = "python-dotenv", specifier = ">=0.19.2,<1.0.0" },
-    { name = "typing-extensions", specifier = ">=4.12.2,<5.0.0" },
+    { name = "flask" },
+    { name = "graphviz" },
+    { name = "mypy" },
+    { name = "pytest" },
+    { name = "python-dotenv" },
+    { name = "typing-extensions" },
 ]
 docs = [
-    { name = "mkdocs-git-revision-date-localized-plugin", specifier = ">=1.4.7,<2.0.0" },
-    { name = "mkdocs-material", specifier = ">=9.6.20,<10.0.0" },
+    { name = "mkdocs-git-revision-date-localized-plugin", specifier = ">=1.4.7" },
+    { name = "mkdocs-material", specifier = ">=9.6.20" },
 ]
 
 [[package]]
