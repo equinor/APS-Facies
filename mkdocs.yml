@@ -38,6 +38,7 @@ nav:
                   - aps-user-guide/define-aps-job/job-setting/select-mode/ordinary-mode.md
                   - aps-user-guide/define-aps-job/job-setting/select-mode/fmu-uncertainty-parameter-mode.md
                   - aps-user-guide/define-aps-job/job-setting/select-mode/fmu-assisted-history-matching-mode.md
+                  - aps-user-guide/define-aps-job/job-setting/select-mode/optimize_memory_diskspace_runtime_in_ahm_with_aps.md
               - aps-user-guide/define-aps-job/job-setting/log-setting.md
               - aps-user-guide/define-aps-job/job-setting/transformation-setting.md
               - aps-user-guide/define-aps-job/job-setting/probability-check-setting.md
