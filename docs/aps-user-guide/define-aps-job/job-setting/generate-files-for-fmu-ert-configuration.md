@@ -118,7 +118,7 @@ This can be edited and used as distribution file in ERT in `GEN_KW` keyword.
 
 The APS job can generate an include file for ERT config file containing the `FIELD` and `GRID` keywords that are consistent with the APS job.
 
-Example of a file containing `FILED` keywords to be included in ERT config file:
+Example of a file containing `FIELD` keywords to be included in ERT config file:
 
 ```text
 -- ERT keywords related to fields used by APS.
