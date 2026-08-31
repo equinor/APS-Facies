@@ -5,8 +5,20 @@ corepack enable
 corepack install
 ''' }
 python = "3.11.13"
-pre-commit = "4.1.0"
+pre-commit = "4.6.0"
 uv = "0.8.22"
+vite-plus = "0.3.0"
+oxfmt = "0.65.0"
+
+[plugins]
+vite-plus = "https://github.com/markmals/mise-vite-plus"
+
+[tasks."format:oxfmt"]
+run = "oxfmt"
+
+[tasks."lint:gui"]
+dir = "gui"
+run = "vp lint"
 
 [tasks."dependencies:python"]
 run = "uv sync --no-install-project"

@@ -1,5 +1,6 @@
 // https://github.com/michael-ciniawsky/postcss-load-config
 
+// oxlint-disable-next-line no-undef
 module.exports = {
   plugins: {
     'postcss-import': {},

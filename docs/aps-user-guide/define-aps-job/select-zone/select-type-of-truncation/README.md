@@ -1,6 +1,7 @@
 ---
 title: Select type of truncation
 ---
+
 Select type of truncation rule from a dropdown list.
 
 ![](assets/images/2d8b811d83865a6b8b25e60a58c785d4395a1528263b00cea20e87663ca66912.png)

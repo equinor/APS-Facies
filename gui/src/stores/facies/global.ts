@@ -77,9 +77,7 @@ export const useGlobalFaciesStore = defineStore('facies-global', () => {
       gridModelStore.current!.name,
       blockedWellStore.selected,
       blockedWellLogStore.selected,
-      regionStore.use
-        ? parameterRegionStore.selected
-        : '__REGIONS_NOT_IN_USE__',
+      regionStore.use ? parameterRegionStore.selected : '__REGIONS_NOT_IN_USE__',
     )
   }
 

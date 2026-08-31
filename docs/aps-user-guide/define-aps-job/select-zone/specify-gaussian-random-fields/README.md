@@ -1,6 +1,7 @@
 ---
 title: Specify Gaussian Random Fields
 ---
+
 Usually APS will use two Gaussian Random Fields (GRF).
 Transformed values of the GRF's are called alpha.
 

@@ -5,6 +5,7 @@ title: APS algorithm
 ## APS algorithm
 
 ### Algorithm steps
+
 For each grid block in geomodel zone:
 
 1. Look up the facies probabilities for that grid block ($P(F_1)$, $P(F_2)$, $P(F_3)$, ...)
@@ -22,6 +23,7 @@ For each grid block in geomodel zone:
 Step 2 above where the truncation map is rescaled such that the area of the polygons belonging to the various facies match the facies probabilities for the current grid cell, is the adaptive step and the reason why the method is called **A**daptive **P**luri-gaussian **S**imulation.
 
 ### Illustration
+
 The figure below illustrates the process.
 The upper left grid cell is chosen as an example.
 The facies probabilities for this grid cell is $P(F_1) = 0.7$, $P(F_2) = 0.1$ and $P(F_3) = 0.2$ and the sum of the probabilities are normalized to 1.

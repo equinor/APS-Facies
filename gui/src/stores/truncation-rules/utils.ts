@@ -160,9 +160,7 @@ function addChildren(
     )
     if (!found || !(found instanceof CubicPolygon)) {
       throw new APSTypeError(
-        `The child reference of ${
-          found ? found.id : found
-        }, is not a Cubic Polygon`,
+        `The child reference of ${found ? found.id : found}, is not a Cubic Polygon`,
       )
     }
     return found

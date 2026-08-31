@@ -2,10 +2,7 @@ import { acceptHMRUpdate, defineStore } from 'pinia'
 import ColorLibrary, {
   type ColorLibrarySpecification,
 } from '@/utils/domain/colorLibrary'
-import {
-  type Color,
-  colorLibraries,
-} from '@/utils/domain/facies/helpers/colors'
+import { type Color, colorLibraries } from '@/utils/domain/facies/helpers/colors'
 import { computed } from 'vue'
 import type { ID } from '@/utils/domain/types'
 import { DEFAULT_COLOR_LIBRARY } from '@/config'

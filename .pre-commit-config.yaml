@@ -13,51 +13,31 @@ repos:
 
   - repo: local
     hooks:
-      - id: prettier
-        name: Prettier.js
-        language: node
-        additional_dependencies:
-          - 'prettier@3.4.2'
-        entry: prettier --write
-        args:
-          - --config=gui/.prettierrc
-        types_or:
-          [
-            'javascript',
-            'vue',
-            'ts',
-            'html',
-            'css',
-            'sass',
-            'scss',
-            'json',
-            'yaml',
-          ]
-        exclude: docs/mind-manager/index.html
+      - id: oxfmt
+        name: oxfmt
+        language: system
+        entry: mise run format:oxfmt
 
-  - repo: https://github.com/pre-commit/mirrors-eslint
-    rev: v9.30.1
-    hooks:
-      - id: eslint
-        args:
-          - --config=gui/eslint.config.cjs
-          - --fix
+      - id: oxlint
+        name: Lint GUI
+        language: node
+        pass_filenames: false
+        entry: mise run lint:gui
         additional_dependencies:
-          - '@eslint/js@9.36.0'
-          - '@stylistic/eslint-plugin@5.10.0'
-          - '@typescript-eslint/parser@8.60.1'
-          - '@vue/eslint-config-prettier@10.2.0'
-          - '@vue/eslint-config-standard@9.0.1'
-          - '@vue/eslint-config-typescript@14.7.0'
-          - eslint@9.36.0
-          - eslint-plugin-import@2.32.0
-          - eslint-plugin-node@11.1.0
-          - eslint-plugin-promise@7.3.0
-          - eslint-plugin-security@3.0.1
-          - eslint-plugin-vue@10.9.1
-          - eslint-plugin-vuetify@2.7.2
-          - vue-eslint-parser@10.4.1
-          - globals@16.4.0
+          - typescript@5.9.3
+  #          - '@eslint/js@9.36.0'
+  #          - '@stylistic/eslint-plugin@5.10.0'
+  #          - '@vue/eslint-config-prettier@10.2.0'
+  #          - '@vue/eslint-config-standard@9.0.1'
+  #          - eslint@9.36.0
+  #          - eslint-plugin-import@2.32.0
+  #          - eslint-plugin-node@11.1.0
+  #          - eslint-plugin-promise@7.3.0
+  #          - eslint-plugin-security@3.0.1
+  #          - eslint-plugin-vue@10.9.1
+  #          - eslint-plugin-vuetify@2.7.2
+  #          - vue-eslint-parser@10.4.1
+  #          - globals@16.4.0
 
   - repo: https://github.com/equinor/dependency-consistency
     rev: v2.1.2

@@ -50,9 +50,7 @@ const faciesGlobalStore = useGlobalFaciesStore()
 
 const faciesTable = computed<GlobalFacies[]>(() => faciesGlobalStore.selected)
 
-const _disabled = computed(
-  () => props.disabled || !props.value.isRepresentative,
-)
+const _disabled = computed(() => props.disabled || !props.value.isRepresentative)
 
 const errorMessage = computed(() =>
   _disabled.value

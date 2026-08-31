@@ -19,8 +19,8 @@
 
 body,
 input {
-  font-family: 'Equinor', 'Roboto', 'Helvetica Neue', Helvetica, Arial,
-    sans-serif;
+  font-family:
+    'Equinor', 'Roboto', 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
 
 [data-md-color-primary='grey'] .md-tabs {

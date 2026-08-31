@@ -17,10 +17,7 @@ import type {
 } from '@/utils/domain/bases/zoneRegionDependent'
 import { getParentId } from '@/utils/domain/bases/zoneRegionDependent'
 import { useRegionStore } from './regions'
-import type {
-  RegionSerialization,
-  ZoneSerialization,
-} from '@/utils/domain/zone'
+import type { RegionSerialization, ZoneSerialization } from '@/utils/domain/zone'
 
 type IDMapping = Map<ID, ID>
 

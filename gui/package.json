@@ -6,11 +6,11 @@
   "author": "Sindre Nistad <snis@equinor.com>",
   "type": "module",
   "scripts": {
-    "build": "vite build",
-    "lint": "vite lint",
-    "serve:gui": "vite --host 0.0.0.0",
+    "build": "vp build",
+    "lint": "vp lint",
+    "serve:gui": "vp dev --host 0.0.0.0",
     "test:e2e": "vue-cli-service test:e2e",
-    "test:unit": "vitest --run"
+    "test:unit": "vp test --run"
   },
   "dependencies": {
     "@fortawesome/fontawesome-free": "^5.5.0",
@@ -35,29 +35,17 @@
     "vuetify": "^3.10.4"
   },
   "devDependencies": {
-    "@eslint/js": "^9.36.0",
     "@stylistic/eslint-plugin": "^5.10.0",
     "@types/lodash": "^4.17.24",
-    "@types/node": "^20.19.4",
+    "@types/node": "^22.20.1",
     "@types/object-hash": "^3.0.6",
     "@types/plotly.js-dist-min": "^2.3.4",
     "@types/uuid": "^8.3.4",
-    "@typescript-eslint/parser": "^8.60.1",
     "@vitejs/plugin-legacy": "^8.0.2",
     "@vitejs/plugin-vue": "^6.0.7",
-    "@vue/eslint-config-prettier": "^10.2.0",
-    "@vue/eslint-config-standard": "^9.0.1",
-    "@vue/eslint-config-typescript": "^14.7.0",
-    "@vue/test-utils": "^2.4.10",
+    "@vue/test-utils": "^2.5.0",
     "@vue/tsconfig": "^0.9.1",
     "esbuild": "^0.28.0",
-    "eslint": "^9.36.0",
-    "eslint-plugin-import": "^2.32.0",
-    "eslint-plugin-node": "^11.1.0",
-    "eslint-plugin-promise": "^7.3.0",
-    "eslint-plugin-security": "^3.0.1",
-    "eslint-plugin-vue": "^10.9.1",
-    "eslint-plugin-vuetify": "^2.7.2",
     "globals": "^16.4.0",
     "ify-loader": "^1.1.0",
     "improved-yarn-audit": "^3.0.4",
@@ -66,21 +54,14 @@
     "terser": "^5.48.0",
     "ts-custom-error": "^3.3.1",
     "typescript": "^5.9.3",
-    "vite": "^8.0.16",
+    "vite": "npm:@voidzero-dev/vite-plus-core@0.3.0",
     "vite-plugin-checker": "^0.14.1",
-    "vitest": "^4.1.8",
-    "vue-eslint-parser": "^10.2.0",
+    "vite-plus": "0.3.0",
     "vue-meta": "^2.4.0",
     "vue-tsc": "^2.2.0"
   },
-  "postcss": {
-    "plugins": {}
-  },
-  "browserslist": [
-    "chrome >= 56"
-  ],
-  "gitHooks": {
-    "pre-commit": "lint-staged"
+  "resolutions": {
+    "vite": "npm:@voidzero-dev/vite-plus-core@0.3.0"
   },
   "lint-staged": {
     "*.js": [
@@ -90,5 +71,14 @@
       "vue-cli-service lint"
     ]
   },
-  "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e"
+  "browserslist": [
+    "chrome >= 56"
+  ],
+  "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e",
+  "gitHooks": {
+    "pre-commit": "lint-staged"
+  },
+  "postcss": {
+    "plugins": {}
+  }
 }

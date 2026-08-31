@@ -101,7 +101,7 @@ const currentStyle = computed(() => {
   return {
     background: theme.global.current.value.colors.primary,
     color: 'white',
-  }
+  } as { background: string; color: string }
 })
 
 function isCurrent(item: T): boolean {

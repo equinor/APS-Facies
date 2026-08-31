@@ -1,6 +1,7 @@
 ---
 title: Probability trends
 ---
+
 ## Utility script to create trends for probability cubes (RMS3D continuous parameter for facies probabilities)
 
 **Description**
@@ -30,8 +31,8 @@ The utility script `define_facies_prob_trend.py`:
 
     Use the Python script as a Python job in RMS since it applies the API `rmsapi` from RMS.
 
-
 ### Example of a Python script using a yml configuration file (model file) as input
+
 In this case the input data directory contains the keyword `model_file_name` to specify the input yml configuration file.
 
 ```python
@@ -50,21 +51,22 @@ define_facies_prob_trend.run(kwargs)
 ```
 
 ### Example 1 yml file format
+
 This example will for each zone calculate volume fraction of each available facies from the input deterministic 3D facies parameter.
 The result will be a constant trend value equal to the facies volume fraction for each facies for each zone.
 
 ```yaml
 FaciesProbTrend:
-    GridModelName: GridModelFine
-    ZoneParamName: Zone
-    FaciesParamName: Facies_initial_example_1
-    ProbParamNamePrefix: ProbTrendEx1
-    SelectedZones: 1 2 3 4 5 6
-    UseConstantProbFromVolumeFraction: True
-
+  GridModelName: GridModelFine
+  ZoneParamName: Zone
+  FaciesParamName: Facies_initial_example_1
+  ProbParamNamePrefix: ProbTrendEx1
+  SelectedZones: 1 2 3 4 5 6
+  UseConstantProbFromVolumeFraction: True
 ```
 
 ### Example 2 yml file format
+
 This example will use conditional probabilities for modelled facies given interpreted facies for two zones based on the input deterministic 3D facies parameter.
 
 The modelled facies are $F_1$, $F_2$, $F_3$, $F_4$, $F_5$
@@ -133,10 +135,11 @@ FaciesProbTrend:
 ```
 
 ### Example of a Python script where all input is specified within the script
+
 In this case the input data directory contains all input data needed and the keyword `model_file_name` is not used.
 
 The keyword for the dictionary cond_prob_matrix is of the form (`zone_number`, `modelled_facies_name`,
- `interpreted_facies_name`).
+`interpreted_facies_name`).
 
 ```python
 from aps.toolbox import define_facies_prob_trend

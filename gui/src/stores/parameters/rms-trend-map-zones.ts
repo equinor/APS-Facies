@@ -16,7 +16,10 @@ export const useParameterRmsTrendMapZoneStore = defineStore(
     async function refresh() {
       const zoneRepresentations = await rms.trendMapZones()
       available.value = Object.entries(zoneRepresentations).map(
-        ([name, representations]) => ({ name, representations }),
+        ([name, representations]) => ({
+          name,
+          representations,
+        }),
       )
     }
     const fetch = refresh // alias

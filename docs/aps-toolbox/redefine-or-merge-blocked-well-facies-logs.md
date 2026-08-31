@@ -1,6 +1,7 @@
 ---
 title: Redefine or merge blocked well facies logs
 ---
+
 ## Utility script to redefine or merge facies in blocked well logs
 
 **Description**
@@ -18,8 +19,8 @@ title: Redefine or merge blocked well facies logs
 The utility script `create_redefined_blocked_facies_log.py`:
 
 ### Alternative ways to implement the use of this script
-- Make your own Python script, define all input in your script with an input dictionary and call the utility scripts run function with the input dictionary
 
+- Make your own Python script, define all input in your script with an input dictionary and call the utility scripts run function with the input dictionary
 
 - Make your own Python script and specify the keyword `model_file_name` and a yml model file specifying the input.
 
@@ -50,25 +51,26 @@ create_redefined_blocked_facies_log.run(params)
 ```
 
 ### Example 1 yml file format
+
 This example will merge and rename facies.
 
 ```yaml
 MergeFaciesLog:
-    GridModelName: GridModelFine
-    BlockedWells: BW3
-    OriginalFaciesLogName: FaciesEx1
-    NewFaciesLogName: TestMergedFacies2Yml
-    NewFaciesCodes:
-         1: A
-         2: B
-         3: C
-    FromOldToNewFacies:
-         F1: A
-         F2: A
-         F3: B
-         F4: B
-         F5: C
-         F6: C
+  GridModelName: GridModelFine
+  BlockedWells: BW3
+  OriginalFaciesLogName: FaciesEx1
+  NewFaciesLogName: TestMergedFacies2Yml
+  NewFaciesCodes:
+    1: A
+    2: B
+    3: C
+  FromOldToNewFacies:
+    F1: A
+    F2: A
+    F3: B
+    F4: B
+    F5: C
+    F6: C
 ```
 
 ### Example of a Python script where all input is specified within the script

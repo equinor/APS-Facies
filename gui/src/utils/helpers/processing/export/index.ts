@@ -189,9 +189,7 @@ function addResultFaciesParamName(
   const parameterRealizationStore = useParameterRealizationStore()
   const value = parameterRealizationStore.selected
   if (value) {
-    parentElement.appendChild(
-      createElement(doc, 'ResultFaciesParamName', value),
-    )
+    parentElement.appendChild(createElement(doc, 'ResultFaciesParamName', value))
   } else {
     throw new APSExportError('No result facies parameter is given')
   }
@@ -742,9 +740,7 @@ function addGaussianRandomFields(
     } else {
       message = `Zone ${parent.zone.code}`
     }
-    throw new APSExportError(
-      message + ' has less than 2 Gaussian Random Fields',
-    )
+    throw new APSExportError(message + ' has less than 2 Gaussian Random Fields')
   } else {
     relevantFields.forEach((field) =>
       addGaussianRandomField(
@@ -845,9 +841,7 @@ function addTruncationRuleBayFill(
   )
 
   // slant factors
-  const baseKw = `APS_${parent.zone.code}_${
-    parent.region ? parent.region.code : 0
-  }_TRUNC_BAYFILL`
+  const baseKw = `APS_${parent.zone.code}_${parent.region ? parent.region.code : 0}_TRUNC_BAYFILL`
 
   truncRule.specification.polygons.forEach((setting): void => {
     BackGroundModelElem.append(

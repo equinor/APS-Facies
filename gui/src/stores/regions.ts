@@ -15,7 +15,9 @@ import { useTruncationRuleStore } from './truncation-rules'
 import { useParameterRegionStore } from './parameters/region'
 
 export type RegionStorePopulationData =
-  CurrentIdentifiedStorePopulationData<Region> & { use?: boolean }
+  CurrentIdentifiedStorePopulationData<Region> & {
+    use?: boolean
+  }
 
 export const useRegionStore = defineStore('regions', () => {
   const use = ref(false)
