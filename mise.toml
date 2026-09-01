@@ -1,3 +1,12 @@
+[tools]
+node = { version = "20.19.3", postinstall = """
+cd "${MISE_CONFIG_ROOT}/gui"
+corepack enable
+corepack install
+""" }
+python = "3.11.13"
+pre-commit = "4.6.0"
+uv = "0.8.22"
 [tasks."dependencies:python"]
 run = "uv sync --no-install-project"
 sources = ["pyproject.toml", "uv.lock"]
@@ -9,11 +18,7 @@ sources = ["pyproject.toml", "uv.lock"]
 outputs = [".venv"]
 
 [tasks."dependencies:node"]
-run = """
-corepack enable
-corepack install
-yarn install --frozen-lockfile
-"""
+run = "yarn install --frozen-lockfile"
 dir = "gui"
 sources = ["gui/package.json", "gui/yarn.lock"]
 outputs = ["gui/node_modules/"]
