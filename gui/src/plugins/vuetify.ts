@@ -1,4 +1,4 @@
-import 'vuetify/styles'
+import 'vuetify/styles/main.sass'
 import { createVuetify, type IconAliases } from 'vuetify'
 import { aliases, fa } from 'vuetify/iconsets/fa'
 import * as components from 'vuetify/components'
