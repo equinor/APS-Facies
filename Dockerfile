@@ -1,6 +1,6 @@
 # syntax = docker/dockerfile:1
 ARG RMS_IMAGE
-FROM node:20.19.2-alpine3.22 AS node
+FROM node:22.23.2-alpine3.24 AS node
 
 ENV CODE=/code
 ENV NODE_MODULES=$CODE/node_modules
