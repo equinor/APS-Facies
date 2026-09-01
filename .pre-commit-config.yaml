@@ -20,7 +20,7 @@ repos:
 
       - id: oxlint
         name: Lint GUI
-        language: node
+        language: system
         pass_filenames: false
         entry: mise run lint:gui
 
