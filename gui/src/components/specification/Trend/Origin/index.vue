@@ -69,9 +69,7 @@ const invalid = ref<Invalid>({
 const availableOriginTypes = computed(
   () => useConstantsOptionsOriginStore().available,
 )
-const isEllipticCone = computed(
-  () => props.value.trend.type === 'ELLIPTIC_CONE',
-)
+const isEllipticCone = computed(() => props.value.trend.type === 'ELLIPTIC_CONE')
 const originType = computed({
   get: () => props.value.trend.origin.type,
   set: (value: OriginType) => (props.value.trend.origin.type = value),

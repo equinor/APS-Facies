@@ -57,9 +57,7 @@ export const useFaciesGroupStore = defineStore('facies-groups', () => {
       (groupConfig) =>
         new FaciesGroup({
           ...groupConfig,
-          facies: groupConfig.facies.map((f) =>
-            faciesStore.byId(f),
-          ) as Facies[],
+          facies: groupConfig.facies.map((f) => faciesStore.byId(f)) as Facies[],
           parent: resolveParentReference(groupConfig.parent),
         }),
     )

@@ -1,6 +1,6 @@
 # syntax = docker/dockerfile:1
 ARG RMS_IMAGE
-FROM node:20.19.2-alpine3.22 AS node
+FROM node:22.23.2-alpine3.24 AS node
 
 ENV CODE=/code
 ENV NODE_MODULES=$CODE/node_modules
@@ -18,10 +18,10 @@ FROM base AS python
 RUN dnf install -y git
 ENV PATH="/root/.local/bin:$PATH"
 
-COPY .tool-versions ./
+COPY mise.toml ./
 RUN <<EOF
 #!/usr/bin/env bash
-UV_VERSION="$(cat .tool-versions|grep uv | grep -o -E '([0-9]+\.?)+')"
+UV_VERSION="$(cat mise.toml|grep uv | grep -o -E '([0-9]+\.?)+')"
 roxenv pip install --user "uv==$UV_VERSION"
 EOF
 
@@ -75,11 +75,11 @@ COPY gui/yarn.lock .
 
 # build / configuration files
 COPY gui/tsconfig.json .
-COPY gui/eslint.config.cjs .
 COPY gui/.postcssrc.js .
 COPY gui/vite.config.ts .
 COPY gui/vue.config.js .
 COPY gui/index.html .
+COPY .oxfmtrc.json .
 
 # Static files
 COPY gui/public public

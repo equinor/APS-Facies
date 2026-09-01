@@ -18,6 +18,6 @@ import { ref, defineSlots } from 'vue'
 const isHovering = ref(false)
 
 defineSlots<{
-  'default'(props: { isHovering: boolean }): void
+  default(props: { isHovering: boolean }): void
 }>()
 </script>

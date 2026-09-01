@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect } from 'vite-plus/test'
 import Facies from '@/utils/domain/facies/local'
 import NonCubicPolygon from '@/utils/domain/polygon/nonCubic'
 import NonCubic from '@/utils/domain/truncationRule/nonCubic'

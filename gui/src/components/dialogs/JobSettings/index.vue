@@ -237,9 +237,7 @@ const useNonStandardFmu = ref(false)
 const onlyUpdateResidualFields = ref(false)
 const exportErtBoxGrid = ref(true)
 
-const version = computed<string>(
-  () => import.meta.env.VUE_APP_APS_VERSION || '',
-)
+const version = computed<string>(() => import.meta.env.VUE_APP_APS_VERSION || '')
 const currentGridModel = computed(() => stores.gridModel.current)
 
 const currentGridModelName = computed(() => currentGridModel.value?.name)

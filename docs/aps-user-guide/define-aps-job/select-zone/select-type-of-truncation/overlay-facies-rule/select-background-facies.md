@@ -1,6 +1,7 @@
 ---
 title: Select background facies
 ---
+
 Select one or more background facies groups and assign background facies to each group.
 No background facies can appear in more than one group.
 

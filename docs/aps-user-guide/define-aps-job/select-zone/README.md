@@ -18,13 +18,13 @@ When using APS in FMU with assisted history matching, the conformity of the grid
 
 About conformity setting:
 
-[//]: # (TODO: this should me a small seperator)
+[//]: # 'TODO: this should me a small seperator'
 
 - The available alternatives are "**Proportional**", "**Top conform**", "**Base conform**"
 
-- This setting is used when APS copy GRF parameters from the geomodel grid to the ERTBOX grid. For more information about the ERTBOX, see the [Job settings for FMU with AHM]().
+- This setting is used when APS copy GRF parameters from the geomodel grid to the ERTBOX grid. For more information about the ERTBOX, see the [Job settings for FMU with AHM](<>).
 
-[//]: # (TODO: Propper link)
+[//]: # 'TODO: Propper link'
 
 The copy/paste button is used when copying the settings of one zone to another zone or from one (zone,region) combination to another (zone,region) combination.
 

@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect } from 'vite-plus/test'
 import { Cubic } from '@/utils/domain'
 import { Orientation } from '@/utils/domain/truncationRule/cubic'
 import { generateFields, selectedZone } from './helpers'

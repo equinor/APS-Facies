@@ -64,8 +64,7 @@ function removeUnavailableFaciesFromTruncationRule(
 
 export const useFaciesStore = defineStore('facies', () => {
   const store = useIdentifiedItems<Facies>()
-  const { available, identifiedAvailable, addAvailable, removeAvailable } =
-    store
+  const { available, identifiedAvailable, addAvailable, removeAvailable } = store
   const _constantProbability = ref<Identified<boolean>>({})
 
   const byId = computed(() => {
@@ -304,10 +303,7 @@ export const useFaciesStore = defineStore('facies', () => {
         regionNumber = region.code
     }
 
-    const parent = zoneStore.byCode(
-      zoneNumber,
-      useRegions ? regionNumber : null,
-    )
+    const parent = zoneStore.byCode(zoneNumber, useRegions ? regionNumber : null)
 
     if (!probabilityCubes) {
       probabilityCubes = available.value

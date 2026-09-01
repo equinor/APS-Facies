@@ -14,8 +14,7 @@ export interface DiscreteSerialization extends BaseItemSerialization {
 }
 
 export interface DiscreteConfiguration
-  extends IDiscrete,
-    BaseItemConfiguration {}
+  extends IDiscrete, BaseItemConfiguration {}
 
 export class Discrete extends BaseItem implements IDiscrete {
   public readonly name: string

@@ -1,6 +1,6 @@
 export enum Orientation {
-  'VERTICAL',
-  'HORIZONTAL',
+  VERTICAL,
+  HORIZONTAL,
 }
 
 export type OrientationString = 'V' | 'H'

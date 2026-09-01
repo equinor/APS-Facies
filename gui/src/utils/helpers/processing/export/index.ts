@@ -189,9 +189,7 @@ function addResultFaciesParamName(
   const parameterRealizationStore = useParameterRealizationStore()
   const value = parameterRealizationStore.selected
   if (value) {
-    parentElement.appendChild(
-      createElement(doc, 'ResultFaciesParamName', value),
-    )
+    parentElement.appendChild(createElement(doc, 'ResultFaciesParamName', value))
   } else {
     throw new APSExportError('No result facies parameter is given')
   }
@@ -742,9 +740,7 @@ function addGaussianRandomFields(
     } else {
       message = `Zone ${parent.zone.code}`
     }
-    throw new APSExportError(
-      message + ' has less than 2 Gaussian Random Fields',
-    )
+    throw new APSExportError(message + ' has less than 2 Gaussian Random Fields')
   } else {
     relevantFields.forEach((field) =>
       addGaussianRandomField(

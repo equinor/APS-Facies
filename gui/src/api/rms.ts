@@ -151,10 +151,7 @@ export default {
     api.call('get_aps_fmu_config', useConfig),
   createAPSFmuConfigFile: (setApsFmuConfig: boolean): Promise<void> =>
     api.call('set_aps_fmu_config', setApsFmuConfig),
-  chooseDir: (
-    mode: 'save' | 'load',
-    suggestion = '',
-  ): Promise<string | null> =>
+  chooseDir: (mode: 'save' | 'load', suggestion = ''): Promise<string | null> =>
     typeof rms !== 'undefined'
       ? rms.chooseDir(mode, suggestion)
       : new Promise((resolve) => resolve(null)),

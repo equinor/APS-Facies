@@ -79,8 +79,7 @@ export interface GaussianRandomFieldSpecification {
   variogram: Variogram
 }
 
-export interface GaussianRandomFieldSerialization
-  extends SimulationSerialization {
+export interface GaussianRandomFieldSerialization extends SimulationSerialization {
   name: string
   settings: SettingsSerialization
   trend: TrendSerialization
@@ -151,9 +150,4 @@ export default class GaussianRandomField extends Simulation implements Named {
   }
 }
 
-export {
-  Variogram,
-  Trend,
-  type TrendSerialization,
-  type VariogramSerialization,
-}
+export { Variogram, Trend, type TrendSerialization, type VariogramSerialization }

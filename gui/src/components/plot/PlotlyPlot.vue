@@ -32,6 +32,7 @@ if (!instance) throw Error('Bad component initialization')
 const plot = ref<PlotlyHTMLElement>({} as PlotlyHTMLElement)
 
 defineExpose({ plot })
+// oxlint-disable-next-line valid-define-emits
 defineEmits(events.map((e) => e.eventName))
 
 type Scheduled = { replot: boolean }

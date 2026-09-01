@@ -1,6 +1,7 @@
 ---
 title: Preview
 ---
+
 ## Preview
 
 The preview update button.
@@ -46,7 +47,7 @@ The cross plots of the GRF fields is meant to be used to check systematic relati
 If there is a systematic clear trend and cluster of points that seems to be located in the same place even when drawing new realizations of the GRF's,
 it indicates that one may expect biased sampling of the facies.
 The perfect situation is when the points are evenly spread over the whole unit square.
-This will ensure that the proportions of the facies is sampled according to the facies  probabilities.
+This will ensure that the proportions of the facies is sampled according to the facies probabilities.
 Try to avoid clustering that is not random effects (seed dependent) but systematic.
 Long correlation lengths of the GRF's tend to create clustering effects in the cross plot,
 but as long as the clusters are not located at the same place for different realizations,
