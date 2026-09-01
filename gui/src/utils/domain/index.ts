@@ -14,10 +14,7 @@ import NonCubicPolygon from '@/utils/domain/polygon/nonCubic'
 import CubicPolygon from '@/utils/domain/polygon/cubic'
 import OverlayPolygon from '@/utils/domain/polygon/overlay'
 import type { ParentReference } from '@/utils/domain/bases/interfaces'
-import type {
-  Parent,
-  Dependent,
-} from '@/utils/domain/bases/zoneRegionDependent'
+import type { Parent, Dependent } from '@/utils/domain/bases/zoneRegionDependent'
 
 export type InstantiatedOverlayTruncationRule = NonCubic | Cubic
 type InstantiatedTruncationRule = Bayfill | InstantiatedOverlayTruncationRule

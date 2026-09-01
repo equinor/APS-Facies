@@ -16,7 +16,5 @@ export const useParameterZoneStore = defineStore('parameter-zone', () => {
 })
 
 if (import.meta.hot) {
-  import.meta.hot.accept(
-    acceptHMRUpdate(useParameterZoneStore, import.meta.hot),
-  )
+  import.meta.hot.accept(acceptHMRUpdate(useParameterZoneStore, import.meta.hot))
 }

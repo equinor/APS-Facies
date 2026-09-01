@@ -59,7 +59,5 @@ export const useParameterGridStore = defineStore('parameter-grid', () => {
 })
 
 if (import.meta.hot) {
-  import.meta.hot.accept(
-    acceptHMRUpdate(useParameterGridStore, import.meta.hot),
-  )
+  import.meta.hot.accept(acceptHMRUpdate(useParameterGridStore, import.meta.hot))
 }

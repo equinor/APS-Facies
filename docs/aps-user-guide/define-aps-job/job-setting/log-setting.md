@@ -1,6 +1,7 @@
 ---
 title: Log setting
 ---
+
 Log settings determine how much output is written to the log window below the GUI main panel.
 
 Default is moderate output (`ON`)

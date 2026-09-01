@@ -37,11 +37,7 @@
         </v-col>
       </v-row>
       <v-spacer />
-      <v-row
-        v-if="parameterSimboxStore.waiting"
-        justify="center"
-        align="center"
-      >
+      <v-row v-if="parameterSimboxStore.waiting" justify="center" align="center">
         <v-icon size="x-large" :icon="$vuetify.icons.aliases?.refreshSpinner" />
       </v-row>
       <v-row v-else>

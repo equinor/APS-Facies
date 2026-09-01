@@ -32,12 +32,7 @@ export default class GlobalFacies extends Discrete {
   declare public name: string
   declare public code: CODE
 
-  public constructor({
-    observed = null,
-    alias,
-    color,
-    ...rest
-  }: Configuration) {
+  public constructor({ observed = null, alias, color, ...rest }: Configuration) {
     super(rest)
     this.observed = observed
     this.color = color

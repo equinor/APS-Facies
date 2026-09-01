@@ -1,6 +1,7 @@
 ---
 title: Probability logs
 ---
+
 For facies interpretation without uncertainties, blocked well set of facies logs can be used.
 Probability logs will then be defined as logs with probability value 1 if the facies is present and 0 if not present.
 In this case we assume that $P(\text{modelled facies} \mid \text{interpreted facies}) = 1$ if modelled facies is equal to interpreted facies and $0$ if not.
@@ -26,13 +27,14 @@ Alternative approaches here can be:
 - Use the RMS well blocking for facies logs and assign a conditional probability for modelled facies given the interpreted facies.
 
 ### Example with conditional probability specification
+
 Example of use of conditional facies probability can be interpretation of two types of sand facies where core data can distinguish between them, but log data have problems distinguishing between the two sand facies.
 Assume a case where interpreted facies types are: $\text{sand}$, $\text{sand}_A$, $\text{sand}_B$.
 If the user wants to model facies $\text{sand}_A$ and $\text{sand}_B$ but from logs only facies $\text{sand}$ can be interpreted, specification like this may be an alternative:
 
 For measured depth intervals with logs only the probability log values are defined by:
 
-$$\begin{eqnarray}
+$$ \begin{eqnarray}
     P(\text{modelled facies sand}_A \mid \text{interpreted facies sand}) = PA \\
     P(\text{modelled facies sand}_B \mid \text{interpreted facies sand}) = PB \\
 \end{eqnarray}$$
@@ -53,3 +55,4 @@ $$\begin{eqnarray}
     P(\text{modelled facies sand}_A \mid \text{interpreted facies sand}_B) = 0 \\
     P(\text{modelled facies sand}_B \mid \text{interpreted facies sand}_B) = 1 \\
 \end{eqnarray}$$
+$$

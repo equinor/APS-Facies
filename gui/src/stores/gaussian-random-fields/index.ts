@@ -100,9 +100,7 @@ export const useGaussianRandomFieldStore = defineStore(
     })
 
     const specification = computed(() => {
-      return (
-        field: GaussianRandomField,
-      ): GaussianRandomFieldSpecification => ({
+      return (field: GaussianRandomField): GaussianRandomFieldSpecification => ({
         name: field.name,
         variogram: field.variogram,
         trend: field.trend,
@@ -113,9 +111,7 @@ export const useGaussianRandomFieldStore = defineStore(
       })
     })
 
-    function add(
-      field: GaussianRandomField | GaussianRandomFieldSerialization,
-    ) {
+    function add(field: GaussianRandomField | GaussianRandomFieldSerialization) {
       if (!(field instanceof GaussianRandomField)) {
         const crossSectionStore = useGaussianRandomFieldCrossSectionStore()
         const variogram = new Variogram(unpackVariogram(field.variogram))
@@ -147,9 +143,7 @@ export const useGaussianRandomFieldStore = defineStore(
       const relevant = getRelevant(available.value, { zone, region })
 
       let grfNumber = relevant.length + 1
-      while (
-        relevant.some((field): boolean => field.name === name(grfNumber))
-      ) {
+      while (relevant.some((field): boolean => field.name === name(grfNumber))) {
         grfNumber++
       }
       return name(grfNumber)
@@ -226,7 +220,7 @@ export const useGaussianRandomFieldStore = defineStore(
 
     function setProperty<
       VorTProp extends 'variogram' | 'trend',
-      VorT extends VorTProp extends 'variogram' ? Variogram : Trend,
+      VorT extends (VorTProp extends 'variogram' ? Variogram : Trend),
       P1 extends keyof VorT,
       P2 extends keyof VorT[P1],
     >(

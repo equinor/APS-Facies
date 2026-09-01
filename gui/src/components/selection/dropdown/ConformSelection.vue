@@ -28,8 +28,7 @@ const zoneStore = useZoneStore()
 
 const conformity = computed({
   get: () => props.value.conformity,
-  set: (value: ZoneConformOption) =>
-    zoneStore.setConformity(props.value, value),
+  set: (value: ZoneConformOption) => zoneStore.setConformity(props.value, value),
 })
 
 const options: ListItem<ZoneConformOption>[] = [

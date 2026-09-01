@@ -16,18 +16,15 @@ import OverlayTruncationRule, {
 import { sample } from 'lodash'
 export { Orientation } from './direction'
 
-export type CubicTruncationRuleArgs =
-  OverlayTruncationRuleArgs<CubicPolygon> & {
-    direction: Direction | Orientation | OrientationString
-  }
+export type CubicTruncationRuleArgs = OverlayTruncationRuleArgs<CubicPolygon> & {
+  direction: Direction | Orientation | OrientationString
+}
 
-export interface CubicSpecification
-  extends OverlaySpecification<CubicPolygonSpecification> {
+export interface CubicSpecification extends OverlaySpecification<CubicPolygonSpecification> {
   direction: OrientationString
 }
 
-export interface CubicSerialization
-  extends OverlaySerialization<CubicPolygonSerialization> {
+export interface CubicSerialization extends OverlaySerialization<CubicPolygonSerialization> {
   direction: OrientationString
 }
 

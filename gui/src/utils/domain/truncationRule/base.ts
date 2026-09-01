@@ -18,8 +18,9 @@ import type { ID } from '@/utils/domain/types'
 import { getId, identify, allSet } from '@/utils/helpers'
 import { isCloseToUnity } from '@/utils/helpers/simple'
 
-export interface TruncationRuleSerialization<S extends PolygonSerialization>
-  extends SimulationSerialization {
+export interface TruncationRuleSerialization<
+  S extends PolygonSerialization,
+> extends SimulationSerialization {
   name: string
   type: TruncationRuleType
   polygons: S[]
@@ -47,10 +48,10 @@ export interface TruncationRuleSpecification<P extends PolygonSpecification> {
 }
 
 export default abstract class TruncationRule<
-    T extends Polygon,
-    S extends PolygonSerialization,
-    P extends PolygonSpecification,
-  >
+  T extends Polygon,
+  S extends PolygonSerialization,
+  P extends PolygonSpecification,
+>
   extends Simulation
   implements Named
 {

@@ -1,6 +1,7 @@
 ---
 title: Estimate and create blocked well probability logs from original facies logs
 ---
+
 ## Utility script to create blocked well probability logs by estinmating volume fractions from original facies logs
 
 **Description**
@@ -8,7 +9,7 @@ title: Estimate and create blocked well probability logs from original facies lo
 Estimate probability of each facies within each blocked well grid cell from original facies log.
 The method is to calculate the fraction of each facies that is present within each blocked well grid cell and use that as the estimate of facies probability.
 The main difference between this approach and the script that create probability logs from blocked well facies logs is that it takes into account the facies
-fraction within each blocked well grid cell instead of first blocking the facies log. Blocking the facies log uses the *majority* rule which means that
+fraction within each blocked well grid cell instead of first blocking the facies log. Blocking the facies log uses the _majority_ rule which means that
 the facies with largest volume fraction will 'win' and the blocked well grid cell will be assigned to that facies.
 
 **Dependency**
@@ -34,7 +35,6 @@ The utility script `prob_logs_from_original_facies_logs.py`:
 
     Use the Python script as a Python job in RMS since it applies the API `rmsapi` from RMS.
 
-
 ### Steps in the algorithm that calculates the blocked well probability logs:
 
 **First probability logs on original facies log scale is created.**
@@ -52,9 +52,9 @@ to be treated as the same modelled facies A, the user can specify that these two
 
 **Option to use conditional probabilities**
 : This option is an alternative way to define probability logs on original facies log scale.
-For the example with two modelled facies A and B, this means that instead of assigning 1 for modelled facies A  (denoted by $A_{m}$)
+For the example with two modelled facies A and B, this means that instead of assigning 1 for modelled facies A (denoted by $A_{m}$)
 where facies A is observed in the log (denoted by $A_{l}$), the probability for facies $A_{m}$ can be specified depending on the observed facies
-in the facies log. The user can specify the conditional probabilities  $P(A_{m} | A_{l})$ and $P(A_{m} | B_{l})$.
+in the facies log. The user can specify the conditional probabilities $P(A_{m} | A_{l})$ and $P(A_{m} | B_{l})$.
 In this case with $A_{m}$ and $B_{m}$ as modelled facies, the probabilities must be normalized such that
 
     $P(A_{m} | A_{l}) + P(B_{m} | A_{l}) = 1$<br>
@@ -72,7 +72,7 @@ of the original facies within each blocked well grid cell. If conditional probab
 blocked well probability logs will contain the average probability of each facies within each blocked well grid cell.
 
 **Option to use bias weighting in well blocking.**
-: It is possible to  specify *bias weighting* with original facies log.
+: It is possible to specify _bias weighting_ with original facies log.
 This means that when calculating the average of the facies probability within a blocked well cell using arithmetic average,
 it is possible with bias weighting to assign different weights to each point along the well path for the original scale
 facies probability logs depending on the original facies for that point. This bias weighting is the same as the one that is available in RMS
@@ -93,17 +93,18 @@ The result is written to ascii files and contains one line per grid layer for th
 
 ## Additional tools to help visualizing the result
 
-A script with a *yml* config file input exists for the purpose to read the blocked well facies probability logs from the RMS project
+A script with a _yml_ config file input exists for the purpose to read the blocked well facies probability logs from the RMS project
 and plot the facies probability logs for each of the specified wells. An option is here also to plot the calculated estimate of
 VPC by reading the files and plot it. More about this tool later in this documentation.
 
 ## How to use the script **estimate_prob_logs**
+
 - The script is run as an RMS python job. The user will need a small python script to
   assign input (a python dictionary) specifying the name of the yml configuration file.
   It will use rmsapi to access the well logs (the facies logs) and add probability logs to the wells.
   It will automatically create and run rms jobs for well blocking of original scale probability logs to get blocked well probability logs.
 
-- The input to the script will be a configuration file in *yml* format with a set of
+- The input to the script will be a configuration file in _yml_ format with a set of
   keywords defining the settings.
 
 - The output will be estimated original scale facies probability logs added to the
@@ -123,8 +124,6 @@ params = {
 }
 prob_logs_from_original_facies_logs.run(params)
 ```
-
-
 
 ## The specification of the configuration file for the script to estimate blocked well facies probability logs
 
@@ -150,7 +149,18 @@ EstimateBlockedWellProbLogs:
     # List of well names to include when calculating probability logs.
     # Wildcard notation is possible. The same Trajectory name and
     # log run name will be used for all selected wells.
-    Wells: ['55_33-1', '55_33-2', '55_33-3', '55_33-A-1', '55_33-A-2', '55_33-A-3', '55_33-A-4', '55_33-A-5', '55_33-A-6']
+    Wells:
+      [
+        '55_33-1',
+        '55_33-2',
+        '55_33-3',
+        '55_33-A-1',
+        '55_33-A-2',
+        '55_33-A-3',
+        '55_33-A-4',
+        '55_33-A-5',
+        '55_33-A-6',
+      ]
     TrajectoryName: 'Drilled trajectory'
     LogRun: log
     FaciesLogName: Facies
@@ -209,7 +219,7 @@ EstimateBlockedWellProbLogs:
     # add the probability logs for the selected logs to be blocked and use the arithmetic average
     # method for well blocking of the probability logs. The blocked well jobs will be
     # automatically updated
-    BlockedWellJobNames: [bw_valysar_vertical,  bw_valysar_horizontal]
+    BlockedWellJobNames: [bw_valysar_vertical, bw_valysar_horizontal]
 
     BiasWeighting:
       Floodplain: 1.0
@@ -223,6 +233,7 @@ EstimateBlockedWellProbLogs:
 ## Description of the keywords
 
 Following the main keyword **EstimateBlockedWellProbLogs** are the following keywords:
+
 ```yml
 OutputPrefix: <prefix of new probability logs>
 DebugLevel:  <number from 0 to 2 defining amount of output to screen>
@@ -273,7 +284,6 @@ BiasWeighting:  (Optional keyword, default is equal weight for each facies)
 UseOnlyMaxProb: <True or False, Default False>
 ```
 
-
 ## Script to plot the result from the script to estimate blocked well facies probabilities
 
 **Description**
@@ -290,7 +300,6 @@ the name of the yml configuration file for this script.
 
 **Output**
 : Visualize probability logs or vertical proportion curves using matplotlib.
-
 
 Example of the python script to be run as a python job in RMS:
 
@@ -311,16 +320,16 @@ Example of the configuration file for the plotting script:
 Description of keywords:
 
 ```yml
-  Following main keyword PlotProbLogs are:
-      PlotEstimatedVPC: <True/False>  (Choose between plotting blocked well facies probability logs or estimated VPC for zone)
-      WellList: <list of wellnames>
-      ProbLogNames: <list of blocked well probability log names>
-      ZoneLogName: <Name of zone log for blocked wells>
-      MaxZoneNumber: <zones are assumed to be in increasing order and this is max zone number>
-      GridModelName: <Name of grid model>
-      BlockedWellSetName: <Name of blocked well set for the grid model>
-      AverageProbLogPrefix: <Prefix name for VPC files generated by the estimate prob log script>
-      AverageProbLogFilePath: <relative path to where the VPC files are saved>
-      ZoneName: <Name of zone>
-      Facies: <List of modelled facies>
+Following main keyword PlotProbLogs are:
+  PlotEstimatedVPC: <True/False>  (Choose between plotting blocked well facies probability logs or estimated VPC for zone)
+  WellList: <list of wellnames>
+  ProbLogNames: <list of blocked well probability log names>
+  ZoneLogName: <Name of zone log for blocked wells>
+  MaxZoneNumber: <zones are assumed to be in increasing order and this is max zone number>
+  GridModelName: <Name of grid model>
+  BlockedWellSetName: <Name of blocked well set for the grid model>
+  AverageProbLogPrefix: <Prefix name for VPC files generated by the estimate prob log script>
+  AverageProbLogFilePath: <relative path to where the VPC files are saved>
+  ZoneName: <Name of zone>
+  Facies: <List of modelled facies>
 ```

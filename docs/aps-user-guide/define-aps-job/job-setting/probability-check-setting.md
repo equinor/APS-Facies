@@ -1,6 +1,7 @@
 ---
 title: Probability check setting
 ---
+
 The facies probabilities should be normalized as input, but sometimes they are not.
 APS will do a normalisation check.
 The user can tune the tolerances both for how large mismatch in value is tolerated

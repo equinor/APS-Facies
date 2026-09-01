@@ -76,8 +76,7 @@ function addPolygon(): void {
   ruleStore.addPolygon(props.rule, {
     order: props.value.order + 1,
     overlay: props.value.overlay,
-    group:
-      props.value instanceof OverlayPolygon ? props.value.group : undefined,
+    group: props.value instanceof OverlayPolygon ? props.value.group : undefined,
   })
 }
 
