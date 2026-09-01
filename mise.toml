@@ -17,6 +17,7 @@ vite-plus = "https://github.com/markmals/mise-vite-plus"
 run = "oxfmt"
 
 [tasks."lint:gui"]
+depends = ["dependencies:node"]
 dir = "gui"
 run = "vp lint"
 
