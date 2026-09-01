@@ -18,10 +18,10 @@ FROM base AS python
 RUN dnf install -y git
 ENV PATH="/root/.local/bin:$PATH"
 
-COPY .tool-versions ./
+COPY mise.toml ./
 RUN <<EOF
 #!/usr/bin/env bash
-UV_VERSION="$(cat .tool-versions|grep uv | grep -o -E '([0-9]+\.?)+')"
+UV_VERSION="$(cat mise.toml|grep uv | grep -o -E '([0-9]+\.?)+')"
 roxenv pip install --user "uv==$UV_VERSION"
 EOF
 
