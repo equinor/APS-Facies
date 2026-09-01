@@ -23,16 +23,16 @@
     "resolveJsonModule": true,
     "sourceMap": true,
     "useDefineForClassFields": true,
-    "baseUrl": ".",
     "types": ["vite/client", "vue", "vuetify", "node"],
     "paths": {
-      "@/*": ["src/*"]
+      "@/*": ["./src/*"]
     },
     "lib": ["es7", "esnext", "dom", "dom.iterable", "scripthost"]
   },
   "files": [
     "./node_modules/vuetify/dist/vuetify.d.ts",
     "./src/vue-shims.d.ts",
+    "./src/vue-augmentations.d.ts",
     "./src/api/rms.d.ts"
   ],
   "include": [

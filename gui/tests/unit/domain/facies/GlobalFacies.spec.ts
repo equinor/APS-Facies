@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { GlobalFacies } from '@/utils/domain'
 import CodeError from '@/utils/domain/bases/discrete/codeError'
 import { APSTypeError } from '@/utils/domain/errors'

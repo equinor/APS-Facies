@@ -31,7 +31,6 @@
 !src/aps/algorithms/**/*.py
 
 !gui/tsconfig.json
-!gui/eslint.config.cjs
 !gui/.postcssrc.js
 !gui/vue.config.js
 !gui/vite.config.ts
@@ -40,5 +39,7 @@
 !gui/public/favicon.ico
 !gui/public/index.html
 !gui/src
+
+!.oxfmtrc.json
 
 !nginx/local.nginx
