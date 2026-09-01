@@ -86,9 +86,7 @@ export const useGridModelStore = defineStore('grid-models', () => {
       const parameterStoresDependentOnGrid = getParameterStoresDependentOnGrid()
       await Promise.all([
         fetchSimbox === true &&
-          useParameterGridSimulationBoxesStore().updateSimulationBox(
-            _gridModel,
-          ),
+          useParameterGridSimulationBoxesStore().updateSimulationBox(_gridModel),
         ...parameterStoresDependentOnGrid.map((store) => store.fetch()),
       ])
 

@@ -89,8 +89,7 @@ export function deserializeTruncationRule<S extends PolygonSerialization>(
 
 export const useTruncationRuleStore = defineStore('truncation-rules', () => {
   const store = useIdentifiedItems<InstantiatedTruncationRule>()
-  const { available, identifiedAvailable, addAvailable, removeAvailable } =
-    store
+  const { available, identifiedAvailable, addAvailable, removeAvailable } = store
 
   const current = computed(() => {
     const zoneStore = useZoneStore()
@@ -433,11 +432,7 @@ export const useTruncationRuleStore = defineStore('truncation-rules', () => {
       .filter((rule) => rule.fields.some((grf) => grf.id === field.id))
       .forEach((rule) => {
         if (rule.isUsedInBackground(field)) {
-          updateBackgroundField(
-            rule,
-            rule.backgroundFields.indexOf(field),
-            null,
-          )
+          updateBackgroundField(rule, rule.backgroundFields.indexOf(field), null)
         } else {
           const overlayPolygons = (rule.polygons as Array<Polygon>).filter(
             (p) => p instanceof OverlayPolygon,

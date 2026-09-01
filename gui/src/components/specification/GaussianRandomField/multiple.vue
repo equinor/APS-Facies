@@ -13,11 +13,7 @@
     <v-expansion-panel-text>
       <cross-section />
       <v-expansion-panels v-model="panels" variant="accordion" multiple>
-        <v-expansion-panel
-          v-for="field in fields"
-          :key="field.id"
-          elevation="0"
-        >
+        <v-expansion-panel v-for="field in fields" :key="field.id" elevation="0">
           <template #title>
             <v-row class="fill-height" align="center" justify="start">
               <v-col cols="4">

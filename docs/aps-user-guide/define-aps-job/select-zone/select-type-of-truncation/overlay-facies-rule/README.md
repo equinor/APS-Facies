@@ -34,7 +34,6 @@ How to define overlay facies:
 
 - The overlay facies specification is in reality modelled by extending the 2D truncation map into a $2 + N$ dimensional truncation cube where $2 + N$ is total number of used GRF fields, and each line specified in the GUI with overlay facies corresponds to a polygon in the $2 + N$ dimensional cube.
 
-
 The table appearing when selecting to use overlay facies contains several columns.
 The first column "Background"
 is used for selecting which facies play the role as background facies for a specified overlay facies.
@@ -56,12 +55,11 @@ The algorithm for how to look up facies when using overlay facies is roughly as 
 1. Look up in which background facies the coordinate ($\alpha_{1}$, $\alpha_{2}$) is located.
 
 2. If the background facies is background for the overlay facies, look up in which interval along the $\alpha_{3}$ axis the coordinate $\alpha_{3}$ belongs
-    1. If the $\alpha_{3}$ coordinate is within the interval belonging to the overlay facies, the overlay facies is assigned to the grid cell.
-    2. If the $\alpha_{3}$ coordinate is not within the interval belonging to the overlay facies, the background facies is kept.
+   1. If the $\alpha_{3}$ coordinate is within the interval belonging to the overlay facies, the overlay facies is assigned to the grid cell.
+   2. If the $\alpha_{3}$ coordinate is not within the interval belonging to the overlay facies, the background facies is kept.
 
 The interval along the $\text{Alpah}_3$ axis is divided into $[0, s]$ for overlay facies and $[s, 1]$ where background facies is used, and s is a calculated threshold value that depends on the facies probability.
 The parameter "Center" is a parameter for modifying the intervals along the $\alpha_{3}$ axis such that three intervals
-
 
 $[0, \max(c - s / 2, 0)]$ belongs to background facies, $[\max(c-s/2,0), \min(c+ s/2,1)]$ belongs to overlay facies, $[\min( c + s / 2, 1), 1]$ belongs to background facies.
 This method is applied also for more than 3 GRF's.

@@ -14,6 +14,7 @@ If possible, please also include a **minimal** RMS project where the bug happens
 This is only relevant if the plugin is unable to handle some specific data in the RMS project.
 
 ### Improving documentation
+
 Do you find the documentation lacking?
 Please reach out, create an issue, pull request, or suggest changes.
 
@@ -39,7 +40,6 @@ mkdocs serve
 
 instead.
 
-
 ## Setting up a local developer environment
 
 (these steps are not _strictly_ necessary to run the containers, but will make the development experience better)
@@ -50,10 +50,12 @@ Install [`mise`](https://mise.jdx.dev/getting-started.html), if not already inst
 We use [`uv`](https://docs.astral.sh/uv/) for managing Python packages and installation[^1].
 
 On macOS, you may have to set
+
 ```bash
 export PYTHON_CONFIGURE_OPTS="--enable-framework"
 export SYSTEM_VERSION_COMPAT=1
 ```
+
 first, in order to make user Python is compiled / installed as a Framework, which is highly recommended to make matplotlib behave.
 
 ```bash
@@ -65,7 +67,9 @@ uv sync  # Installed via mise
 ```bash
 make init
 ```
+
 ### Running locally
+
 Assuming you have containerized RMS
 E.g. added all relevant files to a [RedHat Enterprise Linux](https://catalog.redhat.com/software/containers/rhel7/57ea8cee9c624c035f96f3af?architecture=amd64&image=65a671adb31b6e74ca7559c8) or compatible base image, and installed the necessary dependencies.
 This also assumes that the tool `roxenv` is available in the container's `PATH`.
@@ -75,6 +79,7 @@ docker compose build --build-arg="RMS_IMAGE=<your containerized RMS image>"
 ```
 
 Assuming you have an RMS project
+
 ```bash
 export RMS_PROJECT_PATH=<path to the RMS project you want to work with>
 
@@ -82,6 +87,7 @@ docker-compose up -d
 ```
 
 #### Running without containers
+
 This assumes that RMS' Python environment is activated
 
 In one terminal execute
@@ -113,12 +119,10 @@ sudo service nginx restart
 
 **NOTE**: CodeSpaces might not work as expected because RMS must be available.
 
-
 ## Testing
 
 ```bash
 uv run pytest tests
 ```
-
 
 [^1]: We also support using regular `pip install -e .`, but then the dependencies will not be deterministic which _may_ cause some issues.

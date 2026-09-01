@@ -48,10 +48,7 @@
 import TruncationRulePreview from './TruncationRulePreview.vue'
 
 import { computed } from 'vue'
-import {
-  type RuleName,
-  useTruncationRuleStore,
-} from '@/stores/truncation-rules'
+import { type RuleName, useTruncationRuleStore } from '@/stores/truncation-rules'
 import { useTruncationRulePresetStore } from '@/stores/truncation-rules/presets'
 import type { TruncationRuleType } from '@/utils/domain/truncationRule/base'
 import { useOptionStore } from '@/stores/options'
@@ -87,7 +84,6 @@ const preset = computed(() => {
 
 const type = computed<TruncationRuleType | null>({
   get: () => rulePresetStore.type,
-  set: (value: TruncationRuleType | null) =>
-    rulePresetStore.change(value, null),
+  set: (value: TruncationRuleType | null) => rulePresetStore.change(value, null),
 })
 </script>

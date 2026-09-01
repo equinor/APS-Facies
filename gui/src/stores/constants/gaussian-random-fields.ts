@@ -60,10 +60,7 @@ export const useConstantsGaussianRandomFieldsStore = defineStore(
 
 if (import.meta.hot) {
   import.meta.hot.accept(
-    acceptHMRUpdate(
-      useConstantsGaussianRandomFieldsCubicStore,
-      import.meta.hot,
-    ),
+    acceptHMRUpdate(useConstantsGaussianRandomFieldsCubicStore, import.meta.hot),
   )
   import.meta.hot.accept(
     acceptHMRUpdate(

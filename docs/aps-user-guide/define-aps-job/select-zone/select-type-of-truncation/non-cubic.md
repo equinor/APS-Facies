@@ -1,6 +1,7 @@
 ---
 title: Non-cubic
 ---
+
 For non-cubic truncation rule, also a template can be selected from a drop down menu with templates.
 A list of polygon boundary lines related to polygons in the truncation map will appear and the user should usually modify the angles for their purpose and select a facies to each polygon.
 The ordering of the polygons is of importance and it is recommended to actively use the previewer to see the effect.
@@ -18,14 +19,13 @@ The lines that define the boundaries between each polygon is defined by an angle
 The selected template can be edited.
 Each line in the table shown below corresponds to a polygon in the truncation map.
 Angles for normal vectors normal to the boundary lines between the polygons are specified.
- The example below shows a case with 5 facies and 6 polygons.
+The example below shows a case with 5 facies and 6 polygons.
 When a facies is associated with multiple polygons,
 a probability fraction
 (how much of the probability associated with a facies is to be assigned to each polygon that belongs to the facies)
 is specified.
 
 ![](assets/images/b1fe5ebb39c6f416ce4d4e4647f5434f4648892e2c4e6921fcd39dde7a6de8b3.png)
-
 
 ![](assets/images/23f9c6cbea99d53e2d22f6837d5add3a8a69cc12b125d4b6d82a610555bcabb8.png)
 

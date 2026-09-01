@@ -1,6 +1,7 @@
 ---
 title: Normalisation
 ---
+
 The sum of facies probabilities must add up to 1 in each individual grid cell within a zone.
 A normalisation must be done as the last step in the preparation of facies probabilities.
 

@@ -1,6 +1,7 @@
 ---
 title: Select GRF
 ---
+
 For each background facies group, specify one or more lines with overlay facies.
 This includes specification of which GRF to use and name of overlay facies.
 

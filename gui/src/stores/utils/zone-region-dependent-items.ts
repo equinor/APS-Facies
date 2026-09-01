@@ -8,8 +8,9 @@ import { useIdentifiedItems } from '@/stores/utils/identified-items'
 import { useRegionStore } from '@/stores/regions'
 import type { Region, Zone } from '@/utils/domain'
 
-interface ZoneRegionDependentItems<T extends ZoneRegionDependent>
-  extends IdentifiedItems<T> {
+interface ZoneRegionDependentItems<
+  T extends ZoneRegionDependent,
+> extends IdentifiedItems<T> {
   current: WritableComputedRef<T | null>
 }
 

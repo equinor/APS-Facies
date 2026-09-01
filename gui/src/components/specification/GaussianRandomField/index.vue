@@ -129,9 +129,8 @@ const canSimulate = computed(
   () =>
     notEmpty(variogramType.value) &&
     (trend.value.use
-      ? TREND_NOT_IMPLEMENTED_PREVIEW_VISUALIZATION.indexOf(
-          trend.value.type,
-        ) === -1
+      ? TREND_NOT_IMPLEMENTED_PREVIEW_VISUALIZATION.indexOf(trend.value.type) ===
+        -1
       : true) &&
     isValid.value &&
     !waitingForSimulation.value,

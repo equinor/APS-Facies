@@ -44,7 +44,7 @@
   lang="ts"
   generic="
     ItemType extends 'zone' | 'region',
-    T extends ItemType extends 'zone' ? Zone : Region
+    T extends (ItemType extends 'zone' ? Zone : Region)
   "
 >
 import BaseSelectionTable from '@/components/baseComponents/BaseSelectionTable.vue'
@@ -100,9 +100,7 @@ const headers = computed<HeaderItem[]>(() => [
   { text: 'Use', value: 'selected' },
   ...(props.showName ? [{ text: props.headerName, value: 'name' }] : []),
   ...(props.showCode ? [{ text: 'Code', sortable: true, value: 'code' }] : []),
-  ...(showConformity.value
-    ? [{ text: 'Conformity', value: 'conformity' }]
-    : []),
+  ...(showConformity.value ? [{ text: 'Conformity', value: 'conformity' }] : []),
   { text: 'Copy/Paste' },
 ])
 
