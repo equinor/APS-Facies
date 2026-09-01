@@ -7,6 +7,15 @@ corepack install
 python = "3.11.13"
 pre-commit = "4.6.0"
 uv = "0.8.22"
+vite-plus = "0.3.0"
+
+[plugins]
+vite-plus = "https://github.com/markmals/mise-vite-plus"
+
+[tasks."lint:gui"]
+dir = "gui"
+run = "vp lint"
+
 [tasks."dependencies:python"]
 run = "uv sync --no-install-project"
 sources = ["pyproject.toml", "uv.lock"]
