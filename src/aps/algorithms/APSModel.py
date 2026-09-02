@@ -1807,18 +1807,9 @@ class APSModel:
                         )
                         if fileformat_settings is not None:
                             value = fileformat_settings.text.strip().lower()
-                            legal_values = ['roff', 'grdecl']
+                            legal_values = ['roff']
                             if value in legal_values:
                                 self.__fmu_file_format = value
-                                if value == 'grdecl':
-                                    warnings.warn(
-                                        "The file format using 'grdecl' for field parameters is deprecated."
-                                        "Please use 'roff' format.",
-                                        FutureWarning,
-                                    )
-                                    print(
-                                        f"Warning: File format 'grdecl' is deprecated. Use 'roff' format."
-                                    )
                             else:
                                 raise ValueError(
                                     f'Job settings parameter for {kw_fileformat} '
