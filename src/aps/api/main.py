@@ -49,8 +49,6 @@ def run(config):
             if job.run_fmu_workflows and job.create_fmu_grid:
                 run_create_simulation_grid(**kwargs)
             run_check_grid_index_origin(**kwargs)
-            if not kwargs['use_constant_probabilities']:
-                run_normalization(**kwargs)
             if job.update_model_with_fmu_variables:
                 run_update_fmu_variables_in_model_file(**kwargs)
             if job.run_fmu_workflows:
