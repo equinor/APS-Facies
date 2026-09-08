@@ -7,5 +7,9 @@ The scripts are:
 - define_facies_prob_map_dep_trend.py      Define prob cube trends in specified direction based on input facies parameter.
 - check_and_normalise_probability.py       Check normalization of prob cubes and normalize them if specified criteria is satisfied.
 - prob_cube_parameterization.py            Make linear combination of different sets of prob cubes. Useful in ERT for prob uncertainty.
-- copy_rms_param_to_ertbox_grid.py         Copy 3D parameters in RMS from geogrid to ERTBOX grid and vice versa. Extrapolation is also available.
-- redefine_zones_in_aps_model.py           If zone subdivision is changed after APS model is defined, this script can remap the zones and make updated model file for APS.
+- redefine_zones_in_aps_model.py           If zone subdivision is changed after APS model is defined, this script can remap the zones and make updated model file for APS.2
+
+Other useful tools not related directly to APS, but was originally in the APS toolbox:
+- copy_rms_param_to_ertbox_grid.py         This script is now stored and maintained under repository
+                                           fmu-tools. See the available scripts under src/fmu/tools/rms
+                                           in the fmu-tools repo.

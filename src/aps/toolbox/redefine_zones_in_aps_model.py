@@ -64,7 +64,7 @@ def run(params):
     # For each new zone, specify a list of which old zones to merge together.
     # The first old zone in the list is used as the APS model for the new zone.
     # A requirement is that the old zones in the list are neighbours so that they can be merged.
-    # A split of old zone into multipl new zones is done by specifying the same old zone name
+    # A split of old zone into multiple new zones is done by specifying the same old zone name
     # for each of the new zones.
     zone_mapping = {
         "Zone_A":  ["Zone_A3_orig", "Zone_A2_orig", "Zone_A1_orig"],

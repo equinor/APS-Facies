@@ -62,7 +62,6 @@ nav:
       - aps-toolbox/redefine-or-merge-blocked-well-facies-logs.md
       - aps-toolbox/convert-bitmap-to-rms-surface-format.md
       - aps-toolbox/check-normalisation-of-facies-probabilities.md
-      - aps-toolbox/copy-3d-parameters-to-or-from-ertbox.md
   - APS model file format:
       - aps-model-file-format/README.md
   - Mind Manager map: mind-manager/index.html
