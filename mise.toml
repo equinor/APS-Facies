@@ -26,12 +26,15 @@ run = "uv run --no-project mkdocs serve"
 depends = ["dependencies:docs"]
 
 [tasks.build-containers]
-run = 'docker compose build --build-arg="RMS_IMAGE=$RMS_IMAGE" {{option(name="only", var=true)}}'
+usage = '''
+flag "--only <only>" help="Specify a single container to build"
+'''
+run = 'docker compose build --build-arg="RMS_IMAGE=$RMS_IMAGE" {{usage.only}}'
 env = { _.file = ".env" }
 
 [tasks."unit-test:python"]
 depends = ["build-containers --only api"]
-run = "docker compose run --rm api uv run pytest aps/tests"
+run = "docker compose run --rm api uv run pytest tests"
 
 [env]
 _.python.venv = { path = ".venv", create = false }
