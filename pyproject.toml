@@ -22,7 +22,6 @@ dependencies = [
 ]
 
 [project.scripts]
-generate-workflow-blocks = "aps.toolbox.generate_workflow_blocks.__main__:run"
 parse-truncation-rule-templates = "aps.toolbox.parse_truncation_rule_templates.__main__:main"
 
 [dependency-groups]
