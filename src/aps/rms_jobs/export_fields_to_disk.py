@@ -52,12 +52,10 @@ def run(project, **kwargs):
     fmu_use_residual_fields = aps_model.fmu_use_residual_fields
 
     if file_format.upper() == 'GRDECL':
-        warnings.warn(
+        raise ValueError(
             f'The file format {file_format} for field parameters is deprecated. '
-            "Please use 'roff' format instead.",
-            FutureWarning,
+            "Please use 'roff' format instead."
         )
-        print(f"Warning: File format 'grdecl' is deprecated. Use 'roff' format.")
     print(' ')
     print(f'Export 3D parameter files from {fmu_grid_name}')
     if debug_level >= Debug.ON:
@@ -198,37 +196,7 @@ def write_field_name_to_file(
             file_name, field_name, format=roxar.FileFormat.ROFF_BINARY
         )
     else:
-        warnings.warn("File format 'grdecl' is deprecated", FutureWarning)
-        # Use xtgeo for other formats not available from roxar.grids
-        values = field_property.get_values()
-        values3d = np.reshape(values, (nx, ny, nz))
-
-        if handedness == Direction.right:
-            # Current grid model is right-handed
-            # Need to flip order of the values to get correct export
-            # when using GRDECL format with xtgeo.GridProperty instance
-            values3d_flipped = flip_grid_index_origo(values3d, ny)
-
-            xtgeo_object = xtgeo.GridProperty(
-                ncol=nx,
-                nrow=ny,
-                nlay=nz,
-                values=values3d_flipped,
-                name=field_name,
-            )
-        else:
-            xtgeo_object = xtgeo.GridProperty(
-                ncol=nx,
-                nrow=ny,
-                nlay=nz,
-                values=values3d,
-                name=field_name,
-            )
-        xtgeo_object.to_file(
-            file_name,
-            fformat=file_format,
-            name=field_name,
-        )
+        raise ValueError("File format 'grdecl' is deprecated. Use ROFF format.")
 
 
 def is_active_param_name(property_name: str):

@@ -70,9 +70,8 @@ The figure illustrates a mapping from ERTBOX grid to geomodel grid (or the RMS s
 
 ## File format for GRF fields
 
-Default file format for export/import to/from ERT is `ROFF` format.
-The alternative is Eclipse ASCII format (`GRDECL`).
-It is recommended to use the `ROFF` format (binary format).
+File format for export/import to/from ERT is `ROFF` format.
+The alternative (Eclipse ASCII format (`GRDECL`)) is deprecated.
 
 ![](assets/images/1d9d53c1f332cc0915df4b0510d80cd3c3ae4c71ce664b62a2e5a7bcd9b80353.png)
 
