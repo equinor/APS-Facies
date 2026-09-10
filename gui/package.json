@@ -46,7 +46,7 @@
     "@vitejs/plugin-vue": "^6.0.7",
     "@vue/test-utils": "^2.5.0",
     "@vue/tsconfig": "^0.9.1",
-    "esbuild": "^0.28.0",
+    "esbuild": "^0.28.1",
     "globals": "^16.4.0",
     "ify-loader": "^1.1.0",
     "improved-yarn-audit": "^3.0.4",
