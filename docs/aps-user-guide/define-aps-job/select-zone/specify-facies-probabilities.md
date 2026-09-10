@@ -1,6 +1,7 @@
 ---
 title: Specify facies probabilities
 ---
+
 Each facies to be modelled need a specification of its probability in each grid cell within the zone.
 
 To test APS models, constant probabilities can be chosen.
@@ -20,12 +21,11 @@ APS models with probability cubes:
   Note that facies probabilities for multiple zones (and regions) can be saved in the same RMS 3D parameter.
   Use the zone (and region) parameter to filter out the relevant grid cell values when making or QC the facies probabilities.
 
-
 Well conditioning in APS is handled by facies probability cubes only.
 The user must create facies probability cubes with value 1 for grid cells where the facies always must be present and 0 in grid cells where another facies always is present.
 This is typical in grid cells belonging to blocked well grid cells.
 But it is also possible to assign probability 1 and 0 for other grid cells than those corresponding to blocked wells if one want to have a partly deterministic model.
- But note that facies probability cubes need to be prepared _before_ specifying the APS job since they must be available for APS when selecting facies probability cubes for each facies.
+But note that facies probability cubes need to be prepared _before_ specifying the APS job since they must be available for APS when selecting facies probability cubes for each facies.
 Probabilities must be normalized:
 
 - When using constant probabilities, a button can be pushed to normalize the probabilities if they are not already normalized. Note that for this to work, the truncation rule may have to be specified first.

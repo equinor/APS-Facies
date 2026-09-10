@@ -1,6 +1,7 @@
 ---
 title: Probability logs
 ---
+
 ## Utility script to create blocked well probability logs
 
 **Description**
@@ -18,7 +19,6 @@ title: Probability logs
 **Usage of the probability logs**
 : A probability log containing only 0 or 1 can be used to condition probability cubes to reproduce blocked well facies logs 100% while probabilities between 0 and 1 represents uncertainties in blocked well facies.
 
-
 The utility script `create_probability_logs.py`:
 
 ### Alternative ways to implement the use of this script
@@ -30,7 +30,6 @@ The utility script `create_probability_logs.py`:
 !!! NOTE
 
     Use the Python script as a Python job in RMS since it applies the API `rmsapi` from RMS.
-
 
 ### Example of a Python script using a yml configuration file (model file) as input
 
@@ -48,31 +47,31 @@ input_dict = {
 create_probability_logs.run(input_dict)
 ```
 
-
 ### Example 1 yml file format
+
 This example create 0/1 probability logs
 The facies selected to be used vary from zone to zone.
 Number of zones: 6
 
 ```yaml
 ProbLogs:
-    GridModelName: GridModelFine
-    BlockedWells: BW3
-    FaciesLogName: FaciesEx1
-    ZoneLogName: Zone
-    OutputPrefix: ProbEx1
-    ModellingFaciesPerZone:
-        1: F1 F2 F3 F4 F5 F6
-        2: F1 F2 F3 F4 F5 F6
-        3: F1 F2 F3 F4 F5 F6
-        4: F1 F2 F3 F4 F5 F6
-        5: F1 F2    F4 F5 F6
-        6:    F2       F5 F6
-    UseConditionalProbabilities: False
+  GridModelName: GridModelFine
+  BlockedWells: BW3
+  FaciesLogName: FaciesEx1
+  ZoneLogName: Zone
+  OutputPrefix: ProbEx1
+  ModellingFaciesPerZone:
+    1: F1 F2 F3 F4 F5 F6
+    2: F1 F2 F3 F4 F5 F6
+    3: F1 F2 F3 F4 F5 F6
+    4: F1 F2 F3 F4 F5 F6
+    5: F1 F2    F4 F5 F6
+    6: F2       F5 F6
+  UseConditionalProbabilities: False
 ```
 
-
 ### Example 2 of yml file format
+
 This example use conditional probability for modelled facies given interpreted facies.
 
 Number of zones used: 2
@@ -92,60 +91,58 @@ Facies chosen to be modelled for zone 6: F1, F4, F5
 In this example, modelled facies names are same as interpreted facies names.
 
 ```yaml
-
-
 ProbLogs:
-    GridModelName: GridModelFine
-    BlockedWells: BW2
-    FaciesLogName: FaciesLog
-    ZoneLogName: Zone
-    OutputPrefix: Prob_ex_1_yml
-    ModellingFaciesPerZone:
-        1: F1 F2    F4
-        6: F1       F4 F5
-    UseConditionalProbabilities: True
+  GridModelName: GridModelFine
+  BlockedWells: BW2
+  FaciesLogName: FaciesLog
+  ZoneLogName: Zone
+  OutputPrefix: Prob_ex_1_yml
+  ModellingFaciesPerZone:
+    1: F1 F2    F4
+    6: F1       F4 F5
+  UseConditionalProbabilities: True
 
-    CondProbMatrix:
-        (1, F1, F1): 1.0
-        (1, F2, F1): 0.0
-        (1, F4, F1): 0.0
+  CondProbMatrix:
+    (1, F1, F1): 1.0
+    (1, F2, F1): 0.0
+    (1, F4, F1): 0.0
 
-        (1, F1, F2): 0.0
-        (1, F2, F2): 1.0
-        (1, F4, F2): 0.0
+    (1, F1, F2): 0.0
+    (1, F2, F2): 1.0
+    (1, F4, F2): 0.0
 
-        (1, F1, F3): 0.5
-        (1, F2, F3): 0.3
-        (1, F4, F3): 0.2
+    (1, F1, F3): 0.5
+    (1, F2, F3): 0.3
+    (1, F4, F3): 0.2
 
-        (1, F1, F4): 0.0
-        (1, F2, F4): 0.0
-        (1, F4, F4): 1.0
+    (1, F1, F4): 0.0
+    (1, F2, F4): 0.0
+    (1, F4, F4): 1.0
 
-        (6, F1, F1): 1.0
-        (6, F4, F1): 0.0
-        (6, F5, F1): 0.0
+    (6, F1, F1): 1.0
+    (6, F4, F1): 0.0
+    (6, F5, F1): 0.0
 
-        (6, F1, F2): 0.50
-        (6, F4, F2): 0.50
-        (6, F5, F2): 0.0
+    (6, F1, F2): 0.50
+    (6, F4, F2): 0.50
+    (6, F5, F2): 0.0
 
-        (6, F1, F3): 0.0
-        (6, F4, F3): 0.9
-        (6, F5, F3): 0.1
+    (6, F1, F3): 0.0
+    (6, F4, F3): 0.9
+    (6, F5, F3): 0.1
 
-        (6, F1, F4): 0.0
-        (6, F4, F4): 1.0
-        (6, F5, F4): 0.0
+    (6, F1, F4): 0.0
+    (6, F4, F4): 1.0
+    (6, F5, F4): 0.0
 
-        (6, F1, F5): 0.0
-        (6, F4, F5): 0.0
-        (6, F5, F5): 1.0
+    (6, F1, F5): 0.0
+    (6, F4, F5): 0.0
+    (6, F5, F5): 1.0
 ```
 
 ### Example of how to specify input directly in the input python dictionary
-In this case the input data directory contains all necessary input, and is not using the keyword `model_file_name`.
 
+In this case the input data directory contains all necessary input, and is not using the keyword `model_file_name`.
 
 ```python
 from aps.toolbox import create_probability_logs

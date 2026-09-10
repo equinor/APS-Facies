@@ -1,0 +1,6 @@
+{
+  "singleQuote": true,
+  "semi": false,
+  "printWidth": 81,
+  "ignorePatterns": ["docs/mind-manager/index.html"]
+}

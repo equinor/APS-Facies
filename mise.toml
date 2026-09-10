@@ -1,3 +1,26 @@
+[tools]
+node = { version = "22.23.2", postinstall = """
+cd "${MISE_CONFIG_ROOT}/gui"
+corepack enable
+corepack install
+""" }
+python = "3.11.13"
+pre-commit = "4.6.0"
+uv = "0.8.22"
+vite-plus = "0.3.0"
+oxfmt = "0.65.0"
+
+[plugins]
+vite-plus = "https://github.com/markmals/mise-vite-plus"
+
+[tasks."format:oxfmt"]
+run = "oxfmt"
+
+[tasks."lint:gui"]
+depends = ["dependencies:node"]
+dir = "gui"
+run = "vp lint"
+
 [tasks."dependencies:python"]
 run = "uv sync --no-install-project"
 sources = ["pyproject.toml", "uv.lock"]
@@ -9,11 +32,7 @@ sources = ["pyproject.toml", "uv.lock"]
 outputs = [".venv"]
 
 [tasks."dependencies:node"]
-run = """
-corepack enable
-corepack install
-yarn install --frozen-lockfile
-"""
+run = "yarn install --frozen-lockfile"
 dir = "gui"
 sources = ["gui/package.json", "gui/yarn.lock"]
 outputs = ["gui/node_modules/"]

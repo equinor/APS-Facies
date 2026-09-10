@@ -1,6 +1,7 @@
 ---
 title: Convert bitmap to RMS surface format
 ---
+
 ## Utility script to convert 8-bit bitmap file to RMS surface file format
 
 **Description**
@@ -20,7 +21,7 @@ The utility script `bitmap_to_rms.py`:
 **Alternative ways to implement the use of this script:**
 
 - Make your own Python script, define all input in your script with
- an input dictionary and call the utility scripts run function with the input dictionary
+  an input dictionary and call the utility scripts run function with the input dictionary
 
 - Make your own Python script and specify the keyword `model_file_name` and a yml model file specifying the input.
 
@@ -48,6 +49,7 @@ bitmap_to_rms.run(params)
 ```
 
 ### Example 1 yml file format
+
 This example is a yml file as input to the bitmap_to_rms.py script.
 
 It converts 3 files and use a colorcode to facies code mapping to get the results with facies codes.
@@ -63,7 +65,7 @@ but the user have to identify which color codes represents which facies codes th
 ```yaml
 bitmap2rms:
   Coordinates:
-    x:  643400  658400
+    x: 643400  658400
     y: 4343950 4359800
   PixelInterval:
     nx: 1152
@@ -76,7 +78,7 @@ bitmap2rms:
   ColorCode:
     1: 232
     2: 113
-    3:  79
+    3: 79
     4: 251
   Files:
     - Input: examples/img/bitmap/B1.bmp
@@ -88,6 +90,7 @@ bitmap2rms:
 ```
 
 ### Example of a Python script where all input is specified in the script
+
 In this case the input data directory contains all relevant keywords to specify the input to the script.
 Note that in this case the keyword `model_file_name` is not used.
 

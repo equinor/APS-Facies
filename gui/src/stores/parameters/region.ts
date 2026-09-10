@@ -12,10 +12,7 @@ export const useParameterRegionStore = defineStore('parameter-region', () => {
   const loading = ref(false)
 
   async function select(regionParameter: string | null) {
-    if (
-      regionParameter !== null &&
-      !available.value.includes(regionParameter)
-    ) {
+    if (regionParameter !== null && !available.value.includes(regionParameter)) {
       throw new Error(
         `Selected regionParam ( ${regionParameter} ) ` +
           'is not present in the current project\n\n' +

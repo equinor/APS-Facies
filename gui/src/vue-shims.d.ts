@@ -1,15 +1,6 @@
-import type { Tooltip } from 'floating-vue'
-import 'vite/client'
-
 declare module '*.json' {
   const value: Record<string, unknown>
   export default value
-}
-
-declare module '@vue/runtime-core' {
-  interface GlobalComponents {
-    FloatingTooltip: typeof Tooltip
-  }
 }
 
 declare module '*.vue' {

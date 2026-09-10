@@ -5,20 +5,24 @@ This document described the changes between versions of the APS GUI.
 ## 1.6.2
 
 ### Fixes
+
 - Table headers are no longer hidden
 - Fixed a bug that caused the development version to not generate version information
 
 ### Miscellaneous
+
 - Update dependencies for development and CI/CD
 
 ## 1.6.1
 
 ### Fixes
+
 - Zone parameter is created if it does not exist
 
 ## 1.6.0
 
 ### What's new
+
 - Going forward, the APS plugin will only support RMS 14.2 / Python 3.11 and newer.
 - Documentation, including user guide, was migrated from MindManager to [`mkdocs-material`](https://squidfunk.github.io/mkdocs-material/) and is available on [GitHub Pages](https://equinor.github.io/APS-Facies/aps-user-guide/).
 - Use static name for the plugin artefact for the bleeding release
@@ -27,6 +31,7 @@ This document described the changes between versions of the APS GUI.
 - Add script to make probability log estimates from original facies logs
 
 ### Fixes
+
 - Add check on active cells for current zone. Mismatch is now reported as an error instead of a `NaN` error when there are no active cells in the zone.
 - Version information in the GUI is now read from the `aps` package rather than from included files. This should avoid some ways the plugin could crash.
 - Do not show tooltip when it is empty
@@ -34,6 +39,7 @@ This document described the changes between versions of the APS GUI.
 - Fix bug when importing to ertbox from file
 
 ### Restructure
+
 - Migrate from Snyk to GitHub Advanced Security for vulnerability scanning and Dependabot for keeping dependencies up to date
 - Refactor by using `fmu.tools.rms` function `copy_rms_param`
 - Make `generate-workflow-blocks` callable via `aps` and as installed script
@@ -46,6 +52,7 @@ This document described the changes between versions of the APS GUI.
 - Replace `pylint` with `ruff`
 
 ### Miscellaneous
+
 - Update dependencies and libraries
 - Improved performance for the CI/CD
 - Remove various unnecessary files and scripts

@@ -735,10 +735,7 @@ function getTrend(
     options.originXUpdatable = isFMUUpdatable(trendContainer, 'origin_x')
     options.originY = getMandatoryNumericValue(trendContainer, 'origin_y')
     options.originYUpdatable = isFMUUpdatable(trendContainer, 'origin_y')
-    options.originZ = getMandatoryNumericValue(
-      trendContainer,
-      'origin_z_simbox',
-    )
+    options.originZ = getMandatoryNumericValue(trendContainer, 'origin_z_simbox')
     options.originZUpdatable = isFMUUpdatable(trendContainer, 'origin_z_simbox')
   }
   if ('migrationAngle' in trendContainer) {
@@ -853,8 +850,7 @@ const jobSettings = (
     case 'FIELDS':
       updateGRFElement = getMandatoryNodeValue(fmuSettingsElement, 'UpdateGRF')
       ertBoxGrid = getMandatoryTextValue(updateGRFElement, 'ErtBoxGrid')
-      exportErtBox =
-        getTextValue(updateGRFElement, 'ExportErtBoxGrid') === 'YES'
+      exportErtBox = getTextValue(updateGRFElement, 'ExportErtBoxGrid') === 'YES'
       exchangeMode =
         getMandatoryTextValue(updateGRFElement, 'ExchangeMode') === 'AUTO'
       fileFormat = getMandatoryTextValue(updateGRFElement, 'FileFormat')
@@ -1081,8 +1077,7 @@ interface TruncationRuleContentOverlayModel {
   }>
 }
 
-interface TruncationRuleContentNonCubic
-  extends TruncationRuleContentOverlayModel {
+interface TruncationRuleContentNonCubic extends TruncationRuleContentOverlayModel {
   // That is, non-cubic truncation rule
   BackGroundModel: {
     AlphaFields: string // That is Gaussian Random Fields
@@ -1261,8 +1256,7 @@ export const useModelFileLoaderStore = defineStore('model-file-loader', () => {
       },
       {
         // fetching the simbox can take a long time, so we do not doe it during the initial loading / parsing
-        action: (name: string) =>
-          useGridModelStore().select(name, 'background'),
+        action: (name: string) => useGridModelStore().select(name, 'background'),
         property: 'GridModelName',
         check: false,
       },
@@ -1491,9 +1485,7 @@ export const useModelFileLoaderStore = defineStore('model-file-loader', () => {
     // if we get here, the data is ok, we have identified what to select and can make the selection
     setCurrentZoneId(zoneToSetAsCurrent!.id)
     selectZones(zonesToSelect)
-    await Promise.all(
-      zonesToSelect.map((zone) => touchZone({ zone } as Parent)),
-    )
+    await Promise.all(zonesToSelect.map((zone) => touchZone({ zone } as Parent)))
     if (regionToSetAsCurrent) {
       setCurrentRegionId(regionToSetAsCurrent.id)
       selectRegions(regionsToSelect)

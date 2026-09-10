@@ -59,8 +59,7 @@
                 </v-row>
               </v-row>
               <div v-else>
-                Selection of facies is not available until Grid Model is
-                selected
+                Selection of facies is not available until Grid Model is selected
               </div>
             </template>
           </v-expansion-panel>

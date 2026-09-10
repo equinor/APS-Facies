@@ -8,7 +8,6 @@ title: APS user guide
 
 ## APS user guide
 
-
 This user guide reflects the workflow associated with APS and the structure settings of the APS GUI (RMS plugin).
 
 Other items are:

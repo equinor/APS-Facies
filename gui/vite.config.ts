@@ -1,15 +1,27 @@
-import { defineConfig } from 'vite'
+import { defineConfig, lazyPlugins } from 'vite-plus'
 import vue from '@vitejs/plugin-vue'
 import vuetify from 'vite-plugin-vuetify'
 import { join } from 'node:path'
 import legacy from '@vitejs/plugin-legacy'
 import checker from 'vite-plugin-checker'
+import lintConfig from './oxlint.config.ts'
+import { readFileSync, existsSync } from 'fs'
 
 const resolve = (dir: string) => join(__dirname, dir)
 const { CODESPACE_NAME } = process.env
 
+function getOxfmtSettings() {
+  let config = '.oxfmtrc.json'
+  if (!existsSync(resolve(config))) {
+    config = '../.oxfmtrc.json'
+  }
+  return JSON.parse(readFileSync(resolve(config), 'utf-8'))
+}
+
 export default defineConfig({
-  plugins: [
+  fmt: getOxfmtSettings(),
+  lint: lintConfig,
+  plugins: lazyPlugins(() => [
     legacy({
       renderModernChunks: false,
       targets: [
@@ -23,7 +35,7 @@ export default defineConfig({
     checker({
       vueTsc: true,
     }),
-  ],
+  ]),
   resolve: {
     alias: {
       // eslint-disable-next-line @typescript-eslint/naming-convention

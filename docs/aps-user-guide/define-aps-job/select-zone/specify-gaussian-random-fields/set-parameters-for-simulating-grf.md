@@ -25,8 +25,8 @@ The GRF field specification:
 - Dip direction (The dip for main range direction)
 
 - Optional, specify trends:
-    - Select trend type
-    - Select associated parameter settings
+  - Select trend type
+  - Select associated parameter settings
 
 Use the previewer for the GRF fields to check the effect of the settings:
 

@@ -45,8 +45,7 @@ export const useConstantsRangesStore = defineStore('constants-ranges', () => {
     const azimuthStore = useConstantsRangesAzimuthStore()
     const dipStore = useConstantsRangesDipStore()
     const powerStore = useConstantsRangesPowerStore()
-    const depositionalAzimuthStore =
-      useConstantsRangesDepositionalAzimuthStore()
+    const depositionalAzimuthStore = useConstantsRangesDepositionalAzimuthStore()
     const stackingStore = useConstantsRangesStackingStore()
     const migrationStore = useConstantsRangesMigrationStore()
     await Promise.all([
@@ -73,10 +72,7 @@ if (import.meta.hot) {
     acceptHMRUpdate(useConstantsRangesPowerStore, import.meta.hot),
   )
   import.meta.hot.accept(
-    acceptHMRUpdate(
-      useConstantsRangesDepositionalAzimuthStore,
-      import.meta.hot,
-    ),
+    acceptHMRUpdate(useConstantsRangesDepositionalAzimuthStore, import.meta.hot),
   )
   import.meta.hot.accept(
     acceptHMRUpdate(useConstantsRangesStackingStore, import.meta.hot),

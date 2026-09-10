@@ -7,8 +7,7 @@ import type { RmsJob } from '@/plugins/rms'
 
 export default async function migrate<
   T extends
-    | (Partial<RootStoreSerialization> &
-        Pick<RootStoreSerialization, 'version'>)
+    | (Partial<RootStoreSerialization> & Pick<RootStoreSerialization, 'version'>)
     | RmsJob,
 >(data: T, toVersion: string): Promise<RootStoreSerialization> {
   /* Inspired by: https://typeofnan.dev/an-approach-to-js-object-schema-migration/ */

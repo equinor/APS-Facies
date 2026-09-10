@@ -188,9 +188,7 @@ export function processPolygons(
     return organizeCubicPolygons(
       polygons as (CubicPolygon | OverlayPolygon)[],
       structured.map((polygonSpec) =>
-        'level' in polygonSpec
-          ? (polygonSpec.level as CubicPolygonLevel)
-          : null,
+        'level' in polygonSpec ? (polygonSpec.level as CubicPolygonLevel) : null,
       ),
     )
   }

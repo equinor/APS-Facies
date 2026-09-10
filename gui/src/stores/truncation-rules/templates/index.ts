@@ -207,8 +207,7 @@ export const useTruncationRuleTemplateStore = defineStore(
         throw new APSError('No template with the given name and type')
       const missing =
         template.minFields -
-        getRelevant(fieldStore.available as GaussianRandomField[], parent)
-          .length
+        getRelevant(fieldStore.available as GaussianRandomField[], parent).length
       for (let i = 0; i < missing; i++) {
         fieldStore.addEmptyField()
       }

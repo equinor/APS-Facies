@@ -63,11 +63,7 @@ export default class BayfillPolygon extends Polygon {
   public name: BayfillFacies
   public slantFactor: FmuUpdatable | null
 
-  public constructor({
-    name,
-    slantFactor = null,
-    ...rest
-  }: BayfillPolygonArgs) {
+  public constructor({ name, slantFactor = null, ...rest }: BayfillPolygonArgs) {
     super(rest)
     this.name = name
     if (requireSlantFactor(name)) {

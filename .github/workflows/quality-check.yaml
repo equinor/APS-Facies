@@ -21,6 +21,12 @@ jobs:
         with:
           path: ~/.cache/pre-commit
           key: pre-commit-3|${{ env.pythonLocation }}|${{ hashFiles('.pre-commit-config.yaml') }}
+      - name: Cache Node.js dependencies
+        # Used by some of the pre-commit hooks
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: gui/node_modules
+          key: ${{ runner.os }}-yarn-${{ hashFiles('gui/yarn.lock', 'gui/package.json') }}
       - run: pre-commit run --all-files --show-diff-on-failure --color=always
         shell: bash
 

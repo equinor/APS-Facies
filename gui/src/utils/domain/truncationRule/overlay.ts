@@ -31,13 +31,15 @@ interface OverlayPolygonSpecification extends PolygonSpecification {
   over: string[]
 }
 
-export interface OverlaySpecification<P extends PolygonSpecification>
-  extends TruncationRuleSpecification<P> {
+export interface OverlaySpecification<
+  P extends PolygonSpecification,
+> extends TruncationRuleSpecification<P> {
   overlay: OverlayPolygonSpecification[] | null
 }
 
-export interface OverlaySerialization<P extends PolygonSerialization>
-  extends TruncationRuleSerialization<P | OverlayPolygonSerialization> {
+export interface OverlaySerialization<
+  P extends PolygonSerialization,
+> extends TruncationRuleSerialization<P | OverlayPolygonSerialization> {
   _useOverlay: boolean
 }
 
@@ -52,10 +54,7 @@ export default abstract class OverlayTruncationRule<
 > {
   protected _useOverlay: boolean
 
-  protected constructor({
-    _useOverlay,
-    ...rest
-  }: OverlayTruncationRuleArgs<T>) {
+  protected constructor({ _useOverlay, ...rest }: OverlayTruncationRuleArgs<T>) {
     super(rest)
     this._useOverlay = _useOverlay ?? false
 

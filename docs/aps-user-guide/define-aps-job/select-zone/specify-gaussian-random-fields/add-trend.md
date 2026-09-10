@@ -1,16 +1,16 @@
 ---
 title: Add trend
 ---
+
 Toggle on "Apply trend to field" to use GRF trends.
 Select trend type from drop down list.
 When using trends,
 one need to specify the relative standard deviation of the Gaussian residual field relative to the variability of the trend.
 
 The absolute standard deviation is defined by
- $\text{relative_std_dev} * ( \max(\text{Trend}) - \min(\text{Trend}) )$.
+$\text{relative_std_dev} * ( \max(\text{Trend}) - \min(\text{Trend}) )$.
 
 If Relative standard deviation is very small or 0, no gaussian residual field is simulated and the GRF realization is equal to the trend.
-
 
 An application with 0 relative standard deviation can be to choose the trend type `RMS_PARAM` or `RMS_TRENDMAP` and model the GRF with trend outside of APS instead and import it into APS.
 ![](assets/images/9ebe7066e526a07b55b22ae880aacd8fb5480c72e05ef997303c2cd4d1b0ed40.png)
@@ -26,7 +26,6 @@ The linear trend depends on two direction angles, azimuth and stacking angle whi
 Stacking angle is measured in azimuth direction and defined in the same way as in other facies modules in RMS.
 
 ![](assets/images/bc330264b483b68d35ffc47d3509a4ee63e14c96137f210b78293a878d771ad6.png)
-
 
 ## Elliptic (Curved coastline)
 
@@ -80,7 +79,6 @@ In the example below RMS was used to create a trend by digitizing polygon lines,
 create a vector field and use that in RMS petrosim with 2D anisotropy specification of azimuth.
 
 ![](assets/images/baf170bfb5b0290eeb9910abc9038b8c8642c9ddd583c39c247d9ff4fd223e6b.png)
-
 
 ## Customized 2D trend
 

@@ -77,9 +77,7 @@ export function getRelevant<T extends Dependent>(
   available: T[],
   parent: Parent,
 ): T[] {
-  return available.filter((item) =>
-    hasParents(item, parent.zone, parent.region),
-  )
+  return available.filter((item) => hasParents(item, parent.zone, parent.region))
 }
 
 export function getElements<S extends PolygonSerialization>(

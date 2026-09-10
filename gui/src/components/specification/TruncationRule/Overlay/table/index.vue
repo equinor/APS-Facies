@@ -103,13 +103,12 @@ const groups = computed(() => {
 
 type Item = { id: ID; polygons: Array<OverlayPolygon>; index: number }
 
-const idGroups = computed(
-  (): Array<Item> =>
-    groups.value.map(({ group, polygons }, index) => ({
-      id: group,
-      polygons,
-      index,
-    })),
+const idGroups = computed((): Array<Item> =>
+  groups.value.map(({ group, polygons }, index) => ({
+    id: group,
+    polygons,
+    index,
+  })),
 )
 
 const headers: HeaderItems = [

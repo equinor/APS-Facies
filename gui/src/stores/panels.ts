@@ -77,9 +77,7 @@ export const usePanelStore = defineStore('panels', () => {
         panelName === 'individualGaussianRandomFields'
       ) {
         if (!isArray(open))
-          throw new Error(
-            'individual gaussian fields expects a list of numbers',
-          )
+          throw new Error('individual gaussian fields expects a list of numbers')
       }
       // @ts-expect-error We check the types are consistent above
       panels[sectionName][panelName] = open

@@ -73,9 +73,7 @@ const dataDefinition = computed<Partial<PlotData>[]>(() => [
   },
 ])
 
-const _disabled = computed(
-  () => props.disabled || !props.value.isRepresentative,
-)
+const _disabled = computed(() => props.disabled || !props.value.isRepresentative)
 
 watch(waiting, async () => {
   if (!waiting.value) {
