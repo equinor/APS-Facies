@@ -19,6 +19,7 @@ import { useParameterGridStore } from '@/stores/parameters/grid'
 import { useParameterProbabilityCubeStore } from '@/stores/parameters/probability-cube'
 import { useParameterRmsTrendStore } from '@/stores/parameters/rms-trend'
 import { useParameterRmsTrendMapZoneStore } from '@/stores/parameters/rms-trend-map-zones'
+import { useParameterLengthUnitStore } from '@/stores/parameters/length-unit'
 
 export const useParameterStore = defineStore('parameters', () => {
   const stores = [
@@ -26,6 +27,7 @@ export const useParameterStore = defineStore('parameters', () => {
     useParameterNameProjectStore(),
     useParametersMaxFractionOfValuesOutsideToleranceStore(),
     useParametersToleranceOfProbabilityNormalisationStore(),
+    useParameterLengthUnitStore(),
   ]
   async function fetch() {
     await Promise.all(stores.map((store) => store.fetch()))
@@ -91,6 +93,7 @@ export const useParameterStore = defineStore('parameters', () => {
       useParametersToleranceOfProbabilityNormalisationStore(),
       useParameterTransformTypeStore(),
       useParameterZoneStore(),
+      useParameterLengthUnitStore(),
     ].forEach((store) => store.$reset())
   }
 
