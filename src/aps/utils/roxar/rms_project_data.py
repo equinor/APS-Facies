@@ -9,7 +9,7 @@ from warnings import warn
 
 import numpy as np
 from fmu.tools.rms.zone_mapping import ZoneMapping
-from roxar import GridPropertyType, Project
+from roxar import GridPropertyType, Project, UnitSystem
 from roxar.grids import (
     BlockedWells,
     BlockedWellsSet,
@@ -35,6 +35,7 @@ from aps.utils.constants.simple import (
     CrossSectionType,
     Debug,
     Direction,
+    LengthUnit,
     MaximumValues,
     MinimumValues,
     OriginType,
@@ -99,6 +100,19 @@ def _option_mapping() -> Dict[str, Type[Enum]]:
         'origin': OriginType,
         'stacking_direction': Direction,
         'trend': TrendType,
+    }
+
+
+def _length_unit_mapping() -> Dict[UnitSystem, LengthUnit]:
+    return {
+        UnitSystem.metric: LengthUnit.METRIC,
+        UnitSystem.metric_cmg: LengthUnit.METRIC,
+        UnitSystem.metric_tempest: LengthUnit.METRIC,
+        UnitSystem.si: LengthUnit.METRIC,
+        UnitSystem.field: LengthUnit.FIELD,
+        UnitSystem.field_cmg: LengthUnit.FIELD,
+        UnitSystem.field_us: LengthUnit.FIELD,
+        UnitSystem.field_nexus: LengthUnit.FIELD,
     }
 
 
@@ -429,6 +443,28 @@ class RMSData:
             nLayers,
             debug_level=debug_level,
         )
+
+    def get_project_length_unit(self) -> LengthUnit:
+        try:
+            project_units = self.project.project_units
+        except AttributeError:
+            raise ValueError(
+                'Could not determine the RMS project unit system: '
+                'project.project_units is not available.'
+            )
+
+        if project_units == UnitSystem.mmft:
+            warn(
+                f'RMS project unit system is {project_units}, which mixes '
+                'metric and field units. The GUI will show metric ("m") '
+                'length units, which may not match the vertical/depth axis.'
+            )
+            return LengthUnit.METRIC
+
+        try:
+            return _length_unit_mapping()[project_units]
+        except KeyError:
+            raise ValueError(f'Unsupported RMS project unit system: {project_units} ')
 
     @empty_if_none
     def get_blocked_well_logs(

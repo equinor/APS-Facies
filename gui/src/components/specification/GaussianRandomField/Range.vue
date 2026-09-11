@@ -5,7 +5,7 @@
       :property-type="propertyType"
       sub-property-type="main"
       label="Parallel to Azimuth"
-      unit="m"
+      :unit="lengthUnitStore.selected"
       strictly-greater
       @update:error="(e: boolean) => (invalid.main = e)"
     />
@@ -14,7 +14,7 @@
       :property-type="propertyType"
       sub-property-type="perpendicular"
       label="Normal to Azimuth"
-      unit="m"
+      :unit="lengthUnitStore.selected"
       strictly-greater
       @update:error="(e: boolean) => (invalid.perpendicular = e)"
     />
@@ -23,7 +23,7 @@
       :property-type="propertyType"
       sub-property-type="vertical"
       label="Vertical (normal to dip)"
-      unit="m"
+      :unit="lengthUnitStore.selected"
       strictly-greater
       @update:error="(e: boolean) => (invalid.vertical = e)"
     />
@@ -35,10 +35,13 @@ import type { GaussianRandomField } from '@/utils/domain'
 
 import { ref, watch } from 'vue'
 import StorableNumericField from '@/components/specification/StorableNumericField.vue'
+import { useParameterLengthUnitStore } from '@/stores/parameters/length-unit'
 
 const MainRange = StorableNumericField
 const PerpendicularRange = StorableNumericField
 const VerticalRange = StorableNumericField
+
+const lengthUnitStore = useParameterLengthUnitStore()
 
 type Props = { value: GaussianRandomField }
 defineProps<Props>()

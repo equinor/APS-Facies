@@ -1,5 +1,7 @@
 import type { ID } from '@/utils/domain/types'
 
+export type LengthUnit = 'm' | 'ft'
+
 export interface CodeName {
   code: number
   name: string

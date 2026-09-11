@@ -46,7 +46,7 @@
             :model-value="simulationBox.x"
             readonly
             label="X"
-            unit="m"
+            :unit="lengthUnitStore.selected"
             hint="The size of the simulation box"
             persistent-hint
           />
@@ -56,7 +56,7 @@
             :model-value="simulationBox.y"
             readonly
             label="Y"
-            unit="m"
+            :unit="lengthUnitStore.selected"
             hint="The size of the simulation box"
             persistent-hint
           />
@@ -66,7 +66,7 @@
             :model-value="simulationBox.z"
             readonly
             label="Z"
-            unit="m"
+            :unit="lengthUnitStore.selected"
             :hint="simulationBox.hint"
             persistent-hint
           />
@@ -87,7 +87,7 @@
             :model-value="simulationBoxOrigin.x"
             readonly
             label="X"
-            unit="m"
+            :unit="lengthUnitStore.selected"
             hint="Origin of simulation box"
             persistent-hint
           />
@@ -97,7 +97,7 @@
             :model-value="simulationBoxOrigin.y"
             readonly
             label="Y"
-            unit="m"
+            :unit="lengthUnitStore.selected"
             hint="Origin of simulation box"
             persistent-hint
           />
@@ -123,11 +123,13 @@ import { useParameterGridStore } from '@/stores/parameters/grid'
 import { useGridModelStore } from '@/stores/grid-models'
 import { useParameterGridSimulationBoxStore } from '@/stores/parameters/grid/simulation-box'
 import { useZoneStore } from '@/stores/zones'
+import { useParameterLengthUnitStore } from '@/stores/parameters/length-unit'
 
 const gridModelStore = useGridModelStore()
 const parameterGridModelStore = useParameterGridStore()
 const parameterSimboxStore = useParameterGridSimulationBoxStore()
 const zoneStore = useZoneStore()
+const lengthUnitStore = useParameterLengthUnitStore()
 
 const gridSize = computed<Coordinate3D>(() => parameterGridModelStore.size)
 const gridAzimuth = computed(() => parameterGridModelStore.azimuth)
