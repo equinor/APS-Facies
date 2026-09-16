@@ -11,6 +11,7 @@ import type {
   RmsGridModel,
   Paths,
   Job,
+  LengthUnit,
 } from '@/api/types'
 import type { TruncationRuleDescription } from '@/utils'
 import type { GaussianRandomFieldSpecification } from '@/utils/domain/gaussianRandomField'
@@ -180,4 +181,5 @@ export default {
     api.call('load_dot_master'),
   runAPSWorkflow: (state: string): Promise<void> =>
     api.call('run_aps_workflow', state),
+  lengthUnit: (): Promise<LengthUnit> => api.call('get_project_length_unit'),
 }

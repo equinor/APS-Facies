@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from enum import Enum, EnumMeta, IntEnum
+from enum import Enum, EnumMeta, IntEnum, StrEnum
 
 
 class BaseMeta(EnumMeta):
@@ -218,3 +218,8 @@ class ModelFileFormat(Enum):
     YML = 'yml'
     XML = 'xml'
     BOTH = 'both'
+
+
+class LengthUnit(StrEnum):
+    METRIC = 'm'
+    FIELD = 'ft'
