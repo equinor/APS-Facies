@@ -79,6 +79,7 @@ COPY gui/.postcssrc.js .
 COPY gui/vite.config.ts .
 COPY gui/vue.config.js .
 COPY gui/index.html .
+COPY gui/oxlint.config.ts .
 COPY .oxfmtrc.json .
 
 # Static files
