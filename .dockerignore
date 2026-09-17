@@ -39,6 +39,7 @@
 !gui/public/favicon.ico
 !gui/public/index.html
 !gui/src
+!gui/oxlint.config.ts
 
 !.oxfmtrc.json
 
