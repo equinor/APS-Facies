@@ -495,7 +495,6 @@ monkeytype.sqlite3
 # Word temporary files
 doc/~$*.docx
 
-aps_workflows
 gui/public/truncation-rules
 !gui/src/stores/truncation-rules
 gui/src/stores/truncation-rules/templates/truncationRules.json
