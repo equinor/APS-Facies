@@ -80,14 +80,6 @@
           </v-radio-group>
           <v-row no-gutters>
             <v-select
-              v-model="_fieldFileFormat"
-              :items="FIELD_FORMATS"
-              label="File format for export of Gaussian Random Fields"
-              variant="underlined"
-            />
-          </v-row>
-          <v-row no-gutters>
-            <v-select
               v-model="_customTrendExtrapolationMethod"
               v-tooltip="
                 'Extrapolation method for custom trends to fill undefined grid cells in ERT/FMU grid.'
@@ -141,7 +133,6 @@ import WarningDialog from '@/components/dialogs/JobSettings/WarningDialog.vue'
 import { computed, ref, watch } from 'vue'
 import { useFmuMaxDepthStore } from '@/stores/fmu/maxDepth'
 import {
-  FIELD_FORMATS,
   type FieldFormats,
   TREND_EXTRAPOLATION_METHODS,
 } from '@/stores/fmu/options'
@@ -243,11 +234,6 @@ const _importFields = computed({
   get: () => (props.importFields ? 'automatic_detect' : 'generate'),
   set: (value: FieldUsage) =>
     emit('update:importFields', value === 'automatic_detect'),
-})
-
-const _fieldFileFormat = computed<FieldFormats>({
-  get: () => props.fieldFileFormat,
-  set: (value: FieldFormats) => emit('update:fieldFileFormat', value),
 })
 
 const _customTrendExtrapolationMethod = computed({
