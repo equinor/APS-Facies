@@ -82,7 +82,7 @@ export default createVuetify({
           secondary: colors.grey.darken3, // '#424242',
           // Rename this to 'primary', and retire the blue, once every phase
           // of the redesign is done
-          accent:'#007079',
+          accent: '#007079',
           error: colors.red.accent2, // '#FF5252',
           info: colors.blue.base, // '#2196F3',
           success: colors.green.base, // '#4CAF50',

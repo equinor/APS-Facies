@@ -70,8 +70,7 @@
               </v-row>
             </v-expansion-panel-text>
             <p v-if="!gridModelSelected" class="px-2 pb-3 text-caption">
-              Selection of facies is not available until a Grid Model is
-              selected
+              Selection of facies is not available until a Grid Model is selected
             </p>
           </v-expansion-panel>
         </v-expansion-panels>
