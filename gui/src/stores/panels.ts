@@ -4,6 +4,7 @@ import { isArray } from 'lodash'
 
 type PanelStructure = {
   selection: {
+    general: boolean
     zoneRegion: boolean
     facies: boolean
   }
@@ -24,6 +25,7 @@ type PanelStructure = {
 export const usePanelStore = defineStore('panels', () => {
   const panels: PanelStructure = reactive({
     selection: {
+      general: true,
       zoneRegion: false,
       facies: false,
     },
@@ -42,6 +44,7 @@ export const usePanelStore = defineStore('panels', () => {
   })
 
   function $reset() {
+    panels.selection.general = true
     panels.selection.zoneRegion = false
     panels.selection.facies = false
     panels.preview.truncationRuleMap = false
@@ -116,7 +119,10 @@ export const usePanelStore = defineStore('panels', () => {
   }
 
   function populate(panelSerialization: PanelStoreSerialization) {
-    Object.assign(panels, panelSerialization)
+    for (const sectionName of Object.keys(panels) as (keyof PanelStructure)[]) {
+      const section = panelSerialization[sectionName]
+      if (section) Object.assign(panels[sectionName], section)
+    }
   }
 
   const selection = computed({

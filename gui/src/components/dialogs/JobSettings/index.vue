@@ -12,9 +12,14 @@
     "
   >
     <template #activator="{ props }">
-      <v-btn color="primary" v-bind="props" variant="outlined">
-        Job Settings
-      </v-btn>
+      <action-button
+        v-tooltip:bottom="
+          'Settings for FMU, logging, transformation, run, display, and grid'
+        "
+        v-bind="props"
+      >
+        Job settings
+      </action-button>
     </template>
     <v-card>
       <v-card-title class="text-h5" />
@@ -155,6 +160,7 @@ import rms from '@/api/rms'
 import LoggingSettings from '@/components/dialogs/JobSettings/LoggingSettings.vue'
 import SettingsPanel from '@/components/dialogs/JobSettings/SettingsPanel.vue'
 import BoldButton from '@/components/baseComponents/BoldButton.vue'
+import ActionButton from '@/components/baseComponents/ActionButton.vue'
 import FmuSettings from '@/components/dialogs/JobSettings/FmuSettings.vue'
 import RunSettings from '@/components/dialogs/JobSettings/RunSettings.vue'
 import GridInformation from '@/components/dialogs/JobSettings/GridInformation.vue'
