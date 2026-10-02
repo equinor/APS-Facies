@@ -15,18 +15,15 @@ import 'roboto-fontface/css/roboto/roboto-fontface.css'
 function makeCustomIcons(): Partial<IconAliases> {
   const customIcons: { [key: string]: string } = {
     add: 'fas fa-plus-square',
-    changelog: 'far fa-newspaper',
     clipboard: 'far fa-clipboard',
     clipboardFailed: 'fas fa-exclamation-triangle',
     clipboardSuccess: 'fas fa-clipboard-check',
     copy: 'far fa-clone',
     down: 'fas fa-angle-down',
-    export: 'fas fa-file-export',
+    externalLink: 'fas fa-external-link-alt',
     folder: 'far fa-folder',
     folderOpen: 'far fa-folder-open',
     fromRoxar: 'fas fa-desktop',
-    help: 'fas fa-question-circle',
-    import: 'fas fa-file-import fa-flip-horizontal',
     observed: 'far fa-eye',
     observedNegated: 'far fa-eye-slash',
     openFolder: 'far fa-folder-open',
@@ -83,7 +80,9 @@ export default createVuetify({
         colors: {
           primary: colors.blue.darken2, // '#1976D2',
           secondary: colors.grey.darken3, // '#424242',
-          accent: colors.blue.accent1, // '#82B1FF',
+          // Rename this to 'primary', and retire the blue, once every phase
+          // of the redesign is done
+          accent: '#007079',
           error: colors.red.accent2, // '#FF5252',
           info: colors.blue.base, // '#2196F3',
           success: colors.green.base, // '#4CAF50',

@@ -2,38 +2,48 @@
   <v-container class="align justify center pa-0" fluid>
     <v-row>
       <v-col>
-        <choose-grid-model />
-      </v-col>
-      <v-col>
-        <choose-facies-realization-parameter v-if="gridModelSelected" />
-      </v-col>
-    </v-row>
-    <v-row>
-      <v-col>
-        <v-expansion-panels
-          v-if="gridModelSelected"
-          v-model="expanded"
-          variant="accordion"
-          multiple
-        >
-          <v-expansion-panel expand value="zoneRegion" elevation="0">
-            <template #title>
-              <section-title>Zones and Regions</section-title>
-            </template>
-            <template #text>
-              <zone-region v-if="gridModelSelected" />
-              <span v-else>
-                Selection of zones and regions is not available until Grid Model
-                is selected
-              </span>
-            </template>
+        <v-expansion-panels v-model="expanded" variant="accordion" multiple>
+          <v-expansion-panel value="general" elevation="0">
+            <v-expansion-panel-title class="px-2">
+              <section-title>General</section-title>
+            </v-expansion-panel-title>
+            <v-expansion-panel-text>
+              <div class="d-flex flex-column ga-3 px-2 pb-2">
+                <choose-grid-model />
+                <choose-facies-realization-parameter
+                  :disabled="!gridModelSelected"
+                  disabled-message="Selection of a Facies Realization parameter is not available until a Grid Model is selected"
+                />
+                <model-file-actions />
+              </div>
+            </v-expansion-panel-text>
           </v-expansion-panel>
-          <v-expansion-panel value="facies" elevation="0">
-            <template #title>
+          <v-expansion-panel
+            value="zoneRegion"
+            :disabled="!gridModelSelected"
+            elevation="0"
+          >
+            <v-expansion-panel-title class="px-2">
+              <section-title>Zones and Regions</section-title>
+            </v-expansion-panel-title>
+            <v-expansion-panel-text>
+              <zone-region />
+            </v-expansion-panel-text>
+            <p v-if="!gridModelSelected" class="px-2 pb-3 text-caption">
+              Selection of zones and regions is not available until a Grid Model
+              is selected
+            </p>
+          </v-expansion-panel>
+          <v-expansion-panel
+            value="facies"
+            :disabled="!gridModelSelected"
+            elevation="0"
+          >
+            <v-expansion-panel-title class="px-2">
               <section-title>Facies</section-title>
-            </template>
-            <template #text>
-              <v-row v-if="gridModelSelected" no-gutters class="fill-height">
+            </v-expansion-panel-title>
+            <v-expansion-panel-text>
+              <v-row no-gutters class="fill-height">
                 <v-row v-if="hasWellParameters" no-gutters>
                   <v-col class="pt-2" cols="6">
                     <choose-blocked-well-parameter />
@@ -58,10 +68,10 @@
                   </v-col>
                 </v-row>
               </v-row>
-              <div v-else>
-                Selection of facies is not available until Grid Model is selected
-              </div>
-            </template>
+            </v-expansion-panel-text>
+            <p v-if="!gridModelSelected" class="px-2 pb-3 text-caption">
+              Selection of facies is not available until a Grid Model is selected
+            </p>
           </v-expansion-panel>
         </v-expansion-panels>
       </v-col>
@@ -76,6 +86,7 @@ import FaciesSelection from '@/components/selection/FaciesSelection.vue'
 import ChooseBlockedWellParameter from '@/components/selection/dropdown/ChooseBlockedWellParameter.vue'
 import ChooseBlockedWellLogParameter from '@/components/selection/dropdown/ChooseBlockedWellLogParameter.vue'
 import ChooseFaciesRealizationParameter from '@/components/selection/dropdown/ChooseFaciesRealizationParameter.vue'
+import ModelFileActions from '@/components/selection/ModelFileActions.vue'
 import SectionTitle from '@/components/baseComponents/headings/SectionTitle.vue'
 
 import { computed } from 'vue'
