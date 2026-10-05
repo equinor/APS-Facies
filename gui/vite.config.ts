@@ -30,7 +30,9 @@ export default defineConfig({
     }),
     vue(),
     vuetify({
-      autoImport: true,
+      // `v-tooltip` comes from floating-vue (see src/plugins/tooltip). Without
+      // this, Vuetify's own tooltip directive is injected at compile time instead.
+      autoImport: { ignore: ['Tooltip'] },
     }),
     checker({
       vueTsc: true,
