@@ -2,11 +2,14 @@ import 'vuetify/styles/main.sass'
 import { createVuetify, type IconAliases } from 'vuetify'
 import { aliases, fa } from 'vuetify/iconsets/fa'
 import * as components from 'vuetify/components'
-import * as directives from 'vuetify/directives'
+import * as vuetifyDirectives from 'vuetify/directives'
 
 import '@/style/main.scss'
 
 import colors from 'vuetify/util/colors'
+
+// `v-tooltip` comes from floating-vue (see src/plugins/tooltip)
+const { Tooltip: _tooltip, ...directives } = vuetifyDirectives
 
 // Icons
 import '@fortawesome/fontawesome-free/css/all.css'
