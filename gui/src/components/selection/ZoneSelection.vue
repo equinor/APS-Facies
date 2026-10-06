@@ -1,13 +1,7 @@
 <template>
-  <selection-table
-    header-name="Zone"
-    item-type="zone"
-    show-name
-    show-code
-    loading-text="Loading Zones"
-  />
+  <selectable-item-list item-type="zone" show-name />
 </template>
 
 <script setup lang="ts">
-import SelectionTable from '@/components/table/SelectionTable.vue'
+import SelectableItemList from '@/components/selection/SelectableItemList.vue'
 </script>

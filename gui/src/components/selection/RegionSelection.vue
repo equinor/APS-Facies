@@ -1,16 +1,13 @@
 <template>
-  <selection-table
-    header-name="Region"
+  <selectable-item-list
     item-type="region"
-    no-data-text="A Zone must be selected, before its regions may be shown"
-    show-code
     :show-name="showName"
-    loading-text="Loading Regions"
+    no-data-text="A Zone must be selected, before its regions may be shown"
   />
 </template>
 
 <script setup lang="ts">
-import SelectionTable from '@/components/table/SelectionTable.vue'
+import SelectableItemList from '@/components/selection/SelectableItemList.vue'
 
 import { computed } from 'vue'
 import { useZoneStore } from '@/stores/zones'
