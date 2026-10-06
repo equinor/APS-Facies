@@ -1,20 +1,19 @@
 <template>
-  <v-row justify="space-between" align="center" no-gutters>
-    <v-col cols="0">
-      <warning-dialog ref="warning" html />
-    </v-col>
-    <v-col cols="4">
-      <v-checkbox v-model="useRegions" label="Use regions" />
-    </v-col>
-    <v-col cols="8">
-      <choose-parameter
-        :disabled="!useRegions"
-        regular
-        parameter-type="region"
-        label="Region parameter"
-      />
-    </v-col>
-  </v-row>
+  <div class="d-flex flex-column ga-2">
+    <warning-dialog ref="warning" html />
+    <v-checkbox
+      v-model="useRegions"
+      label="Use regions"
+      density="compact"
+      hide-details
+    />
+    <choose-parameter
+      :disabled="!useRegions"
+      regular
+      parameter-type="region"
+      label="Region parameter"
+    />
+  </div>
 </template>
 
 <script setup lang="ts">

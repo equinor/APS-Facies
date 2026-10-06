@@ -27,6 +27,7 @@ function makeCustomIcons(): Partial<IconAliases> {
     folder: 'far fa-folder',
     folderOpen: 'far fa-folder-open',
     fromRoxar: 'fas fa-desktop',
+    more: 'fas fa-ellipsis-v',
     observed: 'far fa-eye',
     observedNegated: 'far fa-eye-slash',
     openFolder: 'far fa-folder-open',
