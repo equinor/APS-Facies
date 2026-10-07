@@ -16,3 +16,70 @@ $font-family: 'Roboto', 'Avenir', Helvetica, Arial, sans-serif;
     margin-left: 0;
   }
 }
+
+// Fallbacks for RMS 14.2 (Chromium 69), which lacks some CSS that Vuetify uses.
+// Each applies only where the feature is unsupported
+
+// Rounded outline of outlined fields
+@supports not (border-start-start-radius: 0) {
+  .v-field--variant-outlined {
+    .v-field__outline__start {
+      border-top-left-radius: inherit;
+      border-bottom-left-radius: inherit;
+    }
+
+    .v-field__outline__end {
+      border-top-right-radius: inherit;
+      border-bottom-right-radius: inherit;
+    }
+  }
+}
+
+// 'padding-inline' and 'margin-inline' shorthands
+@supports not (padding-inline: 0) {
+  .v-field__input {
+    padding-left: var(--v-field-padding-start);
+    padding-right: var(--v-field-padding-end);
+  }
+
+  .v-field__input > input {
+    padding-left: inherit;
+    padding-right: inherit;
+  }
+
+  .v-list-item {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
+  .v-btn__prepend {
+    margin-left: calc(var(--v-btn-height) / -9);
+    margin-right: calc(var(--v-btn-height) / 4.5);
+  }
+
+  .v-btn__append {
+    margin-left: calc(var(--v-btn-height) / 4.5);
+    margin-right: calc(var(--v-btn-height) / -9);
+  }
+}
+
+// 'max()' in the height of a field's input
+@supports not (min-height: max(0px, 0px)) {
+  .v-field__input {
+    min-height: var(--v-input-control-height);
+  }
+}
+
+// 'ga-*' as margins where flexbox lacks 'gap' (see 'plugins/flex-gap.ts')
+.no-flex-gap {
+  @for $n from 1 through 16 {
+    .d-flex.ga-#{$n} > * + * {
+      margin-left: $n * 4px;
+    }
+
+    .d-flex.flex-column.ga-#{$n} > * + * {
+      margin-top: $n * 4px;
+      margin-left: 0;
+    }
+  }
+}

@@ -6,6 +6,7 @@ import { createApp } from 'vue'
 import { createPinia } from 'pinia'
 import { useTooltip } from './plugins/tooltip'
 import { attachRMSListeners } from './plugins/rms'
+import { markMissingFlexGap } from './plugins/flex-gap'
 import vuetify from './plugins/vuetify'
 import App from './App.vue'
 
@@ -16,5 +17,6 @@ app.use(createPinia())
 attachRMSListeners()
 
 useTooltip(app)
+markMissingFlexGap()
 
 app.mount('#app')

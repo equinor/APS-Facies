@@ -116,6 +116,11 @@ function onKeydown(event: KeyboardEvent): void {
   background-color: rgba(var(--v-theme-accent), 0.08);
 }
 
+// Chromium 69 (RMS 14.2) shows a focus ring on click too, keep it for keyboard only
+.item-card:focus {
+  outline: none;
+}
+
 .item-card:focus-visible {
   outline: 2px solid rgb(var(--v-theme-accent));
   outline-offset: 2px;
