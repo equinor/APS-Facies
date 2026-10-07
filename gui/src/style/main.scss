@@ -6,6 +6,12 @@ $font-family: 'Roboto', 'Avenir', Helvetica, Arial, sans-serif;
   padding: 0;
 }
 
+// Re-centre Font Awesome glyphs, which otherwise inherit the icon's 'middle'
+// and sit slightly below centre (e.g. checkbox icons vs. their labels)
+.v-icon::before {
+  vertical-align: baseline;
+}
+
 .v-expansion-panel-text__wrapper {
   padding-left: 0;
   padding-right: 0;
