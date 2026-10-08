@@ -6,6 +6,7 @@
       label="Use regions"
       density="compact"
       hide-details
+      class="use-regions"
     />
     <choose-parameter
       :disabled="!useRegions"
@@ -30,3 +31,9 @@ const useRegions = computed({
   set: (value: boolean) => regionStore.setUse(value),
 })
 </script>
+
+<style lang="scss" scoped>
+.use-regions :deep(.v-label) {
+  padding-left: 8px;
+}
+</style>
