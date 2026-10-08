@@ -1,5 +1,5 @@
 <template>
-  <div class="d-flex flex-column ga-3 pb-2">
+  <div class="d-flex flex-column ga-3 px-2 pb-2">
     <zone-selection />
     <choose-region-parameter />
     <region-selection v-show="canShowRegions" />
