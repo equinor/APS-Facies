@@ -1,5 +1,5 @@
 <template>
-  <labeled-field label="Conformity" position="start">
+  <labeled-field label="Conformity" position="start" class="conform-selection">
     <template #default="{ fieldAttrs }">
       <v-select
         v-bind="fieldAttrs"
@@ -44,3 +44,10 @@ const options: ListItem<ZoneConformOption>[] = [
   },
 ]
 </script>
+
+<style lang="scss" scoped>
+.conform-selection :deep(.v-label) {
+  font-size: 0.875rem;
+  letter-spacing: 0.25px;
+}
+</style>
