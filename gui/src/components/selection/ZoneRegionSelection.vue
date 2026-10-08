@@ -1,11 +1,9 @@
 <template>
-  <v-row no-gutters>
-    <v-col>
-      <zone-selection />
-      <choose-region-parameter />
-      <region-selection v-show="canShowRegions" />
-    </v-col>
-  </v-row>
+  <div class="d-flex flex-column ga-3 px-2 pb-2">
+    <zone-selection />
+    <choose-region-parameter />
+    <region-selection v-show="canShowRegions" />
+  </div>
 </template>
 
 <script setup lang="ts">

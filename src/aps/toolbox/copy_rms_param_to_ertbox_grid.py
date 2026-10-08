@@ -480,7 +480,7 @@ def _read_model_file_yml(model_file_name, debug_level=Debug.OFF):
         text_value = conformity_text[key]
         if text_value not in valid_conformities_list:
             raise ValueError(
-                f'Unknown comformity: {text_value}\n'
+                f'Unknown conformity: {text_value}\n'
                 f'Valid specifications are: {valid_conformities_list} '
             )
         conformity_per_zone[key] = Conform(text_value).value
