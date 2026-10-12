@@ -1,28 +1,26 @@
 <template>
-  <v-select
-    v-model="conformity"
-    :items="options"
-    :theme="dark ? 'dark' : 'light'"
-    variant="underlined"
-  />
+  <labeled-field label="Conformity" position="start" class="conform-selection">
+    <template #default="{ fieldAttrs }">
+      <v-select
+        v-bind="fieldAttrs"
+        v-model="conformity"
+        :items="options"
+        bg-color="surface"
+      />
+    </template>
+  </labeled-field>
 </template>
 
 <script setup lang="ts">
+import LabeledField from '@/components/baseComponents/LabeledField.vue'
+
 import type { Zone } from '@/utils/domain'
 import type { ZoneConformOption } from '@/utils/domain/zone'
 import type { ListItem } from '@/utils/typing'
 import { computed } from 'vue'
 import { useZoneStore } from '@/stores/zones'
 
-const props = withDefaults(
-  defineProps<{
-    value: Zone
-    dark?: boolean
-  }>(),
-  {
-    dark: false,
-  },
-)
+const props = defineProps<{ value: Zone }>()
 
 const zoneStore = useZoneStore()
 
@@ -46,3 +44,10 @@ const options: ListItem<ZoneConformOption>[] = [
   },
 ]
 </script>
+
+<style lang="scss" scoped>
+.conform-selection :deep(.v-label) {
+  font-size: 0.875rem;
+  letter-spacing: 0.25px;
+}
+</style>

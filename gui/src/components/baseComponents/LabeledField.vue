@@ -1,10 +1,11 @@
 <template>
-  <div>
+  <div :class="{ 'd-flex align-center ga-3': inline }">
     <v-label
       :id="labelId"
       :for="id"
       :text="label"
-      class="mb-1 opacity-100 text-high-emphasis"
+      class="opacity-100 text-high-emphasis"
+      :class="inline ? 'flex-shrink-0' : 'mb-1'"
     />
     <v-defaults-provider :defaults="fieldDefaults">
       <slot :field-attrs="fieldAttrs" />
@@ -13,12 +14,19 @@
 </template>
 
 <script setup lang="ts">
-import { useId } from 'vue'
+import { computed, useId } from 'vue'
 
-defineProps<{ label: string }>()
+const props = withDefaults(
+  defineProps<{
+    label: string
+    position?: 'top' | 'start'
+  }>(),
+  { position: 'top' },
+)
 
 const id = useId()
 const labelId = `${id}-label`
+const inline = computed(() => props.position === 'start')
 
 // 'v-select' labels its input 'Open' / 'Close', for the menu it toggles, which
 // would otherwise become the accessible name of the field. 'aria-labelledby'
@@ -35,8 +43,18 @@ const redesignedField = {
   density: 'compact',
   hideDetails: 'auto',
 }
-const fieldDefaults = {
-  VSelect: redesignedField,
-  VCombobox: redesignedField,
-}
+const fieldDefaults = computed(() => {
+  const field = inline.value
+    ? { ...redesignedField, class: 'flex-grow-1' }
+    : redesignedField
+  return { VSelect: field, VCombobox: field }
+})
 </script>
+
+<style lang="scss" scoped>
+:deep(.v-field) {
+  --v-input-control-height: 32px;
+  --v-field-input-padding-top: 4px;
+  --v-field-input-padding-bottom: 4px;
+}
+</style>
