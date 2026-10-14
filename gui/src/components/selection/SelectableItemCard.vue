@@ -5,7 +5,7 @@
     :class="{ 'item-card--current': isCurrent }"
     tabindex="0"
     :aria-current="isCurrent || undefined"
-    @click="setCurrent"
+    @click="emit('activate')"
     @keydown="onKeydown"
   >
     <div class="d-flex align-center ga-2">
@@ -15,14 +15,18 @@
         :aria-label="`Use ${name}`"
         density="compact"
         class="flex-grow-0"
+        :disabled="selectDisabled"
         @click.stop="emit('toggle')"
       />
+      <slot name="prepend" />
       <span class="text-body-2 text-truncate item-card__name">{{ name }}</span>
       <v-spacer />
-      <span class="text-body-2 text-medium-emphasis text-no-wrap">
-        Code {{ item.code }}
+      <span
+        class="item-card__code text-body-2 text-medium-emphasis text-no-wrap text-center"
+      >
+        Code {{ code }}
       </span>
-      <v-menu location="bottom end">
+      <v-menu v-if="$slots.actions" location="bottom end">
         <template #activator="{ props: menuProps }">
           <v-btn
             v-bind="menuProps"
@@ -34,61 +38,40 @@
           />
         </template>
         <v-list density="compact" min-width="160">
-          <v-list-item prepend-icon="$copy" title="Copy" @click="copy" />
-          <v-list-item
-            prepend-icon="$paste"
-            title="Paste"
-            :disabled="!canPaste || isPasting"
-            @click="paste"
-          />
+          <slot name="actions" />
         </v-list>
       </v-menu>
     </div>
-    <div v-if="$slots.settings" class="mt-1">
-      <slot name="settings" />
+    <div v-if="$slots.default" class="d-flex flex-column ga-1 mt-1">
+      <slot />
     </div>
   </v-card>
 </template>
 
 <script setup lang="ts">
-import type { Region, Zone } from '@/utils/domain'
-import type { ID } from '@/utils/domain/types'
 import type { SelectedType } from '@/utils/domain/bases/selectableItem'
-import { computed } from 'vue'
-import { useCopyPasteStore } from '@/stores/copy-paste'
 
-const props = defineProps<{
-  item: Zone | Region
-  name: string
-  selected: SelectedType
-  isCurrent: boolean
-}>()
+withDefaults(
+  defineProps<{
+    name: string
+    code: number
+    selected: SelectedType
+    isCurrent: boolean
+    selectDisabled?: boolean
+  }>(),
+  { selectDisabled: false },
+)
 
 const emit = defineEmits<{
-  (event: 'update:current', value: ID): void
+  (event: 'activate'): void
   (event: 'toggle'): void
 }>()
 
-defineSlots<{ settings?(): void }>()
-
-const copyPasteStore = useCopyPasteStore()
-
-const canPaste = computed(
-  () => !!copyPasteStore.source && copyPasteStore.source.id !== props.item.id,
-)
-const isPasting = computed(() => !!copyPasteStore.isPasting(props.item))
-
-function copy(): void {
-  copyPasteStore.copy(props.item)
-}
-
-function paste(): void {
-  copyPasteStore.paste(props.item)
-}
-
-function setCurrent(): void {
-  emit('update:current', props.item.id)
-}
+defineSlots<{
+  prepend?(): void
+  actions?(): void
+  default?(): void
+}>()
 
 // A key press on one of the controls the card contains, such as the checkbox
 // or the actions menu, is left to that control
@@ -96,19 +79,24 @@ function onKeydown(event: KeyboardEvent): void {
   if (event.target !== event.currentTarget) return
   if (event.key === 'Enter' || event.key === ' ') {
     event.preventDefault()
-    setCurrent()
+    emit('activate')
   }
 }
 </script>
 
 <style lang="scss" scoped>
 .item-card {
+  --item-card-code-width: 4rem;
   border-color: rgba(var(--v-border-color), 0.22);
   border-radius: 14px;
 }
 
 .item-card__name {
   min-width: 0;
+}
+
+.item-card__code {
+  min-width: var(--item-card-code-width);
 }
 
 .item-card--current {
