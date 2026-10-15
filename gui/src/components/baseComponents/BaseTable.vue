@@ -17,7 +17,7 @@
     <template #headers="{ columns }">
       <tr>
         <th v-for="column in columns" :key="column.title">
-          <span v-tooltip.botton="column.headerProps?.help">
+          <span v-tooltip.bottom="column.headerProps?.help">
             {{ column.title }}
           </span>
         </th>
