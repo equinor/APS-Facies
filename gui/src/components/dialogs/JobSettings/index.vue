@@ -13,7 +13,7 @@
   >
     <template #activator="{ props }">
       <action-button
-        v-tooltip:bottom="
+        v-tooltip.bottom="
           'Settings for FMU, logging, transformation, run, display, and grid'
         "
         v-bind="props"

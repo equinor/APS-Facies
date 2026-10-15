@@ -1,14 +1,14 @@
 <template>
   <div class="d-flex flex-column ga-2">
     <action-button
-      v-tooltip:bottom="'Import an existing model file'"
+      v-tooltip.bottom="'Import an existing model file'"
       block
       @click="importModelFile"
     >
       Import Model File
     </action-button>
     <action-button
-      v-tooltip:bottom="'Export the current specification as a model file'"
+      v-tooltip.bottom="'Export the current specification as a model file'"
       block
       @click="exportModelFile"
     >
