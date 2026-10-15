@@ -12,7 +12,7 @@
     <div class="d-flex ga-3">
       <job-settings />
       <action-button
-        v-tooltip:bottom="
+        v-tooltip.bottom="
           'Documentation of the APS methodology and user guide for this plug-in.'
         "
         append-icon="$externalLink"
