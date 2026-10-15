@@ -9,14 +9,27 @@
         v-for="item in items"
         :key="item.id"
         role="listitem"
-        :item="item"
         :name="nameOf(item)"
+        :code="item.code"
         :selected="item.selected"
         :is-current="item.id === currentId"
-        @update:current="setCurrent"
+        @activate="setCurrent(item.id)"
         @toggle="toggle(item)"
       >
-        <template v-if="showConformity" #settings>
+        <template #actions>
+          <v-list-item
+            prepend-icon="$copy"
+            title="Copy"
+            @click="copyPasteStore.copy(item)"
+          />
+          <v-list-item
+            prepend-icon="$paste"
+            title="Paste"
+            :disabled="!canPaste(item) || !!copyPasteStore.isPasting(item)"
+            @click="copyPasteStore.paste(item)"
+          />
+        </template>
+        <template v-if="showConformity" #default>
           <conform-selection :value="item as Zone" />
         </template>
       </selectable-item-card>
@@ -34,6 +47,7 @@ import type { Region, Zone } from '@/utils/domain'
 import { useZoneStore } from '@/stores/zones'
 import { useRegionStore } from '@/stores/regions'
 import { useFmuOptionStore } from '@/stores/fmu/options'
+import { useCopyPasteStore } from '@/stores/copy-paste'
 
 type Props = {
   itemType: 'zone' | 'region'
@@ -48,6 +62,7 @@ const props = withDefaults(defineProps<Props>(), {
 const zoneStore = useZoneStore()
 const regionStore = useRegionStore()
 const fmuOptionStore = useFmuOptionStore()
+const copyPasteStore = useCopyPasteStore()
 
 type GenericStore = {
   loading: boolean
@@ -86,6 +101,10 @@ function nameOf(item: Zone | Region): string {
 const showConformity = computed(
   () => !!fmuOptionStore.fmuMode && props.itemType === 'zone',
 )
+
+function canPaste(item: Zone | Region): boolean {
+  return !!copyPasteStore.source && copyPasteStore.source.id !== item.id
+}
 
 function setCurrent(id: ID): void {
   store.value.setCurrentId(id)

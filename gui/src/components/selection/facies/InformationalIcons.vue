@@ -1,43 +1,35 @@
 <template>
-  <v-row :dense="true" no-gutters>
-    <v-col>
-      <informational-icon
-        v-if="parentSelected && isFaciesFromRms"
-        :value="value"
-        :active="isObserved"
-        :current="current"
-        message="Observed in well log"
-        inactive-message="Not observed"
-        icon="observed"
+  <div class="d-flex align-center ga-2">
+    <v-icon
+      v-if="isFaciesFromRms && parentSelected"
+      v-tooltip.bottom="isObserved ? 'Observed in well log' : 'Not observed'"
+      :icon="isObserved ? '$observed' : '$observedNegated'"
+      size="small"
+      class="fa-fw"
+    />
+    <span class="source-slot d-flex justify-center">
+      <v-icon
+        v-tooltip.bottom="
+          isFaciesFromRms ? 'Fetched from RMS' : 'Added manually'
+        "
+        :icon="isFaciesFromRms ? '$fromRoxar' : '$createdByUser'"
+        size="small"
+        class="fa-fw"
       />
-    </v-col>
-    <v-col>
-      <informational-icon
-        :value="value"
-        :active="isFaciesFromRms"
-        :current="current"
-        icon="fromRoxar"
-        message="Fetched from RMS"
-      />
-    </v-col>
-  </v-row>
+    </span>
+  </div>
 </template>
 
 <script setup lang="ts">
-import type { ID } from '@/utils/domain/types'
 import type { GlobalFacies } from '@/utils/domain'
 
-import InformationalIcon from './InformationalIcon.vue'
 import { computed } from 'vue'
 import { useRootStore } from '@/stores'
 import { useFaciesStore } from '@/stores/facies'
 import { useZoneStore } from '@/stores/zones'
 import { useRegionStore } from '@/stores/regions'
 
-const props = defineProps<{
-  value: GlobalFacies
-  current?: ID | null
-}>()
+const props = defineProps<{ value: GlobalFacies }>()
 const rootStore = useRootStore()
 const zoneStore = useZoneStore()
 const regionStore = useRegionStore()
@@ -56,3 +48,9 @@ const parentSelected = computed(() => {
   return zoneSelected
 })
 </script>
+
+<style lang="scss" scoped>
+.source-slot {
+  width: 32px;
+}
+</style>
