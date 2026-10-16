@@ -81,6 +81,8 @@ export const useZoneStore = defineStore('zones', () => {
   function select(selected: Zone[]) {
     for (const zone of Object.values(identifiedAvailable.value)) {
       const toggled = includes(selected, zone)
+      // Keeps 'intermediate' zones as they are, instead of selecting all their regions
+      if (!!zone.selected === toggled) continue
       identifiedAvailable.value[zone.id]!.selected = toggled
     }
   }
