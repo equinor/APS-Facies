@@ -64,7 +64,11 @@ nav:
       - aps-toolbox/check-normalisation-of-facies-probabilities.md
       - aps-toolbox/copy-3d-parameters-to-or-from-ertbox.md
   - APS model file format:
-      - aps-model-file-format/README.md
+      - aps-model-file-format/aps_xml_model_file_reference.md
+      - aps-model-file-format/xml-trend-models.md
+      - aps-model-file-format/xml-truncation-rules.md
+  - APS FMU configuration:
+      - aps-fmu-config/aps_fmu_config_documentation.md
   - Mind Manager map: mind-manager/index.html
 
 markdown_extensions:
