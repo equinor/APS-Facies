@@ -47,7 +47,7 @@ const fieldDefaults = computed(() => {
   const field = inline.value
     ? { ...redesignedField, class: 'flex-grow-1' }
     : redesignedField
-  return { VSelect: field, VCombobox: field }
+  return { VSelect: field, VCombobox: field, VTextField: field }
 })
 </script>
 

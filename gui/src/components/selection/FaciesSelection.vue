@@ -1,57 +1,22 @@
 <template>
-  <v-row no-gutters>
-    <v-row class="fill-height" justify="start">
-      <v-col cols="2">
-        <icon-button icon="add" @click="add" />
-      </v-col>
-      <v-col cols="2">
-        <floating-tooltip
-          v-tooltip="removeError ?? undefined"
-          :disabled="canRemove"
-          trigger="hover"
-        >
-          <icon-button icon="remove" :disabled="!canRemove" @click="remove" />
-        </floating-tooltip>
-      </v-col>
-      <v-col cols="8" />
-    </v-row>
-    <v-col cols="12">
-      <facies-table :hide-alias="hideAlias" />
-    </v-col>
-  </v-row>
+  <div class="d-flex flex-column ga-3">
+    <div class="d-flex flex-column ga-2">
+      <action-button block @click="add">Add facies</action-button>
+      <action-button block disabled>Add filter</action-button>
+    </div>
+    <facies-list />
+  </div>
 </template>
 
 <script setup lang="ts">
-import FaciesTable from '@/components/table/FaciesTable/index.vue'
-import IconButton from '@/components/selection/IconButton.vue'
+import ActionButton from '@/components/baseComponents/ActionButton.vue'
+import FaciesList from '@/components/selection/facies/FaciesList.vue'
 
-import { computed } from 'vue'
-import { useFaciesStore } from '@/stores/facies'
 import { useGlobalFaciesStore } from '@/stores/facies/global'
-import type { GlobalFacies } from '@/utils/domain'
 
-withDefaults(defineProps<{ hideAlias?: boolean }>(), { hideAlias: false })
-
-const faciesStore = useFaciesStore()
 const faciesGlobalStore = useGlobalFaciesStore()
 
-const current = computed(() => faciesGlobalStore.current)
-const canRemove = computed(() =>
-  current.value ? !faciesStore.isFromRMS(current.value as GlobalFacies) : false,
-)
-
-const removeError = computed(() => {
-  if (!current.value) return 'A facies must be selected'
-  if (!canRemove.value)
-    return `The selected facies (${current.value!.name}) is from RMS, and cannot be deleted from this GUI`
-  return ''
-})
-
-async function add() {
-  await faciesGlobalStore.create({})
-}
-
-function remove() {
-  faciesGlobalStore.removeSelectedFacies()
+function add(): void {
+  faciesGlobalStore.create({})
 }
 </script>

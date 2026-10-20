@@ -1,23 +1,15 @@
 <template>
-  <div>
-    <!-- <v-edit-dialog lazy @open="reset"> -->
-    <v-text-field
-      v-model="_fieldValue"
-      :label="label"
-      :type="numeric ? 'number' : 'text'"
-      :error-messages="errorMessages"
-      single-line
-      hide-details
-      variant="underlined"
-      @keydown.enter="update"
-      @focusout="update"
-    />
-    <!-- </v-edit-dialog> -->
-  </div>
+  <v-text-field
+    v-model="_fieldValue"
+    :type="numeric ? 'number' : 'text'"
+    :error-messages="errorMessages"
+    @keydown.enter="update"
+    @focusout="update"
+  />
 </template>
 
 <script setup lang="ts" generic="T, N extends boolean">
-import { computed, onBeforeMount, ref } from 'vue'
+import { computed, onBeforeMount, ref, watch } from 'vue'
 
 type OnSubmit = N extends true ? number : string
 
@@ -25,12 +17,10 @@ const props = withDefaults(
   defineProps<{
     value: T
     field: keyof T
-    label?: string
     numeric?: N
     restrictions?: ((value: string) => string)[]
   }>(),
   {
-    label: 'Edit',
     numeric: undefined,
     restrictions: () => [],
   },
@@ -45,6 +35,7 @@ function reset(): void {
   _fieldValue.value = props.value[props.field] as string
 }
 onBeforeMount(() => reset())
+watch(() => props.value[props.field], reset)
 
 const errorMessages = computed(() =>
   props.restrictions

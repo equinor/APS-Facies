@@ -38,6 +38,7 @@ function makeCustomIcons(): Partial<IconAliases> {
     clipboardFailed: 'fas fa-exclamation-triangle',
     clipboardSuccess: 'fas fa-clipboard-check',
     copy: 'far fa-clone',
+    createdByUser: 'fas fa-user',
     down: 'fas fa-angle-down',
     externalLink: 'fas fa-external-link-alt',
     folder: 'far fa-folder',
