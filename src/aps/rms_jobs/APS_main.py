@@ -572,18 +572,15 @@ def run(
                                 f'for facies: {facies_name} for zone: {zone_number}'
                             )
 
-                    index = -np.infty
                     # Get the probability values from the common list since it already is loaded
-                    for i in range(len(probability_parameter_all_values)):
-                        name = probability_parameter_all_values[i].name
-                        if facies_name == name:
-                            index = i
+                    for prob in probability_parameter_all_values:
+                        if prob.name == facies_name:
+                            # Probabilities for each facies for current zone
+                            values = prob.value
+                            probability_parameter_values_for_facies.append(
+                                Probability(facies_name, values)
+                            )
                             break
-                    # Probabilities for each facies for current zone
-                    values = probability_parameter_all_values[index].value
-                    probability_parameter_values_for_facies.append(
-                        Probability(facies_name, values)
-                    )
 
         # end for
 
