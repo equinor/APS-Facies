@@ -65,18 +65,7 @@ def get_field_name(field_name, zone):
     return f'aps_{zone}_{field_name}'
 
 
-def _load_field_values_grdecl(field_name, path, grid=None, debug_level=Debug.OFF):
-    if debug_level >= Debug.VERY_VERBOSE:
-        print(f'--- File name: {path}')
-        print(f'--- Field name: {field_name}')
-        print('--- Format: GRDECL')
-    property = xtgeo.gridproperty_from_file(
-        path, fformat='grdecl', name=field_name, grid=grid
-    )
-    return property.values
-
-
-def _load_field_values_roff(field_name, path, grid=None, debug_level=Debug.OFF):
+def _load_field_values_roff(field_name, path, debug_level=Debug.OFF):
     if debug_level >= Debug.VERY_VERBOSE:
         print(f'--- File name: {path}')
         print(f'--- Field name: {field_name}')
@@ -117,21 +106,14 @@ def field_name_from_full_name(full_field_name, zone_name, region_name=''):
     return field_name
 
 
-def load_field_values(field_name: str, path: Path, grid=None, debug_level=Debug.OFF):
+def load_field_values(field_name: str, path: Path, debug_level=Debug.OFF):
     if path.suffix.upper() == '.GRDECL':
-        warnings.warn(
+        raise ValueError(
             "The file format 'grdecl' for field parameters is deprecated. "
-            "Please use 'roff' format instead.",
-            FutureWarning,
-        )
-        print(f"Warning: File format 'grdecl' is deprecated. Use 'roff' format.")
-        return _load_field_values_grdecl(
-            field_name, path, grid=grid, debug_level=debug_level
+            "Please use 'roff' format instead."
         )
     elif path.suffix.upper() == '.ROFF':
-        return _load_field_values_roff(
-            field_name, path, grid=grid, debug_level=debug_level
-        )
+        return _load_field_values_roff(field_name, path, debug_level=debug_level)
     else:
         raise ValueError(f'Invalid file format, {path.suffix}')
 
@@ -205,10 +187,6 @@ def run(
             f'is empty for realization {project.current_realisation}.'
         )
 
-    xtgeo_fmu_grid = None
-    if file_format.upper() == 'GRDECL':
-        xtgeo_fmu_grid = xtgeo.grid_from_roxar(project, fmu_grid_name)
-
     region_names = None
     region_param_name = None
     if aps_model.use_regions:
@@ -227,7 +205,6 @@ def run(
             zone_mapping,
             load_dir,
             file_format,
-            xtgeo_fmu_grid,
             region_names=region_names,
             region_param_name=region_param_name,
             ert_iteration=ert_iteration,
@@ -242,7 +219,6 @@ def run(
             zone_mapping,
             load_dir,
             file_format,
-            xtgeo_fmu_grid,
             handedness=handedness,
             region_names=region_names,
             region_param_name=region_param_name,
@@ -261,7 +237,6 @@ def import_and_update_ertbox_and_geogrid(
     zone_mapping: ZoneMapping,
     load_dir: Path,
     file_format: str,
-    xtgeo_fmu_grid: xtgeo.Grid,
     region_names: dict = None,
     region_param_name: str = None,
     ert_iteration: int = 0,
@@ -328,7 +303,6 @@ def import_and_update_ertbox_and_geogrid(
                     field = load_field_values(
                         full_field_name,
                         field_location,
-                        grid=xtgeo_fmu_grid,
                         debug_level=debug_level,
                     )
 
@@ -395,7 +369,6 @@ def import_and_update_ertbox_and_geogrid_with_residuals(
     zone_mapping: ZoneMapping,
     load_dir: Path,
     file_format: str,
-    xtgeo_fmu_grid: xtgeo.Grid,
     handedness=Direction.right,
     region_names: dict = None,
     region_param_name: str = None,
@@ -485,7 +458,6 @@ def import_and_update_ertbox_and_geogrid_with_residuals(
                     field = load_field_values(
                         field_name_in_file,
                         field_location,
-                        grid=xtgeo_fmu_grid,
                         debug_level=debug_level,
                     )
 

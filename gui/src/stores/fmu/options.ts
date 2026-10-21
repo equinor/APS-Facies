@@ -12,7 +12,7 @@ import {
   DEFAULT_FMU_SIMULATION_GRID_NAME,
 } from '@/config'
 
-export const FIELD_FORMATS = ['roff', 'grdecl'] as const
+export const FIELD_FORMATS = ['roff'] as const
 export type FieldFormats = (typeof FIELD_FORMATS)[number]
 
 export const TREND_EXTRAPOLATION_METHODS = [
