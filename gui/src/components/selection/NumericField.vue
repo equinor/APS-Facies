@@ -8,6 +8,7 @@
   >
     <v-col :cols="12 - (isFmuUpdatable ? checkboxSize + 1 : 0)" :class="_class">
       <v-text-field
+        v-bind="$attrs"
         :class="_class"
         :model-value="fieldValue"
         :error-messages="errors"
@@ -18,7 +19,7 @@
         :hint="hint"
         :persistent-hint="persistentHint"
         :append-icon="appendIcon"
-        variant="underlined"
+        :variant="variant"
         @update:model-value="
           (e: Exclude<InternalValue, null>) => {
             v.fieldValue.$touch()
@@ -80,9 +81,12 @@ interface AdditionalRule {
 
 type InternalValue = BigNumber | number | string | null
 
+defineOptions({ inheritAttrs: false })
+
 type Props = {
   modelValue: FmuUpdatable<T> | number | null
   label: string
+  variant?: VTextField['variant']
   valueType?: string
   unit?: string
   hint?: string
@@ -105,6 +109,7 @@ type Props = {
   arrowStep?: number
 }
 const props = withDefaults(defineProps<Props>(), {
+  variant: 'underlined',
   valueType: '',
   unit: '',
   hint: '',

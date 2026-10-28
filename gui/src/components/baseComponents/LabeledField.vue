@@ -5,7 +5,7 @@
       :for="id"
       :text="label"
       class="opacity-100 text-high-emphasis"
-      :class="inline ? 'flex-shrink-0' : 'mb-1'"
+      :class="labelClass"
     />
     <v-defaults-provider :defaults="fieldDefaults">
       <slot :field-attrs="fieldAttrs" />
@@ -20,13 +20,18 @@ const props = withDefaults(
   defineProps<{
     label: string
     position?: 'top' | 'start'
+    hideLabel?: boolean
   }>(),
-  { position: 'top' },
+  { position: 'top', hideLabel: false },
 )
 
 const id = useId()
 const labelId = `${id}-label`
 const inline = computed(() => props.position === 'start')
+const labelClass = computed(() => {
+  if (props.hideLabel) return 'd-sr-only'
+  return inline.value ? 'flex-shrink-0' : 'mb-1'
+})
 
 // 'v-select' labels its input 'Open' / 'Close', for the menu it toggles, which
 // would otherwise become the accessible name of the field. 'aria-labelledby'
@@ -47,7 +52,12 @@ const fieldDefaults = computed(() => {
   const field = inline.value
     ? { ...redesignedField, class: 'flex-grow-1' }
     : redesignedField
-  return { VSelect: field, VCombobox: field, VTextField: field }
+  return {
+    VSelect: field,
+    VCombobox: field,
+    VAutocomplete: field,
+    VTextField: field,
+  }
 })
 </script>
 

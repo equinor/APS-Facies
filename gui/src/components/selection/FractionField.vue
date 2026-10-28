@@ -8,6 +8,7 @@
     :label="label"
     :append-icon="appendIcon"
     :dense="dense"
+    :variant="variant"
     optional
     enforce-ranges
     @update:model-value="(newValue) => emit('update:model-value', newValue)"
@@ -21,6 +22,7 @@ import type { FmuUpdatable } from '@/utils/domain/bases/fmuUpdatable'
 import type { MinMax } from '@/api/types'
 import NumericField from '@/components/selection/NumericField.vue'
 import type { PROBABILITY } from '@/utils/domain/types'
+import type { VTextField } from 'vuetify/components'
 
 const ranges: MinMax = { min: 0, max: 1 }
 type Props = {
@@ -30,6 +32,7 @@ type Props = {
   label?: string
   appendIcon?: string
   dense?: boolean
+  variant?: VTextField['variant']
 }
 withDefaults(defineProps<Props>(), {
   fmuUpdatable: false,
@@ -37,6 +40,7 @@ withDefaults(defineProps<Props>(), {
   label: '',
   appendIcon: '',
   dense: false,
+  variant: 'underlined',
 })
 const emit = defineEmits<{
   (event: 'click:append', value: MouseEvent): void

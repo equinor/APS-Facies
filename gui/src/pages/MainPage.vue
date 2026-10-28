@@ -15,12 +15,12 @@
       </v-col>
       <v-col cols="4">
         <scrollable-area>
-          <preview v-if="hasSimulations" />
+          <settings v-if="canSpecifyModelSettings" />
         </scrollable-area>
       </v-col>
       <v-col cols="4">
         <scrollable-area>
-          <settings v-if="canSpecifyModelSettings" />
+          <preview v-if="hasSimulations" />
         </scrollable-area>
       </v-col>
     </v-row>

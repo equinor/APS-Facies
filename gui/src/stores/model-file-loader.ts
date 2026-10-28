@@ -1304,7 +1304,7 @@ export const useModelFileLoaderStore = defineStore('model-file-loader', () => {
       }
       populatePreviewSettings(apsModelContainer)
       const panelStore = usePanelStore()
-      panelStore.open('settings', 'truncationRule')
+      panelStore.open('settings', 'faciesProbability')
       panelStore.open('preview', 'truncationRuleMap')
     } catch (reason) {
       displayMessage((reason as Error).message, 'error')
