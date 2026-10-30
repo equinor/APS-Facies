@@ -1,44 +1,45 @@
 <template>
-  <v-container class="align justify center" fluid>
-    <v-row>
-      <v-expansion-panels v-model="expanded" variant="accordion" multiple>
-        <section-title>{{ title }}</section-title>
-        <v-expansion-panel
-          v-tooltip.bottom-start="{
-            content: !hasFacies && 'No Facies has been selected',
-            disabled: hasFacies,
-          }"
-          value="faciesProbability"
-          :disabled="!hasFacies"
-          elevation="0"
-        >
-          <template #title>
-            <section-title>Probabilities for Facies</section-title>
-          </template>
-          <template #text>
-            <facies-probability-cube />
-          </template>
-        </v-expansion-panel>
-        <v-expansion-panel
-          v-tooltip.bottom="{
-            content: !hasEnoughFacies && 'Too few Facies has been selected',
-            disabled: hasEnoughFacies,
-          }"
-          value="truncationRule"
-          :disabled="!hasEnoughFacies"
-          elevation="0"
-        >
-          <template #title>
-            <section-title>Truncation Rule</section-title>
-          </template>
-          <template #text>
-            <truncation-rule />
-          </template>
-        </v-expansion-panel>
-        <gaussian-random-fields />
-      </v-expansion-panels>
-    </v-row>
-  </v-container>
+  <div>
+    <header
+      class="settings-header position-sticky top-0 bg-surface d-flex align-center pa-2"
+    >
+      <section-title>{{ title }}</section-title>
+    </header>
+    <v-expansion-panels v-model="expanded" variant="accordion" multiple>
+      <v-expansion-panel
+        value="faciesProbability"
+        :disabled="!hasFacies"
+        elevation="0"
+      >
+        <v-expansion-panel-title class="px-2">
+          <section-title>Probabilities for Facies</section-title>
+        </v-expansion-panel-title>
+        <v-expansion-panel-text>
+          <facies-probability-cube />
+        </v-expansion-panel-text>
+        <p v-if="!hasFacies" class="px-2 pb-3 text-caption">
+          No Facies has been selected
+        </p>
+      </v-expansion-panel>
+      <v-expansion-panel
+        v-tooltip.bottom="{
+          content: !hasEnoughFacies && 'Too few Facies has been selected',
+          disabled: hasEnoughFacies,
+        }"
+        value="truncationRule"
+        :disabled="!hasEnoughFacies"
+        elevation="0"
+      >
+        <template #title>
+          <section-title>Truncation Rule</section-title>
+        </template>
+        <template #text>
+          <truncation-rule />
+        </template>
+      </v-expansion-panel>
+      <gaussian-random-fields />
+    </v-expansion-panels>
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -96,16 +97,15 @@ const hasEnoughFacies = computed<boolean>(
   () => _facies.value.length >= minFacies,
 )
 
-watch(
-  _facies,
-  async () => {
-    panelStore.set('settings', 'truncationRule', hasEnoughFacies.value)
-
-    if (!hasFacies.value) {
-      panelStore.close('settings', 'truncationRule')
-      panelStore.close('settings', 'faciesProbability')
-    }
-  },
-  { deep: true },
-)
+watch(_facies, () => {
+  panelStore.set('settings', 'faciesProbability', hasFacies.value)
+  if (!hasEnoughFacies.value) panelStore.close('settings', 'truncationRule')
+})
 </script>
+
+<style lang="scss" scoped>
+.settings-header {
+  z-index: 2;
+  border-bottom: thin solid rgba(var(--v-border-color), var(--v-border-opacity));
+}
+</style>

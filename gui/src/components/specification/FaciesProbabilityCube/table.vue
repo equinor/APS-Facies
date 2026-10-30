@@ -1,114 +1,133 @@
 <template>
-  <base-table
-    :headers="headers"
-    :items="items"
-    no-data-text="No Facies selected"
-    elevation="0"
-  >
-    <template #item="{ item: facies }: { item: Facies }">
+  <table class="probability-table w-100 text-body-2">
+    <thead class="text-no-wrap">
       <tr>
-        <td>{{ facies.alias }}</td>
+        <th scope="col">Facies</th>
+        <th v-if="useProbabilityCubes" scope="col">Probability cube</th>
+        <th scope="col" class="probability-table__value">
+          {{ probabilityHeading }}
+        </th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr v-for="facies in selectedFacies" :key="facies.id">
+        <th scope="row" class="font-weight-regular">{{ facies.alias }}</th>
         <td v-if="useProbabilityCubes">
-          <v-autocomplete
-            :model-value="facies.probabilityCube"
-            :items="probabilityCubes"
-            clearable
-            @update:model-value="
-              (cube: ProbabilityCube) => changeProbabilityCube(facies, cube)
-            "
-          />
+          <labeled-field
+            :label="`Probability cube for ${facies.alias}`"
+            hide-label
+          >
+            <template #default="{ fieldAttrs }">
+              <v-autocomplete
+                v-bind="fieldAttrs"
+                :model-value="facies.probabilityCube"
+                :items="probabilityCubes"
+                :menu-props="{ maxWidth: 0 }"
+                clearable
+                @update:model-value="
+                  (cube: ProbabilityCube | null) =>
+                    faciesStore.changeProbabilityCube(facies, cube)
+                "
+              />
+            </template>
+          </labeled-field>
         </td>
-        <td v-if="useProbabilityCubes">
-          {{
-            facies.previewProbability !== null
-              ? facies.previewProbability.toFixed(2)
-              : '-'
-          }}
-        </td>
-        <td v-else>
-          <fraction-field
-            :model-value="facies.previewProbability"
-            label=""
-            dense
-            @update:model-value="
-              (probability) =>
-                changeProbability(facies, probability as PROBABILITY)
-            "
-          />
+        <td>
+          <labeled-field
+            :label="`${probabilityHeading} for ${facies.alias}`"
+            hide-label
+          >
+            <template #default="{ fieldAttrs }">
+              <v-text-field
+                v-if="useProbabilityCubes"
+                v-bind="fieldAttrs"
+                :model-value="facies.previewProbability?.toFixed(3)"
+                :disabled="facies.previewProbability === null"
+                class="pointer-events-none"
+                tabindex="-1"
+                readonly
+              />
+              <fraction-field
+                v-else
+                v-bind="fieldAttrs"
+                :model-value="facies.previewProbability"
+                variant="outlined"
+                @update:model-value="
+                  (probability) =>
+                    faciesStore.changePreviewProbability(
+                      facies,
+                      probability as PROBABILITY | null,
+                    )
+                "
+              />
+            </template>
+          </labeled-field>
         </td>
       </tr>
-    </template>
-  </base-table>
+    </tbody>
+  </table>
 </template>
 
 <script setup lang="ts">
 import FractionField from '@/components/selection/FractionField.vue'
-import BaseTable from '@/components/baseComponents/BaseTable.vue'
+import LabeledField from '@/components/baseComponents/LabeledField.vue'
 
 import type { ProbabilityCube } from '@/utils/domain/facies/local'
-import type Facies from '@/utils/domain/facies/local'
-import type { HeaderItem, ListItem } from '@/utils/typing'
+import type { PROBABILITY } from '@/utils/domain/types'
+import type { ListItem } from '@/utils/typing'
 
 import { computed } from 'vue'
 import { useFaciesStore } from '@/stores/facies'
 import { useParameterProbabilityCubeStore } from '@/stores/parameters/probability-cube'
 import { useRootStore } from '@/stores'
-import type { PROBABILITY } from '@/utils/domain/types'
 
 const rootStore = useRootStore()
 const faciesStore = useFaciesStore()
+const probabilityCubeStore = useParameterProbabilityCubeStore()
 
 const selectedFacies = computed(() => faciesStore.selected)
 
 const probabilityCubes = computed<ListItem<ProbabilityCube>[]>(() =>
-  [{ title: '', props: { disabled: false } }].concat(
-    useParameterProbabilityCubeStore().available.map((parameter) => {
-      return {
-        title: parameter,
-        props: {
-          disabled: selectedFacies.value
-            .map((facies) => facies.probabilityCube)
-            .includes(parameter),
-        },
-      }
-    }),
-  ),
+  probabilityCubeStore.available.map((parameter) => ({
+    title: parameter,
+    props: {
+      disabled: selectedFacies.value.some(
+        (facies) => facies.probabilityCube === parameter,
+      ),
+    },
+  })),
 )
 
 const useProbabilityCubes = computed(
   () => !faciesStore.constantProbability(rootStore.parent),
 )
 
-const items = computed<Facies[]>(() =>
-  [...selectedFacies.value].sort((a, b) => a.code - b.code),
+const probabilityHeading = computed(() =>
+  useProbabilityCubes.value ? 'Preview probability' : 'Probability',
 )
-
-const headers = computed<HeaderItem[]>(() => {
-  if (useProbabilityCubes.value) {
-    return [
-      { text: 'Facies', value: 'name' },
-      { text: 'Probability Cube', value: 'probabilityCube' },
-      { text: 'Preview Probability', value: 'previewProbability' },
-    ]
-  } else {
-    return [
-      { text: 'Facies', value: 'name' },
-      { text: 'Probability', value: 'previewProbability' },
-    ]
-  }
-})
-
-function changeProbabilityCube(
-  facies: Facies,
-  probabilityCube: ProbabilityCube,
-): void {
-  faciesStore.changeProbabilityCube(facies, probabilityCube)
-}
-
-function changeProbability(
-  facies: Facies,
-  previewProbability: PROBABILITY | null,
-): void {
-  faciesStore.changePreviewProbability(facies, previewProbability)
-}
 </script>
+
+<style lang="scss" scoped>
+.probability-table {
+  table-layout: fixed;
+  border-collapse: collapse;
+
+  th,
+  td {
+    padding: 0.25rem 0;
+    text-align: start;
+  }
+
+  tr > * + * {
+    padding-left: 0.625rem;
+  }
+
+  td:last-child :deep(input) {
+    text-align: end;
+  }
+
+  .probability-table__value {
+    width: 9.5rem;
+  }
+}
+</style>

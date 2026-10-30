@@ -363,7 +363,7 @@ export const useFaciesStore = defineStore('facies', () => {
     _constantProbability.value[parentId] = usage
   }
 
-  function changeProbabilityCube(facies: Facies, cube: ProbabilityCube) {
+  function changeProbabilityCube(facies: Facies, cube: ProbabilityCube | null) {
     facies.probabilityCube = cube
   }
 

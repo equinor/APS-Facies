@@ -1,12 +1,8 @@
 <template>
-  <v-row class="fill-height" align="center" justify="center">
-    <v-col>
-      <probability-cube-header />
-    </v-col>
-    <v-col cols="12">
-      <facies-probability-cube-table />
-    </v-col>
-  </v-row>
+  <div class="d-flex flex-column ga-2 px-2 pb-2">
+    <probability-cube-header />
+    <facies-probability-cube-table />
+  </div>
 </template>
 
 <script setup lang="ts">
