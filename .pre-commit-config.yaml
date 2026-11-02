@@ -28,6 +28,8 @@ repos:
     rev: v2.1.2
     hooks:
       - id: consistent-dependencies
+        # Use the Node.js on PATH (pinned in mise.toml) instead of letting nodeenv download the latest release
+        language_version: system
         args:
           - gui/yarn.lock
 
