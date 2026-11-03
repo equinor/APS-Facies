@@ -23,6 +23,7 @@ services:
       - './models/private:/private'
       - './models/project:/project'
       - './.git:/code/.git:ro' # Used by hatch-vcs to create _version.py
+      - './tests:/code/tests'
     env_file:
       - .env
 
