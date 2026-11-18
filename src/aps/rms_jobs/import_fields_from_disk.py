@@ -207,7 +207,7 @@ def run(
 
     xtgeo_fmu_grid = None
     if file_format.upper() == 'GRDECL':
-        xtgeo_fmu_grid = xtgeo.grid_from_roxar(project, fmu_grid_name)
+        xtgeo_fmu_grid = xtgeo.grid_from_rms(project, fmu_grid_name)
 
     region_names = None
     region_param_name = None

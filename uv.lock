@@ -52,7 +52,7 @@ requires-dist = [
     { name = "pillow", specifier = ">=10.3.0" },
     { name = "pyyaml", specifier = ">=6.0" },
     { name = "scipy", specifier = ">=1.10.0" },
-    { name = "xtgeo", specifier = ">=4.3.3" },
+    { name = "xtgeo", specifier = ">=4.27.0" },
 ]
 
 [package.metadata.requires-dev]
@@ -1966,7 +1966,7 @@ wheels = [
 
 [[package]]
 name = "xtgeo"
-version = "4.19.0"
+version = "4.27.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "deprecation" },
@@ -1987,22 +1987,22 @@ dependencies = [
     { name = "xtgeoviz" },
 ]
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/ea/20/ad2efaea23753a7562242a1cdab9c28b492aa0e403fc96b3488969dba878/xtgeo-4.19.0-cp311-cp311-macosx_11_0_arm64.whl", hash = "sha256:d3e71cb314d23663d8383ea97dbc817988c1f5438317bf6b591fee9615ab6040", size = 2917372, upload-time = "2026-03-03T08:06:15.028Z" },
-    { url = "https://files.pythonhosted.org/packages/5f/aa/fee7d885c53b4516b77dd4966abf2075f79e5b2c2117f1fcd542234a2574/xtgeo-4.19.0-cp311-cp311-manylinux_2_26_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:b0d1fe58b084e458841e9ed6f633e30a0d5c1532ba3e5b873da82d8ea910382c", size = 3134195, upload-time = "2026-03-03T08:06:16.982Z" },
-    { url = "https://files.pythonhosted.org/packages/ec/20/b25efe29dc0d4bedc51a643853adfd92baf50acd8d195d1fe93216329c47/xtgeo-4.19.0-cp311-cp311-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:a10063efb52b1498046c692bbbe25f7cb6d830301e6ee4298e8a6bbb9c197f2a", size = 3186513, upload-time = "2026-03-03T08:06:18.684Z" },
-    { url = "https://files.pythonhosted.org/packages/66/50/c4caaeefb6626567b38d5e8e53c3760733b68a715e8ee28d792b02bc5411/xtgeo-4.19.0-cp311-cp311-win_amd64.whl", hash = "sha256:adfd72ab890aa11bf62f334a082ec345f53cd71891b264bbe1593e4a94aaee50", size = 1299741, upload-time = "2026-03-03T08:06:20.069Z" },
-    { url = "https://files.pythonhosted.org/packages/ac/be/4dd06516a224def8217a30a5b0ba0057e14f878ddc5ae326668f31649388/xtgeo-4.19.0-cp312-cp312-macosx_11_0_arm64.whl", hash = "sha256:01c9c350432aed1d449f987942599c761fe32190dee4a2eda482aeefc797604d", size = 2917611, upload-time = "2026-03-03T08:06:21.862Z" },
-    { url = "https://files.pythonhosted.org/packages/56/57/7c0c81bd9b22b144b6e95c86bd301dadd32329df61ee64a7efdd1704e6e6/xtgeo-4.19.0-cp312-cp312-manylinux_2_26_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:98d3e7fce10c15ad4cdb1a1d3ca59474c510807902071f66667f9ec4f7566550", size = 3135196, upload-time = "2026-03-03T08:06:23.468Z" },
-    { url = "https://files.pythonhosted.org/packages/0b/18/97ed5094b734fd50666c1dd56882840d4378bff5226c043f0edb7d939f03/xtgeo-4.19.0-cp312-cp312-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:123aed346c6eac57a9fc1419520901761b325f95902a26256a66b7f74abc372b", size = 3188364, upload-time = "2026-03-03T08:06:24.893Z" },
-    { url = "https://files.pythonhosted.org/packages/38/c1/58fe51ce6bba1ac462672d0861b699ad69772f541c5a69bde941b8c60c6b/xtgeo-4.19.0-cp312-cp312-win_amd64.whl", hash = "sha256:a0e655a556a06a36ece9306cc7882e1e42c108e809c7a367949bffec5c7faad4", size = 1302612, upload-time = "2026-03-03T08:06:26.419Z" },
-    { url = "https://files.pythonhosted.org/packages/45/13/ed45c28aea3d74b4f9e0d042b0f6ad79f7764241f7c83e4f742991cdb2e3/xtgeo-4.19.0-cp313-cp313-macosx_11_0_arm64.whl", hash = "sha256:60ee49bee5cb4648edee2283537179e55ed297a48986807605fba5a4fb964591", size = 2917667, upload-time = "2026-03-03T08:06:27.68Z" },
-    { url = "https://files.pythonhosted.org/packages/24/cc/dea5f9f2a5f375f6c809b1412c53499489214f3c20cbbdc866227953d526/xtgeo-4.19.0-cp313-cp313-manylinux_2_26_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:7dc06d62e2a5a155b2236ef66c7c657c4596fa77c786e47012f79cef910e4bf7", size = 3135259, upload-time = "2026-03-03T08:06:29.438Z" },
-    { url = "https://files.pythonhosted.org/packages/a4/22/39bb9bc10d569f85d90fa1e36ad0e344fdadc47763e4870ff482c5086554/xtgeo-4.19.0-cp313-cp313-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:57ec34ed31145731979b4613d1d417088407e8ae888d644dfc252703b2154b61", size = 3188414, upload-time = "2026-03-03T08:06:30.791Z" },
-    { url = "https://files.pythonhosted.org/packages/94/e5/4fe0b68f732a077b599599173880e8e2905adbb8ac57debab9a78fbfcbcc/xtgeo-4.19.0-cp313-cp313-win_amd64.whl", hash = "sha256:836674bf4417f3dcc1dc9edebe9f759cb1a6dbbb1a08f982f97c8e605f03ef39", size = 1302762, upload-time = "2026-03-03T08:06:32.753Z" },
-    { url = "https://files.pythonhosted.org/packages/f8/07/c0a22af937db7fc6aaf73105522b86925ef76c9ed144d4d800fd5b9ba734/xtgeo-4.19.0-cp314-cp314-macosx_11_0_arm64.whl", hash = "sha256:0ab48ce42f5b4ef57fe47247619ae5410dd4509f04879367a9a5fe6e69e2bfa8", size = 2918310, upload-time = "2026-03-03T08:06:34.32Z" },
-    { url = "https://files.pythonhosted.org/packages/8d/3e/1160006b0f63020a350cdd12d4dd5406692b62016bc1dd961ce2541a6869/xtgeo-4.19.0-cp314-cp314-manylinux_2_26_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:1f9a634c1a36740d354547be3f69e2134aaebcdbd25ced19c5229c3ef55bbb93", size = 3137080, upload-time = "2026-03-03T08:06:35.794Z" },
-    { url = "https://files.pythonhosted.org/packages/50/78/31baed7e5ca9f03286826a6811694a8a8eba4b1b7493befb1654257d5fc4/xtgeo-4.19.0-cp314-cp314-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:37a4c1b7252d80b17728434fd1114ad5338b00c5f8479c64e28af01f4d296b73", size = 3188845, upload-time = "2026-03-03T08:06:37.643Z" },
-    { url = "https://files.pythonhosted.org/packages/4a/41/8fd7061c007e882c4a5025bf4166a3491df0c9c354f1e9eb5219180cda70/xtgeo-4.19.0-cp314-cp314-win_amd64.whl", hash = "sha256:1f2680bb9a3af3a8363d64862095d9f2c932ef31993b3b144b59fc4ebac12ec7", size = 1325600, upload-time = "2026-03-03T08:06:39.536Z" },
+    { url = "https://files.pythonhosted.org/packages/8f/d5/de1b1b101be0be3fa27cdc417b159def1e6848a9380f357f3acec936a917/xtgeo-4.27.0-cp311-cp311-macosx_11_0_arm64.whl", hash = "sha256:685e75ab6288c8d12921d979fc3a3097b762d5bb0c1f531132dfd1937d0fe1fa", size = 3062492, upload-time = "2026-10-14T11:24:07.027Z" },
+    { url = "https://files.pythonhosted.org/packages/31/c3/d0a8203240b61fa4bf73ec4a1f40a015ef6bedfd1715366001efef70cfb2/xtgeo-4.27.0-cp311-cp311-manylinux_2_26_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:71ac970fb1f89dc183b3c6146125cc3eeb76d7f557dacc1ed00c8cdb13927df0", size = 3289959, upload-time = "2026-10-14T11:24:09.096Z" },
+    { url = "https://files.pythonhosted.org/packages/35/19/6f44fc63a46f29c90babaaa491b999c85d37c91877304f21e49e6d15cece/xtgeo-4.27.0-cp311-cp311-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:c7757821ce0db1c53ff44b37bedf5cafa04b74f1e18cc25c9943721ea49bbf46", size = 3347108, upload-time = "2026-10-14T11:24:10.838Z" },
+    { url = "https://files.pythonhosted.org/packages/76/75/11a11397201bacdfbbf77ce0320af07f31fe133b0ed2ed38026d67ba27d4/xtgeo-4.27.0-cp311-cp311-win_amd64.whl", hash = "sha256:7654bf4c5bd97fb2a8d5796a97af6ec74fc653381039561052f16fa416619397", size = 1597514, upload-time = "2026-10-14T11:24:12.631Z" },
+    { url = "https://files.pythonhosted.org/packages/f6/53/77c28fe0b6a37f2c8f0dd7fda68cee5437f1aa4f156250e9a1166e189f7c/xtgeo-4.27.0-cp312-cp312-macosx_11_0_arm64.whl", hash = "sha256:c26891fb94f546c61e32f526732a454bd9865ad189cef27b8840a20dfd5f743f", size = 3064473, upload-time = "2026-10-14T11:24:14.103Z" },
+    { url = "https://files.pythonhosted.org/packages/a3/04/3eb5ce47fbabd0a05db8090ff8cb8261cb7d42d776f23f3a7648cc64e251/xtgeo-4.27.0-cp312-cp312-manylinux_2_26_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:82b4711af3ae1a37f7c894f5a2a747fef5f8945d26e0760a04dfcf110e098150", size = 3294172, upload-time = "2026-10-14T11:24:15.641Z" },
+    { url = "https://files.pythonhosted.org/packages/6b/b7/d30fd0ab939508b440874f3a62c6dd7c41d47a4701ee4a9784c71fdd8688/xtgeo-4.27.0-cp312-cp312-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:95c6b60eab4910c7369e9ca967186f849034bfce3bc1e6be483c4a2684aaef7f", size = 3350076, upload-time = "2026-10-14T11:24:17.318Z" },
+    { url = "https://files.pythonhosted.org/packages/43/bb/87283974e63c23eaad6af6c5d393205d8c7cff2d53881a207a3c1f35a1f0/xtgeo-4.27.0-cp312-cp312-win_amd64.whl", hash = "sha256:2e6801cba4bbf792f226a08d6083202b5d01bc27067b35482ff46086ce937986", size = 1600240, upload-time = "2026-10-14T11:24:19.083Z" },
+    { url = "https://files.pythonhosted.org/packages/3e/21/e7847eb02f7b81d5a141473a4862e2ba3ecafcb5a8b22c3e393761ef4add/xtgeo-4.27.0-cp313-cp313-macosx_11_0_arm64.whl", hash = "sha256:e3c5e2db6ab98aabd651475a5dfeac25e5c352946a9acf1f258feb9ca02b6c7e", size = 3064555, upload-time = "2026-10-14T11:24:20.451Z" },
+    { url = "https://files.pythonhosted.org/packages/cc/76/200a5b940de55bc1f55f9b0f3d95bada160fafcc389c0a051897296c35cd/xtgeo-4.27.0-cp313-cp313-manylinux_2_26_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:a017491252f1b7aeaa5bcd2969c7c73c07685d392471c42a75b8e2f5cba1c59e", size = 3294258, upload-time = "2026-10-14T11:24:22.306Z" },
+    { url = "https://files.pythonhosted.org/packages/cd/25/abe0d39397d9d66b9e6005524a7b140cf846a8d4b64ae8f565ad068cf076/xtgeo-4.27.0-cp313-cp313-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:01eca240db1472740d750da20cdedd5d8834d318f59c27240ff6357a106ed672", size = 3350169, upload-time = "2026-10-14T11:24:23.941Z" },
+    { url = "https://files.pythonhosted.org/packages/6b/58/0aef0333fb8c586fcf512b4014f5843d959d6ea8940039711d649448121c/xtgeo-4.27.0-cp313-cp313-win_amd64.whl", hash = "sha256:9d2742720d52d349ed71c7d672b353b3097cc4c42f93a4466fdf92369bafe72a", size = 1600054, upload-time = "2026-10-14T11:24:25.702Z" },
+    { url = "https://files.pythonhosted.org/packages/45/ba/76aa1a100c297ed475ab95b363a69ae1d277b3fc582ab2e6c16513ca1940/xtgeo-4.27.0-cp314-cp314-macosx_11_0_arm64.whl", hash = "sha256:263d507e7397744df3fbc3dbbb9fa8934c47289001d7164d8909f289856f3b0f", size = 3065426, upload-time = "2026-10-14T11:24:27.286Z" },
+    { url = "https://files.pythonhosted.org/packages/f5/a4/0a9508fc40d3033c05e6ace36501af7ac1b969ce7b1621122869fe7f228c/xtgeo-4.27.0-cp314-cp314-manylinux_2_26_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:abf08296ad8354718af8d77c5e290e1b77c30adf04768e960c50a80ff455c248", size = 3295711, upload-time = "2026-10-14T11:24:28.878Z" },
+    { url = "https://files.pythonhosted.org/packages/d7/87/4a104d8e9d805dffc1d61337265530b576ce6c736d6c8cc0623e8a33c347/xtgeo-4.27.0-cp314-cp314-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:bd9d35545fb77c3d63e4b05cf7719462f326078bf229edb110b7787712343a27", size = 3350440, upload-time = "2026-10-14T11:24:30.644Z" },
+    { url = "https://files.pythonhosted.org/packages/f0/c0/0e7aa53197e7aca0008c4764e577749800ec6114889df20a156016051949/xtgeo-4.27.0-cp314-cp314-win_amd64.whl", hash = "sha256:08ec2d751bdfe8a23a1a4edea5d75a1106d8035f89c435b94d0fd85e276cfc06", size = 1628475, upload-time = "2026-10-14T11:24:32.27Z" },
 ]
 
 [[package]]

@@ -110,7 +110,7 @@ def create_ertbox_grid_model(
             increment=increment,
             flip=flip,
         )
-        simulation_grid.to_roxar(
+        simulation_grid.to_rms(
             project, fmu_simulation_grid_name, project.current_realisation
         )
     except:
