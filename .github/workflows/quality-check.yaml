@@ -4,7 +4,8 @@ name: 'Build and test the GUI'
 
 on:
   workflow_dispatch:
-  push:
+  pull_request:
+    types: [opened, synchronize, reopened]
 
 permissions:
   contents: read
