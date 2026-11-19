@@ -1,5 +1,5 @@
 <template>
-  <floating-tooltip trigger="hover">
+  <floating-tooltip placement="bottom" trigger="hover">
     <v-icon :color="color">
       {{ vuetify.icons.aliases.help }}
     </v-icon>

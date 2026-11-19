@@ -44,6 +44,7 @@ function makeCustomIcons(): Partial<IconAliases> {
     folder: 'far fa-folder',
     folderOpen: 'far fa-folder-open',
     fromRoxar: 'fas fa-desktop',
+    help: 'far fa-question-circle',
     more: 'fas fa-ellipsis-v',
     observed: 'far fa-eye',
     observedNegated: 'far fa-eye-slash',

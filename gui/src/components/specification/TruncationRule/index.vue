@@ -3,15 +3,22 @@
   <div v-if="rule">
     <v-row no-gutters>
       <v-col v-if="notBayfill" cols="12">
-        <floating-tooltip :disabled="canUseOverlay" trigger="hover">
-          <v-checkbox
-            v-model="useOverlay"
-            :disabled="!canUseOverlay"
-            class="tooltip-target"
-            label="Include Overlay Facies"
-          />
-          <template #popper>{{ useOverlayTooltip }}</template>
-        </floating-tooltip>
+        <hover-helper v-slot="{ isHovering }">
+          <floating-tooltip
+            :shown="isHovering"
+            :disabled="canUseOverlay"
+            placement="bottom"
+            trigger="hover"
+          >
+            <v-checkbox
+              v-model="useOverlay"
+              :disabled="!canUseOverlay"
+              class="tooltip-target"
+              label="Include Overlay Facies"
+            />
+            <template #popper>{{ useOverlayTooltip }}</template>
+          </floating-tooltip>
+        </hover-helper>
       </v-col>
     </v-row>
     <v-row no-gutters>
@@ -37,6 +44,7 @@ import NonCubicSpecification from '@/components/specification/TruncationRule/Non
 import CubicSpecification from '@/components/specification/TruncationRule/Cubic/index.vue'
 import TruncationHeader from '@/components/specification/TruncationRule/header.vue'
 import OverlayFacies from '@/components/specification/TruncationRule/Overlay/index.vue'
+import HoverHelper from '@/components/selection/dropdown/HoverHelper.vue'
 
 import { Bayfill, type InstantiatedOverlayTruncationRule } from '@/utils/domain'
 import type { Optional } from '@/utils/typing'
@@ -115,6 +123,6 @@ const canUseOverlay = computed(
 )
 
 const useOverlayTooltip = computed(
-  () => overlayErrors.value.find(({ check }) => check)?.errorMessage,
+  () => overlayErrors.value.find(({ check }) => !check)?.errorMessage,
 )
 </script>

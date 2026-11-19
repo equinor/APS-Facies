@@ -1,29 +1,37 @@
 <template>
-  <floating-tooltip :disabled="!tooltipText" trigger="hover">
-    <v-btn
-      :disabled="waiting || disabled"
-      :theme="dark ? 'dark' : 'light'"
-      :text="text"
-      :color="color"
-      :outlined="outlined"
-      :variant="variant"
-      @click="(e: MouseEvent) => emit('click', e)"
+  <hover-helper v-slot="{ isHovering }">
+    <floating-tooltip
+      :shown="isHovering"
+      :disabled="!tooltipText"
+      placement="bottom"
+      trigger="hover"
     >
-      <slot v-if="!title && !waiting" />
-      <span v-if="!waiting">
-        {{ title }}
-      </span>
-      <span v-else>
-        <v-progress-circular indeterminate />
-      </span>
-    </v-btn>
-    <template #popper>
-      {{ tooltipText }}
-    </template>
-  </floating-tooltip>
+      <v-btn
+        :disabled="waiting || disabled"
+        :theme="dark ? 'dark' : 'light'"
+        :text="text"
+        :color="color"
+        :outlined="outlined"
+        :variant="variant"
+        @click="(e: MouseEvent) => emit('click', e)"
+      >
+        <slot v-if="!title && !waiting" />
+        <span v-if="!waiting">
+          {{ title }}
+        </span>
+        <span v-else>
+          <v-progress-circular indeterminate />
+        </span>
+      </v-btn>
+      <template #popper>
+        {{ tooltipText }}
+      </template>
+    </floating-tooltip>
+  </hover-helper>
 </template>
 
 <script setup lang="ts">
+import HoverHelper from '@/components/selection/dropdown/HoverHelper.vue'
 import type { Color } from '@/utils/domain/facies/helpers/colors'
 import type { VBtn } from 'vuetify/components'
 
