@@ -25,9 +25,7 @@ def run(project, **kwargs):
         print(' ')
         print(f"- Export ERT box grid {aps_grid_name} to '{field_location}'")
 
-    aps_grid = xtgeo.grid_from_roxar(
-        project, aps_grid_name, project.current_realisation
-    )
+    aps_grid = xtgeo.grid_from_rms(project, aps_grid_name, project.current_realisation)
 
     aps_grid.to_file(
         str(field_location / '{}.EGRID'.format(aps_grid_name)),

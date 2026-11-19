@@ -286,7 +286,7 @@ def prob_logs_per_facies(
     for well_name in well_name_list:
         if debug_level >= Debug.ON:
             print(f'- Well: {well_name} ')
-        well = xtgeo.well_from_roxar(
+        well = xtgeo.well_from_rms(
             project,
             well_name,
             trajectory=trajectory,
@@ -424,7 +424,7 @@ def prob_logs_per_facies(
         if debug_level >= Debug.ON:
             print(f'- Update probability logs for well {well_name}  ')
 
-        well.to_roxar(
+        well.to_rms(
             project, well_name, lognames='all', trajectory=trajectory, logrun=logrun
         )
 
@@ -599,7 +599,7 @@ def normalize_and_check(
             )
         lognames = blocked_well_prob_log_names.copy()
         lognames.append(blocked_well_zone_log_name)
-        bw_well = xtgeo.blockedwell_from_roxar(
+        bw_well = xtgeo.blockedwell_from_rms(
             project, grid_model_name, blocked_wells_name, name, lognames=lognames
         )
 
@@ -685,7 +685,7 @@ def normalize_and_check(
 
         # Set the updated blocked well data
         bw_well.dataframe = df_blocked_well
-        bw_well.to_roxar(
+        bw_well.to_rms(
             project, grid_model_name, blocked_wells_name, name, lognames='all'
         )
 
@@ -715,7 +715,7 @@ def average_prob_logs(
     df_dict = {}
 
     for well_name in well_list:
-        bw_well = xtgeo.blockedwell_from_roxar(
+        bw_well = xtgeo.blockedwell_from_rms(
             project, grid_model_name, bw_name, well_name, lognames='all'
         )
         df_dict[well_name] = bw_well.dataframe
@@ -802,7 +802,7 @@ def get_facies_and_zone_logs(
     # Get the facies and codes for the facies log
     first = True
     for well_name in well_name_list:
-        well = xtgeo.well_from_roxar(
+        well = xtgeo.well_from_rms(
             project,
             well_name,
             trajectory=trajectory,

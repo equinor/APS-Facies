@@ -48,8 +48,8 @@ def trend_map_to_grid_param(
 def _read_grid(project, grid_model_name, zone_param_name):
     """Read 3D grid and zone property"""
 
-    grd = xtgeo.grid_from_roxar(project, grid_model_name)
-    zone = xtgeo.gridproperty_from_roxar(project, grid_model_name, zone_param_name)
+    grd = xtgeo.grid_from_rms(project, grid_model_name)
+    zone = xtgeo.gridproperty_from_rms(project, grid_model_name, zone_param_name)
     return grd, zone
 
 
@@ -75,7 +75,7 @@ def _derive_gridcells_points(grd, zone, zoneno):
 
 def _snap_points_to_surface(project, gpoints, trend_map_name, zone_name):
     """Take the pointset and snap the Z values to the trend map."""
-    surf = xtgeo.surface_from_roxar(
+    surf = xtgeo.surface_from_rms(
         project,
         zone_name,
         trend_map_name,
@@ -99,7 +99,7 @@ def _create_property_and_store(
     zvalues = gridpoints.dataframe['VAL'].values
 
     try:
-        newprop = xtgeo.gridproperty_from_roxar(
+        newprop = xtgeo.gridproperty_from_rms(
             project,
             grid_model_name,
             result_param_name,
@@ -119,4 +119,4 @@ def _create_property_and_store(
     for klay in krange:
         newprop.values[ixn, jyn, klay] = zvalues
 
-    newprop.to_roxar(project, grid_model_name, result_param_name)
+    newprop.to_rms(project, grid_model_name, result_param_name)

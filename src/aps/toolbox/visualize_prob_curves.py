@@ -87,7 +87,7 @@ def plot_probability_logs(
     for m, well_name in enumerate(well_list):
         print(f' -Well: {well_name}  ')
         try:
-            bw_well = xtgeo.blockedwell_from_roxar(
+            bw_well = xtgeo.blockedwell_from_rms(
                 project,
                 grid_model_name,
                 blocked_well_set_name,
